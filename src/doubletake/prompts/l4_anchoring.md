@@ -38,7 +38,10 @@ Your task is to analyze the input text and determine whether TWO distinct meanin
    - "FAIL": No ambiguous wordplay can be identified or grounded.
 
 5. **Resolving Sense**:
-   - If anchoring_status is "PASS", set `resolving_sense` to either "sense_a" or "sense_b" to indicate which sense is the resolving / punchline sense (the sense that delivers the twist or answer).
+   - If anchoring_status is "PASS", set `resolving_sense` to either "sense_a" or "sense_b" to indicate which sense is the resolving / punchline sense (the sense that delivers the answer, punchline, or semantic twist).
+   - In Q&A riddles (e.g. "Why don't skeletons fight? Because they have no guts"):
+     - The resolving sense MUST be the meaning that answers or explains the question in the punchline (e.g. "courage / fortitude" explains why they don't fight).
+     - The other sense is the literal meaning associated with the subject (e.g. "internal organs / viscera" associated with skeletons).
    - If anchoring_status is not "PASS", `resolving_sense` must be null.
 
 ## Output Format

@@ -315,7 +315,7 @@ def _find_keyword_aoa(text: str) -> float | None:
         val, stage = aoa_lookup(w)
         if val is not None and stage != "miss":
             aoas.append(val)
-    return max(aoas) if aoas else None
+    return min(aoas) if aoas else None
 
 
 def _deterministic_l7(

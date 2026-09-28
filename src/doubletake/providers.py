@@ -20,11 +20,18 @@ import json
 import logging
 import os
 import time
+import warnings
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Literal
 
 _LOG = logging.getLogger(__name__)
+
+# Suppress google-genai SDK internal AFC warning (harmless SDK notice for generate_content)
+logging.getLogger("google_genai").setLevel(logging.ERROR)
+logging.getLogger("google_genai.models").setLevel(logging.ERROR)
+warnings.filterwarnings("ignore", message=r".*automatic function calling.*")
+
 
 
 def load_dotenv(env_path: Path | str | None = None) -> bool:

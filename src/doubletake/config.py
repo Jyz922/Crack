@@ -152,6 +152,9 @@ class Settings(BaseModel):
         "agent": 0.10,
         "tense_aspect": 0.05,
     }
+    # Polarity floor: guard against complete absence of contrast (e.g. 0.0)
+    L5_QA_MIN_POLARITY: float = 0.15
+
     # Per-genre pass/fail cut-off for the weighted resolution score.
     # Not named in README — see module docstring, deviation 2.
     # Verdicts are per run, so cut-offs are set from per-run ranges, not means.

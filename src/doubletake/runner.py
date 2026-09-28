@@ -175,6 +175,10 @@ def _l0_post_layer(record: AnalysisRecord, settings: Settings) -> AnalysisRecord
         main_class = MainClassification.OUT_OF_SCOPE_HOMOPHONE
     elif scope_label == ScopeLabel.OUT_OF_SCOPE_NONLEXICAL_JOKE:
         main_class = MainClassification.OUT_OF_SCOPE_NONLEXICAL_JOKE
+    elif record.l4_result is not None and record.l4_result.anchoring_status == AnchoringStatus.ONE_SENSE_ONLY:
+        main_class = MainClassification.ONE_SENSE_ONLY
+    elif record.l4_result is not None and record.l4_result.anchoring_status == AnchoringStatus.FAIL:
+        main_class = MainClassification.ANCHORING_FAIL
     elif record.l5_result is not None:
         if record.l5_result.resolution_status == ResolutionStatus.RESOLUTION_PASS:
             if record.l6_result is not None and record.l6_result.distinctness_status == DistinctnessStatus.SENSES_TOO_CLOSE:
@@ -187,11 +191,6 @@ def _l0_post_layer(record: AnalysisRecord, settings: Settings) -> AnalysisRecord
                 )
         elif record.l5_result.resolution_status == ResolutionStatus.RESOLUTION_FAIL:
             main_class = MainClassification.RESOLUTION_FAIL
-    elif record.l4_result is not None:
-        if record.l4_result.anchoring_status == AnchoringStatus.ONE_SENSE_ONLY:
-            main_class = MainClassification.ONE_SENSE_ONLY
-        elif record.l4_result.anchoring_status == AnchoringStatus.FAIL:
-            main_class = MainClassification.ANCHORING_FAIL
 
     # Confidence calculation per README § L6 (lowered when L6 paraphrase is skipped)
     confidence: float | None = None

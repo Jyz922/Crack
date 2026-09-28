@@ -675,7 +675,7 @@ def resolve_l5(
             resolution_status=_resolution_status(
                 score,
                 settings.L5_RESOLUTION_THRESHOLDS[genre],
-                min_polarity=0.25,
+                min_polarity=settings.L5_QA_MIN_POLARITY,
                 polarity=subscores.get("polarity_or_direction"),
             ),
             **kw,
