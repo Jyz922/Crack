@@ -8,8 +8,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from doubletake.config import DEFAULT_SETTINGS, Settings
-from doubletake.providers import (
+from crack.config import DEFAULT_SETTINGS, Settings
+from crack.providers import (
     PROVIDERS,
     call_openai_compatible,
     create_client,
@@ -193,7 +193,7 @@ class TestLoadDotenv:
             "TEST_KEY_4=value4 # comment\n",
             encoding="utf-8",
         )
-        from doubletake.providers import load_dotenv
+        from crack.providers import load_dotenv
 
         with patch.dict(os.environ, {}, clear=True):
             assert load_dotenv(env_file) is True
@@ -205,7 +205,7 @@ class TestLoadDotenv:
     def test_load_dotenv_does_not_overwrite_existing(self, tmp_path: Path) -> None:
         env_file = tmp_path / ".env"
         env_file.write_text("EXISTING_KEY=new_val\n", encoding="utf-8")
-        from doubletake.providers import load_dotenv
+        from crack.providers import load_dotenv
 
         with patch.dict(os.environ, {"EXISTING_KEY": "original_val"}, clear=True):
             load_dotenv(env_file)

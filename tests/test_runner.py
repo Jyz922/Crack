@@ -1,4 +1,4 @@
-"""Tests for doubletake.runner and layer execution registry."""
+"""Tests for crack.runner and layer execution registry."""
 
 from __future__ import annotations
 
@@ -9,8 +9,8 @@ from unittest.mock import patch
 
 import pytest
 
-from doubletake.config import DEFAULT_SETTINGS, Settings
-from doubletake.enums import (
+from crack.config import DEFAULT_SETTINGS, Settings
+from crack.enums import (
     AnchorRelation,
     AnchoringStatus,
     DistinctnessStatus,
@@ -19,7 +19,7 @@ from doubletake.enums import (
     ResolutionStatus,
     ScopeLabel,
 )
-from doubletake.layers import (
+from crack.layers import (
     run_l1,
     run_l2,
     run_l3,
@@ -29,7 +29,7 @@ from doubletake.layers import (
     run_l7,
     run_l8,
 )
-from doubletake.runner import (
+from crack.runner import (
     _LAYER_REGISTRY,
     _l0_post_layer,
     _l0_pre_layer,
@@ -38,7 +38,7 @@ from doubletake.runner import (
     register_layer,
     run,
 )
-from doubletake.schema import AnalysisRecord, FinalVerdict, L4Result, L5QAResult, L6Result, LayerTrace
+from crack.schema import AnalysisRecord, FinalVerdict, L4Result, L5QAResult, L6Result, LayerTrace
 
 _SAMPLE_BLIND = Path(__file__).parent / "fixtures" / "sample_blind.jsonl"
 _SAMPLE_GOLD = Path(__file__).parent / "fixtures" / "sample_gold.jsonl"
@@ -216,7 +216,7 @@ class TestL0PostEvidenceHandling:
         assert rec.confidence == round(0.90 * 0.85, 3)
 
     def test_l0_post_handles_out_of_scope(self) -> None:
-        from doubletake.l0_scope import LayerEvidence, assign_scope_label
+        from crack.l0_scope import LayerEvidence, assign_scope_label
         rec = AnalysisRecord(item_id="oos_test", text="homophone joke", target_ages=[8])
         evidence = LayerEvidence(is_homophone=True, has_homograph=False)
         rec.final = FinalVerdict(

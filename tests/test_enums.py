@@ -2,7 +2,7 @@
 
 import pytest
 
-from doubletake.enums import (
+from crack.enums import (
     AgeAppropriatenessVerdict,
     AmbiguityAblation,
     AnchorRelation,

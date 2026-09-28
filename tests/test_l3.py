@@ -7,12 +7,12 @@ from pathlib import Path
 
 import pytest
 
-from doubletake.config import DEFAULT_SETTINGS
-from doubletake.l1_surface import analyze
-from doubletake.l2_senses import retrieve
-from doubletake.l3_candidates import rank
-from doubletake.layers import run_l1, run_l2, run_l3
-from doubletake.schema import AnalysisRecord
+from crack.config import DEFAULT_SETTINGS
+from crack.l1_surface import analyze
+from crack.l2_senses import retrieve
+from crack.l3_candidates import rank
+from crack.layers import run_l1, run_l2, run_l3
+from crack.schema import AnalysisRecord
 
 _FIXTURES = {
     (x := json.loads(l))["id"]: x

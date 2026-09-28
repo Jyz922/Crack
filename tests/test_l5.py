@@ -15,9 +15,9 @@ from google.genai.errors import ServerError as GeminiServerError
 from google.genai.types import FinishReason
 from pydantic import ValidationError
 
-from doubletake.config import DEFAULT_SETTINGS, Settings
-from doubletake.enums import AnchorRelation, AnchoringStatus, Genre, ResolutionStatus
-from doubletake.l5_resolution import (
+from crack.config import DEFAULT_SETTINGS, Settings
+from crack.enums import AnchorRelation, AnchoringStatus, Genre, ResolutionStatus
+from crack.l5_resolution import (
     _L5_DECLARATIVE_WEIGHTS,
     _L5_DEFINITIONAL_WEIGHTS,
     _L5_DIALOGUE_WEIGHTS,
@@ -25,8 +25,8 @@ from doubletake.l5_resolution import (
     _render_prompt,
     resolve_l5,
 )
-from doubletake.providers import resolve_backend
-from doubletake.schema import (
+from crack.providers import resolve_backend
+from crack.schema import (
     AnalysisRecord,
     L1Result,
     L4Result,
@@ -430,7 +430,7 @@ class TestResolveL5Offline:
 
     @pytest.mark.parametrize("genre", [Genre.DEFINITIONAL_ONELINER, Genre.DECLARATIVE])
     def test_named_sense_prompts_never_reference_position(self, genre: Genre) -> None:
-        template = (Path(__file__).parents[1] / "src" / "doubletake" / "prompts"
+        template = (Path(__file__).parents[1] / "src" / "crack" / "prompts"
                     / {Genre.DEFINITIONAL_ONELINER: "l5_definitional.md",
                        Genre.DECLARATIVE: "l5_declarative.md"}[genre]).read_text(encoding="utf-8")
         assert "{sense_a" not in template and "{sense_b" not in template
@@ -648,7 +648,7 @@ def test_gemini_generate_waits_and_retries_on_retry_delay() -> None:
     ok.text = '{"polarity_or_direction": 0.9}'
     client.models.generate_content.side_effect = [_make_retry_delay_error("30s"), ok]
 
-    with patch("doubletake.l5_resolution.time.sleep") as mock_sleep:
+    with patch("crack.l5_resolution.time.sleep") as mock_sleep:
         result = _gemini_generate(client, "gemini-3.6-flash", "prompt", MagicMock())
 
     assert result is ok
@@ -660,7 +660,7 @@ def test_gemini_generate_fails_immediately_on_spend_cap() -> None:
     client = MagicMock()
     client.models.generate_content.side_effect = _make_spend_cap_error()
 
-    with patch("doubletake.l5_resolution.time.sleep") as mock_sleep:
+    with patch("crack.l5_resolution.time.sleep") as mock_sleep:
         with pytest.raises(RuntimeError, match="spend cap"):
             _gemini_generate(client, "gemini-3.6-flash", "prompt", MagicMock())
 
@@ -673,7 +673,7 @@ def test_gemini_generate_fails_immediately_on_rpd_exhausted() -> None:
     client = MagicMock()
     client.models.generate_content.side_effect = [_make_rpd_error()]
 
-    with patch("doubletake.l5_resolution.time.sleep") as mock_sleep:
+    with patch("crack.l5_resolution.time.sleep") as mock_sleep:
         with pytest.raises(RuntimeError, match="non-retryable"):
             _gemini_generate(client, "gemini-3.6-flash", "prompt", MagicMock())
 
@@ -693,7 +693,7 @@ def test_5xx_then_success_two_calls_one_sleep() -> None:
     good.text = json.dumps({k: 0.9 for k in settings.L5_QA_WEIGHTS})
     client.models.generate_content.side_effect = [_make_server_error(503), good]
 
-    with patch("doubletake.l5_resolution.time.sleep") as mock_sleep:
+    with patch("crack.l5_resolution.time.sleep") as mock_sleep:
         result = resolve_l5(_qa_record_for_routing(), settings, ambiguous_term="guts", client=client)
 
     assert result.resolution_status == ResolutionStatus.RESOLUTION_PASS
@@ -713,7 +713,7 @@ def test_five_503s_on_primary_triggers_fallback() -> None:
     good.text = json.dumps({k: 0.9 for k in settings.L5_QA_WEIGHTS})
     client.models.generate_content.side_effect = [_make_server_error(503)] * 5 + [good]
 
-    with patch("doubletake.l5_resolution.time.sleep") as mock_sleep:
+    with patch("crack.l5_resolution.time.sleep") as mock_sleep:
         result = resolve_l5(_qa_record_for_routing(), settings, ambiguous_term="guts", client=client)
 
     assert result.resolution_status == ResolutionStatus.RESOLUTION_PASS
@@ -734,7 +734,7 @@ def test_all_models_exhausted_raises_with_status() -> None:
     # 5 primary + 5 fallback = 10 consecutive 503s
     client.models.generate_content.side_effect = [_make_server_error(503)] * 10
 
-    with patch("doubletake.l5_resolution.time.sleep"):
+    with patch("crack.l5_resolution.time.sleep"):
         with pytest.raises(RuntimeError, match="503"):
             resolve_l5(_qa_record_for_routing(), settings, ambiguous_term="guts", client=client)
 

@@ -2,9 +2,9 @@
 
 import pytest
 
-from doubletake.config import Settings
-from doubletake.enums import ScopeLabel
-from doubletake.l0_scope import (
+from crack.config import Settings
+from crack.enums import ScopeLabel
+from crack.l0_scope import (
     InputValidationError,
     LayerEvidence,
     assign_scope_label,

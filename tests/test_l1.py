@@ -8,11 +8,11 @@ from pathlib import Path
 
 import pytest
 
-from doubletake.config import DEFAULT_SETTINGS
-from doubletake.enums import Genre
-from doubletake.l1_surface import analyze, route_genre
-from doubletake.layers import run_l1
-from doubletake.schema import AnalysisRecord
+from crack.config import DEFAULT_SETTINGS
+from crack.enums import Genre
+from crack.l1_surface import analyze, route_genre
+from crack.layers import run_l1
+from crack.schema import AnalysisRecord
 
 _ROOT = Path(__file__).resolve().parents[1]
 _FIXTURES = [

@@ -4,14 +4,14 @@ and corpus loader error handling."""
 import pytest
 from pydantic import ValidationError
 
-from doubletake.corpus import join_blind_gold, load_blind, load_gold
-from doubletake.enums import (
+from crack.corpus import join_blind_gold, load_blind, load_gold
+from crack.enums import (
     AgeAppropriatenessVerdict,
     ComprehensionStatus,
     MainClassification,
     ScopeLabel,
 )
-from doubletake.schema import (
+from crack.schema import (
     AnalysisRecord,
     AgeVerdict,
     FinalVerdict,

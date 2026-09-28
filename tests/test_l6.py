@@ -9,8 +9,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from doubletake.config import DEFAULT_SETTINGS, Settings
-from doubletake.enums import (
+from crack.config import DEFAULT_SETTINGS, Settings
+from crack.enums import (
     AmbiguityAblation,
     AnchorRelation,
     AnchoringStatus,
@@ -20,10 +20,10 @@ from doubletake.enums import (
     ResolutionStatus,
     ScopeLabel,
 )
-from doubletake.l6_distinctness import distinctness_l6
-from doubletake.layers import run_l1, run_l6
-from doubletake.runner import _l0_post_layer
-from doubletake.schema import (
+from crack.l6_distinctness import distinctness_l6
+from crack.layers import run_l1, run_l6
+from crack.runner import _l0_post_layer
+from crack.schema import (
     AnalysisRecord,
     CandidateEntry,
     FinalVerdict,
@@ -206,13 +206,13 @@ class TestL6MockRuns:
         assert res.distinctness_status == DistinctnessStatus.SENSES_DISTINCT
 
     def test_extract_json_with_code_block(self) -> None:
-        from doubletake.l6_distinctness import _extract_json
+        from crack.l6_distinctness import _extract_json
         raw = "```json\n{\"distinctness_status\": \"SENSES_DISTINCT\", \"ambiguity_ablation\": \"SUPPORTED\"}\n```"
         parsed = _extract_json(raw)
         assert parsed["distinctness_status"] == "SENSES_DISTINCT"
 
     def test_extract_json_embedded_curly_braces(self) -> None:
-        from doubletake.l6_distinctness import _extract_json
+        from crack.l6_distinctness import _extract_json
         raw = "Here is the result: {\"distinctness_status\": \"SENSES_DISTINCT\"} Thank you!"
         parsed = _extract_json(raw)
         assert parsed["distinctness_status"] == "SENSES_DISTINCT"
@@ -229,7 +229,7 @@ class TestL6MockRuns:
         assert res.ambiguity_ablation == AmbiguityAblation.SKIPPED
 
     def test_unknown_l6_backend_raises(self) -> None:
-        from doubletake.l6_distinctness import _complete_l6
+        from crack.l6_distinctness import _complete_l6
         custom_settings = DEFAULT_SETTINGS.model_copy(update={"L6_BACKEND": "unknown_backend"})
         with pytest.raises(ValueError, match="Unknown L6_BACKEND"):
             _complete_l6("prompt", custom_settings, client=None)
@@ -249,8 +249,8 @@ class TestRunL6Pipeline:
         })
         client = _mock_gemini_client(payload)
         from unittest.mock import patch
-        with patch("doubletake.l6_distinctness._complete_l6") as mock_comp:
-            from doubletake.l6_distinctness import _L6Call
+        with patch("crack.l6_distinctness._complete_l6") as mock_comp:
+            from crack.l6_distinctness import _L6Call
             mock_comp.return_value = _L6Call(json.loads(payload), "mock", False, 0)
             rec = run_l6(rec, DEFAULT_SETTINGS)
 

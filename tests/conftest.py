@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from doubletake.config import DEFAULT_SETTINGS
+from crack.config import DEFAULT_SETTINGS
 
 
 @pytest.fixture(autouse=True)
@@ -20,7 +20,7 @@ def _live_gate(request):
             "Set DOUBLETAKE_ALLOW_LIVE=1 to run them. "
             "Routine verification: py -3.11 -m pytest -q -m 'not live'",
         )
-    from doubletake.providers import resolve_api_key, resolve_backend
+    from crack.providers import resolve_api_key, resolve_backend
     backend_req = os.getenv("DOUBLETAKE_BACKEND") or "auto"
     backend = resolve_backend(backend_req)
     key_val, key_name = resolve_api_key(backend)

@@ -1,6 +1,11 @@
-# DoubleTake: Age-Aware Homograph Humor Detector
+# CRACK: Computational Resolution & Anchoring of Comedy & Knowledge
 
-DoubleTake analyzes a short English text and a target age to determine whether the text uses homographic ambiguity to create humor. The system explains the relevant meanings, identifies how each meaning is supported by the text, evaluates whether the joke structure resolves correctly, and reports whether the joke is understandable and appropriate for the target age.
+> *"Cracking jokes by cracking the code."*
+>
+> - **Sense A (Humor):** *to crack a joke* — to deliver punchlines, wit, and wordplay.
+> - **Sense B (Computation):** *to crack a code* — to deconstruct, decipher, and resolve complex semantic ambiguity.
+
+**CRACK** is a neuro-symbolic humor analysis and developmental appropriateness pipeline. It analyzes short English texts across target ages to identify homographic ambiguity, ground double meanings with contextual evidence, evaluate incongruity resolution, and determine developmental comprehension and appropriateness (AoA).
 
 The project supports two lexical mechanisms:
 
@@ -49,6 +54,23 @@ Sense B: courage
 Resolution: "no guts" means lacking courage, which explains why the
 skeletons do not fight.
 Age verdict: FULLY_AGE_APPROPRIATE for age 8
+```
+
+## Quick Start & CLI
+
+Install in editable mode:
+```bash
+pip install -e .
+```
+
+Analyze a single joke:
+```bash
+crack --text "Why don't skeletons fight? Because they have no guts." --age 8
+```
+
+Run batch analysis on a corpus with gold evaluation:
+```bash
+crack --blind corpus/joke_corpus_blind.jsonl --eval corpus/joke_corpus_gold.jsonl
 ```
 
 ## Pipeline Overview

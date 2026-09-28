@@ -7,17 +7,17 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from doubletake.config import DEFAULT_SETTINGS, Settings
-from doubletake.enums import (
+from crack.config import DEFAULT_SETTINGS, Settings
+from crack.enums import (
     AnchorRelation,
     AnchoringStatus,
     ComprehensionStatus,
     Genre,
 )
-from doubletake.l7_comprehension import assess_l7
-from doubletake.layers import run_l7
-from doubletake.runner import _LAYER_REGISTRY
-from doubletake.schema import (
+from crack.l7_comprehension import assess_l7
+from crack.layers import run_l7
+from crack.runner import _LAYER_REGISTRY
+from crack.schema import (
     AnalysisRecord,
     CandidateEntry,
     L1Result,
@@ -310,24 +310,24 @@ class TestL7PipelineIntegration:
 
 class TestL7HelpersAndEdgeCases:
     def test_extract_json_markdown_fence(self) -> None:
-        from doubletake.l7_comprehension import _extract_json
+        from crack.l7_comprehension import _extract_json
         raw = "```json\n{\"metalinguistic_floor\": 7.0, \"per_age_comprehension\": {\"8\": \"FULLY_COMPREHENSIBLE\"}}\n```"
         data = _extract_json(raw)
         assert data["metalinguistic_floor"] == 7.0
 
     def test_extract_json_embedded(self) -> None:
-        from doubletake.l7_comprehension import _extract_json
+        from crack.l7_comprehension import _extract_json
         raw = "Result: {\"sense_a_aoa\": 4.0, \"per_age_comprehension\": {}} Thanks!"
         data = _extract_json(raw)
         assert data["sense_a_aoa"] == 4.0
 
     def test_extract_json_invalid(self) -> None:
-        from doubletake.l7_comprehension import _extract_json
+        from crack.l7_comprehension import _extract_json
         with pytest.raises(json.JSONDecodeError):
             _extract_json("not json")
 
     def test_find_keyword_aoa(self) -> None:
-        from doubletake.l7_comprehension import _find_keyword_aoa
+        from crack.l7_comprehension import _find_keyword_aoa
         # Stopwords only
         assert _find_keyword_aoa("a an the in on") is None
         # Non-stopwords with AoA
@@ -348,7 +348,7 @@ class TestL7HelpersAndEdgeCases:
         assert 8 in res.per_age_comprehension
 
     def test_compound_split_from_l2_senses(self) -> None:
-        from doubletake.schema import L2Result, SenseEntry
+        from crack.schema import L2Result, SenseEntry
         rec = AnalysisRecord(item_id="auto", text="autobiography", target_ages=[8])
         rec.l3_result = L3Result(
             candidates=[CandidateEntry(term="autobiography", score=0.9, score_components={"compound_split": 1.0})]
@@ -396,13 +396,13 @@ class TestL7HelpersAndEdgeCases:
         assert res.per_age_comprehension[9] == ComprehensionStatus.AOA_UNKNOWN
 
     def test_unknown_backend_raises(self) -> None:
-        from doubletake.l7_comprehension import _complete_l7
+        from crack.l7_comprehension import _complete_l7
         bad_settings = DEFAULT_SETTINGS.model_copy(update={"L7_BACKEND": "nonexistent_backend"})
         with pytest.raises(ValueError, match="Unknown L7_BACKEND"):
             _complete_l7("prompt", bad_settings, client=None)
 
     def test_gemini_missing_api_key_raises(self) -> None:
-        from doubletake.l7_comprehension import _call_gemini_l7
+        from crack.l7_comprehension import _call_gemini_l7
         settings = DEFAULT_SETTINGS.model_copy(update={"GEMINI_API_KEY": None})
         import os
         old_val = os.environ.pop("GEMINI_API_KEY", None)
@@ -414,7 +414,7 @@ class TestL7HelpersAndEdgeCases:
                 os.environ["GEMINI_API_KEY"] = old_val
 
     def test_call_anthropic_direct(self) -> None:
-        from doubletake.l7_comprehension import _call_anthropic_l7
+        from crack.l7_comprehension import _call_anthropic_l7
         # 1st attempt valid
         client = _mock_anthropic_client(json.dumps({"sense_a_aoa": 4.0, "per_age_comprehension": {"8": "FULLY_COMPREHENSIBLE"}}))
         parsed = _call_anthropic_l7("prompt", "claude-sonnet-5", client)
@@ -427,7 +427,7 @@ class TestL7HelpersAndEdgeCases:
 
     def test_call_gemini_single_and_chain(self) -> None:
         from google.genai.errors import ServerError as _GeminiServerError
-        from doubletake.l7_comprehension import _call_gemini_l7, _call_gemini_l7_single
+        from crack.l7_comprehension import _call_gemini_l7, _call_gemini_l7_single
 
         # Single success
         mock_client = MagicMock()
@@ -460,7 +460,7 @@ class TestL7HelpersAndEdgeCases:
         assert call_res.model_used == "gemini-3.8-flash"
 
     def test_call_openai_direct(self) -> None:
-        from doubletake.l7_comprehension import _call_openai_l7
+        from crack.l7_comprehension import _call_openai_l7
         client = _mock_openai_client(json.dumps({"sense_a_aoa": 4.0, "per_age_comprehension": {}}))
         call = _call_openai_l7("prompt", "openai", DEFAULT_SETTINGS, client=client)
         assert call.parsed is not None
@@ -493,8 +493,8 @@ class TestL7HelpersAndEdgeCases:
             pos_tags=["NOUN"],
         )
         from unittest.mock import patch
-        with patch("doubletake.l7_comprehension.aoa_lookup", return_value=(None, "miss")):
-            with patch("doubletake.l7_comprehension._find_keyword_aoa", return_value=None):
+        with patch("crack.l7_comprehension.aoa_lookup", return_value=(None, "miss")):
+            with patch("crack.l7_comprehension._find_keyword_aoa", return_value=None):
                 # When sense_a_aoa would fall back
                 res = assess_l7(rec, DEFAULT_SETTINGS)
                 assert res.sense_a_aoa is not None  # falls back to 5.0 baseline

@@ -7,18 +7,18 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from doubletake.config import DEFAULT_SETTINGS, Settings
-from doubletake.enums import (
+from crack.config import DEFAULT_SETTINGS, Settings
+from crack.enums import (
     AgeAppropriatenessVerdict,
     AnchorRelation,
     AnchoringStatus,
     ComprehensionStatus,
     Genre,
 )
-from doubletake.l8_appropriateness import assess_l8
-from doubletake.layers import run_l8
-from doubletake.runner import _LAYER_REGISTRY
-from doubletake.schema import (
+from crack.l8_appropriateness import assess_l8
+from crack.layers import run_l8
+from crack.runner import _LAYER_REGISTRY
+from crack.schema import (
     AgeVerdict,
     AnalysisRecord,
     CandidateEntry,
@@ -263,30 +263,30 @@ class TestL8MultiBackendMocking:
 
 class TestL8HelpersAndEdgeCases:
     def test_extract_json_markdown_fence(self) -> None:
-        from doubletake.l8_appropriateness import _extract_json
+        from crack.l8_appropriateness import _extract_json
         raw = "```json\n{\"per_age_verdict\": {\"8\": \"FULLY_AGE_APPROPRIATE\"}}\n```"
         data = _extract_json(raw)
         assert data["per_age_verdict"]["8"] == "FULLY_AGE_APPROPRIATE"
 
     def test_extract_json_embedded(self) -> None:
-        from doubletake.l8_appropriateness import _extract_json
+        from crack.l8_appropriateness import _extract_json
         raw = "Here is JSON: {\"explanation\": \"OK\"} done."
         data = _extract_json(raw)
         assert data["explanation"] == "OK"
 
     def test_extract_json_invalid(self) -> None:
-        from doubletake.l8_appropriateness import _extract_json
+        from crack.l8_appropriateness import _extract_json
         with pytest.raises(json.JSONDecodeError):
             _extract_json("not valid json at all")
 
     def test_unknown_backend_raises(self) -> None:
-        from doubletake.l8_appropriateness import _complete_l8
+        from crack.l8_appropriateness import _complete_l8
         bad_settings = DEFAULT_SETTINGS.model_copy(update={"L8_BACKEND": "nonexistent_backend"})
         with pytest.raises(ValueError, match="Unknown L8_BACKEND"):
             _complete_l8("prompt", bad_settings, client=None)
 
     def test_gemini_missing_api_key_raises(self) -> None:
-        from doubletake.l8_appropriateness import _call_gemini_l8
+        from crack.l8_appropriateness import _call_gemini_l8
         settings = DEFAULT_SETTINGS.model_copy(update={"GEMINI_API_KEY": None})
         import os
         old_val = os.environ.pop("GEMINI_API_KEY", None)
@@ -298,7 +298,7 @@ class TestL8HelpersAndEdgeCases:
                 os.environ["GEMINI_API_KEY"] = old_val
 
     def test_call_anthropic_direct(self) -> None:
-        from doubletake.l8_appropriateness import _call_anthropic_l8
+        from crack.l8_appropriateness import _call_anthropic_l8
         client = _mock_anthropic_client(json.dumps({"per_age_verdict": {"8": "FULLY_AGE_APPROPRIATE"}}))
         parsed = _call_anthropic_l8("prompt", "claude-sonnet-5", client)
         assert parsed is not None
@@ -308,7 +308,7 @@ class TestL8HelpersAndEdgeCases:
 
     def test_call_gemini_single_and_chain(self) -> None:
         from google.genai.errors import ServerError as _GeminiServerError
-        from doubletake.l8_appropriateness import _call_gemini_l8, _call_gemini_l8_single
+        from crack.l8_appropriateness import _call_gemini_l8, _call_gemini_l8_single
 
         mock_client = MagicMock()
         resp = MagicMock()
@@ -338,7 +338,7 @@ class TestL8HelpersAndEdgeCases:
         assert call_res.model_used == "gemini-3.8-flash"
 
     def test_call_openai_direct(self) -> None:
-        from doubletake.l8_appropriateness import _call_openai_l8
+        from crack.l8_appropriateness import _call_openai_l8
         client = _mock_openai_client(json.dumps({"per_age_verdict": {"8": "FULLY_AGE_APPROPRIATE"}}))
         call = _call_openai_l8("prompt", "openai", DEFAULT_SETTINGS, client=client)
         assert call.parsed is not None

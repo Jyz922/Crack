@@ -12,10 +12,10 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from doubletake.config import DEFAULT_SETTINGS
-from doubletake.enums import AnchorRelation, AnchoringStatus, Genre, ResolutionStatus
-from doubletake.l5_resolution import resolve_l5
-from doubletake.schema import AnalysisRecord, L1Result, L4Result
+from crack.config import DEFAULT_SETTINGS
+from crack.enums import AnchorRelation, AnchoringStatus, Genre, ResolutionStatus
+from crack.l5_resolution import resolve_l5
+from crack.schema import AnalysisRecord, L1Result, L4Result
 
 _QA_TEXT = "Why don't skeletons fight? They have no guts."
 _QA_SUBSCORES = list(DEFAULT_SETTINGS.L5_QA_WEIGHTS.keys())
@@ -68,7 +68,7 @@ def test_missing_qa_subscore_triggers_retry_and_insufficient_context(
     """
     record = _qa_record()
     client = _client_always_omitting(missing_field)
-    with caplog.at_level(logging.WARNING, logger="doubletake.l5_resolution"):
+    with caplog.at_level(logging.WARNING, logger="crack.l5_resolution"):
         result = resolve_l5(record, DEFAULT_SETTINGS, ambiguous_term="guts", client=client)
 
     if DEFAULT_SETTINGS.L5_BACKEND == "gemini":

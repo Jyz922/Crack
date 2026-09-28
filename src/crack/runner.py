@@ -20,7 +20,9 @@ Output layout
 
 CLI
 ---
-    python -m doubletake.runner --blind <path> [--output <root>]
+    crack --blind <path> [--output <root>]
+    # or
+    python -m crack.runner --blind <path> [--output <root>]
 """
 
 from __future__ import annotations
@@ -50,9 +52,9 @@ if __package__ in (None, ""):
     _src_dir = Path(__file__).resolve().parent.parent
     if str(_src_dir) not in sys.path:
         sys.path.insert(0, str(_src_dir))
-    from doubletake.config import DEFAULT_SETTINGS, Settings
-    from doubletake.corpus import evaluate_run, load_blind
-    from doubletake.enums import (
+    from crack.config import DEFAULT_SETTINGS, Settings
+    from crack.corpus import evaluate_run, load_blind
+    from crack.enums import (
         AnchorRelation,
         AnchoringStatus,
         DistinctnessStatus,
@@ -60,13 +62,13 @@ if __package__ in (None, ""):
         ResolutionStatus,
         ScopeLabel,
     )
-    from doubletake.l0_scope import (
+    from crack.l0_scope import (
         InputValidationError,
         LayerEvidence,
         assign_scope_label,
         preprocess_input,
     )
-    from doubletake.layers import (
+    from crack.layers import (
         run_l1,
         run_l2,
         run_l3,
@@ -76,8 +78,8 @@ if __package__ in (None, ""):
         run_l7,
         run_l8,
     )
-    from doubletake.providers import resolve_backend
-    from doubletake.schema import AnalysisRecord, FinalVerdict, LayerTrace
+    from crack.providers import resolve_backend
+    from crack.schema import AnalysisRecord, FinalVerdict, LayerTrace
 else:
     from .config import DEFAULT_SETTINGS, Settings
     from .corpus import evaluate_run, load_blind
@@ -346,7 +348,7 @@ def format_analysis_report(record: AnalysisRecord, target_age: int) -> str:
     lines = [
         "",
         "=" * 70,
-        "                   DOUBLETAKE HUMOR ANALYSIS REPORT",
+        "                      CRACK HUMOR ANALYSIS REPORT",
         "=" * 70,
     ]
     mc = record.final.main_classification.value if record.final else "UNKNOWN"
@@ -440,8 +442,8 @@ def format_analysis_report(record: AnalysisRecord, target_age: int) -> str:
 
 def _main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
-        prog="python -m doubletake.runner",
-        description="Run the DoubleTake pipeline over a blind JSONL corpus or single text.",
+        prog="crack",
+        description="CRACK: Neuro-symbolic pun identification and developmental appropriateness pipeline.",
     )
     parser.add_argument(
         "--blind", "--input", dest="blind", default=None, metavar="PATH",
@@ -525,6 +527,10 @@ def _main(argv: list[str] | None = None) -> None:
         print(f"  Age verdict match rate:  {eval_res['age_accuracy']:.1%} ({eval_res['correct_age_evals']}/{eval_res['total_age_evals']})")
         print(f"  Report written to: {eval_file}")
 
+
+
+def main() -> None:
+    _main()
 
 
 if __name__ == "__main__":

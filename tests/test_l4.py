@@ -10,11 +10,11 @@ from unittest.mock import MagicMock
 import pytest
 from pydantic import ValidationError
 
-from doubletake.config import DEFAULT_SETTINGS, Settings
-from doubletake.enums import AnchorRelation, AnchoringStatus, Genre
-from doubletake.l4_anchoring import _align_substring, _render_l4_prompt, anchor_l4
-from doubletake.layers import run_l1, run_l2, run_l3, run_l4
-from doubletake.schema import (
+from crack.config import DEFAULT_SETTINGS, Settings
+from crack.enums import AnchorRelation, AnchoringStatus, Genre
+from crack.l4_anchoring import _align_substring, _render_l4_prompt, anchor_l4
+from crack.layers import run_l1, run_l2, run_l3, run_l4
+from crack.schema import (
     AnalysisRecord,
     CandidateEntry,
     L1Result,
@@ -213,8 +213,8 @@ class TestAnchorL4Offline:
             "resolving_sense": "sense_a",
         }
         from unittest.mock import patch
-        from doubletake.l4_anchoring import _L4Call
-        with patch("doubletake.l4_anchoring._complete_l4") as mock_complete:
+        from crack.l4_anchoring import _L4Call
+        with patch("crack.l4_anchoring._complete_l4") as mock_complete:
             mock_complete.return_value = _L4Call(payload, "mock", False, 0)
             rec = run_l4(rec, DEFAULT_SETTINGS)
 
@@ -258,7 +258,7 @@ class TestAnchorL4Offline:
         assert res.anchoring_status == AnchoringStatus.PASS
 
     def test_l2_senses_included_in_prompt_context(self) -> None:
-        from doubletake.schema import L2Result, SenseEntry
+        from crack.schema import L2Result, SenseEntry
         rec = _make_record("He went to the bank to deposit cash.", Genre.DECLARATIVE, candidate_term="bank")
         rec.l2_result = L2Result(
             senses=[
@@ -277,7 +277,7 @@ class TestAnchorL4Offline:
         assert res.anchoring_status == AnchoringStatus.PASS
 
     def test_unknown_l4_backend_raises(self) -> None:
-        from doubletake.l4_anchoring import _complete_l4
+        from crack.l4_anchoring import _complete_l4
         custom_settings = DEFAULT_SETTINGS.model_copy(update={"L4_BACKEND": "unknown_backend"})
         with pytest.raises(ValueError, match="Unknown L4_BACKEND"):
             _complete_l4("test prompt", custom_settings, client=None)

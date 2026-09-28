@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import pytest
 
-from doubletake.l2_senses import aoa_coverage, aoa_lookup, compound_splits, retrieve, senses_for
+from crack.l2_senses import aoa_coverage, aoa_lookup, compound_splits, retrieve, senses_for
 
 
 @pytest.mark.parametrize("lemma,stage", [
@@ -63,10 +63,10 @@ def test_retrieve_skips_stopwords_and_adds_split_senses() -> None:
 
 
 def test_run_l2_populates_record_from_l1_tokens() -> None:
-    from doubletake.config import DEFAULT_SETTINGS
-    from doubletake.enums import Genre
-    from doubletake.layers import run_l2
-    from doubletake.schema import AnalysisRecord, L1Result
+    from crack.config import DEFAULT_SETTINGS
+    from crack.enums import Genre
+    from crack.layers import run_l2
+    from crack.schema import AnalysisRecord, L1Result
 
     record = AnalysisRecord(item_id="t", text="The trunk.", target_ages=[8])
     with pytest.raises(ValueError):
@@ -78,14 +78,14 @@ def test_run_l2_populates_record_from_l1_tokens() -> None:
 
 
 def test_mwe_scan_handles_reflexive_and_inflection() -> None:
-    from doubletake.l2_senses import mwe_spans
+    from crack.l2_senses import mwe_spans
     assert mwe_spans(["Pull", "yourself", "together"]) == [("Pull yourself together", "pull_together")]
     assert ("going after", "go_after") in mwe_spans(["going", "after", "liquid", "assets"])
     assert ("liquid assets", "liquid_assets") in mwe_spans(["going", "after", "liquid", "assets"])
 
 
 def test_mwe_scan_skips_function_word_only_grams() -> None:
-    from doubletake.l2_senses import mwe_spans
+    from crack.l2_senses import mwe_spans
     assert mwe_spans(["at", "all"]) == []  # at_all is a WordNet lemma
 
 
