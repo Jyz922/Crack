@@ -227,8 +227,7 @@ def test_full_corpus_loads_and_joins_cleanly() -> None:
         blind = load_blind(blind_path)
         gold = load_gold(gold_path)
         joined = join_blind_gold(blind, gold)
-        assert len(joined) == 50
-        assert len(blind) == 50
-        assert len(gold) == 50
+        assert len(joined) == len(blind) == len(gold)
+        assert len(joined) >= 110
 
 

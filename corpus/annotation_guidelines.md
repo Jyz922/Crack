@@ -7,15 +7,15 @@ The DoubleTake evaluation corpus consists of paired JSON Lines files designed fo
 - `joke_corpus_blind.jsonl`: Inputs available to the pipeline (`id`, `text`, `target_ages`).
 - `joke_corpus_gold.jsonl`: Ground-truth linguistic annotations (`id`, `gold_label`, `genre`, `ambiguous_term`, `sense_a`, `sense_b`, `expected_age_verdict`).
 
-## 2. Corpus Composition (50 items)
+## 2. Corpus Composition (110 items)
 
 | Group | IDs | Count | Description |
 |---|---|---:|---|
-| **Positive Jokes** | `J01`–`J20` | 20 | Valid homograph and compound-split jokes across all 4 genres |
-| **De-joked Controls** | `D01`–`D20` | 20 | Lexically and syntactically matched negative controls removing the double meaning |
+| **Positive Jokes** | `J01`–`J60` | 60 | Valid homograph and compound-split jokes across all 4 genres (riddles, definitions, dialogues, declarative wordplay) |
+| **De-joked Controls** | `D01`–`D40` | 40 | Lexically and syntactically matched negative controls removing the double meaning |
 | **Ordinary Non-Jokes** | `N01`–`N06` | 6 | Everyday sentences containing ambiguous words with only one sense active |
 | **Out-of-Scope Controls** | `O01`–`O04` | 4 | Homophone puns (heterographic) and situational non-lexical jokes |
-| **Total** | | **50** | Benchmark evaluation corpus |
+| **Total** | | **110** | Benchmark evaluation corpus |
 
 ## 3. Classification Taxonomy (`gold_label`)
 
