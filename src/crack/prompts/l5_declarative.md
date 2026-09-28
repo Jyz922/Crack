@@ -19,11 +19,19 @@ Anchored at: "{resolving_sense_anchor_quote}"
 
 ## Dimensions to score
 
-1. **both_readings_available** — Can the sentence be read coherently under BOTH senses of the ambiguous term? A high score means each sense yields a grammatical, sensible reading of the whole sentence. A low score means one sense is forced or makes the sentence nonsensical.
+1. **both_readings_available** — Are BOTH senses of the ambiguous term clearly active and meaningful in the sentence?
+   - For single-occurrence wordplay (e.g. "The fishermen are calculating the net loss"): Does the sentence support two distinct interpretations?
+   - For dual-occurrence wordplay where the word/heteronym appears twice (e.g. "produce organic produce", "wind was too strong to wind the sail", "shed a tear upon seeing the tear", "too close to the door to close it"): Does the sentence successfully juxtapose both distinct meanings/parts-of-speech?
+   - A high score (0.7–1.0) means both senses are legitimately invoked. A low score means one sense is forced, nonsensical, or absent.
 
-2. **punchline_sense_is_unexpected** — Does the sentence set up an expectation of the setup reading, so that the punchline reading arrives as a surprise? A high score means a reader would default to the setup reading and must switch to recognise the punchline reading. A low score means the punchline reading is the obvious, default reading of the sentence (no switch occurs).
+2. **punchline_sense_is_unexpected** — Does the sentence create a semantic contrast, shift, or clever double-take through the ambiguous term?
+   - For single-occurrence: Does the reader experience an unexpected second meaning that shifts the interpretation?
+   - For dual-occurrence: Does the sentence deliberately play on the sharp semantic or grammatical contrast between the two usages of the identical spelling?
+   - A high score (0.7–1.0) means the statement deliberately creates a clever semantic shift or contrasting wordplay. A low score means no intentional shift or wordplay exists.
 
-3. **incongruity_present** — Is there a meaningful clash between the two readings that the sentence exploits deliberately? A high score means the senses come from clearly different domains and the sentence is constructed so that the clash is the point. A low score means the ambiguity is incidental: an ordinary factual statement that merely happens to contain a polysemous word.
+3. **incongruity_present** — Is there a meaningful clash or juxtaposition between the two readings that the sentence exploits deliberately?
+   - A high score (0.7–1.0) means the senses come from clearly different domains/functions and the sentence is constructed so that the clash/contrast is the point.
+   - A low score (0.0–0.3) means the statement is purely mundane and factual without intentional wit.
 
 ## Output format
 

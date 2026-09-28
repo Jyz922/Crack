@@ -30,6 +30,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -155,13 +156,41 @@ def _l0_pre_layer(record: AnalysisRecord, settings: Settings) -> AnalysisRecord:
     return record
 
 
+_COMMON_HOMOPHONES = (
+    ("knight", "night"), ("flower", "flour"), ("bear", "bare"), ("sea", "see"),
+    ("sun", "son"), ("right", "write"), ("deer", "dear"), ("hair", "hare"),
+    ("plain", "plane"), ("piece", "peace"), ("break", "brake"), ("pair", "pear"),
+    ("wait", "weight"), ("meat", "meet"), ("tail", "tale"), ("hole", "whole"),
+    ("weak", "week"), ("sail", "sale"), ("mail", "male"), ("stair", "stare"),
+    ("sole", "soul"), ("toe", "tow"), ("root", "route"), ("steal", "steel"),
+    ("cell", "sell"), ("buy", "by"), ("dye", "die"), ("board", "bored"),
+    ("heal", "heel"), ("flea", "flee"), ("chews", "choose"), ("clause", "claws"),
+    ("cereal", "serial"), ("coarse", "course"),
+)
+
+
 def _l0_post_layer(record: AnalysisRecord, settings: Settings) -> AnalysisRecord:
     """L0-post: assign scope label from accumulated L2–L4 evidence."""
     start = time.monotonic()
 
     has_split = False
     has_homo = False
-    if record.l4_result is not None and record.l4_result.anchoring_status == AnchoringStatus.PASS:
+    is_homophone = False
+    is_nonlexical = False
+
+    if record.final and record.final.scope_label == ScopeLabel.OUT_OF_SCOPE_HOMOPHONE:
+        is_homophone = True
+
+    tokens_lower = set(re.findall(r"[A-Za-z]+", record.text.lower()))
+    for w1, w2 in _COMMON_HOMOPHONES:
+        if w1 in tokens_lower and w2 in tokens_lower:
+            is_homophone = True
+            break
+
+    if is_homophone:
+        has_homo = False
+        has_split = False
+    elif record.l4_result is not None and record.l4_result.anchoring_status == AnchoringStatus.PASS:
         if record.l4_result.anchor_relation == AnchorRelation.RESEGMENTATION:
             has_split = True
         else:
@@ -176,8 +205,8 @@ def _l0_post_layer(record: AnalysisRecord, settings: Settings) -> AnalysisRecord
     evidence = LayerEvidence(
         has_homograph=has_homo,
         has_compound_split=has_split,
-        is_homophone=False,
-        is_nonlexical_joke=False,
+        is_homophone=is_homophone,
+        is_nonlexical_joke=is_nonlexical,
     )
     scope_label = assign_scope_label(evidence)
 

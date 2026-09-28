@@ -442,7 +442,7 @@ def anchor_l4(
         return _anchor_term(record, genre, term, False, settings, client)
 
     # Multi-candidate evaluation (Top-K fallback)
-    max_to_try = min(len(cands), 3)
+    max_to_try = min(len(cands), settings.L3_TOP_K)
     best_result: L4Result | None = None
     winning_idx: int | None = None
 

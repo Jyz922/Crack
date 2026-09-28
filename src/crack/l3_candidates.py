@@ -113,7 +113,11 @@ def _mwe(phrase: str, mwe: list[SenseEntry], whole: dict[str, list[SenseEntry]])
     )
 
 
-def rank(senses: list[SenseEntry], top_k: int) -> L3Result:
+def rank(
+    senses: list[SenseEntry],
+    top_k: int,
+    preferred_term: str | None = None,
+) -> L3Result:
     whole: dict[str, list[SenseEntry]] = defaultdict(list)
     splits: dict[tuple[str, str], list[SenseEntry]] = defaultdict(list)
     mwes: dict[str, list[SenseEntry]] = defaultdict(list)
@@ -133,4 +137,9 @@ def rank(senses: list[SenseEntry], top_k: int) -> L3Result:
     best: dict[str, CandidateEntry] = {}
     for c in cands:
         best.setdefault(c.term, c)
-    return L3Result(candidates=list(best.values())[:top_k])
+    ranked = list(best.values())
+    if preferred_term:
+        norm = preferred_term.lower()
+        if norm in best:
+            ranked = [best[norm]] + [c for c in ranked if c.term != norm]
+    return L3Result(candidates=ranked[:top_k])

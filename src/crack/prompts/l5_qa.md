@@ -19,7 +19,9 @@ Anchored at: "{resolving_sense_anchor_quote}"
 
 ## Dimensions to score
 
-1. **polarity_or_direction** — Does the punchline activate a reading of the ambiguous term that contrasts in polarity or direction with the setup's reading? A high score means the two senses pull in meaningfully opposite directions.
+1. **polarity_or_direction** — Does the punchline activate a reading of the ambiguous term that contrasts sharply in semantic domain, polarity, or framing from the setup's reading?
+   - A high score (0.7–1.0) means the two senses represent clearly distinct, contrasting conceptual domains (e.g. biological anatomy vs. physical container, animal group vs. human institution, natural wave vs. human gesture, literal organs vs. abstract courage), or pull in opposing directions.
+   - A low score (0.0–0.2) means both readings belong to the exact same mundane context with no wordplay contrast, or that no secondary reading is active.
 
 2. **answer_relevance** — Does the punchline answer the question in a way that is semantically coherent via the punchline reading of the ambiguous term? A high score means the punchline reading genuinely resolves the question.
 

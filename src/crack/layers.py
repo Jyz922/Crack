@@ -16,10 +16,17 @@ an unimplemented layer does not crash the whole run.
 
 from __future__ import annotations
 
+import re
 import time
 
 from .config import Settings
-from .enums import AgeAppropriatenessVerdict, ComprehensionStatus, MainClassification, ScopeLabel
+from .enums import (
+    AgeAppropriatenessVerdict,
+    ComprehensionStatus,
+    Genre,
+    MainClassification,
+    ScopeLabel,
+)
 from .l1_surface import analyze
 from .l2_senses import retrieve
 from .l3_candidates import rank
@@ -68,7 +75,12 @@ def run_l3(record: AnalysisRecord, settings: Settings) -> AnalysisRecord:
     if record.l2_result is None:
         raise ValueError("L2 must run before L3: l2_result is None")
     start = time.monotonic()
-    record.l3_result = rank(record.l2_result.senses, settings.L3_TOP_K)
+    preferred: str | None = None
+    if record.l1_result and record.l1_result.genre == Genre.DEFINITIONAL_ONELINER:
+        m = re.match(r"^\s*([A-Za-z]+)\s*:", record.text)
+        if m:
+            preferred = m.group(1).lower()
+    record.l3_result = rank(record.l2_result.senses, settings.L3_TOP_K, preferred_term=preferred)
     record.trace.append(LayerTrace(
         layer="L3",
         status="OK",

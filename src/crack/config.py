@@ -56,7 +56,7 @@ class Settings(BaseModel):
     # --- L3 candidate ranking --------------------------------------------
     # NOTE: target-age familiarity is intentionally excluded from the
     # candidate score — see module docstring, deviation 1.
-    L3_TOP_K: int = 3
+    L3_TOP_K: int = 5
 
     # --- L4 backend ------------------------------------------------------
     L4_BACKEND: BackendType = "gemini"
