@@ -27,18 +27,78 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import shutil
 import subprocess
+import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable
 
-from .config import DEFAULT_SETTINGS, Settings
-from .corpus import evaluate_run, load_blind
-from .enums import AnchorRelation, AnchoringStatus, DistinctnessStatus, MainClassification, ResolutionStatus, ScopeLabel
-from .l0_scope import InputValidationError, LayerEvidence, assign_scope_label, preprocess_input
-from .layers import run_l1, run_l2, run_l3, run_l4, run_l5, run_l6, run_l7, run_l8
-from .schema import AnalysisRecord, FinalVerdict, LayerTrace
+# Support direct script execution without `python -m`
+if __package__ in (None, ""):
+    _src_dir = Path(__file__).resolve().parent.parent
+    if str(_src_dir) not in sys.path:
+        sys.path.insert(0, str(_src_dir))
+    from doubletake.config import DEFAULT_SETTINGS, Settings
+    from doubletake.corpus import evaluate_run, load_blind
+    from doubletake.enums import (
+        AnchorRelation,
+        AnchoringStatus,
+        DistinctnessStatus,
+        MainClassification,
+        ResolutionStatus,
+        ScopeLabel,
+    )
+    from doubletake.l0_scope import (
+        InputValidationError,
+        LayerEvidence,
+        assign_scope_label,
+        preprocess_input,
+    )
+    from doubletake.layers import (
+        run_l1,
+        run_l2,
+        run_l3,
+        run_l4,
+        run_l5,
+        run_l6,
+        run_l7,
+        run_l8,
+    )
+    from doubletake.providers import resolve_backend
+    from doubletake.schema import AnalysisRecord, FinalVerdict, LayerTrace
+else:
+    from .config import DEFAULT_SETTINGS, Settings
+    from .corpus import evaluate_run, load_blind
+    from .enums import (
+        AnchorRelation,
+        AnchoringStatus,
+        DistinctnessStatus,
+        MainClassification,
+        ResolutionStatus,
+        ScopeLabel,
+    )
+    from .l0_scope import (
+        InputValidationError,
+        LayerEvidence,
+        assign_scope_label,
+        preprocess_input,
+    )
+    from .layers import (
+        run_l1,
+        run_l2,
+        run_l3,
+        run_l4,
+        run_l5,
+        run_l6,
+        run_l7,
+        run_l8,
+    )
+    from .providers import resolve_backend
+    from .schema import AnalysisRecord, FinalVerdict, LayerTrace
+
 
 
 # ---------------------------------------------------------------------------
@@ -207,6 +267,17 @@ def run(
 
     Returns the path to the output directory created for this run.
     """
+    if settings is DEFAULT_SETTINGS:
+        backend_req = os.getenv("DOUBLETAKE_BACKEND") or "auto"
+        backend = resolve_backend(backend_req)
+        settings = DEFAULT_SETTINGS.model_copy(update={
+            "L4_BACKEND": backend,
+            "L5_BACKEND": backend,
+            "L6_BACKEND": backend,
+            "L7_BACKEND": backend,
+            "L8_BACKEND": backend,
+        })
+
     blind_items = load_blind(blind_path)
 
     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
@@ -269,15 +340,23 @@ def run(
 def _main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
         prog="python -m doubletake.runner",
-        description="Run the DoubleTake pipeline over a blind JSONL corpus.",
+        description="Run the DoubleTake pipeline over a blind JSONL corpus or single text.",
     )
     parser.add_argument(
-        "--blind", required=True, metavar="PATH",
+        "--blind", "--input", dest="blind", default=None, metavar="PATH",
         help="Path to the blind JSONL corpus file.",
     )
     parser.add_argument(
-        "--output", default="runs", metavar="DIR",
-        help="Root directory for run output (default: runs).",
+        "--text", default=None, metavar="TEXT",
+        help="Single text input to analyze directly.",
+    )
+    parser.add_argument(
+        "--age", type=int, default=8, metavar="AGE",
+        help="Target age for single text analysis (default: 8).",
+    )
+    parser.add_argument(
+        "--output", default="runs", metavar="DIR_OR_FILE",
+        help="Root directory for run output or target .jsonl path (default: runs).",
     )
     parser.add_argument(
         "--eval", default=None, metavar="GOLD_PATH",
@@ -285,17 +364,86 @@ def _main(argv: list[str] | None = None) -> None:
     )
     args = parser.parse_args(argv)
 
-    out_dir = run(blind_path=args.blind, output_root=args.output)
+    backend_req = os.getenv("DOUBLETAKE_BACKEND") or "auto"
+    backend = resolve_backend(backend_req)
+    settings = DEFAULT_SETTINGS.model_copy(update={
+        "L4_BACKEND": backend,
+        "L5_BACKEND": backend,
+        "L6_BACKEND": backend,
+        "L7_BACKEND": backend,
+        "L8_BACKEND": backend,
+    })
+
+    if args.text:
+        record = AnalysisRecord(
+            item_id="CLI_01",
+            text=args.text,
+            target_ages=[args.age],
+        )
+        for layer_name, layer_fn in _LAYER_REGISTRY:
+            start = time.monotonic()
+            try:
+                record = layer_fn(record, settings)
+            except Exception as exc:
+                duration_ms = round((time.monotonic() - start) * 1000, 3)
+                record.trace.append(LayerTrace(
+                    layer=layer_name,
+                    status="ERROR",
+                    reason=f"{type(exc).__name__}: {exc}",
+                    duration_ms=duration_ms,
+                    hints_used=0,
+                ))
+        print("\n=================== DoubleTake Analysis ===================")
+        print(f"Text:                {record.text}")
+        print(f"Target age:          {args.age}")
+        if record.l1_result:
+            print(f"Genre:               {record.l1_result.genre.value}")
+        if record.l4_result and record.l4_result.anchoring_status == AnchoringStatus.PASS:
+            print(f"Ambiguous Term:      {record.l4_result.sense_a_anchor_quote}")
+            print(f"Sense A:             {record.l4_result.sense_a}")
+            print(f"Sense B:             {record.l4_result.sense_b}")
+            if record.l4_result.resolving_sense:
+                print(f"Resolving Sense:     {record.l4_result.resolving_sense}")
+        if record.final:
+            print(f"Classification:      {record.final.main_classification.value}")
+            print(f"Scope Label:         {record.final.scope_label.value}")
+            print(f"Confidence:          {record.confidence:.2f}")
+            if record.l6_result and record.l6_result.explanation:
+                print(f"Explanation:         {record.l6_result.explanation}")
+            if record.final.per_age:
+                for a, av in record.final.per_age.items():
+                    print(f"Age {a} Assessment:   comprehension={av.comprehension.value}, appropriateness={av.appropriateness.value}")
+        print("===========================================================")
+        return
+
+    if not args.blind:
+        parser.error("Either --blind/--input <path> or --text <string> must be provided.")
+
+    out_root = Path(args.output)
+    is_jsonl_target = out_root.suffix == ".jsonl"
+    actual_root = out_root.parent if is_jsonl_target else out_root
+
+    out_dir = run(blind_path=args.blind, settings=settings, output_root=actual_root)
+    records_file = out_dir / "records.jsonl"
     print(f"Run complete. Output: {out_dir}")
 
+    if is_jsonl_target:
+        out_root.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(records_file, out_root)
+        print(f"Copied output records to: {out_root}")
+
     if args.eval:
-        eval_res = evaluate_run(out_dir / "records.jsonl", args.eval)
+        eval_res = evaluate_run(records_file, args.eval)
         eval_file = out_dir / "evaluation.json"
         eval_file.write_text(json.dumps(eval_res, indent=2), encoding="utf-8")
-        print("Evaluation summary:")
+        if is_jsonl_target:
+            eval_target = out_root.parent / f"{out_root.stem}_eval.json"
+            shutil.copyfile(eval_file, eval_target)
+        print("\nEvaluation summary:")
         print(f"  Classification accuracy: {eval_res['classification_accuracy']:.1%} ({eval_res['correct_classification']}/{eval_res['total_items']})")
         print(f"  Age verdict match rate:  {eval_res['age_accuracy']:.1%} ({eval_res['correct_age_evals']}/{eval_res['total_age_evals']})")
         print(f"  Report written to: {eval_file}")
+
 
 
 if __name__ == "__main__":
