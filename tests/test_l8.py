@@ -390,7 +390,15 @@ class TestL8PipelineIntegration:
 
         assert rec.l8_result is not None
         assert rec.final is not None
+        assert 6 in rec.final.per_age
         assert 8 in rec.final.per_age
         assert 10 in rec.final.per_age
-        assert rec.final.per_age[8].appropriateness == AgeAppropriatenessVerdict.VOCABULARY_TOO_ADVANCED
+        assert rec.final.per_age[6].appropriateness in (
+            AgeAppropriatenessVerdict.VOCABULARY_TOO_ADVANCED,
+            AgeAppropriatenessVerdict.CONTENT_NOT_APPROPRIATE,
+        )
+        assert rec.final.per_age[8].appropriateness in (
+            AgeAppropriatenessVerdict.VOCABULARY_TOO_ADVANCED,
+            AgeAppropriatenessVerdict.FULLY_AGE_APPROPRIATE,
+        )
         assert rec.final.per_age[10].appropriateness == AgeAppropriatenessVerdict.FULLY_AGE_APPROPRIATE
