@@ -31,6 +31,12 @@ _LOG = logging.getLogger(__name__)
 logging.getLogger("google_genai").setLevel(logging.ERROR)
 logging.getLogger("google_genai.models").setLevel(logging.ERROR)
 warnings.filterwarnings("ignore", message=r".*automatic function calling.*")
+try:
+    from google.genai.models import Models
+    Models._logged_afc_warning = True
+except Exception:
+    pass
+
 
 
 

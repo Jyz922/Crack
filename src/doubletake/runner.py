@@ -35,6 +35,15 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable
+import warnings
+
+# Suppress google-genai SDK internal AFC warning notice
+warnings.filterwarnings("ignore", message=r".*automatic function calling.*")
+try:
+    from google.genai.models import Models
+    Models._logged_afc_warning = True
+except Exception:
+    pass
 
 # Support direct script execution without `python -m`
 if __package__ in (None, ""):
@@ -332,6 +341,98 @@ def run(
     return out_dir
 
 
+def format_analysis_report(record: AnalysisRecord, target_age: int) -> str:
+    """Format an AnalysisRecord into a clear, intuitive human-readable report."""
+    lines = [
+        "",
+        "=" * 67,
+        "              DOUBLETAKE 语义与笑话分析报告 (Analysis Report)",
+        "=" * 67,
+    ]
+    mc = record.final.main_classification.value if record.final else "UNKNOWN"
+
+    # 1. Clear Verdict at the very top: Is it a joke?
+    if mc in ("VALID_HOMOGRAPH_JOKE", "VALID_COMPOUND_SPLIT_JOKE"):
+        verdict = "🎉 是双关笑话 (VALID JOKE)"
+    elif mc in ("OUT_OF_SCOPE_HOMOPHONE", "OUT_OF_SCOPE_NONLEXICAL_JOKE"):
+        verdict = "⚠️ 可能是笑话，但超出本模型识别范围 (OUT OF SCOPE)"
+    else:
+        verdict = "❌ 不是笑话 (NOT A JOKE)"
+
+    mc_map = {
+        "VALID_HOMOGRAPH_JOKE": "有效同形双关笑话 (VALID_HOMOGRAPH_JOKE - 同拼写词的多义对立)",
+        "VALID_COMPOUND_SPLIT_JOKE": "有效复合词拆解笑话 (VALID_COMPOUND_SPLIT_JOKE - 复合词拆分重构语义)",
+        "ONE_SENSE_ONLY": "单一词义 (ONE_SENSE_ONLY - 语境仅激活单一字面含义，未构成双关)",
+        "RESOLUTION_FAIL": "语义对比未达成 (RESOLUTION_FAIL - 谜底未形成有效双关反差)",
+        "OUT_OF_SCOPE_HOMOPHONE": "同音异形双关 (OUT_OF_SCOPE_HOMOPHONE - 读音相同但拼写不同)",
+        "OUT_OF_SCOPE_NONLEXICAL_JOKE": "非词汇双关笑话 (OUT_OF_SCOPE_NONLEXICAL_JOKE - 荒诞情境或非语言幽默)",
+        "NO_AMBIGUITY_FOUND": "未发现多义词 (NO_AMBIGUITY_FOUND - 文本不含可识别的歧义词)",
+        "ANCHORING_FAIL": "语境锚定失败 (ANCHORING_FAIL)",
+    }
+    mc_desc = mc_map.get(mc, mc)
+    conf = f"{record.confidence:.0%}" if record.confidence is not None else "N/A"
+
+    lines.append(f"【判 定 结 论】: {verdict}")
+    lines.append(f"【分 类 判 定】: {mc_desc}")
+    lines.append(f"【判定置信度】: {conf}")
+
+    # 2. Text & Genre
+    lines.append("-" * 67)
+    lines.append(f"【分 析 文 本】: {record.text}")
+    if record.l1_result:
+        genre_map = {
+            "QA_RIDDLE": "问答谜语 (QA_RIDDLE)",
+            "DEFINITIONAL_ONELINER": "定义式一句话幽默 (DEFINITIONAL_ONELINER)",
+            "DIALOGUE_MISUNDERSTANDING": "对话误会 (DIALOGUE_MISUNDERSTANDING)",
+            "DECLARATIVE": "陈述句笑话 (DECLARATIVE)",
+        }
+        lines.append(f"【体 裁 分 类】: {genre_map.get(record.l1_result.genre.value, record.l1_result.genre.value)}")
+
+    # 3. Wordplay & Senses
+    ambiguous_term = None
+    if record.l3_result and record.l3_result.candidates:
+        ambiguous_term = record.l3_result.candidates[0].term
+    elif record.l4_result and record.l4_result.sense_a_anchor_quote:
+        ambiguous_term = record.l4_result.sense_a_anchor_quote
+
+    if ambiguous_term:
+        lines.append(f"【双关歧义词】: {ambiguous_term}")
+
+    if record.l4_result and record.l4_result.anchoring_status == AnchoringStatus.PASS:
+        lines.append(f"【含  义  A 】: {record.l4_result.sense_a} (对应语境: \"{record.l4_result.sense_a_anchor_quote}\")")
+        lines.append(f"【含  义  B 】: {record.l4_result.sense_b} (对应语境: \"{record.l4_result.sense_b_anchor_quote}\")")
+        if record.l4_result.resolving_sense:
+            res_sense = record.l4_result.resolving_sense
+            res_text = record.l4_result.sense_a if res_sense == "sense_a" else record.l4_result.sense_b
+            res_label = "含义 A" if res_sense == "sense_a" else "含义 B"
+            lines.append(f"【谜底所用含义】: {res_label} ({res_text})")
+
+    if record.l6_result and record.l6_result.explanation:
+        lines.append(f"【幽默机制解析】: {record.l6_result.explanation}")
+
+    # 4. Age Assessment
+    if record.final and record.final.per_age:
+        lines.append("-" * 67)
+        comp_map = {
+            "FULLY_COMPREHENSIBLE": "完全能理解 (FULLY_COMPREHENSIBLE)",
+            "PARTIALLY_COMPREHENSIBLE": "部分理解 (PARTIALLY_COMPREHENSIBLE - 仅理解表层字面义)",
+            "INCOMPREHENSIBLE": "无法理解 (INCOMPREHENSIBLE)",
+        }
+        appr_map = {
+            "FULLY_AGE_APPROPRIATE": "完全适龄 (FULLY_AGE_APPROPRIATE)",
+            "VOCABULARY_TOO_ADVANCED": "超龄偏难：词汇水平超出该年龄段认知 (VOCABULARY_TOO_ADVANCED)",
+            "WORDPLAY_SKILL_TOO_ADVANCED": "超龄偏难：双关认知技能尚不足 (WORDPLAY_SKILL_TOO_ADVANCED)",
+        }
+        for a, av in record.final.per_age.items():
+            comp_str = comp_map.get(av.comprehension.value, av.comprehension.value)
+            appr_str = appr_map.get(av.appropriateness.value, av.appropriateness.value)
+            lines.append(f"【{a} 岁儿童评估】: 理解程度: {comp_str}")
+            lines.append(f"               适龄结论: {appr_str}")
+
+    lines.append("=" * 67)
+    return "\n".join(lines)
+
+
 # ---------------------------------------------------------------------------
 # CLI entry point
 # ---------------------------------------------------------------------------
@@ -392,27 +493,7 @@ def _main(argv: list[str] | None = None) -> None:
                     duration_ms=duration_ms,
                     hints_used=0,
                 ))
-        print("\n=================== DoubleTake Analysis ===================")
-        print(f"Text:                {record.text}")
-        print(f"Target age:          {args.age}")
-        if record.l1_result:
-            print(f"Genre:               {record.l1_result.genre.value}")
-        if record.l4_result and record.l4_result.anchoring_status == AnchoringStatus.PASS:
-            print(f"Ambiguous Term:      {record.l4_result.sense_a_anchor_quote}")
-            print(f"Sense A:             {record.l4_result.sense_a}")
-            print(f"Sense B:             {record.l4_result.sense_b}")
-            if record.l4_result.resolving_sense:
-                print(f"Resolving Sense:     {record.l4_result.resolving_sense}")
-        if record.final:
-            print(f"Classification:      {record.final.main_classification.value}")
-            print(f"Scope Label:         {record.final.scope_label.value}")
-            print(f"Confidence:          {record.confidence:.2f}")
-            if record.l6_result and record.l6_result.explanation:
-                print(f"Explanation:         {record.l6_result.explanation}")
-            if record.final.per_age:
-                for a, av in record.final.per_age.items():
-                    print(f"Age {a} Assessment:   comprehension={av.comprehension.value}, appropriateness={av.appropriateness.value}")
-        print("===========================================================")
+        print(format_analysis_report(record, args.age))
         return
 
     if not args.blind:
