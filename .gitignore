@@ -6,6 +6,8 @@ __pycache__/
 *.egg-info/
 runs/
 .env
+.env.*
+!.env.example
 .venv/
 spike/out/
 data/

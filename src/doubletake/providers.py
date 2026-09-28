@@ -21,9 +21,64 @@ import logging
 import os
 import time
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Callable, Literal
 
 _LOG = logging.getLogger(__name__)
+
+
+def load_dotenv(env_path: Path | str | None = None) -> bool:
+    """Load variables from a .env file into os.environ if not already set.
+
+    Supports:
+    - Standard KEY=VALUE syntax
+    - Quoted values (single or double quotes)
+    - Optional `export KEY=VALUE` prefix
+    - Inline comments (`# ...`)
+    - Blank lines and full-line comments
+    """
+    candidates: list[Path] = []
+    if env_path is not None:
+        candidates.append(Path(env_path))
+    else:
+        candidates.append(Path.cwd() / ".env")
+        candidates.append(Path(__file__).resolve().parent.parent.parent / ".env")
+
+    for p in candidates:
+        if p.is_file():
+            try:
+                for raw_line in p.read_text(encoding="utf-8").splitlines():
+                    line = raw_line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    if line.startswith("export "):
+                        line = line[7:].strip()
+                    if "=" not in line:
+                        continue
+                    k, v = line.split("=", 1)
+                    k = k.strip()
+                    v = v.strip()
+                    if " #" in v:
+                        if (v.startswith('"') and '"' in v[1:]) or (v.startswith("'") and "'" in v[1:]):
+                            quote_char = v[0]
+                            end_idx = v.find(quote_char, 1)
+                            if end_idx != -1:
+                                v = v[:end_idx + 1]
+                        else:
+                            v = v.split(" #", 1)[0].strip()
+                    v = v.strip()
+                    if (v.startswith('"') and v.endswith('"')) or (v.startswith("'") and v.endswith("'")):
+                        v = v[1:-1]
+                    if k and k not in os.environ:
+                        os.environ[k] = v
+                return True
+            except Exception as e:
+                _LOG.debug("Error loading .env file from %s: %s", p, e)
+    return False
+
+
+load_dotenv()
+
 
 BackendType = Literal[
     "auto",

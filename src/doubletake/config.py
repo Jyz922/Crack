@@ -22,7 +22,9 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, model_validator
 
 from .enums import Genre
-from .providers import BackendType
+from .providers import BackendType, load_dotenv
+
+load_dotenv()
 
 
 class Settings(BaseModel):

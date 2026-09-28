@@ -180,3 +180,34 @@ class TestCallOpenAICompatible:
 
         assert parsed == {"score": 0.9}
         assert client.chat.completions.create.call_count == 2
+
+
+class TestLoadDotenv:
+    def test_load_dotenv_from_file(self, tmp_path: Path) -> None:
+        env_file = tmp_path / ".env"
+        env_file.write_text(
+            "# Comment line\n"
+            "TEST_KEY_1=value1\n"
+            "export TEST_KEY_2=\"value2 with spaces\"\n"
+            "TEST_KEY_3='value3' # inline comment\n"
+            "TEST_KEY_4=value4 # comment\n",
+            encoding="utf-8",
+        )
+        from doubletake.providers import load_dotenv
+
+        with patch.dict(os.environ, {}, clear=True):
+            assert load_dotenv(env_file) is True
+            assert os.environ.get("TEST_KEY_1") == "value1"
+            assert os.environ.get("TEST_KEY_2") == "value2 with spaces"
+            assert os.environ.get("TEST_KEY_3") == "value3"
+            assert os.environ.get("TEST_KEY_4") == "value4"
+
+    def test_load_dotenv_does_not_overwrite_existing(self, tmp_path: Path) -> None:
+        env_file = tmp_path / ".env"
+        env_file.write_text("EXISTING_KEY=new_val\n", encoding="utf-8")
+        from doubletake.providers import load_dotenv
+
+        with patch.dict(os.environ, {"EXISTING_KEY": "original_val"}, clear=True):
+            load_dotenv(env_file)
+            assert os.environ.get("EXISTING_KEY") == "original_val"
+
