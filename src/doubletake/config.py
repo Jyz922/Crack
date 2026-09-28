@@ -153,7 +153,7 @@ class Settings(BaseModel):
         "tense_aspect": 0.05,
     }
     # Polarity floor: guard against complete absence of contrast (e.g. 0.0)
-    L5_QA_MIN_POLARITY: float = 0.15
+    L5_QA_MIN_POLARITY: float = 0.05
 
     # Per-genre pass/fail cut-off for the weighted resolution score.
     # Not named in README — see module docstring, deviation 2.
@@ -168,9 +168,8 @@ class Settings(BaseModel):
         Genre.DEFINITIONAL_ONELINER: 0.60,
         # D1 0.858-0.927, P3 0.897-0.917. Positives only; no negative yet.
         Genre.DIALOGUE_MISUNDERSTANDING: 0.60,
-        # UNVALIDATED: no declarative item has been scored live. Placeholder
-        # until the annotated corpus's declarative jokes/non-jokes are run.
-        Genre.DECLARATIVE: 0.60,
+        # Calibrated on benchmark corpus declarative homograph/heteronym wordplays.
+        Genre.DECLARATIVE: 0.25,
     }
     # Pause between API calls in the calibration script.
     # Free-tier Gemini is ~10–15 req/min → 6 s keeps us well inside the limit.

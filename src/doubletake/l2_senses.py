@@ -185,7 +185,7 @@ def senses_for(word: str, *, term: str | None = None, source: str = "wordnet") -
     return out
 
 
-def compound_splits(word: str, min_part: int = 2) -> list[tuple[str, str]]:
+def compound_splits(word: str, min_part: int = 3) -> list[tuple[str, str]]:
     """Two-way splits where both halves are WordNet lemmas (autobiography ->
     auto + biography). Exact lemma names only: wn.lemmas() skips morphy, so
     "lain" (-> lie) doesn't count as a part.

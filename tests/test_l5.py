@@ -447,19 +447,19 @@ class TestResolveL5Offline:
             )
 
     def test_threshold_is_per_genre(self) -> None:
-        """0.5 passes QA (cut-off 0.46) but fails DECLARATIVE (cut-off 0.60)."""
+        """Threshold is genre-specific: 0.35 fails QA (cut-off 0.46) but passes DECLARATIVE (cut-off 0.25)."""
         qa = resolve_l5(
             _make_record(self._QA_TEXT, Genre.QA_RIDDLE, self._qa_l4()),
             DEFAULT_SETTINGS, ambiguous_term="guts",
-            client=_mock_client([json.dumps({k: 0.5 for k in DEFAULT_SETTINGS.L5_QA_WEIGHTS})]),
+            client=_mock_client([json.dumps({k: 0.35 for k in DEFAULT_SETTINGS.L5_QA_WEIGHTS})]),
         )
         decl = resolve_l5(
             _make_record(self._QA_TEXT, Genre.DECLARATIVE, self._qa_l4()),
             DEFAULT_SETTINGS, ambiguous_term="guts",
-            client=_mock_client([json.dumps({k: 0.5 for k in _L5_DECLARATIVE_WEIGHTS})]),
+            client=_mock_client([json.dumps({k: 0.35 for k in _L5_DECLARATIVE_WEIGHTS})]),
         )
-        assert qa.resolution_status == ResolutionStatus.RESOLUTION_PASS
-        assert decl.resolution_status == ResolutionStatus.RESOLUTION_FAIL
+        assert qa.resolution_status == ResolutionStatus.RESOLUTION_FAIL
+        assert decl.resolution_status == ResolutionStatus.RESOLUTION_PASS
 
     def test_declarative_score_uses_correct_weights(self) -> None:
         l4 = L4Result(

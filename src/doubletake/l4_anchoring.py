@@ -316,27 +316,20 @@ def anchor_l4(
 
     genre = record.l1_result.genre
 
-    # Candidate selection
-    term = ambiguous_term
+def _anchor_term(
+    record: AnalysisRecord,
+    genre: Genre,
+    term: str,
+    is_compound_split_candidate: bool,
+    settings: Settings,
+    client: Any,
+) -> L4Result:
     candidate_details = ""
-    is_compound_split_candidate = False
-
-    if term is None and record.l3_result and record.l3_result.candidates:
-        top_cand = record.l3_result.candidates[0]
-        term = top_cand.term
-        is_compound_split_candidate = top_cand.score_components.get("compound_split", 0.0) == 1.0
-
-        # Retrieve definitions if available in L2
-        if record.l2_result and record.l2_result.senses:
-            matched_senses = [s for s in record.l2_result.senses if s.term.lower() == term.lower()]
-            if matched_senses:
-                s_lines = [f"- {s.sense_id}: {s.definition}" for s in matched_senses[:4]]
-                candidate_details = f"Known dictionary senses for '{term}':\n" + "\n".join(s_lines)
-
-    if term is None:
-        # Fallback to first noun/content token if no L3 candidates
-        tokens = record.l1_result.tokens
-        term = tokens[0] if tokens else "wordplay"
+    if record.l2_result and record.l2_result.senses:
+        matched_senses = [s for s in record.l2_result.senses if s.term.lower() == term.lower()]
+        if matched_senses:
+            s_lines = [f"- {s.sense_id}: {s.definition}" for s in matched_senses[:4]]
+            candidate_details = f"Known dictionary senses for '{term}':\n" + "\n".join(s_lines)
 
     prompt = _render_l4_prompt(record.text, genre, term, candidate_details)
     call = _complete_l4(prompt, settings, client)
@@ -373,7 +366,7 @@ def anchor_l4(
     relation: AnchorRelation | None = None
     if raw_rel:
         rel_str = str(raw_rel).lower().strip()
-        if "resegmentation" in rel_str or "split" in rel_str or is_compound_split_candidate:
+        if "resegmentation" in rel_str or "split" in rel_str:
             relation = AnchorRelation.RESEGMENTATION
         elif "speaker" in rel_str or "mismatch" in rel_str or genre == Genre.DIALOGUE_MISUNDERSTANDING:
             relation = AnchorRelation.SPEAKER_MISMATCH
@@ -419,3 +412,59 @@ def anchor_l4(
         anchoring_status=status,
         resolving_sense=resolving_sense,  # type: ignore[arg-type]
     )
+
+
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
+
+def anchor_l4(
+    record: AnalysisRecord,
+    settings: Settings = DEFAULT_SETTINGS,
+    *,
+    ambiguous_term: str | None = None,
+    client: Any = None,
+    diagnostics: dict[str, Any] | None = None,
+) -> L4Result:
+    """Compute the L4 sense-anchoring result for *record*."""
+    if record.l1_result is None:
+        raise ValueError("L1 must run before L4: l1_result is None")
+
+    genre = record.l1_result.genre
+
+    if ambiguous_term is not None:
+        return _anchor_term(record, genre, ambiguous_term, False, settings, client)
+
+    cands = record.l3_result.candidates if record.l3_result else []
+    if not cands:
+        tokens = record.l1_result.tokens
+        term = tokens[0] if tokens else "wordplay"
+        return _anchor_term(record, genre, term, False, settings, client)
+
+    # Multi-candidate evaluation (Top-K fallback)
+    max_to_try = min(len(cands), 3)
+    best_result: L4Result | None = None
+    winning_idx: int | None = None
+
+    for idx in range(max_to_try):
+        cand = cands[idx]
+        is_split = cand.score_components.get("compound_split", 0.0) == 1.0
+        res = _anchor_term(record, genre, cand.term, is_split, settings, client)
+
+        if res.anchoring_status == AnchoringStatus.PASS:
+            best_result = res
+            winning_idx = idx
+            break
+
+        if best_result is None:
+            best_result = res
+        elif res.anchoring_status == AnchoringStatus.ONE_SENSE_ONLY and best_result.anchoring_status == AnchoringStatus.FAIL:
+            best_result = res
+
+    # If a non-first candidate was the winner, rotate it to index 0 so L5/L6 and report receive it
+    if winning_idx is not None and winning_idx > 0 and record.l3_result:
+        winning_cand = cands[winning_idx]
+        record.l3_result.candidates = [winning_cand] + [c for i, c in enumerate(cands) if i != winning_idx]
+
+    return best_result or _anchor_term(record, genre, cands[0].term, False, settings, client)
+
