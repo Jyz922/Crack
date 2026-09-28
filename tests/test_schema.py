@@ -217,3 +217,18 @@ def test_load_gold_rejects_duplicate_id(tmp_path) -> None:
     with pytest.raises(ValueError, match="duplicate id"):
         load_gold(gold_file)
 
+
+def test_full_corpus_loads_and_joins_cleanly() -> None:
+    from pathlib import Path
+    corpus_dir = Path(__file__).parent.parent / "corpus"
+    blind_path = corpus_dir / "joke_corpus_blind.jsonl"
+    gold_path = corpus_dir / "joke_corpus_gold.jsonl"
+    if blind_path.exists() and gold_path.exists():
+        blind = load_blind(blind_path)
+        gold = load_gold(gold_path)
+        joined = join_blind_gold(blind, gold)
+        assert len(joined) == 50
+        assert len(blind) == 50
+        assert len(gold) == 50
+
+
