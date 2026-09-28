@@ -20,7 +20,10 @@ def _live_gate(request):
             "Set DOUBLETAKE_ALLOW_LIVE=1 to run them. "
             "Routine verification: py -3.11 -m pytest -q -m 'not live'",
         )
-    from doubletake.providers import resolve_api_key_name
-    key = resolve_api_key_name(DEFAULT_SETTINGS.L5_BACKEND)
-    if not os.getenv(key):
-        pytest.skip(f"{key} not set")
+    from doubletake.providers import resolve_api_key, resolve_backend
+    backend_req = os.getenv("DOUBLETAKE_BACKEND") or "auto"
+    backend = resolve_backend(backend_req)
+    key_val, key_name = resolve_api_key(backend)
+    if not key_val:
+        pytest.skip(f"Live test skipped: {key_name} not set for backend '{backend}'")
+

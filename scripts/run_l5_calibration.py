@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import time
 from datetime import datetime, timezone
@@ -23,9 +24,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from doubletake.config import DEFAULT_SETTINGS
+from doubletake.config import DEFAULT_SETTINGS, Settings
 from doubletake.enums import AnchoringStatus, Genre, ResolutionStatus
 from doubletake.l5_resolution import resolve_l5
+from doubletake.providers import resolve_backend
 from doubletake.schema import AnalysisRecord, L1Result, L4Result
 
 _FIXTURES_PATH = Path(__file__).parent.parent / "tests" / "fixtures" / "l5_anchors.jsonl"
@@ -85,16 +87,29 @@ def _load_completed() -> set[tuple[str, int]]:
 
 
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Backend resolution & Settings
+# ---------------------------------------------------------------------------
+
+def _get_calibration_settings() -> tuple[Settings, str]:
+    backend_req = os.getenv("DOUBLETAKE_BACKEND") or "auto"
+    backend = resolve_backend(backend_req)
+    settings = DEFAULT_SETTINGS.model_copy(update={"L5_BACKEND": backend})
+    return settings, backend
+
+
+# ---------------------------------------------------------------------------
 # Probe
 # ---------------------------------------------------------------------------
 
 def probe() -> None:
+    settings, backend = _get_calibration_settings()
     fixtures = _load_fixtures()
     fixture = fixtures[0]
     record, term = _build_record(fixture)
-    print(f"Probe: {DEFAULT_SETTINGS.L5_BACKEND} / {DEFAULT_SETTINGS.L5_MODEL_GEMINI}, fixture {fixture['id']}")
+    print(f"Probe: backend={backend}, fixture {fixture['id']}")
     try:
-        result = resolve_l5(record, DEFAULT_SETTINGS, ambiguous_term=term)
+        result = resolve_l5(record, settings, ambiguous_term=term)
         print(f"OK: verdict={result.resolution_status} model={result.model_used} retries={result.retries}")
         sys.exit(0)
     except Exception as e:
@@ -107,6 +122,7 @@ def probe() -> None:
 # ---------------------------------------------------------------------------
 
 def run(fresh: bool) -> None:
+    settings, backend = _get_calibration_settings()
     _RUNS_DIR.mkdir(exist_ok=True)
     _RAW_DIR.mkdir(exist_ok=True)
 
@@ -119,7 +135,7 @@ def run(fresh: bool) -> None:
     total = _N_RUNS * len(fixtures)
     remaining = total - len(completed)
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    print(f"[{ts}] fixtures={len(fixtures)} runs={_N_RUNS} completed={len(completed)} remaining={remaining}")
+    print(f"[{ts}] backend={backend} fixtures={len(fixtures)} runs={_N_RUNS} completed={len(completed)} remaining={remaining}")
 
     with _JSONL_PATH.open("a", encoding="utf-8") as jf:
         for run_idx in range(_N_RUNS):
@@ -135,7 +151,7 @@ def run(fresh: bool) -> None:
                 t0 = time.monotonic()
                 try:
                     result = resolve_l5(
-                        record, DEFAULT_SETTINGS, ambiguous_term=term, diagnostics=diag
+                        record, settings, ambiguous_term=term, diagnostics=diag
                     )
                 except Exception as e:
                     print(f"  {fixture['id']:3s} run={run_idx} ERROR ({type(e).__name__}): {e}")
@@ -164,7 +180,7 @@ def run(fresh: bool) -> None:
                 row = {
                     "item_id": fixture["id"],
                     "run_index": run_idx,
-                    "backend": DEFAULT_SETTINGS.L5_BACKEND,
+                    "backend": backend,
                     "model_used": result.model_used,
                     "fallback_used": result.fallback_used,
                     "subscores": result.subscores,
@@ -188,7 +204,7 @@ def run(fresh: bool) -> None:
                     f"retries={result.retries} ({elapsed_ms}ms)"
                 )
 
-                time.sleep(DEFAULT_SETTINGS.L5_CALL_PAUSE_SECONDS)
+                time.sleep(settings.L5_CALL_PAUSE_SECONDS)
 
     _write_calibration_doc()
     print(f"\nCalibration doc written to {_OUTPUT_PATH}")
@@ -580,6 +596,8 @@ def _write_calibration_doc() -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--backend", default=None,
+                        help="LLM backend (gemini, openai, deepseek, anthropic, etc.)")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--resume", action="store_true", default=True,
                        help="Skip already-completed pairs (default)")
@@ -588,6 +606,9 @@ def main() -> None:
     parser.add_argument("--probe", action="store_true",
                         help="Make one test call and exit")
     args = parser.parse_args()
+
+    if args.backend:
+        os.environ["DOUBLETAKE_BACKEND"] = args.backend
 
     if args.probe:
         probe()

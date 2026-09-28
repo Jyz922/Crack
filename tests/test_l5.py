@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import time
 from pathlib import Path
 from typing import Any
@@ -24,6 +25,7 @@ from doubletake.l5_resolution import (
     _render_prompt,
     resolve_l5,
 )
+from doubletake.providers import resolve_backend
 from doubletake.schema import (
     AnalysisRecord,
     L1Result,
@@ -754,10 +756,14 @@ def test_fixture_item_live(fixture: dict[str, Any]) -> None:
     genre = Genre(fixture["genre"])
     record = _make_record(fixture["text"], genre, l4, item_id=fixture["id"])
 
+    backend_req = os.getenv("DOUBLETAKE_BACKEND") or "auto"
+    backend = resolve_backend(backend_req)
+    settings = DEFAULT_SETTINGS.model_copy(update={"L5_BACKEND": backend})
+
     result = resolve_l5(
-        record, DEFAULT_SETTINGS, ambiguous_term=fixture["ambiguous_term"]
+        record, settings, ambiguous_term=fixture["ambiguous_term"]
     )
-    time.sleep(DEFAULT_SETTINGS.L5_CALL_PAUSE_SECONDS)
+    time.sleep(settings.L5_CALL_PAUSE_SECONDS)
     assert result.resolution_status in ResolutionStatus
     if result.resolution_score is not None:
         assert isinstance(result.resolution_score, float)
