@@ -308,7 +308,7 @@ def run(
     Returns the path to the output directory created for this run.
     """
     if settings is DEFAULT_SETTINGS:
-        backend_req = os.getenv("DOUBLETAKE_BACKEND") or "auto"
+        backend_req = os.getenv("CRACK_BACKEND") or os.getenv("DOUBLETAKE_BACKEND") or "auto"
         backend = resolve_backend(backend_req)
         settings = DEFAULT_SETTINGS.model_copy(update={
             "L4_BACKEND": backend,
@@ -522,9 +522,13 @@ def _main(argv: list[str] | None = None) -> None:
         "--resume", default=None, metavar="PATH",
         help="Optional path to existing records.jsonl to resume from.",
     )
+    parser.add_argument(
+        "--backend", default=None, metavar="NAME",
+        help="Backend LLM provider (openai, gemini, anthropic, deepseek, etc.).",
+    )
     args = parser.parse_args(argv)
 
-    backend_req = os.getenv("DOUBLETAKE_BACKEND") or "auto"
+    backend_req = args.backend or os.getenv("CRACK_BACKEND") or os.getenv("DOUBLETAKE_BACKEND") or "auto"
     backend = resolve_backend(backend_req)
     settings = DEFAULT_SETTINGS.model_copy(update={
         "L4_BACKEND": backend,
