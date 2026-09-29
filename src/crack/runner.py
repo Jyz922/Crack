@@ -330,7 +330,9 @@ def run(
                     if line:
                         try:
                             rec = AnalysisRecord.model_validate_json(line)
-                            existing_records[rec.item_id] = rec
+                            # Only resume items that completed cleanly without layer errors
+                            if not any(t.status == "ERROR" for t in rec.trace):
+                                existing_records[rec.item_id] = rec
                         except Exception:
                             pass
 
