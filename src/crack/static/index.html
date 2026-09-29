@@ -303,7 +303,7 @@
                   type="text"
                   placeholder="e.g. Why was 6 afraid of 7? Because 7 ate 9."
                   :class="[
-                    'w-full bg-slate-950/70 border rounded-2xl py-4 sm:py-5 px-12 text-slate-100 placeholder-slate-500 outline-none transition-all duration-500 text-center font-medium tracking-tight leading-normal shadow-inner',
+                    'w-full bg-slate-950/70 border rounded-2xl py-4 sm:py-5 px-6 sm:px-8 text-slate-100 placeholder-slate-500 outline-none transition-all duration-500 text-center font-medium tracking-tight leading-normal shadow-inner',
                     computedFontSizeClass,
                     morphPhase >= 1
                       ? 'border-cyan-400 ring-4 ring-cyan-400/35 shadow-[0_0_35px_rgba(6,182,212,0.45)]'
@@ -823,7 +823,12 @@
         }
 
         const computedFontSizeClass = computed(() => {
-          const len = (jokeInput.value || '').trim().length;
+          const text = (jokeInput.value || '').trim();
+          if (!text) {
+            // Elegant hint size for placeholder - guaranteed never to overflow or clip
+            return 'text-sm sm:text-base md:text-lg';
+          }
+          const len = text.length;
           if (len <= 26) return 'text-2xl sm:text-3xl md:text-4xl';
           if (len <= 45) return 'text-xl sm:text-2xl md:text-3xl';
           if (len <= 65) return 'text-lg sm:text-xl md:text-2xl';
