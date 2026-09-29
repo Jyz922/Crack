@@ -377,14 +377,15 @@ async def stream_analysis(text: str, target_age: int = 8):
                 # Run the actual layer in thread pool to prevent blocking event loop
                 rec = await loop.run_in_executor(None, layer_fn, rec, settings)
             except Exception as exc:
-                duration_ms = round((time.monotonic() - start) * 1000, 1)
+                err_ms = round((time.monotonic() - start) * 1000, 1)
                 rec.trace.append(LayerTrace(
                     layer=layer_name,
                     status="ERROR",
                     reason=str(exc),
-                    duration_ms=duration_ms,
+                    duration_ms=err_ms,
                     hints_used=0,
                 ))
+            duration_ms = round((time.monotonic() - start) * 1000, 1)
 
             # Send real event payload corresponding to layer completion
             if layer_name == "L1":
