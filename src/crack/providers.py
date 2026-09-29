@@ -427,6 +427,18 @@ def call_openai_compatible(
         suffix = "" if attempt == 0 else retry_suffix
         messages = [{"role": "user", "content": prompt_text + suffix}]
 
+        # Build base call arguments
+        call_kwargs: dict[str, Any] = {
+            "model": model,
+            "messages": messages,
+            "max_completion_tokens": max_output_tokens,
+            "response_format": {"type": "json_object"},
+        }
+        # Only add temperature if it's not a model that enforces default temperature=1 (like o1, o3, luna)
+        is_fixed_temp_model = any(k in model.lower() for k in ("o1", "o3", "luna", "reasoning"))
+        if not is_fixed_temp_model and temperature is not None:
+            call_kwargs["temperature"] = temperature
+
         # Try API call with backoff on transient errors
         raw_text = ""
         for backoff_idx in range(len(delays) + 1):
@@ -434,25 +446,31 @@ def call_openai_compatible(
                 time.sleep(delays[backoff_idx - 1])
                 total_retries += 1
             try:
-                # Try with json_object response format
                 try:
-                    resp = client.chat.completions.create(
-                        model=model,
-                        messages=messages,
-                        temperature=temperature,
-                        max_tokens=max_output_tokens,
-                        response_format={"type": "json_object"},
-                    )
-                except Exception as fmt_err:
-                    # Some endpoints (or models) reject response_format={"type": "json_object"}
-                    err_msg = str(fmt_err).lower()
-                    if "response_format" in err_msg or "unsupported" in err_msg or "json_object" in err_msg:
-                        resp = client.chat.completions.create(
-                            model=model,
-                            messages=messages,
-                            temperature=temperature,
-                            max_tokens=max_output_tokens,
-                        )
+                    resp = client.chat.completions.create(**call_kwargs)
+                except Exception as call_err:
+                    err_msg = str(call_err).lower()
+                    modified = False
+                    # 1. Handle unsupported temperature
+                    if "temperature" in err_msg and "temperature" in call_kwargs:
+                        del call_kwargs["temperature"]
+                        modified = True
+                    # 2. Handle max_completion_tokens vs max_tokens
+                    if "max_completion_tokens" in err_msg and "max_completion_tokens" in call_kwargs:
+                        del call_kwargs["max_completion_tokens"]
+                        call_kwargs["max_tokens"] = max_output_tokens
+                        modified = True
+                    elif "max_tokens" in err_msg and "max_tokens" in call_kwargs:
+                        del call_kwargs["max_tokens"]
+                        call_kwargs["max_completion_tokens"] = max_output_tokens
+                        modified = True
+                    # 3. Handle response_format
+                    if ("response_format" in err_msg or "json_object" in err_msg or "unsupported" in err_msg) and "response_format" in call_kwargs:
+                        del call_kwargs["response_format"]
+                        modified = True
+
+                    if modified:
+                        resp = client.chat.completions.create(**call_kwargs)
                     else:
                         raise
 
