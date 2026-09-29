@@ -1,10 +1,10 @@
-"""Generate dark and light benchmark ranking SVG diagrams in mini-harness style."""
+"""Generate dark and light benchmark ranking, breakdown, and architecture SVG diagrams in mini-harness style."""
 
 import os
 from pathlib import Path
 
 
-def generate_svg(dark_mode: bool = False) -> str:
+def generate_benchmark_svg(dark_mode: bool = False) -> str:
     # Color palette
     if dark_mode:
         bg_card = "#0d1117"
@@ -36,7 +36,6 @@ def generate_svg(dark_mode: bool = False) -> str:
         # Other bars
         bar_bg = "#21262d"
         bar_fill = "#58a6ff"
-        bar_fill_sub = "#8b949e"
         
         # Stat cards at bottom
         stat_card_bg = "#161b22"
@@ -71,7 +70,6 @@ def generate_svg(dark_mode: bool = False) -> str:
         # Other bars
         bar_bg = "#eaeef2"
         bar_fill = "#0969da"
-        bar_fill_sub = "#8c959f"
         
         # Stat cards at bottom
         stat_card_bg = "#f6f8fa"
@@ -84,7 +82,6 @@ def generate_svg(dark_mode: bool = False) -> str:
         {
             "rank": "1",
             "is_crack": True,
-            "badge": "SOTA",
             "name": "CRACK (Ours)",
             "paradigm": "Neuro-Symbolic (WordNet + gpt-6-luna)",
             "f1": "87.82%",
@@ -95,7 +92,6 @@ def generate_svg(dark_mode: bool = False) -> str:
         {
             "rank": "2",
             "is_crack": False,
-            "badge": "",
             "name": "Fine-tuned GPT-4o",
             "paradigm": "Instruction-Tuned LLM (ACL 2024)",
             "f1": "85.50%",
@@ -106,7 +102,6 @@ def generate_svg(dark_mode: bool = False) -> str:
         {
             "rank": "3",
             "is_crack": False,
-            "badge": "",
             "name": "N-Hance Baseline",
             "paradigm": "Semantic Embedding Similarity (2017)",
             "f1": "84.50%",
@@ -117,7 +112,6 @@ def generate_svg(dark_mode: bool = False) -> str:
         {
             "rank": "4",
             "is_crack": False,
-            "badge": "",
             "name": "BERT / RoBERTa",
             "paradigm": "Supervised PLM Classifier (Split-tuned)",
             "f1": "84.00%",
@@ -128,8 +122,7 @@ def generate_svg(dark_mode: bool = False) -> str:
         {
             "rank": "5",
             "is_crack": False,
-            "badge": "Winner '17",
-            "name": "Duluth (Shared Task Winner)",
+            "name": "Duluth (2017 Winner)",
             "paradigm": "Feature-based Ensemble (Miller et al., 2017)",
             "f1": "82.54%",
             "f1_val": 82.54,
@@ -139,7 +132,6 @@ def generate_svg(dark_mode: bool = False) -> str:
         {
             "rank": "6",
             "is_crack": False,
-            "badge": "",
             "name": "Zero-shot GPT-4",
             "paradigm": "Direct Prompting (Black-box, Few-shot)",
             "f1": "81.00%",
@@ -150,7 +142,6 @@ def generate_svg(dark_mode: bool = False) -> str:
         {
             "rank": "7",
             "is_crack": False,
-            "badge": "",
             "name": "Fermi (SemEval-2017)",
             "paradigm": "Word Sense Disambiguation (WSD Overlap)",
             "f1": "77.65%",
@@ -171,48 +162,42 @@ def generate_svg(dark_mode: bool = False) -> str:
         bg = crack_row_bg if is_crack else (row_even if i % 2 == 0 else row_odd)
         border_stroke = f'stroke="{crack_row_border}" stroke-width="1.5"' if is_crack else ""
         
-        # Micro bar: width scales from 0 to 90px (f1 from 0 to 100)
-        bar_w = round((r["f1_val"] / 100.0) * 85, 1)
+        # Micro bar: width scales from 0 to 80px (f1 from 0 to 100)
+        bar_w = round((r["f1_val"] / 100.0) * 80, 1)
         bar_bg_color = crack_bar_bg if is_crack else bar_bg
         bar_fill_color = crack_bar_fill if is_crack else bar_fill
         
         system_color = crack_text if is_crack else text_primary
         weight = "700" if is_crack else "500"
         
-        # Rank / Badge
-        badge_svg = ""
+        # Clean rank badges without any text overflow
         if is_crack:
             badge_svg = f"""
-            <rect x="28" y="{y+10}" width="42" height="22" rx="4" fill="{crack_badge_bg}"/>
-            <text x="49" y="{y+25}" fill="{crack_badge_text}" font-size="11" font-weight="700" text-anchor="middle">#1 SOTA</text>
-            """
-        elif r["badge"]:
-            badge_svg = f"""
-            <rect x="28" y="{y+10}" width="42" height="22" rx="4" fill="{stat_border}"/>
-            <text x="49" y="{y+25}" fill="{text_secondary}" font-size="10" font-weight="600" text-anchor="middle">{r["badge"]}</text>
+            <rect x="22" y="{y+9}" width="54" height="22" rx="4" fill="{crack_badge_bg}"/>
+            <text x="49" y="{y+24}" fill="{crack_badge_text}" font-size="10" font-weight="700" text-anchor="middle">#1 SOTA</text>
             """
         else:
             badge_svg = f"""
-            <text x="49" y="{y+27}" fill="{text_secondary}" font-size="14" font-weight="500" text-anchor="middle">#{r["rank"]}</text>
+            <text x="49" y="{y+26}" fill="{text_secondary}" font-size="13.5" font-weight="500" text-anchor="middle">#{r["rank"]}</text>
             """
 
         rows_svg.append(f"""
         <!-- Row {r['rank']} -->
         <rect x="20" y="{y}" width="960" height="40" rx="6" fill="{bg}" {border_stroke}/>
         {badge_svg}
-        <text x="82" y="{y+26}" fill="{system_color}" font-size="14" font-weight="{weight}" text-anchor="start">{r["name"]}</text>
-        <text x="315" y="{y+26}" fill="{text_secondary}" font-size="12.5" font-weight="400" text-anchor="start">{r["paradigm"]}</text>
+        <text x="90" y="{y+26}" fill="{system_color}" font-size="13.5" font-weight="{weight}" text-anchor="start">{r["name"]}</text>
+        <text x="310" y="{y+26}" fill="{text_secondary}" font-size="12" font-weight="400" text-anchor="start">{r["paradigm"]}</text>
         
         <!-- Subtask 1 Pun F1 -->
-        <text x="695" y="{y+26}" fill="{system_color}" font-size="14" font-weight="{weight}" text-anchor="end">{r["f1"]}</text>
-        <rect x="710" y="{y+17}" width="85" height="7" rx="3.5" fill="{bar_bg_color}"/>
-        <rect x="710" y="{y+17}" width="{bar_w}" height="7" rx="3.5" fill="{bar_fill_color}"/>
+        <text x="675" y="{y+26}" fill="{system_color}" font-size="13.5" font-weight="{weight}" text-anchor="end">{r["f1"]}</text>
+        <rect x="690" y="{y+17}" width="80" height="7" rx="3.5" fill="{bar_bg_color}"/>
+        <rect x="690" y="{y+17}" width="{bar_w}" height="7" rx="3.5" fill="{bar_fill_color}"/>
         
         <!-- Subtask 2 Location Acc -->
-        <text x="880" y="{y+26}" fill="{system_color}" font-size="14" font-weight="{weight}" text-anchor="end">{r["loc"]}</text>
+        <text x="860" y="{y+26}" fill="{system_color}" font-size="13.5" font-weight="{weight}" text-anchor="end">{r["loc"]}</text>
         
         <!-- Delta vs Duluth -->
-        <text x="965" y="{y+26}" fill="{crack_text if '+' in r['delta'] else text_muted}" font-size="12" font-weight="600" text-anchor="end">{r["delta"]}</text>
+        <text x="955" y="{y+26}" fill="{crack_text if '+' in r['delta'] else text_muted}" font-size="12" font-weight="600" text-anchor="end">{r["delta"]}</text>
         """)
 
     # Bottom Stat Summary Cards
@@ -273,11 +258,11 @@ def generate_svg(dark_mode: bool = False) -> str:
     
     <!-- Table Column Headers -->
     <text x="49" y="{header_y}" fill="{text_muted}" font-size="11" font-weight="700" text-anchor="middle" letter-spacing="1">RANK</text>
-    <text x="82" y="{header_y}" fill="{text_muted}" font-size="11" font-weight="700" text-anchor="start" letter-spacing="1">SYSTEM / MODEL</text>
-    <text x="315" y="{header_y}" fill="{text_muted}" font-size="11" font-weight="700" text-anchor="start" letter-spacing="1">PARADIGM &amp; ARCHITECTURE</text>
-    <text x="745" y="{header_y}" fill="{text_muted}" font-size="11" font-weight="700" text-anchor="end" letter-spacing="1">SUBTASK 1 (PUN F1)</text>
-    <text x="880" y="{header_y}" fill="{text_muted}" font-size="11" font-weight="700" text-anchor="end" letter-spacing="1">SUBTASK 2 (LOC)</text>
-    <text x="965" y="{header_y}" fill="{text_muted}" font-size="11" font-weight="700" text-anchor="end" letter-spacing="1">VS WINNER</text>
+    <text x="90" y="{header_y}" fill="{text_muted}" font-size="11" font-weight="700" text-anchor="start" letter-spacing="1">SYSTEM / MODEL</text>
+    <text x="310" y="{header_y}" fill="{text_muted}" font-size="11" font-weight="700" text-anchor="start" letter-spacing="1">PARADIGM &amp; ARCHITECTURE</text>
+    <text x="735" y="{header_y}" fill="{text_muted}" font-size="11" font-weight="700" text-anchor="end" letter-spacing="1">SUBTASK 1 (PUN F1)</text>
+    <text x="860" y="{header_y}" fill="{text_muted}" font-size="11" font-weight="700" text-anchor="end" letter-spacing="1">SUBTASK 2 (LOC)</text>
+    <text x="955" y="{header_y}" fill="{text_muted}" font-size="11" font-weight="700" text-anchor="end" letter-spacing="1">VS WINNER</text>
     
     <!-- Table Rows -->
     {''.join(rows_svg)}
@@ -406,21 +391,238 @@ def generate_breakdown_svg(dark_mode: bool = False) -> str:
     return svg_content
 
 
+def generate_architecture_svg(dark_mode: bool = False) -> str:
+    if dark_mode:
+        bg_card = "#0d1117"
+        border_card = "#30363d"
+        text_primary = "#f0f6fc"
+        text_secondary = "#8b949e"
+        text_muted = "#6e7681"
+        line_divider = "#21262d"
+        
+        col_bg = "#161b22"
+        col_border = "#30363d"
+        item_bg = "#0d1117"
+        item_border = "#21262d"
+        
+        c1_pill_bg = "#1f6feb33"
+        c1_pill_text = "#58a6ff"
+        c1_border = "#388bfd44"
+        
+        c2_pill_bg = "#a371f733"
+        c2_pill_text = "#bc8cff"
+        c2_border = "#8957e544"
+        
+        c3_pill_bg = "#23863633"
+        c3_pill_text = "#3fb950"
+        c3_border = "#2ea04344"
+        
+        fork_bg = "#f8514922"
+        fork_text = "#ff7b72"
+        fork_border = "#f8514955"
+        
+        banner_bg = "#161b22"
+        banner_border = "#30363d"
+        banner_pill_bg = "#238636"
+        banner_pill_text = "#ffffff"
+    else:
+        bg_card = "#ffffff"
+        border_card = "#e1e4e8"
+        text_primary = "#1f2328"
+        text_secondary = "#59636e"
+        text_muted = "#656d76"
+        line_divider = "#d1d9e0"
+        
+        col_bg = "#f6f8fa"
+        col_border = "#d1d9e0"
+        item_bg = "#ffffff"
+        item_border = "#e1e4e8"
+        
+        c1_pill_bg = "#ddf4ff"
+        c1_pill_text = "#0969da"
+        c1_border = "#54aeff66"
+        
+        c2_pill_bg = "#fbefff"
+        c2_pill_text = "#8250df"
+        c2_border = "#c297ff66"
+        
+        c3_pill_bg = "#dafbe1"
+        c3_pill_text = "#1a7f37"
+        c3_border = "#4ac26b66"
+        
+        fork_bg = "#ffebe9"
+        fork_text = "#cf222e"
+        fork_border = "#ff818266"
+        
+        banner_bg = "#f6f8fa"
+        banner_border = "#d1d9e0"
+        banner_pill_bg = "#1a7f37"
+        banner_pill_text = "#ffffff"
+
+    svg_width = 1000
+    svg_height = 730
+
+    svg_content = f"""<svg xmlns="http://www.w3.org/2000/svg" width="{svg_width}" height="{svg_height}" viewBox="0 0 {svg_width} {svg_height}" role="img" aria-labelledby="arch-title arch-desc">
+  <title id="arch-title">CRACK System Architecture: 8-Layer Neuro-Symbolic Pipeline</title>
+  <desc id="arch-desc">Hierarchical diagram of the CRACK humor evaluation system across 3 distinct phases: deterministic lexical foundation, constrained LLM reasoning, and developmental safety evaluation.</desc>
+  
+  <!-- Outer Card -->
+  <rect x="0.5" y="0.5" width="{svg_width-1}" height="{svg_height-1}" rx="14" fill="{bg_card}" stroke="{border_card}"/>
+  
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-variant-numeric="tabular-nums">
+    <!-- Header -->
+    <text x="32" y="38" fill="{c1_pill_text}" font-size="12" font-weight="700" text-anchor="start" letter-spacing="1.5">CRACK  /  SYSTEM PIPELINE</text>
+    <text x="32" y="74" fill="{text_primary}" font-size="26" font-weight="700" text-anchor="start">Neuro-Symbolic 8-Layer Architecture (L0–L8)</text>
+    <text x="32" y="100" fill="{text_secondary}" font-size="14" font-weight="400" text-anchor="start">Deterministic lexical ontologies + Schema-constrained LLM reasoning + Developmental multi-age modeling</text>
+    
+    <!-- Top Input Bar -->
+    <g transform="translate(20, 118)">
+      <rect x="0" y="0" width="960" height="42" rx="7" fill="{col_bg}" stroke="{col_border}"/>
+      <rect x="14" y="10" width="56" height="22" rx="4" fill="{c1_pill_bg}" stroke="{c1_border}"/>
+      <text x="42" y="25" fill="{c1_pill_text}" font-size="11" font-weight="700" text-anchor="middle">INPUT</text>
+      <text x="82" y="26" fill="{text_primary}" font-size="13" font-weight="600">Raw Joke Text + Target Ages (e.g. 6, 8, 10, 12)</text>
+      <text x="946" y="26" fill="{text_muted}" font-size="12" text-anchor="end">Single unified CLI / Python entrypoint</text>
+    </g>
+
+    <!-- Column 1: Stage 1 Deterministic Foundation -->
+    <g transform="translate(20, 174)">
+      <rect x="0" y="0" width="306" height="474" rx="10" fill="{col_bg}" stroke="{c1_border}" stroke-width="1.2"/>
+      
+      <!-- Stage Header -->
+      <rect x="14" y="14" width="138" height="22" rx="4" fill="{c1_pill_bg}"/>
+      <text x="83" y="29" fill="{c1_pill_text}" font-size="10.5" font-weight="700" text-anchor="middle">STAGE 1 · SYMBOLIC</text>
+      <text x="14" y="58" fill="{text_primary}" font-size="17" font-weight="700">Lexical Foundation</text>
+      <text x="14" y="76" fill="{text_secondary}" font-size="12">0 Tokens · Deterministic Search</text>
+      
+      <!-- Block 1: L0 -->
+      <rect x="14" y="94" width="278" height="74" rx="6" fill="{item_bg}" stroke="{item_border}"/>
+      <text x="26" y="116" fill="{text_primary}" font-size="13" font-weight="700">L0 — Scope Boundary Gate</text>
+      <text x="26" y="134" fill="{text_secondary}" font-size="11.5">Accepts homographs &amp; splits</text>
+      <text x="26" y="152" fill="{text_muted}" font-size="11">Filters homophones &amp; rhymes</text>
+
+      <!-- Block 2: L1 -->
+      <rect x="14" y="178" width="278" height="74" rx="6" fill="{item_bg}" stroke="{item_border}"/>
+      <text x="26" y="200" fill="{text_primary}" font-size="13" font-weight="700">L1 — Syntactic &amp; Genre Routing</text>
+      <text x="26" y="218" fill="{text_secondary}" font-size="11.5">Tokenize, POS, Lemmatization</text>
+      <text x="26" y="236" fill="{text_muted}" font-size="11">Routes: QA, Dialogue, One-Liner, Decl</text>
+
+      <!-- Block 3: L2 -->
+      <rect x="14" y="262" width="278" height="74" rx="6" fill="{item_bg}" stroke="{item_border}"/>
+      <text x="26" y="284" fill="{text_primary}" font-size="13" font-weight="700">L2 — Symbolic Sense Retrieval</text>
+      <text x="26" y="302" fill="{text_secondary}" font-size="11.5">WordNet 3.0 Synsets + SemCor</text>
+      <text x="26" y="320" fill="{text_muted}" font-size="11">Kuperman AoA 4-stage join</text>
+
+      <!-- Block 4: L3 -->
+      <rect x="14" y="346" width="278" height="74" rx="6" fill="{item_bg}" stroke="{item_border}"/>
+      <text x="26" y="368" fill="{text_primary}" font-size="13" font-weight="700">L3 — Candidate Ranking</text>
+      <text x="26" y="386" fill="{text_secondary}" font-size="11.5">Contrast (0.70) + Balance (0.30)</text>
+      <text x="26" y="404" fill="{c1_pill_text}" font-size="11" font-weight="600">Extracts Top-8 candidates -&gt;</text>
+    </g>
+
+    <!-- Connector 1 -> 2 -->
+    <path d="M331 411 H342 M337 407 L342 411 L337 415" stroke="{c1_pill_text}" stroke-width="2" fill="none"/>
+
+    <!-- Column 2: Stage 2 Constrained LLM Reasoning -->
+    <g transform="translate(347, 174)">
+      <rect x="0" y="0" width="306" height="474" rx="10" fill="{col_bg}" stroke="{c2_border}" stroke-width="1.2"/>
+      
+      <!-- Stage Header -->
+      <rect x="14" y="14" width="132" height="22" rx="4" fill="{c2_pill_bg}"/>
+      <text x="80" y="29" fill="{c2_pill_text}" font-size="10.5" font-weight="700" text-anchor="middle">STAGE 2 · NEURAL</text>
+      <text x="14" y="58" fill="{text_primary}" font-size="17" font-weight="700">Constrained Reasoning</text>
+      <text x="14" y="76" fill="{text_secondary}" font-size="12">Verbatim Quote Grounding</text>
+      
+      <!-- Block 1: L4 -->
+      <rect x="14" y="94" width="278" height="106" rx="6" fill="{item_bg}" stroke="{item_border}"/>
+      <text x="26" y="116" fill="{text_primary}" font-size="13" font-weight="700">L4 — Bidirectional Anchoring</text>
+      <text x="26" y="134" fill="{text_secondary}" font-size="11.5">Requires non-empty substring</text>
+      <text x="26" y="150" fill="{text_secondary}" font-size="11.5">quotes for Sense A &amp; Sense B</text>
+      <!-- Short-circuit pill -->
+      <rect x="24" y="162" width="248" height="24" rx="4" fill="{fork_bg}" stroke="{fork_border}"/>
+      <text x="148" y="178" fill="{fork_text}" font-size="10.5" font-weight="700" text-anchor="middle">ONE_SENSE_ONLY -&gt; Early Exit (73.6%)</text>
+
+      <!-- Block 2: L5 -->
+      <rect x="14" y="210" width="278" height="106" rx="6" fill="{item_bg}" stroke="{item_border}"/>
+      <text x="26" y="232" fill="{text_primary}" font-size="13" font-weight="700">L5 — Incongruity Resolution</text>
+      <text x="26" y="250" fill="{text_secondary}" font-size="11.5">QA: Polarity, Causal, Event Fit</text>
+      <text x="26" y="268" fill="{text_secondary}" font-size="11.5">Dialogue: Speaker mismatch</text>
+      <text x="26" y="286" fill="{text_muted}" font-size="11">Definitional: Punchline resegmentation</text>
+
+      <!-- Block 3: L6 -->
+      <rect x="14" y="326" width="278" height="94" rx="6" fill="{item_bg}" stroke="{item_border}"/>
+      <text x="26" y="348" fill="{text_primary}" font-size="13" font-weight="700">L6 — Sense Distinctness</text>
+      <text x="26" y="366" fill="{text_secondary}" font-size="11.5">Paraphrase ablation test</text>
+      <text x="26" y="384" fill="{text_secondary}" font-size="11.5">Filters polysemous synonyms</text>
+      <text x="26" y="402" fill="{c2_pill_text}" font-size="11" font-weight="600">SENSES_DISTINCT -&gt; To L7</text>
+    </g>
+
+    <!-- Connector 2 -> 3 -->
+    <path d="M658 411 H669 M664 407 L669 411 L664 415" stroke="{c2_pill_text}" stroke-width="2" fill="none"/>
+
+    <!-- Column 3: Stage 3 Cognitive & Safety -->
+    <g transform="translate(674, 174)">
+      <rect x="0" y="0" width="306" height="474" rx="10" fill="{col_bg}" stroke="{c3_border}" stroke-width="1.2"/>
+      
+      <!-- Stage Header -->
+      <rect x="14" y="14" width="144" height="22" rx="4" fill="{c3_pill_bg}"/>
+      <text x="86" y="29" fill="{c3_pill_text}" font-size="10.5" font-weight="700" text-anchor="middle">STAGE 3 · COGNITIVE</text>
+      <text x="14" y="58" fill="{text_primary}" font-size="17" font-weight="700">Safety &amp; Assessment</text>
+      <text x="14" y="76" fill="{text_secondary}" font-size="12">Multi-Age Developmental Model</text>
+      
+      <!-- Block 1: L7 -->
+      <rect x="14" y="94" width="278" height="96" rx="6" fill="{item_bg}" stroke="{item_border}"/>
+      <text x="26" y="116" fill="{text_primary}" font-size="13" font-weight="700">L7 — Comprehension Model</text>
+      <text x="26" y="134" fill="{text_secondary}" font-size="11.5">Dual-Sense AoA evaluation</text>
+      <text x="26" y="152" fill="{text_secondary}" font-size="11.5">Metalinguistic floor matching</text>
+      <text x="26" y="170" fill="{text_muted}" font-size="11">Verdicts for Ages 6, 8, 10, 12</text>
+
+      <!-- Block 2: L8 -->
+      <rect x="14" y="200" width="278" height="96" rx="6" fill="{item_bg}" stroke="{item_border}"/>
+      <text x="26" y="222" fill="{text_primary}" font-size="13" font-weight="700">L8 — Two-Axis Appropriateness</text>
+      <text x="26" y="240" fill="{text_secondary}" font-size="11.5">Axis 1: Surface (violence, adult)</text>
+      <text x="26" y="258" fill="{text_secondary}" font-size="11.5">Axis 2: Inference (legal, financial)</text>
+      <text x="26" y="276" fill="{text_muted}" font-size="11">Protects young readers</text>
+
+      <!-- Block 3: Output -->
+      <rect x="14" y="306" width="278" height="114" rx="6" fill="{c3_pill_bg}" stroke="{c3_border}"/>
+      <text x="26" y="328" fill="{c3_pill_text}" font-size="13" font-weight="700">FINAL CLASSIFICATION</text>
+      <text x="26" y="348" fill="{text_primary}" font-size="12" font-weight="600">• Classification (HOMOGRAPH / SPLIT)</text>
+      <text x="26" y="366" fill="{text_primary}" font-size="12" font-weight="600">• Pun Word Location + Context Quotes</text>
+      <text x="26" y="384" fill="{text_primary}" font-size="12" font-weight="600">• Per-Age Appropriateness Verdicts</text>
+      <text x="26" y="402" fill="{text_secondary}" font-size="11">Full reproducible JSON audit trace</text>
+    </g>
+
+    <!-- Bottom Rejection Funnel Callout -->
+    <g transform="translate(20, 660)">
+      <rect x="0" y="0" width="960" height="50" rx="7" fill="{banner_bg}" stroke="{banner_border}"/>
+      <rect x="14" y="13" width="118" height="24" rx="4" fill="{banner_pill_bg}"/>
+      <text x="73" y="29" fill="{banner_pill_text}" font-size="11" font-weight="700" text-anchor="middle">TOKEN EFFICIENCY</text>
+      <text x="144" y="30" fill="{text_primary}" font-size="12.5" font-weight="600">Neuro-Symbolic Short-Circuit:</text>
+      <text x="345" y="30" fill="{text_secondary}" font-size="12.5">L4 quote verification terminates 73.6% of non-joke inputs before L5, saving &gt;65% downstream LLM tokens.</text>
+    </g>
+  </g>
+</svg>
+"""
+    return svg_content
+
+
 def main():
     assets_dir = Path(__file__).resolve().parents[1] / "assets"
     assets_dir.mkdir(parents=True, exist_ok=True)
 
-    light_svg = generate_svg(dark_mode=False)
-    dark_svg = generate_svg(dark_mode=True)
-    (assets_dir / "benchmark-ranking-light.svg").write_text(light_svg, encoding="utf-8")
-    (assets_dir / "benchmark-ranking-dark.svg").write_text(dark_svg, encoding="utf-8")
+    # 1. Benchmark Ranking SVGs
+    (assets_dir / "benchmark-ranking-light.svg").write_text(generate_benchmark_svg(dark_mode=False), encoding="utf-8")
+    (assets_dir / "benchmark-ranking-dark.svg").write_text(generate_benchmark_svg(dark_mode=True), encoding="utf-8")
 
-    light_breakdown = generate_breakdown_svg(dark_mode=False)
-    dark_breakdown = generate_breakdown_svg(dark_mode=True)
-    (assets_dir / "developmental-breakdown-light.svg").write_text(light_breakdown, encoding="utf-8")
-    (assets_dir / "developmental-breakdown-dark.svg").write_text(dark_breakdown, encoding="utf-8")
+    # 2. Developmental Breakdown SVGs
+    (assets_dir / "developmental-breakdown-light.svg").write_text(generate_breakdown_svg(dark_mode=False), encoding="utf-8")
+    (assets_dir / "developmental-breakdown-dark.svg").write_text(generate_breakdown_svg(dark_mode=True), encoding="utf-8")
 
-    print("All SVGs generated successfully in assets/.")
+    # 3. Architecture Overview Diagram SVGs
+    (assets_dir / "architecture-diagram-light.svg").write_text(generate_architecture_svg(dark_mode=False), encoding="utf-8")
+    (assets_dir / "architecture-diagram-dark.svg").write_text(generate_architecture_svg(dark_mode=True), encoding="utf-8")
+
+    print("All SVGs (benchmark, breakdown, architecture) generated successfully in assets/.")
 
 
 if __name__ == "__main__":

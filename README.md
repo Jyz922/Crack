@@ -149,50 +149,13 @@ State-of-the-art LLMs struggle with humor verification for two primary reasons:
 
 ## Architecture Overview
 
-```
-                      Input: Text + Target Ages (e.g. 8, 10, 12)
-                                        │
-                                        ▼
-┌───────────────────────────────────────────────────────────────────────────────┐
-│ L0: Scope Boundary Gate (Accepts Homographs & Compound Splits; rejects rhymes)│
-└───────────────────────────────────────┬───────────────────────────────────────┘
-                                        ▼
-┌───────────────────────────────────────────────────────────────────────────────┐
-│ L1: Morpho-Syntactic Analysis & Genre Routing (QA, Dialogue, One-Liner, Decl) │
-└───────────────────────────────────────┬───────────────────────────────────────┘
-                                        ▼
-┌───────────────────────────────────────────────────────────────────────────────┐
-│ L2: Symbolic Sense Retrieval (WordNet 3.0 Synsets + SemCor Counts + AoA)      │
-└───────────────────────────────────────┬───────────────────────────────────────┘
-                                        ▼
-┌───────────────────────────────────────────────────────────────────────────────┐
-│ L3: Ambiguity Candidate Ranking (Age-free Contrast vs. Balance Top-K)         │
-└───────────────────────────────────────┬───────────────────────────────────────┘
-                                        ▼
-┌───────────────────────────────────────────────────────────────────────────────┐
-│ L4: Bidirectional Sense Anchoring (Verbatim Context Grounding: PASS / FAIL)   │
-└───────────────────────────────────────┬───────────────────────────────────────┘
-                                        │ (Short-circuits if ONE_SENSE_ONLY)
-                                        ▼
-┌───────────────────────────────────────────────────────────────────────────────┐
-│ L5: Genre-Calibrated Incongruity Resolution (Polarity, Causal, Event Fit)    │
-└───────────────────────────────────────┬───────────────────────────────────────┘
-                                        ▼
-┌───────────────────────────────────────────────────────────────────────────────┐
-│ L6: Lexical Granularity & Distinctness Check (Paraphrase Ablation Test)       │
-└───────────────────────────────────────┬───────────────────────────────────────┘
-                                        ▼
-┌───────────────────────────────────────────────────────────────────────────────┐
-│ L7: Developmental Comprehension Assessment (Per-Age AoA Threshold Matching)   │
-└───────────────────────────────────────┬───────────────────────────────────────┘
-                                        ▼
-┌───────────────────────────────────────────────────────────────────────────────┐
-│ L8: Two-Axis Appropriateness Assessment (Content Safety vs. Inference Depth)  │
-└───────────────────────────────────────┬───────────────────────────────────────┘
-                                        │
-                                        ▼
-               Final Structured Classification & Developmental Verdict
-```
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/architecture-diagram-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/architecture-diagram-light.svg">
+    <img src="assets/architecture-diagram-light.svg" alt="CRACK Neuro-Symbolic 8-Layer Pipeline Architecture" width="100%">
+  </picture>
+</p>
 
 ---
 

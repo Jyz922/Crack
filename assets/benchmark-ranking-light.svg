@@ -24,148 +24,147 @@
     
     <!-- Table Column Headers -->
     <text x="49" y="205" fill="#656d76" font-size="11" font-weight="700" text-anchor="middle" letter-spacing="1">RANK</text>
-    <text x="82" y="205" fill="#656d76" font-size="11" font-weight="700" text-anchor="start" letter-spacing="1">SYSTEM / MODEL</text>
-    <text x="315" y="205" fill="#656d76" font-size="11" font-weight="700" text-anchor="start" letter-spacing="1">PARADIGM &amp; ARCHITECTURE</text>
-    <text x="745" y="205" fill="#656d76" font-size="11" font-weight="700" text-anchor="end" letter-spacing="1">SUBTASK 1 (PUN F1)</text>
-    <text x="880" y="205" fill="#656d76" font-size="11" font-weight="700" text-anchor="end" letter-spacing="1">SUBTASK 2 (LOC)</text>
-    <text x="965" y="205" fill="#656d76" font-size="11" font-weight="700" text-anchor="end" letter-spacing="1">VS WINNER</text>
+    <text x="90" y="205" fill="#656d76" font-size="11" font-weight="700" text-anchor="start" letter-spacing="1">SYSTEM / MODEL</text>
+    <text x="310" y="205" fill="#656d76" font-size="11" font-weight="700" text-anchor="start" letter-spacing="1">PARADIGM &amp; ARCHITECTURE</text>
+    <text x="735" y="205" fill="#656d76" font-size="11" font-weight="700" text-anchor="end" letter-spacing="1">SUBTASK 1 (PUN F1)</text>
+    <text x="860" y="205" fill="#656d76" font-size="11" font-weight="700" text-anchor="end" letter-spacing="1">SUBTASK 2 (LOC)</text>
+    <text x="955" y="205" fill="#656d76" font-size="11" font-weight="700" text-anchor="end" letter-spacing="1">VS WINNER</text>
     
     <!-- Table Rows -->
     
         <!-- Row 1 -->
         <rect x="20" y="222" width="960" height="40" rx="6" fill="#dafbe1" stroke="#1a7f37" stroke-width="1.5"/>
         
-            <rect x="28" y="232" width="42" height="22" rx="4" fill="#1a7f37"/>
-            <text x="49" y="247" fill="#ffffff" font-size="11" font-weight="700" text-anchor="middle">#1 SOTA</text>
+            <rect x="22" y="231" width="54" height="22" rx="4" fill="#1a7f37"/>
+            <text x="49" y="246" fill="#ffffff" font-size="10" font-weight="700" text-anchor="middle">#1 SOTA</text>
             
-        <text x="82" y="248" fill="#1a7f37" font-size="14" font-weight="700" text-anchor="start">CRACK (Ours)</text>
-        <text x="315" y="248" fill="#59636e" font-size="12.5" font-weight="400" text-anchor="start">Neuro-Symbolic (WordNet + gpt-6-luna)</text>
+        <text x="90" y="248" fill="#1a7f37" font-size="13.5" font-weight="700" text-anchor="start">CRACK (Ours)</text>
+        <text x="310" y="248" fill="#59636e" font-size="12" font-weight="400" text-anchor="start">Neuro-Symbolic (WordNet + gpt-6-luna)</text>
         
         <!-- Subtask 1 Pun F1 -->
-        <text x="695" y="248" fill="#1a7f37" font-size="14" font-weight="700" text-anchor="end">87.82%</text>
-        <rect x="710" y="239" width="85" height="7" rx="3.5" fill="#cce5d6"/>
-        <rect x="710" y="239" width="74.6" height="7" rx="3.5" fill="#1a7f37"/>
+        <text x="675" y="248" fill="#1a7f37" font-size="13.5" font-weight="700" text-anchor="end">87.82%</text>
+        <rect x="690" y="239" width="80" height="7" rx="3.5" fill="#cce5d6"/>
+        <rect x="690" y="239" width="70.3" height="7" rx="3.5" fill="#1a7f37"/>
         
         <!-- Subtask 2 Location Acc -->
-        <text x="880" y="248" fill="#1a7f37" font-size="14" font-weight="700" text-anchor="end">76.35%</text>
+        <text x="860" y="248" fill="#1a7f37" font-size="13.5" font-weight="700" text-anchor="end">76.35%</text>
         
         <!-- Delta vs Duluth -->
-        <text x="965" y="248" fill="#1a7f37" font-size="12" font-weight="600" text-anchor="end">+5.28%</text>
+        <text x="955" y="248" fill="#1a7f37" font-size="12" font-weight="600" text-anchor="end">+5.28%</text>
         
         <!-- Row 2 -->
         <rect x="20" y="266" width="960" height="40" rx="6" fill="#ffffff" />
         
-            <text x="49" y="293" fill="#59636e" font-size="14" font-weight="500" text-anchor="middle">#2</text>
+            <text x="49" y="292" fill="#59636e" font-size="13.5" font-weight="500" text-anchor="middle">#2</text>
             
-        <text x="82" y="292" fill="#1f2328" font-size="14" font-weight="500" text-anchor="start">Fine-tuned GPT-4o</text>
-        <text x="315" y="292" fill="#59636e" font-size="12.5" font-weight="400" text-anchor="start">Instruction-Tuned LLM (ACL 2024)</text>
+        <text x="90" y="292" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="start">Fine-tuned GPT-4o</text>
+        <text x="310" y="292" fill="#59636e" font-size="12" font-weight="400" text-anchor="start">Instruction-Tuned LLM (ACL 2024)</text>
         
         <!-- Subtask 1 Pun F1 -->
-        <text x="695" y="292" fill="#1f2328" font-size="14" font-weight="500" text-anchor="end">85.50%</text>
-        <rect x="710" y="283" width="85" height="7" rx="3.5" fill="#eaeef2"/>
-        <rect x="710" y="283" width="72.7" height="7" rx="3.5" fill="#0969da"/>
+        <text x="675" y="292" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">85.50%</text>
+        <rect x="690" y="283" width="80" height="7" rx="3.5" fill="#eaeef2"/>
+        <rect x="690" y="283" width="68.4" height="7" rx="3.5" fill="#0969da"/>
         
         <!-- Subtask 2 Location Acc -->
-        <text x="880" y="292" fill="#1f2328" font-size="14" font-weight="500" text-anchor="end">71.00%</text>
+        <text x="860" y="292" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">71.00%</text>
         
         <!-- Delta vs Duluth -->
-        <text x="965" y="292" fill="#1a7f37" font-size="12" font-weight="600" text-anchor="end">+2.96%</text>
+        <text x="955" y="292" fill="#1a7f37" font-size="12" font-weight="600" text-anchor="end">+2.96%</text>
         
         <!-- Row 3 -->
         <rect x="20" y="310" width="960" height="40" rx="6" fill="#f6f8fa" />
         
-            <text x="49" y="337" fill="#59636e" font-size="14" font-weight="500" text-anchor="middle">#3</text>
+            <text x="49" y="336" fill="#59636e" font-size="13.5" font-weight="500" text-anchor="middle">#3</text>
             
-        <text x="82" y="336" fill="#1f2328" font-size="14" font-weight="500" text-anchor="start">N-Hance Baseline</text>
-        <text x="315" y="336" fill="#59636e" font-size="12.5" font-weight="400" text-anchor="start">Semantic Embedding Similarity (2017)</text>
+        <text x="90" y="336" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="start">N-Hance Baseline</text>
+        <text x="310" y="336" fill="#59636e" font-size="12" font-weight="400" text-anchor="start">Semantic Embedding Similarity (2017)</text>
         
         <!-- Subtask 1 Pun F1 -->
-        <text x="695" y="336" fill="#1f2328" font-size="14" font-weight="500" text-anchor="end">84.50%</text>
-        <rect x="710" y="327" width="85" height="7" rx="3.5" fill="#eaeef2"/>
-        <rect x="710" y="327" width="71.8" height="7" rx="3.5" fill="#0969da"/>
+        <text x="675" y="336" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">84.50%</text>
+        <rect x="690" y="327" width="80" height="7" rx="3.5" fill="#eaeef2"/>
+        <rect x="690" y="327" width="67.6" height="7" rx="3.5" fill="#0969da"/>
         
         <!-- Subtask 2 Location Acc -->
-        <text x="880" y="336" fill="#1f2328" font-size="14" font-weight="500" text-anchor="end">61.00%</text>
+        <text x="860" y="336" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">61.00%</text>
         
         <!-- Delta vs Duluth -->
-        <text x="965" y="336" fill="#1a7f37" font-size="12" font-weight="600" text-anchor="end">+1.96%</text>
+        <text x="955" y="336" fill="#1a7f37" font-size="12" font-weight="600" text-anchor="end">+1.96%</text>
         
         <!-- Row 4 -->
         <rect x="20" y="354" width="960" height="40" rx="6" fill="#ffffff" />
         
-            <text x="49" y="381" fill="#59636e" font-size="14" font-weight="500" text-anchor="middle">#4</text>
+            <text x="49" y="380" fill="#59636e" font-size="13.5" font-weight="500" text-anchor="middle">#4</text>
             
-        <text x="82" y="380" fill="#1f2328" font-size="14" font-weight="500" text-anchor="start">BERT / RoBERTa</text>
-        <text x="315" y="380" fill="#59636e" font-size="12.5" font-weight="400" text-anchor="start">Supervised PLM Classifier (Split-tuned)</text>
+        <text x="90" y="380" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="start">BERT / RoBERTa</text>
+        <text x="310" y="380" fill="#59636e" font-size="12" font-weight="400" text-anchor="start">Supervised PLM Classifier (Split-tuned)</text>
         
         <!-- Subtask 1 Pun F1 -->
-        <text x="695" y="380" fill="#1f2328" font-size="14" font-weight="500" text-anchor="end">84.00%</text>
-        <rect x="710" y="371" width="85" height="7" rx="3.5" fill="#eaeef2"/>
-        <rect x="710" y="371" width="71.4" height="7" rx="3.5" fill="#0969da"/>
+        <text x="675" y="380" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">84.00%</text>
+        <rect x="690" y="371" width="80" height="7" rx="3.5" fill="#eaeef2"/>
+        <rect x="690" y="371" width="67.2" height="7" rx="3.5" fill="#0969da"/>
         
         <!-- Subtask 2 Location Acc -->
-        <text x="880" y="380" fill="#1f2328" font-size="14" font-weight="500" text-anchor="end">68.00%</text>
+        <text x="860" y="380" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">68.00%</text>
         
         <!-- Delta vs Duluth -->
-        <text x="965" y="380" fill="#1a7f37" font-size="12" font-weight="600" text-anchor="end">+1.46%</text>
+        <text x="955" y="380" fill="#1a7f37" font-size="12" font-weight="600" text-anchor="end">+1.46%</text>
         
         <!-- Row 5 -->
         <rect x="20" y="398" width="960" height="40" rx="6" fill="#f6f8fa" />
         
-            <rect x="28" y="408" width="42" height="22" rx="4" fill="#d1d9e0"/>
-            <text x="49" y="423" fill="#59636e" font-size="10" font-weight="600" text-anchor="middle">Winner '17</text>
+            <text x="49" y="424" fill="#59636e" font-size="13.5" font-weight="500" text-anchor="middle">#5</text>
             
-        <text x="82" y="424" fill="#1f2328" font-size="14" font-weight="500" text-anchor="start">Duluth (Shared Task Winner)</text>
-        <text x="315" y="424" fill="#59636e" font-size="12.5" font-weight="400" text-anchor="start">Feature-based Ensemble (Miller et al., 2017)</text>
+        <text x="90" y="424" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="start">Duluth (2017 Winner)</text>
+        <text x="310" y="424" fill="#59636e" font-size="12" font-weight="400" text-anchor="start">Feature-based Ensemble (Miller et al., 2017)</text>
         
         <!-- Subtask 1 Pun F1 -->
-        <text x="695" y="424" fill="#1f2328" font-size="14" font-weight="500" text-anchor="end">82.54%</text>
-        <rect x="710" y="415" width="85" height="7" rx="3.5" fill="#eaeef2"/>
-        <rect x="710" y="415" width="70.2" height="7" rx="3.5" fill="#0969da"/>
+        <text x="675" y="424" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">82.54%</text>
+        <rect x="690" y="415" width="80" height="7" rx="3.5" fill="#eaeef2"/>
+        <rect x="690" y="415" width="66.0" height="7" rx="3.5" fill="#0969da"/>
         
         <!-- Subtask 2 Location Acc -->
-        <text x="880" y="424" fill="#1f2328" font-size="14" font-weight="500" text-anchor="end">66.80%</text>
+        <text x="860" y="424" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">66.80%</text>
         
         <!-- Delta vs Duluth -->
-        <text x="965" y="424" fill="#656d76" font-size="12" font-weight="600" text-anchor="end">Baseline</text>
+        <text x="955" y="424" fill="#656d76" font-size="12" font-weight="600" text-anchor="end">Baseline</text>
         
         <!-- Row 6 -->
         <rect x="20" y="442" width="960" height="40" rx="6" fill="#ffffff" />
         
-            <text x="49" y="469" fill="#59636e" font-size="14" font-weight="500" text-anchor="middle">#6</text>
+            <text x="49" y="468" fill="#59636e" font-size="13.5" font-weight="500" text-anchor="middle">#6</text>
             
-        <text x="82" y="468" fill="#1f2328" font-size="14" font-weight="500" text-anchor="start">Zero-shot GPT-4</text>
-        <text x="315" y="468" fill="#59636e" font-size="12.5" font-weight="400" text-anchor="start">Direct Prompting (Black-box, Few-shot)</text>
+        <text x="90" y="468" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="start">Zero-shot GPT-4</text>
+        <text x="310" y="468" fill="#59636e" font-size="12" font-weight="400" text-anchor="start">Direct Prompting (Black-box, Few-shot)</text>
         
         <!-- Subtask 1 Pun F1 -->
-        <text x="695" y="468" fill="#1f2328" font-size="14" font-weight="500" text-anchor="end">81.00%</text>
-        <rect x="710" y="459" width="85" height="7" rx="3.5" fill="#eaeef2"/>
-        <rect x="710" y="459" width="68.9" height="7" rx="3.5" fill="#0969da"/>
+        <text x="675" y="468" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">81.00%</text>
+        <rect x="690" y="459" width="80" height="7" rx="3.5" fill="#eaeef2"/>
+        <rect x="690" y="459" width="64.8" height="7" rx="3.5" fill="#0969da"/>
         
         <!-- Subtask 2 Location Acc -->
-        <text x="880" y="468" fill="#1f2328" font-size="14" font-weight="500" text-anchor="end">65.00%</text>
+        <text x="860" y="468" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">65.00%</text>
         
         <!-- Delta vs Duluth -->
-        <text x="965" y="468" fill="#656d76" font-size="12" font-weight="600" text-anchor="end">-1.54%</text>
+        <text x="955" y="468" fill="#656d76" font-size="12" font-weight="600" text-anchor="end">-1.54%</text>
         
         <!-- Row 7 -->
         <rect x="20" y="486" width="960" height="40" rx="6" fill="#f6f8fa" />
         
-            <text x="49" y="513" fill="#59636e" font-size="14" font-weight="500" text-anchor="middle">#7</text>
+            <text x="49" y="512" fill="#59636e" font-size="13.5" font-weight="500" text-anchor="middle">#7</text>
             
-        <text x="82" y="512" fill="#1f2328" font-size="14" font-weight="500" text-anchor="start">Fermi (SemEval-2017)</text>
-        <text x="315" y="512" fill="#59636e" font-size="12.5" font-weight="400" text-anchor="start">Word Sense Disambiguation (WSD Overlap)</text>
+        <text x="90" y="512" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="start">Fermi (SemEval-2017)</text>
+        <text x="310" y="512" fill="#59636e" font-size="12" font-weight="400" text-anchor="start">Word Sense Disambiguation (WSD Overlap)</text>
         
         <!-- Subtask 1 Pun F1 -->
-        <text x="695" y="512" fill="#1f2328" font-size="14" font-weight="500" text-anchor="end">77.65%</text>
-        <rect x="710" y="503" width="85" height="7" rx="3.5" fill="#eaeef2"/>
-        <rect x="710" y="503" width="66.0" height="7" rx="3.5" fill="#0969da"/>
+        <text x="675" y="512" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">77.65%</text>
+        <rect x="690" y="503" width="80" height="7" rx="3.5" fill="#eaeef2"/>
+        <rect x="690" y="503" width="62.1" height="7" rx="3.5" fill="#0969da"/>
         
         <!-- Subtask 2 Location Acc -->
-        <text x="880" y="512" fill="#1f2328" font-size="14" font-weight="500" text-anchor="end">52.15%</text>
+        <text x="860" y="512" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">52.15%</text>
         
         <!-- Delta vs Duluth -->
-        <text x="965" y="512" fill="#656d76" font-size="12" font-weight="600" text-anchor="end">-4.89%</text>
+        <text x="955" y="512" fill="#656d76" font-size="12" font-weight="600" text-anchor="end">-4.89%</text>
         
     
     <!-- Stat Summary Section -->
