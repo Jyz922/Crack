@@ -282,33 +282,41 @@
           <!-- Text Area & Centered Single-Line Typography Container -->
           <div class="relative w-full flex items-center justify-center min-h-[140px] sm:min-h-[160px] transition-all duration-700">
 
-            <!-- 1. Textarea in Input Mode (Frames and smoothly morphs away upon submit) -->
+            <!-- 1. Centered Single-Line Input (Matches analysis typography alignment & font size) -->
             <div
               :class="[
-                'w-full transition-all duration-700 ease-out',
+                'w-full flex flex-col items-center justify-center transition-all duration-700 ease-out',
                 morphPhase >= 2 ? 'opacity-0 scale-95 pointer-events-none absolute inset-0' : 'opacity-100 scale-100 relative'
               ]"
             >
-              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+              <label
+                :class="[
+                  'block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3 text-center transition-opacity duration-300 select-none',
+                  morphPhase >= 1 ? 'opacity-0' : 'opacity-100'
+                ]"
+              >
                 Joke / Wordplay Text
               </label>
-              <div class="relative">
-                <textarea
+              <div class="relative w-full flex items-center justify-center">
+                <input
                   v-model="jokeInput"
-                  rows="3"
+                  type="text"
                   placeholder="e.g. Why was 6 afraid of 7? Because 7 ate 9."
                   :class="[
-                    'w-full bg-slate-950/70 border rounded-xl p-4 text-slate-100 placeholder-slate-500 text-base sm:text-lg resize-none outline-none transition-all duration-500 leading-relaxed',
+                    'w-full bg-slate-950/70 border rounded-2xl py-4 sm:py-5 px-12 text-slate-100 placeholder-slate-500 outline-none transition-all duration-500 text-center font-medium tracking-tight leading-normal shadow-inner',
+                    computedFontSizeClass,
                     morphPhase >= 1
                       ? 'border-cyan-400 ring-4 ring-cyan-400/35 shadow-[0_0_35px_rgba(6,182,212,0.45)]'
                       : 'border-slate-800 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20'
                   ]"
                   @keydown.enter.prevent="startAnalysis"
-                ></textarea>
+                  @input="handleInputClean"
+                />
                 <button
                   v-if="jokeInput && morphPhase === 0"
                   @click="jokeInput = ''"
-                  class="absolute right-3 top-3 text-slate-500 hover:text-slate-300 transition-colors p-1"
+                  class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors p-1.5 rounded-lg hover:bg-slate-800/50"
+                  title="Clear"
                 >
                   <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
@@ -841,10 +849,22 @@
           { icon: '🦊', title: 'The quick brown fox jumps over the lazy dog.', text: 'The quick brown fox jumps over the lazy dog.', age: 8 },
         ];
 
+        function handleInputClean(e) {
+          if (e && e.target) {
+            jokeInput.value = e.target.value.replace(/[\r\n]+/g, ' ');
+          }
+          nextTick(() => {
+            updateTextScale();
+          });
+        }
+
         function selectPreset(preset) {
           if (morphPhase.value > 0) return;
           jokeInput.value = preset.text;
           targetAge.value = preset.age;
+          nextTick(() => {
+            updateTextScale();
+          });
         }
 
         async function startAnalysis() {
@@ -1104,6 +1124,7 @@
           activeDisplayAge,
           presets,
           selectPreset,
+          handleInputClean,
           startAnalysis,
           resetToInput,
           tokens,
