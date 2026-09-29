@@ -139,6 +139,20 @@
     .animate-spring-3 { animation: spring-up 0.6s 0.16s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
     .animate-spring-4 { animation: spring-up 0.65s 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
 
+    /* Magic Move Card Reveal & Fade */
+    @keyframes magic-fade-in {
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+
+    .magic-card-enter {
+      animation: magic-fade-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
     /* Smooth CSS Grid Accordion Collapse (Zero layout jank / reflow) */
     .smooth-collapse {
       display: grid;
@@ -290,7 +304,7 @@
               <div
                 ref="jokeInnerRef"
                 :class="[
-                  'flex flex-nowrap items-center justify-center whitespace-nowrap tracking-tight font-medium leading-none',
+                  'inline-flex flex-nowrap items-center justify-center whitespace-nowrap tracking-tight font-medium leading-none',
                   computedFontSizeClass
                 ]"
                 :style="textScaleStyle"
@@ -482,23 +496,30 @@
       </div>
 
       <!-- Bento Grid Module 2: The Core Dual-Sense Collision Card -->
-      <div class="animate-spring-2 apple-glass rounded-3xl p-6 sm:p-8">
+      <div :class="['apple-glass rounded-3xl p-6 sm:p-8', isMagicMoving ? 'magic-card-enter' : 'animate-spring-2']">
         
         <!-- Joke Text Anchor Header -->
         <div class="mb-6 pb-4 border-b border-slate-800/80">
           <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Original Text & Punchline Site</div>
-          <div class="text-lg sm:text-xl font-medium text-slate-100 leading-relaxed">
-            <template v-for="(tok, idx) in analysisData.tokens" :key="idx">
-              <span v-if="!tok.is_word" class="text-slate-400">{{ tok.text }}</span>
-              <span
+          <div class="w-full overflow-hidden py-1">
+            <div
+              ref="dashboardJokeRef"
+              :style="{ opacity: isMagicMoving ? 0 : 1, transition: 'opacity 0.2s ease' }"
+              class="inline-flex flex-nowrap items-center whitespace-nowrap text-lg sm:text-xl font-medium tracking-tight text-slate-100 leading-none"
+            >
+              <template v-for="(tok, idx) in analysisData.tokens" :key="idx"><span
+                v-if="!tok.is_word"
+                class="text-slate-400 select-none inline leading-none"
+              >{{ tok.text }}</span><span
                 v-else
                 :class="[
+                  'relative inline-flex items-center justify-center rounded-xl leading-none border-2 transition-all',
                   tok.is_punchline
-                    ? 'font-bold text-cyan-300 bg-cyan-500/20 px-2 py-0.5 rounded-lg border border-cyan-400/50 shadow-md shadow-cyan-500/20'
-                    : 'text-slate-200'
+                    ? 'mx-2 px-2.5 pt-1.5 pb-2 text-cyan-100 font-medium punchline-halo bg-cyan-500/30 border-cyan-300 z-20 shadow-xl shadow-cyan-500/40'
+                    : 'mx-0.5 px-1 py-1 border-transparent text-slate-200'
                 ]"
-              >{{ tok.text }}</span>
-            </template>
+              ><span class="inline-block leading-none">{{ tok.text }}</span></span></template>
+            </div>
           </div>
         </div>
 
@@ -756,6 +777,8 @@
         const isScanningMode = computed(() => viewState.value === 'SCANNING');
         const jokeRowRef = ref(null);
         const jokeInnerRef = ref(null);
+        const dashboardJokeRef = ref(null);
+        const isMagicMoving = ref(false);
         const textScale = ref(1);
 
         function updateTextScale() {
@@ -823,6 +846,10 @@
 
         async function startAnalysis() {
           if (!jokeInput.value.trim() || morphPhase.value > 0) return;
+
+          const oldFlyer = document.getElementById('magic-move-flyer');
+          if (oldFlyer) oldFlyer.remove();
+          isMagicMoving.value = false;
 
           // Break tokens from input text immediately
           const rawMatches = jokeInput.value.trim().match(/(\w+|[^\w\s]|\s+)/g) || [];
@@ -992,12 +1019,83 @@
             clearInterval(reasonInterval);
             evtSource.close();
 
-            // Savor the punchline lock and halo spotlight for 1.6s before smooth transition
-            await new Promise(r => setTimeout(r, 1600));
+            // Savor the punchline lock and halo spotlight for 1.2s before smooth flight transition
+            await new Promise(r => setTimeout(r, 1200));
 
+            const sourceEl = jokeInnerRef.value;
+            if (!sourceEl) {
+              viewState.value = 'DASHBOARD';
+              await nextTick();
+              lucide.createIcons();
+              return;
+            }
+
+            // 1. Capture exact geometry in scanner view
+            const sourceRect = sourceEl.getBoundingClientRect();
+            const w0 = sourceEl.offsetWidth || sourceRect.width;
+            const h0 = sourceEl.offsetHeight || sourceRect.height;
+            const s0 = textScale.value || 1;
+
+            // 2. Clone source element to document.body as fixed flying proxy
+            const flyer = sourceEl.cloneNode(true);
+            const badge = flyer.querySelector('.punchline-badge');
+            if (badge) badge.remove();
+
+            flyer.id = 'magic-move-flyer';
+            flyer.style.position = 'fixed';
+            flyer.style.left = `${sourceRect.left}px`;
+            flyer.style.top = `${sourceRect.top}px`;
+            flyer.style.width = `${w0}px`;
+            flyer.style.height = `${h0}px`;
+            flyer.style.margin = '0';
+            flyer.style.padding = '0';
+            flyer.style.zIndex = '99999';
+            flyer.style.pointerEvents = 'none';
+            flyer.style.transformOrigin = 'top left';
+            flyer.style.transform = `scale(${s0})`;
+            flyer.style.transition = 'none';
+            flyer.style.boxSizing = 'border-box';
+            flyer.style.willChange = 'transform';
+            document.body.appendChild(flyer);
+
+            // 3. Switch to DASHBOARD view with isMagicMoving active
+            isMagicMoving.value = true;
             viewState.value = 'DASHBOARD';
+            window.scrollTo({ top: 0, behavior: 'instant' });
+
             await nextTick();
             lucide.createIcons();
+
+            // 4. Measure exact target geometry on Dashboard
+            const targetEl = dashboardJokeRef.value;
+            if (!targetEl) {
+              flyer.remove();
+              isMagicMoving.value = false;
+              return;
+            }
+
+            const targetRect = targetEl.getBoundingClientRect();
+            const deltaX = targetRect.left - sourceRect.left;
+            const deltaY = targetRect.top - sourceRect.top;
+            const targetScaleX = w0 > 0 ? (targetRect.width / w0) : 1;
+            const targetScaleY = h0 > 0 ? (targetRect.height / h0) : 1;
+
+            // 5. Force reflow to commit start frame
+            flyer.getBoundingClientRect();
+
+            // 6. Fluid Apple spring glide to target position
+            requestAnimationFrame(() => {
+              flyer.style.transition = 'transform 0.85s cubic-bezier(0.16, 1, 0.3, 1)';
+              flyer.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0) scale(${targetScaleX}, ${targetScaleY})`;
+            });
+
+            // 7. Clean handoff at target landing
+            setTimeout(() => {
+              isMagicMoving.value = false;
+              if (flyer.parentNode) {
+                flyer.remove();
+              }
+            }, 870);
           });
 
           evtSource.onerror = (err) => {
@@ -1013,12 +1111,16 @@
         }
 
         function resetToInput() {
+          const oldFlyer = document.getElementById('magic-move-flyer');
+          if (oldFlyer) oldFlyer.remove();
+          isMagicMoving.value = false;
           viewState.value = 'INPUT';
           morphPhase.value = 0;
           laserActive.value = false;
           isPunchlineLocked.value = false;
           isCandidateStage.value = false;
           nextTick(() => {
+            updateTextScale();
             lucide.createIcons();
           });
         }
@@ -1076,6 +1178,8 @@
           isScanningMode,
           jokeRowRef,
           jokeInnerRef,
+          dashboardJokeRef,
+          isMagicMoving,
           computedFontSizeClass,
           textScaleStyle,
           updateTextScale,
