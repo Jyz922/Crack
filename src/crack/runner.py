@@ -28,12 +28,14 @@ CLI
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
 import json
 import os
 import re
 import shutil
 import subprocess
 import sys
+import threading
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -302,6 +304,7 @@ def run(
     settings: Settings = DEFAULT_SETTINGS,
     output_root: str | Path = "runs",
     resume_from: str | Path | None = None,
+    concurrency: int = 1,
 ) -> Path:
     """Execute all registered layers over a blind corpus.
 
@@ -340,34 +343,64 @@ def run(
     out_dir = Path(output_root) / ts
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    def _process_item(item: BlindItem) -> AnalysisRecord:
+        record = AnalysisRecord(
+            item_id=item.id,
+            text=item.text,
+            target_ages=item.target_ages,
+        )
+        for layer_name, layer_fn in _LAYER_REGISTRY:
+            start = time.monotonic()
+            try:
+                record = layer_fn(record, settings)
+            except Exception as exc:
+                duration_ms = round((time.monotonic() - start) * 1000, 3)
+                record.trace.append(LayerTrace(
+                    layer=layer_name,
+                    status="ERROR",
+                    reason=f"{type(exc).__name__}: {exc}",
+                    duration_ms=duration_ms,
+                    hints_used=0,
+                ))
+        return record
+
+    total_items = len(blind_items)
+    completed_count = 0
+    file_lock = threading.Lock()
+
     with (out_dir / "records.jsonl").open("w", encoding="utf-8") as fout:
+        remaining_items: list[BlindItem] = []
         for item in blind_items:
             if item.id in existing_records:
                 record = existing_records[item.id]
                 fout.write(record.model_dump_json() + "\n")
                 fout.flush()
-                continue
+                completed_count += 1
+            else:
+                remaining_items.append(item)
 
-            record = AnalysisRecord(
-                item_id=item.id,
-                text=item.text,
-                target_ages=item.target_ages,
-            )
-            for layer_name, layer_fn in _LAYER_REGISTRY:
-                start = time.monotonic()
-                try:
-                    record = layer_fn(record, settings)
-                except Exception as exc:
-                    duration_ms = round((time.monotonic() - start) * 1000, 3)
-                    record.trace.append(LayerTrace(
-                        layer=layer_name,
-                        status="ERROR",
-                        reason=f"{type(exc).__name__}: {exc}",
-                        duration_ms=duration_ms,
-                        hints_used=0,
-                    ))
-            fout.write(record.model_dump_json() + "\n")
-            fout.flush()
+        if completed_count > 0:
+            print(f"Resumed {completed_count}/{total_items} items from previous run. Processing remaining {len(remaining_items)} items...", flush=True)
+
+        if concurrency <= 1:
+            for item in remaining_items:
+                record = _process_item(item)
+                completed_count += 1
+                fout.write(record.model_dump_json() + "\n")
+                fout.flush()
+                if completed_count % 10 == 0 or completed_count == total_items:
+                    print(f"[{datetime.now().strftime('%H:%M:%S')}] Progress: {completed_count}/{total_items} items processed ({completed_count/total_items:.1%})", flush=True)
+        else:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=concurrency) as executor:
+                futures = {executor.submit(_process_item, item): item for item in remaining_items}
+                for future in concurrent.futures.as_completed(futures):
+                    record = future.result()
+                    with file_lock:
+                        completed_count += 1
+                        fout.write(record.model_dump_json() + "\n")
+                        fout.flush()
+                        if completed_count % 10 == 0 or completed_count == total_items:
+                            print(f"[{datetime.now().strftime('%H:%M:%S')}] Progress: {completed_count}/{total_items} items processed ({completed_count/total_items:.1%})", flush=True)
 
     meta = {
         "timestamp": ts,
@@ -526,6 +559,10 @@ def _main(argv: list[str] | None = None) -> None:
         "--backend", default=None, metavar="NAME",
         help="Backend LLM provider (openai, gemini, anthropic, deepseek, etc.).",
     )
+    parser.add_argument(
+        "--concurrency", "-j", type=int, default=1, metavar="N",
+        help="Number of concurrent worker threads (default: 1). Use 8-12 for high-throughput batch evaluation.",
+    )
     args = parser.parse_args(argv)
 
     backend_req = args.backend or os.getenv("CRACK_BACKEND") or os.getenv("DOUBLETAKE_BACKEND") or "auto"
@@ -572,6 +609,7 @@ def _main(argv: list[str] | None = None) -> None:
         settings=settings,
         output_root=actual_root,
         resume_from=args.resume,
+        concurrency=args.concurrency,
     )
     records_file = out_dir / "records.jsonl"
     print(f"Run complete. Output: {out_dir}")
