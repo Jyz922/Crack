@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="420" viewBox="0 0 1000 420" role="img" aria-labelledby="title description">
+  <title id="title">CRACK Developmental Alignment and Neuro-Symbolic Funnel</title>
+  <desc id="description">Visual breakdown of child developmental humor alignment (110 items) and the neuro-symbolic hallucination suppression funnel on 2,250 items.</desc>
+  
+  <!-- Outer Container -->
+  <rect x="0.5" y="0.5" width="999" height="419" rx="14" fill="#ffffff" stroke="#e1e4e8"/>
+  
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-variant-numeric="tabular-nums">
+    <!-- Header -->
+    <text x="32" y="38" fill="#0969da" font-size="12" font-weight="700" text-anchor="start" letter-spacing="1.5">CRACK  /  DETAILED METRICS</text>
+    <text x="32" y="74" fill="#1f2328" font-size="26" font-weight="700" text-anchor="start">Developmental Cognition &amp; Error Analysis</text>
+    <text x="32" y="100" fill="#59636e" font-size="14" font-weight="400" text-anchor="start">Empirical Age-of-Acquisition (AoA) alignment and token-efficient negative filtering</text>
+    <path d="M20 118 H980" stroke="#d1d9e0" stroke-width="1"/>
+    
+    <!-- Left Card: Child-Directed Benchmark -->
+    <g transform="translate(20, 136)">
+      <rect x="0" y="0" width="465" height="260" rx="10" fill="#f6f8fa" stroke="#d1d9e0"/>
+      <text x="22" y="32" fill="#1a7f37" font-size="11" font-weight="700" letter-spacing="1">CHILD-DIRECTED CORPUS (110 ITEMS)</text>
+      <text x="22" y="60" fill="#1f2328" font-size="19" font-weight="700">Developmental Appropriateness</text>
+      
+      <!-- Metric 1 -->
+      <text x="22" y="98" fill="#1f2328" font-size="13" font-weight="600">Classification Accuracy</text>
+      <text x="360" y="98" fill="#1a7f37" font-size="13" font-weight="700" text-anchor="end">88.2%</text>
+      <text x="442" y="98" fill="#656d76" font-size="11.5" text-anchor="end">97 / 110</text>
+      <rect x="22" y="107" width="420" height="7" rx="3.5" fill="#eaeef2"/>
+      <rect x="22" y="107" width="370.44" height="7" rx="3.5" fill="#1a7f37"/>
+      
+      <!-- Metric 2 -->
+      <text x="22" y="142" fill="#1f2328" font-size="13" font-weight="600">Age Verdict Match (Ages 6, 8, 10, 12)</text>
+      <text x="360" y="142" fill="#1a7f37" font-size="13" font-weight="700" text-anchor="end">90.0%</text>
+      <text x="442" y="142" fill="#656d76" font-size="11.5" text-anchor="end">251 / 279</text>
+      <rect x="22" y="151" width="420" height="7" rx="3.5" fill="#eaeef2"/>
+      <rect x="22" y="151" width="378.0" height="7" rx="3.5" fill="#1a7f37"/>
+      
+      <!-- Metric 3 -->
+      <text x="22" y="186" fill="#1f2328" font-size="13" font-weight="600">Negative Control Specificity</text>
+      <text x="360" y="186" fill="#1a7f37" font-size="13" font-weight="700" text-anchor="end">95.5%</text>
+      <text x="442" y="186" fill="#656d76" font-size="11.5" text-anchor="end">42 / 44</text>
+      <rect x="22" y="195" width="420" height="7" rx="3.5" fill="#eaeef2"/>
+      <rect x="22" y="195" width="401.09999999999997" height="7" rx="3.5" fill="#1a7f37"/>
+      
+      <!-- Metric 4 -->
+      <text x="22" y="230" fill="#1f2328" font-size="13" font-weight="600">Deterministic Test Suite Pass Rate</text>
+      <text x="360" y="230" fill="#1a7f37" font-size="13" font-weight="700" text-anchor="end">100.0%</text>
+      <text x="442" y="230" fill="#656d76" font-size="11.5" text-anchor="end">332 / 332</text>
+      <rect x="22" y="239" width="420" height="7" rx="3.5" fill="#eaeef2"/>
+      <rect x="22" y="239" width="420.0" height="7" rx="3.5" fill="#1a7f37"/>
+    </g>
+    
+    <!-- Right Card: Confusion Matrix & Funnel -->
+    <g transform="translate(515, 136)">
+      <rect x="0" y="0" width="465" height="260" rx="10" fill="#f6f8fa" stroke="#d1d9e0"/>
+      <text x="22" y="32" fill="#0969da" font-size="11" font-weight="700" letter-spacing="1">SEMEVAL-2017 FUNNEL (2,250 ITEMS)</text>
+      <text x="22" y="60" fill="#1f2328" font-size="19" font-weight="700">Rejection &amp; Efficiency Breakdown</text>
+      
+      <!-- Stat row 1 -->
+      <g transform="translate(22, 85)">
+        <rect x="0" y="0" width="200" height="66" rx="6" fill="#ffffff" stroke="#d1d9e0"/>
+        <text x="14" y="22" fill="#59636e" font-size="11" font-weight="600">TRUE PUN DETECTION</text>
+        <text x="14" y="48" fill="#0969da" font-size="20" font-weight="700">87.05%</text>
+        <text x="96" y="46" fill="#656d76" font-size="11">1,399 / 1,607</text>
+      </g>
+      
+      <!-- Stat row 2 -->
+      <g transform="translate(230, 85)">
+        <rect x="0" y="0" width="200" height="66" rx="6" fill="#ffffff" stroke="#d1d9e0"/>
+        <text x="14" y="22" fill="#59636e" font-size="11" font-weight="600">EARLY SHORT-CIRCUIT</text>
+        <text x="14" y="48" fill="#1a7f37" font-size="20" font-weight="700">73.56%</text>
+        <text x="96" y="46" fill="#656d76" font-size="11">473 rejected at L4</text>
+      </g>
+      
+      <!-- Explanation Note Box -->
+      <rect x="22" y="166" width="420" height="74" rx="6" fill="#ffffff" stroke="#d1d9e0"/>
+      <text x="36" y="190" fill="#1f2328" font-size="12.5" font-weight="600">Key Neuro-Symbolic Finding:</text>
+      <text x="36" y="209" fill="#59636e" font-size="12" font-weight="400">By requiring verbatim textual quotes for both senses at L4, CRACK</text>
+      <text x="36" y="226" fill="#59636e" font-size="12" font-weight="400">rejects 73.6% of literal proverbs early, saving &gt;65% downstream tokens.</text>
+    </g>
+  </g>
+</svg>

@@ -24,6 +24,14 @@ CRACK establishes new state-of-the-art benchmarks on both **gold-standard academ
 
 Evaluated on the full test set of **SemEval-2017 Task 7: Detection and Interpretation of English Puns** (1,607 positive homographic pun jokes + 643 negative controls, including proverbs and literal sentences).
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/benchmark-ranking-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/benchmark-ranking-light.svg">
+    <img src="assets/benchmark-ranking-light.svg" alt="SemEval-2017 Task 7 Benchmark SOTA Leaderboard" width="100%">
+  </picture>
+</p>
+
 #### Comparison with Prior SOTA, Shared Task Winners & LLMs
 
 | System / Model | Architecture Type | Subtask 1: Detection Acc | Subtask 1: Pun F1 | Subtask 2: Location Acc | Notes |
@@ -43,8 +51,8 @@ Evaluated across all 2,250 items with 10-worker multi-threaded concurrency (tota
 | Task & Metric | CRACK Score | Sample Breakdown | Details |
 |---|:---:|:---:|---|
 | **Subtask 1: Pun Detection (Accuracy)** | **82.84%** | 1,864 / 2,250 | Overall binary classification accuracy |
-| **Subtask 1: Pun Precision (查准率)** | **89.11%** | 1,391 / 1,561 | Minimizes false-positive humor hallucinations |
-| **Subtask 1: Pun Recall (查全率)** | **86.56%** | 1,391 / 1,607 | Captures true homographic double entendres |
+| **Subtask 1: Pun Precision** | **89.11%** | 1,391 / 1,561 | Minimizes false-positive humor hallucinations |
+| **Subtask 1: Pun Recall** | **86.56%** | 1,391 / 1,607 | Captures true homographic double entendres |
 | **Subtask 1: Pun F1-Score** | **87.82%** | — | Harmonic mean of pun detection precision & recall |
 | **Negative Control Specificity** | **73.56%** | 473 / 643 | Rejects ordinary non-joke statements & proverbs |
 | **Subtask 2: Top-1 Pun Location Accuracy** | **76.35%** | 1,227 / 1,607 | Exactly pinpoints the target pun word at rank #1 |
@@ -71,6 +79,14 @@ The repository provides a curated, balanced evaluation set (`corpus/joke_corpus_
 - **60 Positive Wordplay Items**: Valid homograph jokes, compound splits, and heteronym double entendres across diverse genres.
 - **40 Minimal-Pair De-Joked Controls**: Closely matched negative controls where humor is removed to test specificity against hallucination.
 - **10 Out-of-Scope Negative Controls**: Homophones, rhymes, and non-lexical absurdist jokes.
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/developmental-breakdown-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/developmental-breakdown-light.svg">
+    <img src="assets/developmental-breakdown-light.svg" alt="CRACK Developmental Cognition and Funnel Analysis" width="100%">
+  </picture>
+</p>
 
 | Metric | CRACK Score | Details |
 |---|---|---|
