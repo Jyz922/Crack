@@ -139,6 +139,29 @@
     .animate-spring-3 { animation: spring-up 0.6s 0.16s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
     .animate-spring-4 { animation: spring-up 0.65s 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
 
+    /* Smooth CSS Grid Accordion Collapse (Zero layout jank / reflow) */
+    .smooth-collapse {
+      display: grid;
+      grid-template-rows: 1fr;
+      transition: grid-template-rows 0.85s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), margin 0.85s cubic-bezier(0.16, 1, 0.3, 1), padding 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: grid-template-rows, opacity;
+    }
+
+    .smooth-collapse.collapsed {
+      grid-template-rows: 0fr;
+      opacity: 0;
+      margin-top: 0 !important;
+      margin-bottom: 0 !important;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+      pointer-events: none;
+    }
+
+    .smooth-collapse-inner {
+      overflow: hidden;
+      min-height: 0;
+    }
+
     /* Custom Scrollbar */
     ::-webkit-scrollbar {
       width: 6px;
@@ -193,48 +216,50 @@
     <section
       v-if="viewState === 'INPUT' || viewState === 'SCANNING'"
       :class="[
-        'my-auto w-full mx-auto flex flex-col items-center transition-all duration-700 ease-out',
-        isScanningMode ? 'max-w-5xl' : 'max-w-3xl'
+        'my-auto w-full mx-auto flex flex-col items-center transition-[max-width] duration-[850ms] ease-[cubic-bezier(0.16,1,0.3,1)]',
+        morphPhase >= 2 ? 'max-w-5xl' : 'max-w-3xl'
       ]"
     >
       
       <!-- Top Header Title: Smoothly fades & slides up when analysis begins -->
       <div
         :class="[
-          'text-center transition-all duration-500 ease-out overflow-hidden',
-          isScanningMode || isMorphing
-            ? 'opacity-0 -translate-y-8 max-h-0 mb-0 pointer-events-none'
-            : 'opacity-100 translate-y-0 max-h-40 mb-8'
+          'smooth-collapse text-center w-full',
+          morphPhase >= 2 ? 'collapsed mb-0' : 'mb-8'
         ]"
       >
-        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3 bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
-          Linguistic Humor & Pun Identification
-        </h2>
-        <p class="text-slate-400 text-sm sm:text-base max-w-xl mx-auto">
-          Deep neuro-symbolic cognitive pipeline analyzing wordplay ambiguity, punchline resolution, and child developmental appropriateness.
-        </p>
+        <div class="smooth-collapse-inner">
+          <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3 bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+            Linguistic Humor & Pun Identification
+          </h2>
+          <p class="text-slate-400 text-sm sm:text-base max-w-xl mx-auto">
+            Deep neuro-symbolic cognitive pipeline analyzing wordplay ambiguity, punchline resolution, and child developmental appropriateness.
+          </p>
+        </div>
       </div>
 
       <!-- Live Status Subheader: Smoothly fades & floats down above card when scanning -->
       <div
         :class="[
-          'flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/25 text-cyan-300 text-xs font-medium transition-all duration-500 ease-out overflow-hidden',
-          isScanningMode && !isMorphing
-            ? 'opacity-100 translate-y-0 max-h-12 mb-6'
-            : 'opacity-0 -translate-y-4 max-h-0 mb-0 pointer-events-none'
+          'smooth-collapse',
+          morphPhase === 3 ? 'mb-6' : 'collapsed mb-0'
         ]"
       >
-        <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-        <span>{{ scannerStageMessage }}</span>
+        <div class="smooth-collapse-inner flex items-center justify-center">
+          <div class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/25 text-cyan-300 text-xs font-medium">
+            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+            <span>{{ scannerStageMessage }}</span>
+          </div>
+        </div>
       </div>
 
       <!-- The Morphing Main Card (Transforms from Input Box to Analysis Radar) -->
       <div
         :class="[
-          'apple-glass rounded-3xl w-full relative overflow-hidden transition-all duration-700 ease-out flex flex-col',
-          isScanningMode && !isMorphing
-            ? 'px-6 sm:px-10 pt-7 pb-5 shadow-2xl shadow-cyan-950/40 border-cyan-500/30'
-            : (isMorphing ? 'p-6 sm:p-8 border-cyan-400 shadow-[0_0_40px_rgba(6,182,212,0.3)] scale-[1.01]' : 'p-6 sm:p-8')
+          'apple-glass rounded-3xl w-full relative overflow-hidden transition-all duration-[850ms] ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col',
+          morphPhase >= 2
+            ? 'px-6 sm:px-10 py-7 shadow-2xl shadow-cyan-950/40 border-cyan-500/30'
+            : (morphPhase === 1 ? 'p-6 sm:p-8 border-cyan-400 shadow-[0_0_40px_rgba(6,182,212,0.3)]' : 'p-6 sm:p-8')
         ]"
       >
         
@@ -254,143 +279,153 @@
         <!-- Internal Card Content -->
         <div class="relative z-10 w-full flex flex-col justify-center">
 
-          <!-- 1. Textarea in Input Mode (Frames and smoothly morphs away upon submit) -->
-          <div
-            v-if="!isScanningMode"
-            :class="[
-              'transition-all duration-300 ease-out',
-              isMorphing ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'
-            ]"
-          >
-            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-              Joke / Wordplay Text
-            </label>
-            <div class="relative">
-              <textarea
-                v-model="jokeInput"
-                rows="3"
-                placeholder="e.g. Why was 6 afraid of 7? Because 7 ate 9."
-                :class="[
-                  'w-full bg-slate-950/70 border rounded-xl p-4 text-slate-100 placeholder-slate-500 text-base sm:text-lg resize-none outline-none transition-all leading-relaxed',
-                  isMorphing
-                    ? 'border-cyan-400 ring-2 ring-cyan-400/50 shadow-[0_0_25px_rgba(6,182,212,0.35)]'
-                    : 'border-slate-800 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20'
-                ]"
-                @keydown.enter.prevent="startAnalysis"
-              ></textarea>
-              <button
-                v-if="jokeInput && !isMorphing"
-                @click="jokeInput = ''"
-                class="absolute right-3 top-3 text-slate-500 hover:text-slate-300 transition-colors p-1"
-              >
-                <i data-lucide="x" class="w-4 h-4"></i>
-              </button>
-            </div>
-          </div>
+          <!-- Text Area & Centered Single-Line Typography Container -->
+          <div class="relative w-full flex items-center justify-center min-h-[140px] sm:min-h-[160px] transition-all duration-700">
 
-          <!-- 2. Single-Line Analysis Typography Display (Magnifies & centers smoothly) -->
-          <div
-            v-if="isScanningMode"
-            ref="jokeRowRef"
-            class="w-full select-none relative z-10 my-2 py-3 flex items-center justify-center overflow-visible transition-all duration-700 ease-out animate-spring-1"
-          >
+            <!-- 1. Textarea in Input Mode (Frames and smoothly morphs away upon submit) -->
             <div
-              ref="jokeInnerRef"
               :class="[
-                'flex flex-nowrap items-center justify-center whitespace-nowrap tracking-tight font-medium transition-all duration-300',
-                computedFontSizeClass
+                'w-full transition-all duration-700 ease-out',
+                morphPhase >= 2 ? 'opacity-0 scale-95 pointer-events-none absolute inset-0' : 'opacity-100 scale-100 relative'
               ]"
-              :style="textScaleStyle"
             >
-              <template v-for="(tok, idx) in tokens" :key="idx"><span
-                v-if="!tok.is_word"
-                class="text-slate-400 select-none inline"
-              >{{ tok.text }}</span><span
-                v-else
-                :class="[
-                  'relative inline-flex items-center justify-center transition-all duration-300 rounded-xl leading-none border-2',
-                  // Spacing and padding around words (mx-2 on candidates gives clear gap between adjacent boxes)
-                  isCandidateStage && tok.is_candidate
-                    ? 'mx-2 px-2.5 pt-1.5 pb-2'
-                    : (isPunchlineLocked && tok.is_punchline ? 'mx-2 px-3 pt-1.5 pb-2' : 'mx-0.5 px-1 py-1 border-transparent'),
-                  // Punchline locked state
-                  isPunchlineLocked && tok.is_punchline
-                    ? 'text-cyan-100 font-medium punchline-halo bg-cyan-500/30 border-cyan-300 z-30 shadow-2xl shadow-cyan-500/50'
-                    : '',
-                  // Candidate highlighted state (Full 360-degree glowing dashed box)
-                  isCandidateStage && tok.is_candidate && !isPunchlineLocked
-                    ? 'text-cyan-200 font-medium border-dashed border-cyan-400 bg-cyan-500/20 shadow-[0_0_14px_rgba(6,182,212,0.4)] z-20'
-                    : (!isPunchlineLocked || !tok.is_punchline ? 'text-slate-200' : '')
-                ]"
-              ><span class="inline-block leading-none">{{ tok.text }}</span><!-- Floating Tag: Punchline Target Locked --><div
-                  v-if="isPunchlineLocked && tok.is_punchline"
-                  class="punchline-badge"
-                >
-                  <div class="relative px-3.5 py-0.5 rounded-xl bg-gradient-to-r from-cyan-400 via-teal-400 to-violet-500 text-white shadow-2xl shadow-cyan-500/50 border border-white/60 flex items-center gap-1.5 font-bold text-xs">
-                    <i data-lucide="sparkles" class="w-3.5 h-3.5 fill-white"></i>
-                    <span>Punchline Locked</span>
-                    <!-- Caret pointer -->
-                    <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gradient-to-br from-teal-400 to-violet-500 rotate-45 border-r border-b border-white/40"></div>
-                  </div>
-                </div></span></template>
-            </div>
-          </div>
-
-          <!-- 3. Target Age & Analyze Trigger Button (Smoothly slides down & fades out upon submit) -->
-          <div
-            :class="[
-              'flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all duration-400 ease-out overflow-hidden',
-              isScanningMode || isMorphing
-                ? 'opacity-0 translate-y-6 max-h-0 mt-0 pt-0 border-transparent pointer-events-none'
-                : 'opacity-100 translate-y-0 max-h-32 mt-6 pt-4 border-t border-slate-800/80'
-            ]"
-          >
-            <div>
-              <span class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
-                Target Child Age
-              </span>
-              <div class="flex items-center gap-1.5">
-                <button
-                  v-for="age in [6, 8, 10, 12, 14]"
-                  :key="age"
-                  @click="targetAge = age"
+              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+                Joke / Wordplay Text
+              </label>
+              <div class="relative">
+                <textarea
+                  v-model="jokeInput"
+                  rows="3"
+                  placeholder="e.g. Why was 6 afraid of 7? Because 7 ate 9."
                   :class="[
-                    'px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
-                    targetAge === age
-                      ? 'bg-gradient-to-r from-cyan-500 to-violet-600 text-white shadow-md shadow-cyan-500/20 scale-105'
-                      : 'bg-slate-800/60 text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                    'w-full bg-slate-950/70 border rounded-xl p-4 text-slate-100 placeholder-slate-500 text-base sm:text-lg resize-none outline-none transition-all duration-500 leading-relaxed',
+                    morphPhase >= 1
+                      ? 'border-cyan-400 ring-4 ring-cyan-400/35 shadow-[0_0_35px_rgba(6,182,212,0.45)]'
+                      : 'border-slate-800 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20'
                   ]"
+                  @keydown.enter.prevent="startAnalysis"
+                ></textarea>
+                <button
+                  v-if="jokeInput && morphPhase === 0"
+                  @click="jokeInput = ''"
+                  class="absolute right-3 top-3 text-slate-500 hover:text-slate-300 transition-colors p-1"
                 >
-                  Age {{ age }}
+                  <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
               </div>
             </div>
 
-            <!-- Analyze Trigger Button -->
-            <button
-              @click="startAnalysis"
-              :disabled="!jokeInput.trim() || isMorphing"
-              class="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-xl font-semibold text-sm tracking-wide text-white bg-gradient-to-r from-cyan-500 via-teal-500 to-violet-600 hover:opacity-95 shadow-lg shadow-cyan-500/25 active:scale-95 transition-all disabled:opacity-40 disabled:pointer-events-none self-end sm:self-center"
+            <!-- 2. Single-Line Analysis Typography Display (Magnifies & centers smoothly without jumping) -->
+            <div
+              ref="jokeRowRef"
+              :class="[
+                'w-full select-none flex items-center justify-center overflow-visible transition-all duration-700 ease-out py-6',
+                morphPhase >= 2 ? 'opacity-100 scale-100 relative' : 'opacity-0 scale-95 pointer-events-none absolute inset-0'
+              ]"
             >
-              <i data-lucide="play" class="w-4 h-4 fill-white"></i>
-              <span>Analyze Joke</span>
-            </button>
+              <div
+                ref="jokeInnerRef"
+                :class="[
+                  'flex flex-nowrap items-center justify-center whitespace-nowrap tracking-tight font-medium transition-all duration-500',
+                  computedFontSizeClass
+                ]"
+                :style="textScaleStyle"
+              >
+                <template v-for="(tok, idx) in tokens" :key="idx"><span
+                  v-if="!tok.is_word"
+                  class="text-slate-400 select-none inline"
+                >{{ tok.text }}</span><span
+                  v-else
+                  :class="[
+                    'relative inline-flex items-center justify-center transition-all duration-400 rounded-xl leading-none border-2',
+                    // Spacing and padding around words (mx-2 on candidates gives clear gap between adjacent boxes)
+                    (isCandidateStage && tok.is_candidate) || (isPunchlineLocked && tok.is_punchline)
+                      ? 'mx-2 px-2.5 pt-1.5 pb-2'
+                      : 'mx-0.5 px-1 py-1 border-transparent',
+                    // Punchline locked state
+                    isPunchlineLocked && tok.is_punchline
+                      ? 'text-cyan-100 font-medium punchline-halo bg-cyan-500/30 border-cyan-300 z-30 shadow-2xl shadow-cyan-500/50'
+                      : '',
+                    // Candidate highlighted state (Full 360-degree glowing dashed box)
+                    isCandidateStage && tok.is_candidate && !isPunchlineLocked
+                      ? 'text-cyan-200 font-medium border-dashed border-cyan-400 bg-cyan-500/20 shadow-[0_0_16px_rgba(6,182,212,0.4)] z-20'
+                      : (!isPunchlineLocked || !tok.is_punchline ? 'text-slate-200' : '')
+                  ]"
+                ><span class="inline-block leading-none">{{ tok.text }}</span><!-- Floating Tag: Punchline Target Locked --><div
+                    v-if="isPunchlineLocked && tok.is_punchline"
+                    class="punchline-badge"
+                  >
+                    <div class="relative px-3.5 py-0.5 rounded-xl bg-gradient-to-r from-cyan-400 via-teal-400 to-violet-500 text-white shadow-2xl shadow-cyan-500/50 border border-white/60 flex items-center gap-1.5 font-bold text-xs">
+                      <i data-lucide="sparkles" class="w-3.5 h-3.5 fill-white"></i>
+                      <span>Punchline Locked</span>
+                      <!-- Caret pointer -->
+                      <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gradient-to-br from-teal-400 to-violet-500 rotate-45 border-r border-b border-white/40"></div>
+                    </div>
+                  </div></span></template>
+              </div>
+            </div>
+
           </div>
 
-          <!-- 4. Terminal Log Ticker at Bottom (Active during scanning) -->
+          <!-- 3. Target Age & Analyze Trigger Button (Smoothly collapses via Grid) -->
           <div
             :class="[
-              'transition-all duration-500 ease-out overflow-hidden',
-              isScanningMode && !isMorphing
-                ? 'opacity-100 max-h-20 mt-6 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono text-slate-400'
-                : 'opacity-0 max-h-0 mt-0 pt-0 border-transparent pointer-events-none'
+              'smooth-collapse border-slate-800/80',
+              morphPhase >= 2 ? 'collapsed mt-0 pt-0' : 'mt-6 pt-4 border-t'
             ]"
           >
-            <div class="flex items-center gap-2 truncate">
-              <span class="text-cyan-400 font-semibold">[CRACK_PIPELINE]</span>
-              <span class="text-slate-300">{{ currentLogLine }}</span>
+            <div class="smooth-collapse-inner">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <span class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                    Target Child Age
+                  </span>
+                  <div class="flex items-center gap-1.5">
+                    <button
+                      v-for="age in [6, 8, 10, 12, 14]"
+                      :key="age"
+                      @click="targetAge = age"
+                      :class="[
+                        'px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
+                        targetAge === age
+                          ? 'bg-gradient-to-r from-cyan-500 to-violet-600 text-white shadow-md shadow-cyan-500/20 scale-105'
+                          : 'bg-slate-800/60 text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                      ]"
+                    >
+                      Age {{ age }}
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Analyze Trigger Button -->
+                <button
+                  @click="startAnalysis"
+                  :disabled="!jokeInput.trim() || morphPhase >= 1"
+                  class="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-xl font-semibold text-sm tracking-wide text-white bg-gradient-to-r from-cyan-500 via-teal-500 to-violet-600 hover:opacity-95 shadow-lg shadow-cyan-500/25 active:scale-95 transition-all disabled:opacity-40 disabled:pointer-events-none self-end sm:self-center"
+                >
+                  <i data-lucide="play" class="w-4 h-4 fill-white"></i>
+                  <span>{{ morphPhase === 1 ? 'Focusing...' : 'Analyze Joke' }}</span>
+                </button>
+              </div>
             </div>
-            <span class="text-slate-500 hidden sm:inline">{{ (elapsedMs).toFixed(0) }}ms</span>
+          </div>
+
+          <!-- 4. Terminal Log Ticker at Bottom (Smoothly expands via Grid during scanning) -->
+          <div
+            :class="[
+              'smooth-collapse border-slate-800/80',
+              morphPhase === 3 ? 'mt-6 pt-3 border-t' : 'collapsed mt-0 pt-0'
+            ]"
+          >
+            <div class="smooth-collapse-inner">
+              <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+                <div class="flex items-center gap-2 truncate">
+                  <span class="text-cyan-400 font-semibold">[CRACK_PIPELINE]</span>
+                  <span class="text-slate-300">{{ currentLogLine }}</span>
+                </div>
+                <span class="text-slate-500 hidden sm:inline">{{ (elapsedMs).toFixed(0) }}ms</span>
+              </div>
+            </div>
           </div>
 
         </div>
@@ -399,29 +434,27 @@
       <!-- Quick Preset Chips (Below Card, smoothly dissolves down) -->
       <div
         :class="[
-          'w-full transition-all duration-400 ease-out overflow-hidden',
-          isScanningMode || isMorphing
-            ? 'opacity-0 translate-y-8 max-h-0 mt-0 pointer-events-none'
-            : 'opacity-100 translate-y-0 max-h-40 mt-6'
+          'smooth-collapse w-full',
+          morphPhase >= 2 ? 'collapsed mt-0' : 'mt-6'
         ]"
       >
-        <div class="flex items-center justify-between mb-3 px-1">
-          <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Try Curated Benchmarks</span>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <button
-            v-for="(preset, idx) in presets"
-            :key="idx"
-            @click="selectPreset(preset)"
-            class="text-xs bg-slate-900/60 hover:bg-slate-800/80 border border-slate-800 hover:border-slate-700 text-slate-300 px-3 py-2 rounded-xl transition-all flex items-center gap-2"
-          >
-            <span>{{ preset.icon }}</span>
-            <span class="truncate max-w-[240px]">{{ preset.title }}</span>
-          </button>
+        <div class="smooth-collapse-inner">
+          <div class="flex items-center justify-between mb-3 px-1">
+            <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Try Curated Benchmarks</span>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button
+              v-for="(preset, idx) in presets"
+              :key="idx"
+              @click="selectPreset(preset)"
+              class="text-xs bg-slate-900/60 hover:bg-slate-800/80 border border-slate-800 hover:border-slate-700 text-slate-300 px-3 py-2 rounded-xl transition-all flex items-center gap-2"
+            >
+              <span>{{ preset.icon }}</span>
+              <span class="truncate max-w-[240px]">{{ preset.title }}</span>
+            </button>
+          </div>
         </div>
       </div>
-
-    </section>
 
     </section>
 
@@ -759,12 +792,14 @@
         const showTrace = ref(false);
         const copyStatus = ref('Copy Raw JSON');
 
-        // Single-Line Dynamic Scaling
+        // Single-Line Dynamic Scaling & Phased Transition
+        // morphPhase: 0 = IDLE, 1 = FRAMING, 2 = MORPHING & CENTERING, 3 = SCANNING
+        const morphPhase = ref(0);
+        const isMorphing = computed(() => morphPhase.value > 0);
+        const isScanningMode = computed(() => viewState.value === 'SCANNING');
         const jokeRowRef = ref(null);
         const jokeInnerRef = ref(null);
         const textScale = ref(1);
-        const isMorphing = ref(false);
-        const isScanningMode = computed(() => viewState.value === 'SCANNING');
 
         function updateTextScale() {
           nextTick(() => {
@@ -807,19 +842,13 @@
         ];
 
         function selectPreset(preset) {
+          if (morphPhase.value > 0) return;
           jokeInput.value = preset.text;
           targetAge.value = preset.age;
         }
 
         async function startAnalysis() {
-          if (!jokeInput.value.trim() || isMorphing.value) return;
-
-          // Step 1: Keep page intact, frame the input text with cyan glow (保持页面不变，框住输入内容)
-          isMorphing.value = true;
-          scannerStageMessage.value = 'Connecting to real-time CRACK pipeline...';
-          currentLogLine.value = 'Initializing neuro-symbolic layers (L0-L8)...';
-          elapsedMs.value = 0;
-          textScale.value = 1;
+          if (!jokeInput.value.trim() || morphPhase.value > 0) return;
 
           // Break tokens from input text immediately
           const rawMatches = jokeInput.value.trim().match(/(\w+|[^\w\s]|\s+)/g) || [];
@@ -833,20 +862,36 @@
             candidate_score: null,
           }));
 
-          // Step 2: Smoothly expand card and morph text to center (放大变到中间)
-          await new Promise(r => setTimeout(r, 220));
-          viewState.value = 'SCANNING';
+          // PHASE 1: FRAMING (450ms)
+          // Page stays 100% intact, input box illuminates with glowing cyan holographic frame
+          morphPhase.value = 1;
+          scannerStageMessage.value = 'Connecting to real-time CRACK pipeline...';
+          currentLogLine.value = 'Initializing neuro-symbolic layers (L0-L8)...';
+          elapsedMs.value = 0;
+          textScale.value = 1;
+
+          await new Promise(r => setTimeout(r, 450));
+
+          // PHASE 2: SMOOTH EXPANDING & CENTERING (850ms)
+          // Card widens to max-w-5xl, surroundings collapse via CSS Grid, text cross-fades & centers in single line
+          morphPhase.value = 2;
           await nextTick();
           updateTextScale();
           lucide.createIcons();
 
-          // Step 3: Seamlessly power on laser and hand off to real analysis stream (无缝连上analysis)
-          await new Promise(r => setTimeout(r, 380));
-          isMorphing.value = false;
+          await new Promise(r => setTimeout(r, 850));
+
+          // PHASE 3: STAGE LOCK & LASER SWEEP (400ms)
+          // Live status pill drops down, terminal ticker fades in, laser sweeps across text
+          morphPhase.value = 3;
+          viewState.value = 'SCANNING';
           laserActive.value = true;
           laserPosition.value = 0;
           isCandidateStage.value = false;
           isPunchlineLocked.value = false;
+          await nextTick();
+          updateTextScale();
+          lucide.createIcons();
 
           // Start millisecond timer
           const startTime = performance.now();
@@ -858,7 +903,7 @@
           let laserDir = 1;
           function animateLaser() {
             if (!laserActive.value) return;
-            laserPosition.value += 0.45 * laserDir;
+            laserPosition.value += 0.38 * laserDir;
             if (laserPosition.value >= 98) laserDir = -1;
             if (laserPosition.value <= 2) laserDir = 1;
             requestAnimationFrame(animateLaser);
@@ -911,7 +956,7 @@
             scannerStageMessage.value = `[L3] Ambiguity Sites: Scanning ${d.candidates.length} candidates...`;
             currentLogLine.value = `Running lexical contrast and SemCor balance metrics...`;
 
-            // Stagger candidate reveals one by one so the user enjoys watching them pop up!
+            // Stagger candidate reveals deliberately (1350ms apart) so user enjoys each reveal
             d.candidates.forEach((cand, cIdx) => {
               setTimeout(() => {
                 if (viewState.value !== 'SCANNING') return;
@@ -929,9 +974,9 @@
                   return t;
                 });
                 updateTextScale();
-                scannerStageMessage.value = `[L3] Candidate Detected: "${cand.term}"`;
-                currentLogLine.value = `Candidate #${cIdx + 1}: Found dual synsets for "${cand.term}". Evaluating incongruity potential...`;
-              }, (cIdx + 1) * 750);
+                scannerStageMessage.value = `[L3] Candidate #${cIdx + 1}: "${cand.term}"`;
+                currentLogLine.value = `Identified dual synsets for "${cand.term}". Evaluating incongruity potential...`;
+              }, (cIdx + 1) * 1350);
             });
           });
 
@@ -988,8 +1033,8 @@
             clearInterval(reasonInterval);
             evtSource.close();
 
-            // Savor the punchline lock and halo spotlight for 1.4s before smooth transition
-            await new Promise(r => setTimeout(r, 1400));
+            // Savor the punchline lock and halo spotlight for 1.6s before smooth transition
+            await new Promise(r => setTimeout(r, 1600));
 
             viewState.value = 'DASHBOARD';
             await nextTick();
@@ -1004,12 +1049,13 @@
             laserActive.value = false;
             alert('Live analysis error. Check server console for details.');
             viewState.value = 'INPUT';
+            morphPhase.value = 0;
           };
         }
 
         function resetToInput() {
           viewState.value = 'INPUT';
-          isMorphing.value = false;
+          morphPhase.value = 0;
           laserActive.value = false;
           isPunchlineLocked.value = false;
           isCandidateStage.value = false;
@@ -1065,6 +1111,7 @@
           laserPosition,
           isCandidateStage,
           isPunchlineLocked,
+          morphPhase,
           isMorphing,
           isScanningMode,
           jokeRowRef,
