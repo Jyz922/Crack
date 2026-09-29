@@ -183,7 +183,11 @@ def _call_gemini_l4(
         api_key, key_name = resolve_api_key("gemini", settings)
         if not api_key:
             raise ValueError(f"{key_name} not set")
-        client = _genai.Client(api_key=api_key)
+        try:
+            from google.genai import types
+            client = _genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=30000))
+        except Exception:
+            client = _genai.Client(api_key=api_key)
 
     models = [settings.L4_MODEL_GEMINI, *settings.L4_MODEL_GEMINI_CHAIN]
     total_retries = 0

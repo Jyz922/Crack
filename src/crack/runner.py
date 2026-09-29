@@ -301,6 +301,7 @@ def run(
     blind_path: str | Path,
     settings: Settings = DEFAULT_SETTINGS,
     output_root: str | Path = "runs",
+    resume_from: str | Path | None = None,
 ) -> Path:
     """Execute all registered layers over a blind corpus.
 
@@ -319,12 +320,32 @@ def run(
 
     blind_items = load_blind(blind_path)
 
+    existing_records: dict[str, AnalysisRecord] = {}
+    if resume_from:
+        resume_p = Path(resume_from)
+        if resume_p.is_file():
+            with resume_p.open("r", encoding="utf-8") as rf:
+                for line in rf:
+                    line = line.strip()
+                    if line:
+                        try:
+                            rec = AnalysisRecord.model_validate_json(line)
+                            existing_records[rec.item_id] = rec
+                        except Exception:
+                            pass
+
     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     out_dir = Path(output_root) / ts
     out_dir.mkdir(parents=True, exist_ok=True)
 
     with (out_dir / "records.jsonl").open("w", encoding="utf-8") as fout:
         for item in blind_items:
+            if item.id in existing_records:
+                record = existing_records[item.id]
+                fout.write(record.model_dump_json() + "\n")
+                fout.flush()
+                continue
+
             record = AnalysisRecord(
                 item_id=item.id,
                 text=item.text,
@@ -344,6 +365,7 @@ def run(
                         hints_used=0,
                     ))
             fout.write(record.model_dump_json() + "\n")
+            fout.flush()
 
     meta = {
         "timestamp": ts,
@@ -494,6 +516,10 @@ def _main(argv: list[str] | None = None) -> None:
         "--eval", default=None, metavar="GOLD_PATH",
         help="Optional path to gold JSONL corpus to evaluate run output against.",
     )
+    parser.add_argument(
+        "--resume", default=None, metavar="PATH",
+        help="Optional path to existing records.jsonl to resume from.",
+    )
     args = parser.parse_args(argv)
 
     backend_req = os.getenv("DOUBLETAKE_BACKEND") or "auto"
@@ -535,7 +561,12 @@ def _main(argv: list[str] | None = None) -> None:
     is_jsonl_target = out_root.suffix == ".jsonl"
     actual_root = out_root.parent if is_jsonl_target else out_root
 
-    out_dir = run(blind_path=args.blind, settings=settings, output_root=actual_root)
+    out_dir = run(
+        blind_path=args.blind,
+        settings=settings,
+        output_root=actual_root,
+        resume_from=args.resume,
+    )
     records_file = out_dir / "records.jsonl"
     print(f"Run complete. Output: {out_dir}")
 

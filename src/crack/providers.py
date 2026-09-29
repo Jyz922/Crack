@@ -370,7 +370,11 @@ def create_client(
 
     if spec and spec.sdk_family == "gemini":
         import google.genai as genai
-        return genai.Client(api_key=api_key)
+        try:
+            from google.genai import types
+            return genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=30000))
+        except Exception:
+            return genai.Client(api_key=api_key)
 
     if spec and spec.sdk_family == "anthropic":
         import anthropic
