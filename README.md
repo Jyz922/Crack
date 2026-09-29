@@ -250,8 +250,8 @@ CRACK includes zero-shot structured-output connectors for all major frontier pro
 Clone the repository and install dependencies in an isolated virtual environment:
 
 ```bash
-git clone https://github.com/Jyz922/Joke_identification.git
-cd Joke_identification
+git clone https://github.com/Jyz922/Crack.git
+cd Crack
 
 python3 -m venv .venv
 source .venv/bin/activate
@@ -441,6 +441,6 @@ If you use CRACK in your research, please cite:
   author = {CRACK Project Contributors},
   title = {CRACK: Computational Resolution & Anchoring of Comedy & Knowledge},
   year = {2026},
-  url = {https://github.com/Jyz922/Joke_identification}
+  url = {https://github.com/Jyz922/Crack}
 }
 ```
