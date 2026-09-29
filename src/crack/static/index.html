@@ -693,7 +693,7 @@
           targetAge.value = preset.age;
         }
 
-        async function startAnalysis() {
+        function startAnalysis() {
           if (!jokeInput.value.trim()) return;
 
           viewState.value = 'SCANNING';
@@ -701,9 +701,21 @@
           laserPosition.value = 0;
           isCandidateStage.value = false;
           isPunchlineLocked.value = false;
-          scannerStageMessage.value = 'Phase 1: Laser Radar Scanning...';
-          currentLogLine.value = 'Parsing sentence structure and tokens...';
+          scannerStageMessage.value = 'Connecting to real-time CRACK pipeline...';
+          currentLogLine.value = 'Initializing neuro-symbolic layers (L0-L8)...';
           elapsedMs.value = 0;
+
+          // Initial token breakdown from text
+          const rawMatches = jokeInput.value.trim().match(/(\w+|[^\w\s]|\s+)/g) || [];
+          tokens.value = rawMatches.map((t, idx) => ({
+            id: idx,
+            text: t,
+            is_word: /^\w+$/.test(t),
+            lower: t.toLowerCase(),
+            is_candidate: false,
+            is_punchline: false,
+            candidate_score: null,
+          }));
 
           // Start millisecond timer
           const startTime = performance.now();
@@ -711,69 +723,122 @@
             elapsedMs.value = performance.now() - startTime;
           }, 30);
 
-          try {
-            // Initiate backend request
-            const responsePromise = fetch('/api/analyze', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                text: jokeInput.value.trim(),
-                target_age: targetAge.value
-              })
+          // Continuous back-and-forth laser sweep animation
+          let laserDir = 1;
+          function animateLaser() {
+            if (!laserActive.value) return;
+            laserPosition.value += 1.2 * laserDir;
+            if (laserPosition.value >= 98) laserDir = -1;
+            if (laserPosition.value <= 2) laserDir = 1;
+            requestAnimationFrame(animateLaser);
+          }
+          requestAnimationFrame(animateLaser);
+
+          // Connect to real-time Server-Sent Events stream
+          const streamUrl = `/api/analyze/stream?text=${encodeURIComponent(jokeInput.value.trim())}&target_age=${targetAge.value}`;
+          const evtSource = new EventSource(streamUrl);
+
+          evtSource.addEventListener('start', (e) => {
+            const d = JSON.parse(e.data);
+            currentLogLine.value = d.message;
+            if (d.tokens) tokens.value = d.tokens;
+          });
+
+          evtSource.addEventListener('l1', (e) => {
+            const d = JSON.parse(e.data);
+            scannerStageMessage.value = `[L1] Genre: ${d.genre}`;
+            currentLogLine.value = d.message;
+          });
+
+          evtSource.addEventListener('l2', (e) => {
+            const d = JSON.parse(e.data);
+            scannerStageMessage.value = `[L2] WordNet & AoA: ${d.senses_count} Senses`;
+            currentLogLine.value = d.message;
+          });
+
+          evtSource.addEventListener('l3', (e) => {
+            const d = JSON.parse(e.data);
+            isCandidateStage.value = true;
+            scannerStageMessage.value = `[L3] Ambiguity Sites: ${d.candidates.length} candidates`;
+            currentLogLine.value = d.message;
+
+            // Highlight real candidates on screen
+            const candMap = {};
+            d.candidates.forEach(c => { candMap[c.term.toLowerCase()] = c.score; });
+            tokens.value = tokens.value.map(t => {
+              const score = candMap[t.lower];
+              return {
+                ...t,
+                is_candidate: score !== undefined,
+                candidate_score: score !== undefined ? score : null,
+              };
             });
+          });
 
-            // Smooth Laser Sweep Animation (0.0s -> 0.7s)
-            const sweepStart = performance.now();
-            const sweepDuration = 700;
+          evtSource.addEventListener('l4', (e) => {
+            const d = JSON.parse(e.data);
+            scannerStageMessage.value = `[L4] Sense Anchoring: ${d.status}`;
+            currentLogLine.value = d.message;
+          });
 
-            await new Promise((resolve) => {
-              function step() {
-                const progress = Math.min(1, (performance.now() - sweepStart) / sweepDuration);
-                laserPosition.value = progress * 100;
-                if (progress < 1) {
-                  requestAnimationFrame(step);
-                } else {
-                  resolve();
-                }
-              }
-              requestAnimationFrame(step);
-            });
+          evtSource.addEventListener('l5', (e) => {
+            const d = JSON.parse(e.data);
+            scannerStageMessage.value = `[L5] Incongruity Resolution: ${d.status}`;
+            currentLogLine.value = d.message;
+          });
 
-            // Await backend response
-            const res = await responsePromise;
-            const data = await res.json();
-            analysisData.value = data;
-            tokens.value = data.tokens;
+          evtSource.addEventListener('l6', (e) => {
+            const d = JSON.parse(e.data);
+            scannerStageMessage.value = `[L6] Distinctness: ${d.distinctness}`;
+            currentLogLine.value = d.message;
+          });
+
+          evtSource.addEventListener('l7', (e) => {
+            const d = JSON.parse(e.data);
+            scannerStageMessage.value = `[L7] Developmental: Age ${targetAge.value} -> ${d.comprehension}`;
+            currentLogLine.value = d.message;
+          });
+
+          evtSource.addEventListener('l8', (e) => {
+            const d = JSON.parse(e.data);
+            scannerStageMessage.value = `[L8] Child Safety: ${d.verdict}`;
+            currentLogLine.value = d.message;
+          });
+
+          evtSource.addEventListener('complete', async (e) => {
+            const payload = JSON.parse(e.data);
+            analysisData.value = payload;
+            tokens.value = payload.tokens;
             activeDisplayAge.value = targetAge.value;
 
-            // Beat 2: Candidate Highlighting (0.7s -> 1.1s)
-            laserActive.value = false;
-            isCandidateStage.value = true;
-            scannerStageMessage.value = 'Phase 2: WordNet Candidate Senses Identified';
-            currentLogLine.value = `Loaded ${data.candidates.length} candidate ambiguity terms...`;
-            await new Promise(r => setTimeout(r, 450));
-
-            // Beat 3: Punchline Spotlight Convergence (1.1s -> 1.5s)
+            // Punchline locked in!
             isPunchlineLocked.value = true;
-            scannerStageMessage.value = 'Phase 3: Punchline Incongruity Locked';
-            currentLogLine.value = data.punchline 
-              ? `Locked punchline site on '${data.punchline}' (Confidence: ${(data.confidence * 100).toFixed(0)}%)`
-              : 'No ambiguity incongruity resolved.';
-            await new Promise(r => setTimeout(r, 550));
+            scannerStageMessage.value = payload.punchline
+              ? `[L5] Punchline Site Locked: '${payload.punchline}' (${(payload.confidence * 100).toFixed(0)}%)`
+              : 'Analysis complete: No punchline site found.';
+            currentLogLine.value = 'Pipeline execution finished successfully.';
 
-            // Beat 4: Transition to Bento Dashboard (1.5s+)
+            // Stop laser and timer
+            laserActive.value = false;
             clearInterval(timerInterval);
-            viewState.value = 'DASHBOARD';
+            evtSource.close();
 
+            // Savor the punchline lock for 700ms before smooth transition to dashboard
+            await new Promise(r => setTimeout(r, 700));
+
+            viewState.value = 'DASHBOARD';
             await nextTick();
             lucide.createIcons();
+          });
 
-          } catch (err) {
-            console.error('Analysis failed:', err);
+          evtSource.onerror = (err) => {
+            console.error('SSE Error:', err);
+            evtSource.close();
             clearInterval(timerInterval);
-            alert('Analysis failed: ' + err.message);
+            laserActive.value = false;
+            alert('Live analysis error. Check server console for details.');
             viewState.value = 'INPUT';
-          }
+          };
         }
 
         function resetToInput() {

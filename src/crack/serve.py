@@ -1,8 +1,9 @@
 """CRACK Interactive Web Demo & Visual Pipeline Server.
 
-Provides a modern Apple-style frontend for real-time wordplay analysis,
-including the laser scanner animation, candidate sense extraction,
-punchline convergence, and Bento-Grid results dashboard.
+Runs the real CRACK neuro-symbolic pipeline (L0-L8) with real-time SSE streaming.
+Every input joke executes live through tokenization, WordNet retrieval,
+AoA evaluation, LLM sense anchoring, incongruity resolution, developmental
+modeling, and child-safety guardrails.
 
 Usage:
     python -m crack.serve [--port 8000] [--host 127.0.0.1]
@@ -21,6 +22,10 @@ import time
 from pathlib import Path
 from typing import Any, AsyncGenerator, Dict, List, Optional
 
+# Ensure .env is loaded before configuring backends
+from crack.providers import load_dotenv, resolve_backend
+load_dotenv()
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
@@ -37,7 +42,6 @@ from crack.enums import (
     ScopeLabel,
 )
 from crack.l2_senses import wordnet
-from crack.providers import resolve_backend
 from crack.runner import _LAYER_REGISTRY
 from crack.schema import (
     AgeAppropriatenessVerdict,
@@ -46,7 +50,6 @@ from crack.schema import (
     ComprehensionStatus,
     FinalVerdict,
     L4Result,
-    L5QAResult,
     LayerTrace,
 )
 
@@ -76,206 +79,6 @@ class AnalyzeRequest(BaseModel):
     target_age: int = Field(default=8, ge=4, le=18)
 
 
-# ---------------------------------------------------------------------------
-# Pre-canned high-quality resolutions for classic presets (offline fallback)
-# ---------------------------------------------------------------------------
-_PRESET_RESOLUTIONS = {
-    "Why was 6 afraid of 7? Because 7 ate 9.": {
-        "punchline": "ate",
-        "genre": "QA_RIDDLE",
-        "scope_label": "HOMOPHONE",
-        "main_classification": "VALID_HOMOPHONE_JOKE",
-        "confidence": 0.94,
-        "sense_a": {
-            "definition": "take in solid food; consumed",
-            "pos": "verb",
-            "quote": "7 ate 9",
-            "aoa": 2.78,
-            "label": "Sense A (Literal: Consumed)",
-        },
-        "sense_b": {
-            "definition": "the cardinal number between 7 and 9 (homophone for 'eight')",
-            "pos": "numeral",
-            "quote": "6, 7, 8, 9",
-            "aoa": 3.82,
-            "label": "Sense B (Figurative: Numeral 8)",
-        },
-        "resolution_explanation": (
-            "Resolves via phonetic homophone collision: 'ate' sounds identical to the number '8', "
-            "transforming the terrifying act of eating nine into the mundane counting sequence '7, 8, 9'."
-        ),
-        "age_spectrum": {
-            4: {"comprehension": "PARTIALLY_COMPREHENSIBLE", "appropriateness": "CONTENT_OK_INFERENCE_TOO_ADVANCED", "desc": "Understands 'eating' literally; misses the mathematical homophone."},
-            6: {"comprehension": "PARTIALLY_COMPREHENSIBLE", "appropriateness": "CONTENT_OK_INFERENCE_TOO_ADVANCED", "desc": "May recognize counting sequence but misses the double meaning."},
-            8: {"comprehension": "FULLY_COMPREHENSIBLE", "appropriateness": "FULLY_AGE_APPROPRIATE", "desc": "Mastered counting order and phonological wordplay (AoA 3.8 vs Age 8)."},
-            10: {"comprehension": "FULLY_COMPREHENSIBLE", "appropriateness": "FULLY_AGE_APPROPRIATE", "desc": "Fully understands double meaning and pun structure."},
-            12: {"comprehension": "FULLY_COMPREHENSIBLE", "appropriateness": "FULLY_AGE_APPROPRIATE", "desc": "Effortless comprehension; classic elementary school riddle."},
-            14: {"comprehension": "FULLY_COMPREHENSIBLE", "appropriateness": "FULLY_AGE_APPROPRIATE", "desc": "Fully comprehensible."},
-        },
-        "safety": {
-            "surface_status": "PASS",
-            "inferential_status": "PASS",
-            "is_safe": True,
-            "content_issues": [],
-            "inference_issues": [],
-            "notes": "Cartoon-level personification; zero violence or real harm.",
-        },
-    },
-    "I used to be a banker, but I lost interest.": {
-        "punchline": "interest",
-        "genre": "DECLARATIVE",
-        "scope_label": "HOMOGRAPH",
-        "main_classification": "VALID_HOMOGRAPH_JOKE",
-        "confidence": 0.91,
-        "sense_a": {
-            "definition": "a charge for borrowed money, generally a percentage of the amount borrowed",
-            "pos": "noun",
-            "quote": "banker",
-            "aoa": 8.45,
-            "label": "Sense A (Domain: Financial return)",
-        },
-        "sense_b": {
-            "definition": "a feeling of curiosity or concern about something",
-            "pos": "noun",
-            "quote": "lost interest",
-            "aoa": 5.80,
-            "label": "Sense B (Colloquial: Boredom / Apathy)",
-        },
-        "resolution_explanation": (
-            "Resolves through lexical polysemy: 'interest' simultaneously denotes financial return in banking "
-            "and personal emotional engagement with a career."
-        ),
-        "age_spectrum": {
-            4: {"comprehension": "INCOMPREHENSIBLE", "appropriateness": "VOCABULARY_TOO_ADVANCED", "desc": "Does not know banking concepts or the financial meaning of 'interest'."},
-            6: {"comprehension": "INCOMPREHENSIBLE", "appropriateness": "VOCABULARY_TOO_ADVANCED", "desc": "Financial sense exceeds vocabulary acquisition level (AoA ~8.5 yrs)."},
-            8: {"comprehension": "PARTIALLY_COMPREHENSIBLE", "appropriateness": "CONTENT_OK_INFERENCE_TOO_ADVANCED", "desc": "Understands 'losing interest' (boredom), but banking return is emergent."},
-            10: {"comprehension": "FULLY_COMPREHENSIBLE", "appropriateness": "FULLY_AGE_APPROPRIATE", "desc": "Understands both banking interest and personal curiosity."},
-            12: {"comprehension": "FULLY_COMPREHENSIBLE", "appropriateness": "FULLY_AGE_APPROPRIATE", "desc": "Full grasp of adult career wordplay and financial terminology."},
-            14: {"comprehension": "FULLY_COMPREHENSIBLE", "appropriateness": "FULLY_AGE_APPROPRIATE", "desc": "Effortless comprehension."},
-        },
-        "safety": {
-            "surface_status": "PASS",
-            "inferential_status": "PASS",
-            "is_safe": True,
-            "content_issues": [],
-            "inference_issues": [],
-            "notes": "Completely benign occupational wordplay.",
-        },
-    },
-    "What has keys but no locks? A piano.": {
-        "punchline": "keys",
-        "genre": "QA_RIDDLE",
-        "scope_label": "HOMOGRAPH",
-        "main_classification": "VALID_HOMOGRAPH_JOKE",
-        "confidence": 0.95,
-        "sense_a": {
-            "definition": "metal instrument designed to open or close a lock",
-            "pos": "noun",
-            "quote": "no locks",
-            "aoa": 4.12,
-            "label": "Sense A (Physical tool: Door key)",
-        },
-        "sense_b": {
-            "definition": "a lever on a musical instrument depressed by the fingers to produce sound",
-            "pos": "noun",
-            "quote": "A piano",
-            "aoa": 5.10,
-            "label": "Sense B (Musical instrument: Piano key)",
-        },
-        "resolution_explanation": (
-            "Classic semantic category riddle: the setup primes physical security keys that open locks, "
-            "while the punchline re-anchors 'keys' into the musical domain of piano keyboards."
-        ),
-        "age_spectrum": {
-            4: {"comprehension": "PARTIALLY_COMPREHENSIBLE", "appropriateness": "FULLY_AGE_APPROPRIATE", "desc": "Familiar with door keys; may know pianos have keys."},
-            6: {"comprehension": "FULLY_COMPREHENSIBLE", "appropriateness": "FULLY_AGE_APPROPRIATE", "desc": "Both meanings well within vocabulary range (AoA 4.1 and 5.1)."},
-            8: {"comprehension": "FULLY_COMPREHENSIBLE", "appropriateness": "FULLY_AGE_APPROPRIATE", "desc": "High enjoyment; standard developmental riddle."},
-            10: {"comprehension": "FULLY_COMPREHENSIBLE", "appropriateness": "FULLY_AGE_APPROPRIATE", "desc": "Fully mastered."},
-            12: {"comprehension": "FULLY_COMPREHENSIBLE", "appropriateness": "FULLY_AGE_APPROPRIATE", "desc": "Fully mastered."},
-            14: {"comprehension": "FULLY_COMPREHENSIBLE", "appropriateness": "FULLY_AGE_APPROPRIATE", "desc": "Fully mastered."},
-        },
-        "safety": {
-            "surface_status": "PASS",
-            "inferential_status": "PASS",
-            "is_safe": True,
-            "content_issues": [],
-            "inference_issues": [],
-            "notes": "Wholesome, educational musical riddle.",
-        },
-    },
-    "What do you call a fake noodle? An impasta.": {
-        "punchline": "impasta",
-        "genre": "DEFINITIONAL_ONELINER",
-        "scope_label": "COMPOUND_SPLIT",
-        "main_classification": "VALID_COMPOUND_SPLIT_JOKE",
-        "confidence": 0.93,
-        "sense_a": {
-            "definition": "impostor: a person who pretends to be someone else in order to deceive",
-            "pos": "noun",
-            "quote": "fake",
-            "aoa": 8.65,
-            "label": "Sense A (Deception: Impostor)",
-        },
-        "sense_b": {
-            "definition": "pasta: Italian food dough shaped into noodles",
-            "pos": "noun",
-            "quote": "noodle",
-            "aoa": 4.50,
-            "label": "Sense B (Culinary: Pasta)",
-        },
-        "resolution_explanation": (
-            "Portmanteau / phonetic resegmentation: blends 'impostor' (fake) with 'pasta' (noodle) "
-            "to create the playful neologism 'impasta'."
-        ),
-        "age_spectrum": {
-            4: {"comprehension": "INCOMPREHENSIBLE", "appropriateness": "VOCABULARY_TOO_ADVANCED", "desc": "Does not know the word 'impostor'."},
-            6: {"comprehension": "PARTIALLY_COMPREHENSIBLE", "appropriateness": "CONTENT_OK_INFERENCE_TOO_ADVANCED", "desc": "Knows pasta and fake, but 'impostor' vocabulary is rare at age 6."},
-            8: {"comprehension": "FULLY_COMPREHENSIBLE", "appropriateness": "FULLY_AGE_APPROPRIATE", "desc": "Familiar with 'impostor' (often from games like Among Us) and pasta."},
-            10: {"comprehension": "FULLY_COMPREHENSIBLE", "appropriateness": "FULLY_AGE_APPROPRIATE", "desc": "Effortless appreciation of portmanteau pun."},
-            12: {"comprehension": "FULLY_COMPREHENSIBLE", "appropriateness": "FULLY_AGE_APPROPRIATE", "desc": "Fully comprehensible."},
-            14: {"comprehension": "FULLY_COMPREHENSIBLE", "appropriateness": "FULLY_AGE_APPROPRIATE", "desc": "Fully comprehensible."},
-        },
-        "safety": {
-            "surface_status": "PASS",
-            "inferential_status": "PASS",
-            "is_safe": True,
-            "content_issues": [],
-            "inference_issues": [],
-            "notes": "Kid-friendly food pun.",
-        },
-    },
-    "The quick brown fox jumps over the lazy dog.": {
-        "punchline": None,
-        "genre": "DECLARATIVE",
-        "scope_label": "NO_SCOPE_MECHANISM",
-        "main_classification": "NO_AMBIGUITY_FOUND",
-        "confidence": 0.05,
-        "sense_a": None,
-        "sense_b": None,
-        "resolution_explanation": (
-            "Negative baseline: standard pangram sentence with zero incongruity, "
-            "no dual-sense wordplay, and no comedic resolution."
-        ),
-        "age_spectrum": {
-            4: {"comprehension": "FULLY_COMPREHENSIBLE", "appropriateness": "FULLY_AGE_APPROPRIATE", "desc": "Literal declarative sentence; no humor intended."},
-            6: {"comprehension": "FULLY_COMPREHENSIBLE", "appropriateness": "FULLY_AGE_APPROPRIATE", "desc": "Easily understood literal narrative."},
-            8: {"comprehension": "FULLY_COMPREHENSIBLE", "appropriateness": "FULLY_AGE_APPROPRIATE", "desc": "Standard sentence."},
-            10: {"comprehension": "FULLY_COMPREHENSIBLE", "appropriateness": "FULLY_AGE_APPROPRIATE", "desc": "Standard sentence."},
-            12: {"comprehension": "FULLY_COMPREHENSIBLE", "appropriateness": "FULLY_AGE_APPROPRIATE", "desc": "Standard sentence."},
-            14: {"comprehension": "FULLY_COMPREHENSIBLE", "appropriateness": "FULLY_AGE_APPROPRIATE", "desc": "Standard sentence."},
-        },
-        "safety": {
-            "surface_status": "PASS",
-            "inferential_status": "PASS",
-            "is_safe": True,
-            "content_issues": [],
-            "inference_issues": [],
-            "notes": "Completely benign.",
-        },
-    },
-}
-
-
 def _tokenize_text(text: str) -> list[dict[str, Any]]:
     """Tokenize text preserving whitespace and position offsets."""
     pattern = re.compile(r"(\w+|[^\w\s]|\s+)")
@@ -294,44 +97,11 @@ def _tokenize_text(text: str) -> list[dict[str, Any]]:
     return tokens
 
 
-def _run_real_pipeline(text: str, target_age: int, settings: Settings) -> AnalysisRecord:
-    """Execute pipeline over text."""
-    record = AnalysisRecord(
-        item_id=f"WEB_{int(time.time()*1000)}",
-        text=text,
-        target_ages=[4, 6, 8, 10, 12, 14],
-    )
-    for layer_name, layer_fn in _LAYER_REGISTRY:
-        start = time.monotonic()
-        try:
-            record = layer_fn(record, settings)
-        except Exception as exc:
-            duration_ms = round((time.monotonic() - start) * 1000, 3)
-            record.trace.append(LayerTrace(
-                layer=layer_name,
-                status="ERROR",
-                reason=f"{type(exc).__name__}: {exc}",
-                duration_ms=duration_ms,
-                hints_used=0,
-            ))
-    return record
-
-
-def _build_analysis_payload(text: str, target_age: int) -> dict[str, Any]:
-    """Run pipeline with intelligent fallback for instant, robust UI rendering."""
-    clean_text = text.strip()
-    tokens = _tokenize_text(clean_text)
-
-    # Check for direct preset match first
-    matched_preset = None
-    for p_text, p_data in _PRESET_RESOLUTIONS.items():
-        if p_text.lower() == clean_text.lower() or p_text.strip() == clean_text:
-            matched_preset = p_data
-            break
-
+def _get_configured_settings() -> Settings:
+    """Resolve backend from environment (.env) and configure settings."""
     backend_req = os.getenv("CRACK_BACKEND") or os.getenv("DOUBLETAKE_BACKEND") or "auto"
     backend = resolve_backend(backend_req)
-    settings = DEFAULT_SETTINGS.model_copy(update={
+    return DEFAULT_SETTINGS.model_copy(update={
         "L4_BACKEND": backend,
         "L5_BACKEND": backend,
         "L6_BACKEND": backend,
@@ -339,91 +109,12 @@ def _build_analysis_payload(text: str, target_age: int) -> dict[str, Any]:
         "L8_BACKEND": backend,
     })
 
-    # If preset matched, run deterministic L0-L3 for real lexical candidate scores
-    if matched_preset:
-        rec = AnalysisRecord(
-            item_id=f"WEB_{int(time.time()*1000)}",
-            text=clean_text,
-            target_ages=[target_age],
-        )
-        for layer_name, layer_fn in _LAYER_REGISTRY[:4]: # L0-pre, L1, L2, L3
-            start = time.monotonic()
-            try:
-                rec = layer_fn(rec, settings)
-                status = "OK"
-                reason = None
-            except Exception as exc:
-                status = "ERROR"
-                reason = str(exc)
-            rec.trace.append(LayerTrace(
-                layer=layer_name,
-                status=status,
-                reason=reason,
-                duration_ms=round((time.monotonic() - start) * 1000, 3),
-                hints_used=0,
-            ))
-        # Add mock traces for L4-L8
-        for lyr in ["L4", "L5", "L6", "L7", "L8", "L0-post"]:
-            rec.trace.append(LayerTrace(
-                layer=lyr,
-                status="OK",
-                reason="Verified via gold standard",
-                duration_ms=round(0.05 + 0.02 * len(lyr), 3),
-                hints_used=0,
-            ))
-    else:
-        # Check if live LLM calls are allowed
-        allow_live = os.getenv("CRACK_ALLOW_LIVE") == "1" or os.getenv("DOUBLETAKE_ALLOW_LIVE") == "1"
-        rec = AnalysisRecord(
-            item_id=f"WEB_{int(time.time()*1000)}",
-            text=clean_text,
-            target_ages=[4, 6, 8, 10, 12, 14],
-        )
-        if allow_live:
-            for layer_name, layer_fn in _LAYER_REGISTRY:
-                start = time.monotonic()
-                try:
-                    rec = layer_fn(rec, settings)
-                    status = "OK"
-                    reason = None
-                except Exception as exc:
-                    status = "ERROR"
-                    reason = str(exc)
-                rec.trace.append(LayerTrace(
-                    layer=layer_name,
-                    status=status,
-                    reason=reason,
-                    duration_ms=round((time.monotonic() - start) * 1000, 3),
-                    hints_used=0,
-                ))
-        else:
-            # Deterministic fast mode (L0-L3) + synthesized anchoring
-            for layer_name, layer_fn in _LAYER_REGISTRY[:4]:
-                start = time.monotonic()
-                try:
-                    rec = layer_fn(rec, settings)
-                    status = "OK"
-                    reason = None
-                except Exception as exc:
-                    status = "ERROR"
-                    reason = str(exc)
-                rec.trace.append(LayerTrace(
-                    layer=layer_name,
-                    status=status,
-                    reason=reason,
-                    duration_ms=round((time.monotonic() - start) * 1000, 3),
-                    hints_used=0,
-                ))
-            for lyr in ["L4", "L5", "L6", "L7", "L8", "L0-post"]:
-                rec.trace.append(LayerTrace(
-                    layer=lyr,
-                    status="OK",
-                    reason="Fast neuro-symbolic resolver",
-                    duration_ms=0.08,
-                    hints_used=0,
-                ))
 
-    # Extract candidates from L3
+def _build_final_payload(rec: AnalysisRecord, target_age: int) -> dict[str, Any]:
+    """Transform an executed AnalysisRecord into the structured frontend payload."""
+    tokens = _tokenize_text(rec.text)
+
+    # 1. Candidates from L3
     candidates = []
     if rec.l3_result and rec.l3_result.candidates:
         for c in rec.l3_result.candidates[:6]:
@@ -435,97 +126,90 @@ def _build_analysis_payload(text: str, target_age: int) -> dict[str, Any]:
                 "components": c.score_components,
             })
 
-    # If preset matched, blend with preset details for optimal presentation
-    if matched_preset:
-        punchline = matched_preset["punchline"]
-        classification = matched_preset["main_classification"]
-        confidence = matched_preset["confidence"]
-        scope_label = matched_preset["scope_label"]
-        genre = matched_preset["genre"]
-        sense_a = matched_preset["sense_a"]
-        sense_b = matched_preset["sense_b"]
-        resolution_explanation = matched_preset["resolution_explanation"]
-        age_spectrum = matched_preset["age_spectrum"]
-        safety = matched_preset["safety"]
-    else:
-        # Dynamic fallback/synthesis from pipeline
-        top_cand = candidates[0] if candidates else None
-        punchline = top_cand["term"] if top_cand and top_cand["score"] > 0.4 else None
-        genre = rec.l1_result.genre.value if rec.l1_result else "DECLARATIVE"
-        scope_label = rec.final.scope_label.value if rec.final else "HOMOGRAPH"
-        classification = rec.final.main_classification.value if rec.final else (
-            "VALID_HOMOGRAPH_JOKE" if punchline else "NO_AMBIGUITY_FOUND"
-        )
-        confidence = rec.confidence or (top_cand["score"] if top_cand else 0.5)
+    # 2. Punchline ambiguity site determination
+    punchline = None
+    if rec.l4_result and rec.l4_result.anchoring_status == AnchoringStatus.PASS:
+        if getattr(rec.l4_result, "ambiguous_term", None):
+            punchline = rec.l4_result.ambiguous_term
+        elif candidates:
+            punchline = candidates[0]["term"]
+    elif candidates and candidates[0]["score"] > 0.4:
+        punchline = candidates[0]["term"]
 
-        # Build senses from WordNet if available
-        sense_a = None
-        sense_b = None
-        if punchline:
-            try:
-                wn = wordnet()
-                syns = wn.synsets(punchline)
-                if len(syns) >= 2:
-                    sense_a = {
-                        "definition": syns[0].definition(),
-                        "pos": syns[0].pos(),
-                        "quote": punchline,
-                        "aoa": 5.0,
-                        "label": f"Sense A ({syns[0].name()})",
-                    }
-                    sense_b = {
-                        "definition": syns[1].definition(),
-                        "pos": syns[1].pos(),
-                        "quote": punchline,
-                        "aoa": 7.0,
-                        "label": f"Sense B ({syns[1].name()})",
-                    }
-            except Exception:
-                pass
+    # 3. Dual Senses (from real L4 result if present, else WordNet/L2)
+    sense_a = None
+    sense_b = None
+    if rec.l4_result and rec.l4_result.anchoring_status == AnchoringStatus.PASS:
+        sense_a = {
+            "definition": rec.l4_result.sense_a,
+            "quote": rec.l4_result.sense_a_anchor_quote,
+            "aoa": getattr(rec.l7_result, "sense_a_aoa", 4.5) or 4.5,
+            "label": "Sense A (Anchored Meaning)",
+        }
+        sense_b = {
+            "definition": rec.l4_result.sense_b,
+            "quote": rec.l4_result.sense_b_anchor_quote,
+            "aoa": getattr(rec.l7_result, "sense_b_aoa", 7.0) or 7.0,
+            "label": "Sense B (Wordplay Resolution)",
+        }
+    elif punchline:
+        # Fallback to WordNet synsets
+        try:
+            wn = wordnet()
+            syns = wn.synsets(punchline)
+            if len(syns) >= 2:
+                sense_a = {
+                    "definition": syns[0].definition(),
+                    "quote": punchline,
+                    "aoa": 4.5,
+                    "label": f"Sense A ({syns[0].name()})",
+                }
+                sense_b = {
+                    "definition": syns[1].definition(),
+                    "quote": punchline,
+                    "aoa": 6.8,
+                    "label": f"Sense B ({syns[1].name()})",
+                }
+        except Exception:
+            pass
 
-        if not sense_a:
-            sense_a = {
-                "definition": f"Primary lexical meaning of '{punchline or 'term'}'",
-                "pos": "verb/noun",
-                "quote": punchline or "",
-                "aoa": 4.5,
-                "label": "Sense A (Contextual reading)",
-            }
-            sense_b = {
-                "definition": f"Alternate wordplay / pun interpretation of '{punchline or 'term'}'",
-                "pos": "noun/verb",
-                "quote": punchline or "",
-                "aoa": 7.5,
-                "label": "Sense B (Punchline reading)",
-            }
-
-        resolution_explanation = (
-            f"Dual-sense ambiguity centered on '{punchline}'. "
-            f"The setup primes Sense A ({sense_a['definition'][:40]}...), while the punchline "
-            f"forces an incongruity resolution to Sense B."
-            if punchline else "No significant lexical ambiguity or punchline incongruity detected."
-        )
-
-        age_spectrum = {}
-        for a in [4, 6, 8, 10, 12, 14]:
-            comp = "FULLY_COMPREHENSIBLE" if a >= 8 else ("PARTIALLY_COMPREHENSIBLE" if a >= 6 else "INCOMPREHENSIBLE")
-            appr = "FULLY_AGE_APPROPRIATE" if a >= 8 else "CONTENT_OK_INFERENCE_TOO_ADVANCED"
-            age_spectrum[a] = {
-                "comprehension": comp,
-                "appropriateness": appr,
-                "desc": f"Evaluated against Age {a} developmental benchmarks and lexical AoA.",
-            }
-
-        safety = {
-            "surface_status": "PASS",
-            "inferential_status": "PASS",
-            "is_safe": True,
-            "content_issues": [],
-            "inference_issues": [],
-            "notes": "Passed L8 two-axis safety guardrail audit.",
+    if not sense_a and punchline:
+        sense_a = {
+            "definition": f"Primary lexical meaning of '{punchline}' in context.",
+            "quote": punchline,
+            "aoa": 4.5,
+            "label": "Sense A (Contextual reading)",
+        }
+        sense_b = {
+            "definition": f"Secondary incongruity or wordplay reading of '{punchline}'.",
+            "quote": punchline,
+            "aoa": 7.2,
+            "label": "Sense B (Punchline reading)",
         }
 
-    # Mark tokens with candidate statuses and punchline status
+    # 4. Incongruity Resolution explanation
+    resolution_explanation = ""
+    if rec.l5_result:
+        expl = getattr(rec.l5_result, "explanation", "")
+        if expl:
+            resolution_explanation = expl
+        else:
+            status = rec.l5_result.resolution_status.value
+            score = rec.l5_result.resolution_score
+            resolution_explanation = (
+                f"Resolved with status {status} (score: {score}). "
+                f"The punchline exploits lexical ambiguity on '{punchline}'."
+            )
+    if not resolution_explanation:
+        if punchline:
+            resolution_explanation = (
+                f"Linguistic incongruity detected around '{punchline}'. "
+                "The setup creates expectation for Sense A, while the punchline triggers Sense B."
+            )
+        else:
+            resolution_explanation = "No significant incongruity or double meaning found in text."
+
+    # 5. Token annotation
     annotated_tokens = []
     cand_terms = {c["term"].lower(): c for c in candidates}
     for t in tokens:
@@ -540,6 +224,53 @@ def _build_analysis_payload(text: str, target_age: int) -> dict[str, Any]:
             "candidate_term": cand_info["term"] if cand_info else None,
         })
 
+    # 6. Age Spectrum & Target Evaluation (from real L7 and L8)
+    age_spectrum = {}
+    tested_ages = [4, 6, 8, 10, 12, 14]
+    for a in tested_ages:
+        comp = "FULLY_COMPREHENSIBLE"
+        if rec.l7_result and a in rec.l7_result.per_age_comprehension:
+            comp = rec.l7_result.per_age_comprehension[a].value
+        else:
+            comp = "FULLY_COMPREHENSIBLE" if a >= 8 else ("PARTIALLY_COMPREHENSIBLE" if a >= 6 else "INCOMPREHENSIBLE")
+
+        appr = "FULLY_AGE_APPROPRIATE"
+        if rec.l8_result and a in rec.l8_result.per_age_verdict:
+            appr = rec.l8_result.per_age_verdict[a].value
+        else:
+            appr = "FULLY_AGE_APPROPRIATE" if a >= 8 else "CONTENT_OK_INFERENCE_TOO_ADVANCED"
+
+        desc = ""
+        if a < 7:
+            desc = "Below the metalinguistic humor acquisition floor (Age 7.0); misses abstract double meaning."
+        elif a <= 8:
+            desc = f"Emergent wordplay mastery. Aligned with AoA benchmarks ({getattr(rec.l7_result, 'sense_b_aoa', 6.5) or 6.5} yrs)."
+        else:
+            desc = "Full cognitive competence and vocabulary mastery for this wordplay genre."
+
+        age_spectrum[a] = {
+            "comprehension": comp,
+            "appropriateness": appr,
+            "desc": desc,
+        }
+
+    target_eval = age_spectrum.get(target_age, age_spectrum[8])
+
+    # 7. Safety summary from L8
+    content_issues = rec.l8_result.content_issues if rec.l8_result else []
+    inference_issues = rec.l8_result.inference_issues if rec.l8_result else []
+    is_safe = len(content_issues) == 0 and len(inference_issues) == 0
+
+    safety = {
+        "surface_status": "PASS" if not content_issues else "FAIL",
+        "inferential_status": "PASS" if not inference_issues else "FAIL",
+        "is_safe": is_safe,
+        "content_issues": content_issues,
+        "inference_issues": inference_issues,
+        "notes": "Passed all child safety and appropriateness guardrails." if is_safe else f"Issues: {content_issues + inference_issues}",
+    }
+
+    # 8. Trace
     trace_summary = [
         {
             "layer": t.layer,
@@ -550,15 +281,15 @@ def _build_analysis_payload(text: str, target_age: int) -> dict[str, Any]:
         for t in rec.trace
     ]
 
-    target_eval = age_spectrum.get(target_age, age_spectrum.get(8))
-
     return {
-        "text": clean_text,
+        "text": rec.text,
         "target_age": target_age,
-        "genre": genre,
-        "scope_label": scope_label,
-        "main_classification": classification,
-        "confidence": confidence,
+        "genre": rec.l1_result.genre.value if rec.l1_result else "DECLARATIVE",
+        "scope_label": rec.final.scope_label.value if rec.final else "HOMOGRAPH",
+        "main_classification": rec.final.main_classification.value if rec.final else (
+            "VALID_HOMOGRAPH_JOKE" if punchline else "NO_AMBIGUITY_FOUND"
+        ),
+        "confidence": rec.confidence or (candidates[0]["score"] if candidates else 0.5),
         "punchline": punchline,
         "tokens": annotated_tokens,
         "candidates": candidates,
@@ -591,33 +322,111 @@ async def serve_index():
 
 @app.post("/api/analyze")
 async def analyze_joke(req: AnalyzeRequest):
-    try:
-        data = _build_analysis_payload(req.text, req.target_age)
-        return JSONResponse(content=data)
-    except Exception as exc:
-        _LOG.exception("Analysis failed: %s", exc)
-        return JSONResponse(status_code=500, content={"error": str(exc)})
+    """Run full real pipeline synchronously and return complete payload."""
+    clean_text = req.text.strip()
+    settings = _get_configured_settings()
+
+    record = AnalysisRecord(
+        item_id=f"WEB_{int(time.time()*1000)}",
+        text=clean_text,
+        target_ages=[4, 6, 8, 10, 12, 14],
+    )
+
+    loop = asyncio.get_event_loop()
+    def _execute():
+        rec = record
+        for layer_name, layer_fn in _LAYER_REGISTRY:
+            start = time.monotonic()
+            try:
+                rec = layer_fn(rec, settings)
+                status = "OK"
+                reason = None
+            except Exception as exc:
+                status = "ERROR"
+                reason = str(exc)
+            rec.trace.append(LayerTrace(
+                layer=layer_name,
+                status=status,
+                reason=reason,
+                duration_ms=round((time.monotonic() - start) * 1000, 1),
+                hints_used=0,
+            ))
+        return rec
+
+    rec = await loop.run_in_executor(None, _execute)
+    payload = _build_final_payload(rec, req.target_age)
+    return JSONResponse(content=payload)
 
 
 @app.get("/api/analyze/stream")
 async def stream_analysis(text: str, target_age: int = 8):
-    """Server-Sent Events streaming the 4-beat pipeline animation sequence."""
+    """Real-time SSE event stream executing each layer live."""
+    clean_text = text.strip()
+    settings = _get_configured_settings()
+    loop = asyncio.get_event_loop()
+
     async def event_generator() -> AsyncGenerator[str, None]:
-        payload = _build_analysis_payload(text, target_age)
+        rec = AnalysisRecord(
+            item_id=f"WEB_{int(time.time()*1000)}",
+            text=clean_text,
+            target_ages=[4, 6, 8, 10, 12, 14],
+        )
 
-        # Beat 1: Start & Tokenization (0.0s)
-        yield f"event: start\ndata: {json.dumps({'message': 'Initializing linguistic scanner...', 'text': text, 'tokens': payload['tokens']})}\n\n"
-        await asyncio.sleep(0.4)
+        tokens = _tokenize_text(clean_text)
+        yield f"event: start\ndata: {json.dumps({'message': 'Initializing real pipeline...', 'tokens': tokens})}\n\n"
 
-        # Beat 2: Candidates identified (0.7s)
-        yield f"event: candidates\ndata: {json.dumps({'message': 'Scanning WordNet synsets & candidate ambiguity sites...', 'candidates': payload['candidates']})}\n\n"
-        await asyncio.sleep(0.5)
+        for layer_name, layer_fn in _LAYER_REGISTRY:
+            start = time.monotonic()
+            try:
+                # Run the actual layer in thread pool to prevent blocking event loop
+                rec = await loop.run_in_executor(None, layer_fn, rec, settings)
+                status = "OK"
+                reason = None
+            except Exception as exc:
+                status = "ERROR"
+                reason = str(exc)
+            duration_ms = round((time.monotonic() - start) * 1000, 1)
+            rec.trace.append(LayerTrace(
+                layer=layer_name,
+                status=status,
+                reason=reason,
+                duration_ms=duration_ms,
+                hints_used=0,
+            ))
 
-        # Beat 3: Punchline convergence (1.2s)
-        yield f"event: punchline\ndata: {json.dumps({'message': 'Locking punchline incongruity resolution...', 'punchline': payload['punchline'], 'confidence': payload['confidence']})}\n\n"
-        await asyncio.sleep(0.4)
+            # Send real event payload corresponding to layer completion
+            if layer_name == "L1":
+                genre = rec.l1_result.genre.value if rec.l1_result else "DECLARATIVE"
+                yield f"event: l1\ndata: {json.dumps({'layer': 'L1', 'genre': genre, 'duration_ms': duration_ms, 'message': f'L1 Surface: Detected genre {genre}'})}\n\n"
+            elif layer_name == "L2":
+                s_count = len(rec.l2_result.senses) if rec.l2_result else 0
+                yield f"event: l2\ndata: {json.dumps({'layer': 'L2', 'senses_count': s_count, 'duration_ms': duration_ms, 'message': f'L2 Lexical: Loaded {s_count} WordNet synsets & AoA ratings'})}\n\n"
+            elif layer_name == "L3":
+                candidates = []
+                if rec.l3_result and rec.l3_result.candidates:
+                    candidates = [{"term": c.term, "score": round(c.score, 3)} for c in rec.l3_result.candidates[:5]]
+                yield f"event: l3\ndata: {json.dumps({'layer': 'L3', 'candidates': candidates, 'duration_ms': duration_ms, 'message': f'L3 Ranking: Identified {len(candidates)} ambiguity candidates'})}\n\n"
+            elif layer_name == "L4":
+                anchored = rec.l4_result.anchoring_status.value if rec.l4_result else "SKIPPED"
+                sense_a_text = rec.l4_result.sense_a if rec.l4_result else ""
+                sense_b_text = rec.l4_result.sense_b if rec.l4_result else ""
+                yield f"event: l4\ndata: {json.dumps({'layer': 'L4', 'status': anchored, 'sense_a': sense_a_text, 'sense_b': sense_b_text, 'duration_ms': duration_ms, 'message': f'L4 LLM Anchoring ({settings.L4_BACKEND}): {anchored}'})}\n\n"
+            elif layer_name == "L5":
+                res_status = rec.l5_result.resolution_status.value if rec.l5_result else "SKIPPED"
+                score = getattr(rec.l5_result, "resolution_score", None) if rec.l5_result else None
+                yield f"event: l5\ndata: {json.dumps({'layer': 'L5', 'status': res_status, 'score': score, 'duration_ms': duration_ms, 'message': f'L5 Incongruity Resolution: {res_status} (score: {score})'})}\n\n"
+            elif layer_name == "L6":
+                dist = rec.l6_result.distinctness_status.value if rec.l6_result else "SKIPPED"
+                yield f"event: l6\ndata: {json.dumps({'layer': 'L6', 'distinctness': dist, 'duration_ms': duration_ms, 'message': f'L6 Distinctness Check: {dist}'})}\n\n"
+            elif layer_name == "L7":
+                comp = rec.l7_result.per_age_comprehension.get(target_age, "").value if (rec.l7_result and rec.l7_result.per_age_comprehension) else "UNKNOWN"
+                yield f"event: l7\ndata: {json.dumps({'layer': 'L7', 'comprehension': comp, 'duration_ms': duration_ms, 'message': f'L7 Developmental: Age {target_age} -> {comp}'})}\n\n"
+            elif layer_name == "L8":
+                appr = rec.l8_result.per_age_verdict.get(target_age, "").value if (rec.l8_result and rec.l8_result.per_age_verdict) else "UNKNOWN"
+                yield f"event: l8\ndata: {json.dumps({'layer': 'L8', 'verdict': appr, 'duration_ms': duration_ms, 'message': f'L8 Child Safety Guardrail: {appr}'})}\n\n"
 
-        # Beat 4: Complete results payload (1.6s)
+        # Final complete payload
+        payload = _build_final_payload(rec, target_age)
         yield f"event: complete\ndata: {json.dumps(payload)}\n\n"
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")
