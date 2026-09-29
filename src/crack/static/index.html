@@ -188,11 +188,25 @@
     </header>
 
     <!-- ==================================================================== -->
-    <!-- VIEW 1: Input & Playground Phase (Default State)                      -->
+    <!-- VIEW 1 & 2: Unified Input, Morphing & Analysis Scanner               -->
     <!-- ==================================================================== -->
-    <section v-if="viewState === 'INPUT'" class="my-auto max-w-3xl w-full mx-auto">
+    <section
+      v-if="viewState === 'INPUT' || viewState === 'SCANNING'"
+      :class="[
+        'my-auto w-full mx-auto flex flex-col items-center transition-all duration-700 ease-out',
+        isScanningMode ? 'max-w-5xl' : 'max-w-3xl'
+      ]"
+    >
       
-      <div class="text-center mb-8">
+      <!-- Top Header Title: Smoothly fades & slides up when analysis begins -->
+      <div
+        :class="[
+          'text-center transition-all duration-500 ease-out overflow-hidden',
+          isScanningMode || isMorphing
+            ? 'opacity-0 -translate-y-8 max-h-0 mb-0 pointer-events-none'
+            : 'opacity-100 translate-y-0 max-h-40 mb-8'
+        ]"
+      >
         <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3 bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
           Linguistic Humor & Pun Identification
         </h2>
@@ -201,35 +215,136 @@
         </p>
       </div>
 
-      <!-- Main Input Card -->
-      <div class="apple-glass rounded-2xl p-6 sm:p-8 relative overflow-hidden transition-all duration-300">
+      <!-- Live Status Subheader: Smoothly fades & floats down above card when scanning -->
+      <div
+        :class="[
+          'flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/25 text-cyan-300 text-xs font-medium transition-all duration-500 ease-out overflow-hidden',
+          isScanningMode && !isMorphing
+            ? 'opacity-100 translate-y-0 max-h-12 mb-6'
+            : 'opacity-0 -translate-y-4 max-h-0 mb-0 pointer-events-none'
+        ]"
+      >
+        <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+        <span>{{ scannerStageMessage }}</span>
+      </div>
+
+      <!-- The Morphing Main Card (Transforms from Input Box to Analysis Radar) -->
+      <div
+        :class="[
+          'apple-glass rounded-3xl w-full relative overflow-hidden transition-all duration-700 ease-out flex flex-col',
+          isScanningMode && !isMorphing
+            ? 'px-6 sm:px-10 pt-7 pb-5 shadow-2xl shadow-cyan-950/40 border-cyan-500/30'
+            : (isMorphing ? 'p-6 sm:p-8 border-cyan-400 shadow-[0_0_40px_rgba(6,182,212,0.3)] scale-[1.01]' : 'p-6 sm:p-8')
+        ]"
+      >
+        
+        <!-- Moving Laser Scanner Line -->
+        <div
+          v-if="laserActive"
+          class="laser-line transition-all duration-75"
+          :style="{ left: laserPosition + '%' }"
+        >
+          <div class="laser-aura"></div>
+        </div>
+
         <!-- Glow accents -->
         <div class="absolute -top-24 -right-24 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
         <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-violet-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-        <div class="relative z-10">
-          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-            Joke / Wordplay Text
-          </label>
-          <div class="relative">
-            <textarea
-              v-model="jokeInput"
-              rows="3"
-              placeholder="e.g. Why was 6 afraid of 7? Because 7 ate 9."
-              class="w-full bg-slate-950/70 border border-slate-800 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 rounded-xl p-4 text-slate-100 placeholder-slate-500 text-base sm:text-lg resize-none outline-none transition-all leading-relaxed"
-              @keydown.enter.prevent="startAnalysis"
-            ></textarea>
-            <button
-              v-if="jokeInput"
-              @click="jokeInput = ''"
-              class="absolute right-3 top-3 text-slate-500 hover:text-slate-300 transition-colors p-1"
-            >
-              <i data-lucide="x" class="w-4 h-4"></i>
-            </button>
+        <!-- Internal Card Content -->
+        <div class="relative z-10 w-full flex flex-col justify-center">
+
+          <!-- 1. Textarea in Input Mode (Frames and smoothly morphs away upon submit) -->
+          <div
+            v-if="!isScanningMode"
+            :class="[
+              'transition-all duration-300 ease-out',
+              isMorphing ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'
+            ]"
+          >
+            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+              Joke / Wordplay Text
+            </label>
+            <div class="relative">
+              <textarea
+                v-model="jokeInput"
+                rows="3"
+                placeholder="e.g. Why was 6 afraid of 7? Because 7 ate 9."
+                :class="[
+                  'w-full bg-slate-950/70 border rounded-xl p-4 text-slate-100 placeholder-slate-500 text-base sm:text-lg resize-none outline-none transition-all leading-relaxed',
+                  isMorphing
+                    ? 'border-cyan-400 ring-2 ring-cyan-400/50 shadow-[0_0_25px_rgba(6,182,212,0.35)]'
+                    : 'border-slate-800 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20'
+                ]"
+                @keydown.enter.prevent="startAnalysis"
+              ></textarea>
+              <button
+                v-if="jokeInput && !isMorphing"
+                @click="jokeInput = ''"
+                class="absolute right-3 top-3 text-slate-500 hover:text-slate-300 transition-colors p-1"
+              >
+                <i data-lucide="x" class="w-4 h-4"></i>
+              </button>
+            </div>
           </div>
 
-          <!-- Target Age Selector -->
-          <div class="mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-slate-800/80">
+          <!-- 2. Single-Line Analysis Typography Display (Magnifies & centers smoothly) -->
+          <div
+            v-if="isScanningMode"
+            ref="jokeRowRef"
+            class="w-full select-none relative z-10 my-2 py-3 flex items-center justify-center overflow-visible transition-all duration-700 ease-out animate-spring-1"
+          >
+            <div
+              ref="jokeInnerRef"
+              :class="[
+                'flex flex-nowrap items-center justify-center whitespace-nowrap tracking-tight font-medium transition-all duration-300',
+                computedFontSizeClass
+              ]"
+              :style="textScaleStyle"
+            >
+              <template v-for="(tok, idx) in tokens" :key="idx"><span
+                v-if="!tok.is_word"
+                class="text-slate-400 select-none inline"
+              >{{ tok.text }}</span><span
+                v-else
+                :class="[
+                  'relative inline-flex items-center justify-center transition-all duration-300 rounded-xl leading-none border-2',
+                  // Spacing and padding around words (mx-2 on candidates gives clear gap between adjacent boxes)
+                  isCandidateStage && tok.is_candidate
+                    ? 'mx-2 px-2.5 pt-1.5 pb-2'
+                    : (isPunchlineLocked && tok.is_punchline ? 'mx-2 px-3 pt-1.5 pb-2' : 'mx-0.5 px-1 py-1 border-transparent'),
+                  // Punchline locked state
+                  isPunchlineLocked && tok.is_punchline
+                    ? 'text-cyan-100 font-medium punchline-halo bg-cyan-500/30 border-cyan-300 z-30 shadow-2xl shadow-cyan-500/50'
+                    : '',
+                  // Candidate highlighted state (Full 360-degree glowing dashed box)
+                  isCandidateStage && tok.is_candidate && !isPunchlineLocked
+                    ? 'text-cyan-200 font-medium border-dashed border-cyan-400 bg-cyan-500/20 shadow-[0_0_14px_rgba(6,182,212,0.4)] z-20'
+                    : (!isPunchlineLocked || !tok.is_punchline ? 'text-slate-200' : '')
+                ]"
+              ><span class="inline-block leading-none">{{ tok.text }}</span><!-- Floating Tag: Punchline Target Locked --><div
+                  v-if="isPunchlineLocked && tok.is_punchline"
+                  class="punchline-badge"
+                >
+                  <div class="relative px-3.5 py-0.5 rounded-xl bg-gradient-to-r from-cyan-400 via-teal-400 to-violet-500 text-white shadow-2xl shadow-cyan-500/50 border border-white/60 flex items-center gap-1.5 font-bold text-xs">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5 fill-white"></i>
+                    <span>Punchline Locked</span>
+                    <!-- Caret pointer -->
+                    <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gradient-to-br from-teal-400 to-violet-500 rotate-45 border-r border-b border-white/40"></div>
+                  </div>
+                </div></span></template>
+            </div>
+          </div>
+
+          <!-- 3. Target Age & Analyze Trigger Button (Smoothly slides down & fades out upon submit) -->
+          <div
+            :class="[
+              'flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all duration-400 ease-out overflow-hidden',
+              isScanningMode || isMorphing
+                ? 'opacity-0 translate-y-6 max-h-0 mt-0 pt-0 border-transparent pointer-events-none'
+                : 'opacity-100 translate-y-0 max-h-32 mt-6 pt-4 border-t border-slate-800/80'
+            ]"
+          >
             <div>
               <span class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
                 Target Child Age
@@ -254,18 +369,42 @@
             <!-- Analyze Trigger Button -->
             <button
               @click="startAnalysis"
-              :disabled="!jokeInput.trim()"
+              :disabled="!jokeInput.trim() || isMorphing"
               class="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-xl font-semibold text-sm tracking-wide text-white bg-gradient-to-r from-cyan-500 via-teal-500 to-violet-600 hover:opacity-95 shadow-lg shadow-cyan-500/25 active:scale-95 transition-all disabled:opacity-40 disabled:pointer-events-none self-end sm:self-center"
             >
               <i data-lucide="play" class="w-4 h-4 fill-white"></i>
               <span>Analyze Joke</span>
             </button>
           </div>
+
+          <!-- 4. Terminal Log Ticker at Bottom (Active during scanning) -->
+          <div
+            :class="[
+              'transition-all duration-500 ease-out overflow-hidden',
+              isScanningMode && !isMorphing
+                ? 'opacity-100 max-h-20 mt-6 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono text-slate-400'
+                : 'opacity-0 max-h-0 mt-0 pt-0 border-transparent pointer-events-none'
+            ]"
+          >
+            <div class="flex items-center gap-2 truncate">
+              <span class="text-cyan-400 font-semibold">[CRACK_PIPELINE]</span>
+              <span class="text-slate-300">{{ currentLogLine }}</span>
+            </div>
+            <span class="text-slate-500 hidden sm:inline">{{ (elapsedMs).toFixed(0) }}ms</span>
+          </div>
+
         </div>
       </div>
 
-      <!-- Quick Preset Chips -->
-      <div class="mt-6">
+      <!-- Quick Preset Chips (Below Card, smoothly dissolves down) -->
+      <div
+        :class="[
+          'w-full transition-all duration-400 ease-out overflow-hidden',
+          isScanningMode || isMorphing
+            ? 'opacity-0 translate-y-8 max-h-0 mt-0 pointer-events-none'
+            : 'opacity-100 translate-y-0 max-h-40 mt-6'
+        ]"
+      >
         <div class="flex items-center justify-between mb-3 px-1">
           <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Try Curated Benchmarks</span>
         </div>
@@ -283,87 +422,6 @@
       </div>
 
     </section>
-
-    <!-- ==================================================================== -->
-    <!-- VIEW 2: Apple-Style Text Scanner & Punchline Locking Stage (Active)    -->
-    <!-- ==================================================================== -->
-    <section v-else-if="viewState === 'SCANNING'" class="my-auto max-w-5xl w-full mx-auto flex flex-col items-center">
-      
-      <!-- Live Status Subheader -->
-      <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-xs font-medium mb-6">
-        <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-        <span>{{ scannerStageMessage }}</span>
-      </div>
-
-      <!-- Big Typography Display Card -->
-      <div class="apple-glass rounded-3xl px-6 sm:px-10 pt-7 pb-5 w-full relative overflow-hidden transition-all duration-500 flex flex-col">
-        
-        <!-- The Moving Laser Scanner Line -->
-        <div
-          v-if="laserActive"
-          class="laser-line transition-all duration-75"
-          :style="{ left: laserPosition + '%' }"
-        >
-          <div class="laser-aura"></div>
-        </div>
-
-        <!-- Rendered Text with Dynamic Candidate & Punchline Word Spans (SINGLE LINE GUARANTEED) -->
-        <div
-          ref="jokeRowRef"
-          class="w-full select-none relative z-10 my-2 py-3 flex items-center justify-center overflow-visible"
-        >
-          <div
-            ref="jokeInnerRef"
-            :class="[
-              'flex flex-nowrap items-center justify-center whitespace-nowrap tracking-tight font-medium transition-all duration-300',
-              computedFontSizeClass
-            ]"
-            :style="textScaleStyle"
-          >
-            <template v-for="(tok, idx) in tokens" :key="idx"><span
-              v-if="!tok.is_word"
-              class="text-slate-400 select-none inline"
-            >{{ tok.text }}</span><span
-              v-else
-              :class="[
-                'relative inline-flex items-center justify-center transition-all duration-300 rounded-xl leading-none border-2',
-                // Spacing and padding around words (mx-2 on candidates gives clear gap between adjacent boxes)
-                isCandidateStage && tok.is_candidate
-                  ? 'mx-2 px-2.5 pt-1.5 pb-2'
-                  : (isPunchlineLocked && tok.is_punchline ? 'mx-2 px-3 pt-1.5 pb-2' : 'mx-0.5 px-1 py-1 border-transparent'),
-                // Punchline locked state
-                isPunchlineLocked && tok.is_punchline
-                  ? 'text-cyan-100 font-medium punchline-halo bg-cyan-500/30 border-cyan-300 z-30 shadow-2xl shadow-cyan-500/50'
-                  : '',
-                // Candidate highlighted state (Full 360-degree glowing dashed box, font-medium without bold fattening)
-                isCandidateStage && tok.is_candidate && !isPunchlineLocked
-                  ? 'text-cyan-200 font-medium border-dashed border-cyan-400 bg-cyan-500/20 shadow-[0_0_14px_rgba(6,182,212,0.4)] z-20'
-                  : (!isPunchlineLocked || !tok.is_punchline ? 'text-slate-200' : '')
-              ]"
-            ><span class="inline-block leading-none">{{ tok.text }}</span><!-- Floating Tag: Punchline Target Locked --><div
-                v-if="isPunchlineLocked && tok.is_punchline"
-                class="punchline-badge"
-              >
-                <div class="relative px-3.5 py-0.5 rounded-xl bg-gradient-to-r from-cyan-400 via-teal-400 to-violet-500 text-white shadow-2xl shadow-cyan-500/50 border border-white/60 flex items-center gap-1.5 font-bold text-xs">
-                  <i data-lucide="sparkles" class="w-3.5 h-3.5 fill-white"></i>
-                  <span>Punchline Locked</span>
-                  <!-- Caret pointer -->
-                  <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gradient-to-br from-teal-400 to-violet-500 rotate-45 border-r border-b border-white/40"></div>
-                </div>
-              </div></span></template>
-          </div>
-        </div>
-
-        <!-- Real-time Terminal Log Ticker at Bottom -->
-        <div class="mt-6 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono text-slate-400">
-          <div class="flex items-center gap-2 truncate">
-            <span class="text-cyan-400 font-semibold">[CRACK_PIPELINE]</span>
-            <span class="text-slate-300">{{ currentLogLine }}</span>
-          </div>
-          <span class="text-slate-500 hidden sm:inline">{{ (elapsedMs).toFixed(0) }}ms</span>
-        </div>
-
-      </div>
 
     </section>
 
@@ -705,6 +763,8 @@
         const jokeRowRef = ref(null);
         const jokeInnerRef = ref(null);
         const textScale = ref(1);
+        const isMorphing = ref(false);
+        const isScanningMode = computed(() => viewState.value === 'SCANNING');
 
         function updateTextScale() {
           nextTick(() => {
@@ -751,20 +811,17 @@
           targetAge.value = preset.age;
         }
 
-        function startAnalysis() {
-          if (!jokeInput.value.trim()) return;
+        async function startAnalysis() {
+          if (!jokeInput.value.trim() || isMorphing.value) return;
 
-          viewState.value = 'SCANNING';
-          laserActive.value = true;
-          laserPosition.value = 0;
-          isCandidateStage.value = false;
-          isPunchlineLocked.value = false;
+          // Step 1: Keep page intact, frame the input text with cyan glow (保持页面不变，框住输入内容)
+          isMorphing.value = true;
           scannerStageMessage.value = 'Connecting to real-time CRACK pipeline...';
           currentLogLine.value = 'Initializing neuro-symbolic layers (L0-L8)...';
           elapsedMs.value = 0;
           textScale.value = 1;
 
-          // Initial token breakdown from text
+          // Break tokens from input text immediately
           const rawMatches = jokeInput.value.trim().match(/(\w+|[^\w\s]|\s+)/g) || [];
           tokens.value = rawMatches.map((t, idx) => ({
             id: idx,
@@ -775,7 +832,21 @@
             is_punchline: false,
             candidate_score: null,
           }));
+
+          // Step 2: Smoothly expand card and morph text to center (放大变到中间)
+          await new Promise(r => setTimeout(r, 220));
+          viewState.value = 'SCANNING';
+          await nextTick();
           updateTextScale();
+          lucide.createIcons();
+
+          // Step 3: Seamlessly power on laser and hand off to real analysis stream (无缝连上analysis)
+          await new Promise(r => setTimeout(r, 380));
+          isMorphing.value = false;
+          laserActive.value = true;
+          laserPosition.value = 0;
+          isCandidateStage.value = false;
+          isPunchlineLocked.value = false;
 
           // Start millisecond timer
           const startTime = performance.now();
@@ -938,6 +1009,10 @@
 
         function resetToInput() {
           viewState.value = 'INPUT';
+          isMorphing.value = false;
+          laserActive.value = false;
+          isPunchlineLocked.value = false;
+          isCandidateStage.value = false;
           nextTick(() => {
             lucide.createIcons();
           });
@@ -990,6 +1065,8 @@
           laserPosition,
           isCandidateStage,
           isPunchlineLocked,
+          isMorphing,
+          isScanningMode,
           jokeRowRef,
           jokeInnerRef,
           computedFontSizeClass,
