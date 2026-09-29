@@ -140,8 +140,8 @@ PROVIDERS: dict[str, ProviderSpec] = {
         name="openai",
         env_vars=("OPENAI_API_KEY",),
         default_base_url=None,
-        default_model_l4="gpt-4o-mini",
-        default_model_l5="gpt-4o-mini",
+        default_model_l4="gpt-6-luna",
+        default_model_l5="gpt-6-luna",
         sdk_family="openai",
     ),
     "deepseek": ProviderSpec(
@@ -204,8 +204,8 @@ PROVIDERS: dict[str, ProviderSpec] = {
         name="compatible",
         env_vars=("OPENAI_API_KEY", "LLM_API_KEY"),
         default_base_url=None,
-        default_model_l4="gpt-4o-mini",
-        default_model_l5="gpt-4o-mini",
+        default_model_l4="gpt-6-luna",
+        default_model_l5="gpt-6-luna",
         sdk_family="openai",
     ),
 }
@@ -347,7 +347,7 @@ def resolve_model(backend: str, layer: str, settings: Any) -> str:
     if spec:
         return spec.default_model_l4 if layer.upper() in ("L4", "L6", "L7", "L8") else spec.default_model_l5
 
-    return "gpt-4o-mini"
+    return "gpt-6-luna"
 
 
 def create_client(

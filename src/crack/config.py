@@ -64,7 +64,7 @@ class Settings(BaseModel):
     L4_MODEL_GEMINI: str = "gemini-3.6-flash"
     L4_MODEL_GEMINI_CHAIN: list[str] = ["gemini-3.8-flash"]
     L4_MODEL_ANTHROPIC: str = "claude-sonnet-5"
-    L4_MODEL_OPENAI: str = "gpt-4o-mini"
+    L4_MODEL_OPENAI: str = "gpt-6-luna"
     L4_MODEL_DEEPSEEK: str = "deepseek-chat"
     L4_MAX_OUTPUT_TOKENS: int = 4096
     L4_CALL_PAUSE_SECONDS: float = 6.0
@@ -77,7 +77,7 @@ class Settings(BaseModel):
     # Ordered fallback chain tried after the primary exhausts its 5xx retries.
     L5_MODEL_GEMINI_CHAIN: list[str] = ["gemini-3.8-flash"]
     L5_MODEL_ANTHROPIC: str = "claude-sonnet-5"
-    L5_MODEL_OPENAI: str = "gpt-4o-mini"
+    L5_MODEL_OPENAI: str = "gpt-6-luna"
     L5_MODEL_DEEPSEEK: str = "deepseek-chat"
     # Max output tokens per Gemini call. Gemini 3.x counts THINKING tokens
     # against this cap — measured thinking was 487 then 969 on the same temp-0
@@ -94,7 +94,7 @@ class Settings(BaseModel):
     L6_MODEL_GEMINI: str = "gemini-3.6-flash"
     L6_MODEL_GEMINI_CHAIN: list[str] = ["gemini-3.8-flash"]
     L6_MODEL_ANTHROPIC: str = "claude-sonnet-5"
-    L6_MODEL_OPENAI: str = "gpt-4o-mini"
+    L6_MODEL_OPENAI: str = "gpt-6-luna"
     L6_MODEL_DEEPSEEK: str = "deepseek-chat"
     L6_MAX_OUTPUT_TOKENS: int = 4096
     L6_CALL_PAUSE_SECONDS: float = 6.0
@@ -105,7 +105,7 @@ class Settings(BaseModel):
     L7_MODEL_GEMINI: str = "gemini-3.6-flash"
     L7_MODEL_GEMINI_CHAIN: list[str] = ["gemini-3.8-flash"]
     L7_MODEL_ANTHROPIC: str = "claude-sonnet-5"
-    L7_MODEL_OPENAI: str = "gpt-4o-mini"
+    L7_MODEL_OPENAI: str = "gpt-6-luna"
     L7_MODEL_DEEPSEEK: str = "deepseek-chat"
     L7_MAX_OUTPUT_TOKENS: int = 4096
     L7_CALL_PAUSE_SECONDS: float = 6.0
@@ -123,7 +123,7 @@ class Settings(BaseModel):
     L8_MODEL_GEMINI: str = "gemini-3.6-flash"
     L8_MODEL_GEMINI_CHAIN: list[str] = ["gemini-3.8-flash"]
     L8_MODEL_ANTHROPIC: str = "claude-sonnet-5"
-    L8_MODEL_OPENAI: str = "gpt-4o-mini"
+    L8_MODEL_OPENAI: str = "gpt-6-luna"
     L8_MODEL_DEEPSEEK: str = "deepseek-chat"
     L8_MAX_OUTPUT_TOKENS: int = 4096
     L8_CALL_PAUSE_SECONDS: float = 6.0
