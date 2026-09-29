@@ -299,14 +299,14 @@
             <span
               v-else
               :class="[
-                'relative inline-block transition-all duration-300 px-1 py-0.5 rounded-lg',
+                'relative inline-block transition-all duration-500 px-2 py-1 rounded-xl',
                 // Punchline locked state
                 isPunchlineLocked && tok.is_punchline
-                  ? 'text-cyan-200 font-bold scale-110 punchline-halo bg-cyan-500/20 border border-cyan-400 z-30'
+                  ? 'text-cyan-100 font-extrabold scale-125 punchline-halo bg-cyan-500/30 border-2 border-cyan-300 z-30 shadow-2xl shadow-cyan-500/50'
                   : '',
                 // Candidate highlighted state
                 isCandidateStage && tok.is_candidate && !isPunchlineLocked
-                  ? 'text-cyan-300 font-semibold border-b-2 border-dashed border-cyan-400 bg-cyan-500/10'
+                  ? 'text-cyan-300 font-bold border-b-2 border-dashed border-cyan-400 bg-cyan-500/15 scale-110 shadow-lg shadow-cyan-500/20'
                   : 'text-slate-200'
               ]"
             >
@@ -315,18 +315,18 @@
               <!-- Floating Tag: Candidate Sense -->
               <span
                 v-if="isCandidateStage && tok.is_candidate && !isPunchlineLocked"
-                class="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-mono px-2 py-0.5 rounded-md bg-slate-800/90 text-cyan-300 border border-cyan-500/30 shadow-lg pointer-events-none animate-bounce"
+                class="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-slate-900/95 text-cyan-300 border border-cyan-500/40 shadow-xl pointer-events-none transition-all duration-300 animate-pulse"
               >
-                Sense candidate ({{ (tok.candidate_score * 100).toFixed(0) }}%)
+                Candidate ({{ (tok.candidate_score * 100).toFixed(0) }}%)
               </span>
 
               <!-- Floating Tag: Punchline Target Locked -->
               <span
                 v-if="isPunchlineLocked && tok.is_punchline"
-                class="absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-semibold px-2.5 py-1 rounded-lg bg-gradient-to-r from-cyan-500 to-violet-600 text-white shadow-xl shadow-cyan-500/30 border border-cyan-300 pointer-events-none flex items-center gap-1.5 animate-pulse"
+                class="absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-bold px-3 py-1 rounded-xl bg-gradient-to-r from-cyan-400 via-teal-400 to-violet-500 text-white shadow-2xl shadow-cyan-500/50 border border-white pointer-events-none flex items-center gap-1.5 animate-bounce"
               >
-                <i data-lucide="target" class="w-3.5 h-3.5"></i>
-                <span>Punchline Site ({{ (analysisData.confidence * 100).toFixed(0) }}%)</span>
+                <i data-lucide="sparkles" class="w-3.5 h-3.5 fill-white"></i>
+                <span>Punchline Locked ({{ (analysisData.confidence * 100).toFixed(0) }}%)</span>
               </span>
             </span>
 
@@ -723,16 +723,32 @@
             elapsedMs.value = performance.now() - startTime;
           }, 30);
 
-          // Continuous back-and-forth laser sweep animation
+          // Smooth, deliberate radar laser sweep animation (paced for elegant cadence)
           let laserDir = 1;
           function animateLaser() {
             if (!laserActive.value) return;
-            laserPosition.value += 1.2 * laserDir;
+            laserPosition.value += 0.45 * laserDir;
             if (laserPosition.value >= 98) laserDir = -1;
             if (laserPosition.value <= 2) laserDir = 1;
             requestAnimationFrame(animateLaser);
           }
           requestAnimationFrame(animateLaser);
+
+          // Dynamic reasoning ticker for the deep LLM thinking phase
+          const reasoningMessages = [
+            "Querying frontier cognitive reasoning model (OpenAI)...",
+            "Evaluating contextual anchor quotes across sentence boundaries...",
+            "Checking semantic contrast and metaphorical divergence...",
+            "Verifying punchline incongruity without ungrounded hallucination...",
+            "Computing psycholinguistic AoA acquisition curves...",
+          ];
+          let reasonIdx = 0;
+          const reasonInterval = setInterval(() => {
+            if (!isPunchlineLocked.value && viewState.value === 'SCANNING') {
+              currentLogLine.value = reasoningMessages[reasonIdx % reasoningMessages.length];
+              reasonIdx++;
+            }
+          }, 2200);
 
           // Connect to real-time Server-Sent Events stream
           const streamUrl = `/api/analyze/stream?text=${encodeURIComponent(jokeInput.value.trim())}&target_age=${targetAge.value}`;
@@ -758,20 +774,29 @@
 
           evtSource.addEventListener('l3', (e) => {
             const d = JSON.parse(e.data);
-            isCandidateStage.value = true;
-            scannerStageMessage.value = `[L3] Ambiguity Sites: ${d.candidates.length} candidates`;
-            currentLogLine.value = d.message;
+            scannerStageMessage.value = `[L3] Ambiguity Sites: Scanning ${d.candidates.length} candidates...`;
+            currentLogLine.value = `Running lexical contrast and SemCor balance metrics...`;
 
-            // Highlight real candidates on screen
-            const candMap = {};
-            d.candidates.forEach(c => { candMap[c.term.toLowerCase()] = c.score; });
-            tokens.value = tokens.value.map(t => {
-              const score = candMap[t.lower];
-              return {
-                ...t,
-                is_candidate: score !== undefined,
-                candidate_score: score !== undefined ? score : null,
-              };
+            // Stagger candidate reveals one by one so the user enjoys watching them pop up!
+            d.candidates.forEach((cand, cIdx) => {
+              setTimeout(() => {
+                if (viewState.value !== 'SCANNING') return;
+                isCandidateStage.value = true;
+                const candTerm = cand.term.toLowerCase();
+                tokens.value = tokens.value.map(t => {
+                  if (t.lower === candTerm || t.candidate_term === candTerm) {
+                    return {
+                      ...t,
+                      is_candidate: true,
+                      candidate_score: cand.score,
+                      candidate_term: candTerm,
+                    };
+                  }
+                  return t;
+                });
+                scannerStageMessage.value = `[L3] Candidate Detected: "${cand.term}" (${(cand.score * 100).toFixed(0)}%)`;
+                currentLogLine.value = `Candidate #${cIdx + 1}: Found dual synsets for "${cand.term}". Evaluating incongruity potential...`;
+              }, (cIdx + 1) * 750);
             });
           });
 
@@ -818,13 +843,14 @@
               : 'Analysis complete: No punchline site found.';
             currentLogLine.value = 'Pipeline execution finished successfully.';
 
-            // Stop laser and timer
+            // Stop laser, timers and interval
             laserActive.value = false;
             clearInterval(timerInterval);
+            clearInterval(reasonInterval);
             evtSource.close();
 
-            // Savor the punchline lock for 700ms before smooth transition to dashboard
-            await new Promise(r => setTimeout(r, 700));
+            // Savor the punchline lock and halo spotlight for 1.4s before smooth transition
+            await new Promise(r => setTimeout(r, 1400));
 
             viewState.value = 'DASHBOARD';
             await nextTick();
@@ -835,6 +861,7 @@
             console.error('SSE Error:', err);
             evtSource.close();
             clearInterval(timerInterval);
+            clearInterval(reasonInterval);
             laserActive.value = false;
             alert('Live analysis error. Check server console for details.');
             viewState.value = 'INPUT';
