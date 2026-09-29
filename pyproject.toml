@@ -16,11 +16,16 @@ dependencies = [
 
 [project.scripts]
 crack = "crack.runner:main"
+crack-serve = "crack.serve:main"
 
 [project.optional-dependencies]
 test = [
     "pytest>=7",
     "pytest-cov>=4",
+]
+web = [
+    "fastapi>=0.100",
+    "uvicorn>=0.20",
 ]
 
 [tool.setuptools.packages.find]

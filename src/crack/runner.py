@@ -563,7 +563,26 @@ def _main(argv: list[str] | None = None) -> None:
         "--concurrency", "-j", type=int, default=1, metavar="N",
         help="Number of concurrent worker threads (default: 1). Use 8-12 for high-throughput batch evaluation.",
     )
+    parser.add_argument(
+        "--serve", action="store_true",
+        help="Start the interactive CRACK visual web UI server.",
+    )
+    parser.add_argument(
+        "--port", type=int, default=8000, metavar="PORT",
+        help="Port for the web UI server (default: 8000).",
+    )
+    parser.add_argument(
+        "--host", default="127.0.0.1", metavar="HOST",
+        help="Host for the web UI server (default: 127.0.0.1).",
+    )
     args = parser.parse_args(argv)
+
+    if args.serve:
+        import uvicorn
+        from crack.serve import app
+        print(f"\n✨ Starting CRACK Interactive Web UI at http://{args.host}:{args.port}")
+        uvicorn.run(app, host=args.host, port=args.port)
+        return
 
     backend_req = args.backend or os.getenv("CRACK_BACKEND") or os.getenv("DOUBLETAKE_BACKEND") or "auto"
     backend = resolve_backend(backend_req)
@@ -597,8 +616,8 @@ def _main(argv: list[str] | None = None) -> None:
         print(format_analysis_report(record, args.age))
         return
 
-    if not args.blind:
-        parser.error("Either --blind/--input <path> or --text <string> must be provided.")
+    if not args.blind and not args.serve:
+        parser.error("Either --blind/--input <path>, --text <string>, or --serve must be provided.")
 
     out_root = Path(args.output)
     is_jsonl_target = out_root.suffix == ".jsonl"

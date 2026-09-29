@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRACK — Neuro-Symbolic Humor & Pun Analysis Engine</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              cyan: '#06b6d4',
+              teal: '#14b8a6',
+              purple: '#8b5cf6',
+              violet: '#a855f7',
+              dark: '#080C14',
+              surface: '#0F172A',
+              card: 'rgba(15, 23, 42, 0.75)',
+            }
+          },
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"SF Pro Text"', 'Inter', 'sans-serif'],
+            mono: ['"SF Mono"', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Vue 3 -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* Custom Apple-Style Aesthetics & Keyframe Animations */
+    body {
+      background-color: #070B12;
+      background-image: 
+        radial-gradient(at 10% 15%, rgba(6, 182, 212, 0.08) 0px, transparent 50%),
+        radial-gradient(at 90% 85%, rgba(139, 92, 246, 0.08) 0px, transparent 50%);
+      background-attachment: fixed;
+      color: #F1F5F9;
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+      overflow-x: hidden;
+    }
+
+    /* Laser Scanner Beam */
+    .laser-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(180deg, transparent, #22d3ee 30%, #38bdf8 70%, transparent);
+      box-shadow: 0 0 15px #06b6d4, 0 0 30px #38bdf8, 0 0 50px rgba(6, 182, 212, 0.5);
+      z-index: 20;
+      pointer-events: none;
+    }
+
+    .laser-aura {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 80px;
+      transform: translateX(-100%);
+      background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.15));
+      pointer-events: none;
+    }
+
+    /* Punchline Halo Pulse */
+    @keyframes punchline-pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.7), 0 0 20px rgba(139, 92, 246, 0.4);
+      }
+      50% {
+        box-shadow: 0 0 0 12px rgba(6, 182, 212, 0), 0 0 35px rgba(139, 92, 246, 0.8);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(6, 182, 212, 0), 0 0 20px rgba(139, 92, 246, 0.4);
+      }
+    }
+
+    .punchline-halo {
+      animation: punchline-pulse 1.8s infinite cubic-bezier(0.4, 0, 0.6, 1);
+    }
+
+    /* Glassmorphism Card Style */
+    .apple-glass {
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+    }
+
+    .apple-glass-hover:hover {
+      border-color: rgba(255, 255, 255, 0.18);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    }
+
+    /* Staggered Spring Fade-in for Dashboard Cards */
+    @keyframes spring-up {
+      0% {
+        opacity: 0;
+        transform: translateY(24px) scale(0.98);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .animate-spring-1 { animation: spring-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .animate-spring-2 { animation: spring-up 0.55s 0.08s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+    .animate-spring-3 { animation: spring-up 0.6s 0.16s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+    .animate-spring-4 { animation: spring-up 0.65s 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+  </style>
+</head>
+<body class="min-h-screen antialiased flex flex-col selection:bg-cyan-500/30 selection:text-cyan-200">
+
+  <div id="app" class="flex-1 flex flex-col max-w-6xl w-full mx-auto px-4 sm:px-6 py-6" v-cloak>
+
+    <!-- Top Navigation Bar -->
+    <header class="flex items-center justify-between py-3 mb-8 border-b border-white/5">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-violet-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+          <i data-lucide="sparkles" class="w-5 h-5 text-white"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+              CRACK
+            </h1>
+            <span class="text-xs px-2 py-0.5 rounded-full font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+              v0.1.0
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 font-normal">Computational Resolution & Anchoring of Comedy & Knowledge</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <a href="https://github.com/Jyz922/Crack" target="_blank" class="flex items-center gap-2 text-xs text-slate-400 hover:text-white px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20 transition-all bg-white/[0.02]">
+          <i data-lucide="github" class="w-4 h-4"></i>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- ==================================================================== -->
+    <!-- VIEW 1: Input & Playground Phase (Default State)                      -->
+    <!-- ==================================================================== -->
+    <section v-if="viewState === 'INPUT'" class="my-auto max-w-3xl w-full mx-auto">
+      
+      <div class="text-center mb-8">
+        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3 bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+          Linguistic Humor & Pun Identification
+        </h2>
+        <p class="text-slate-400 text-sm sm:text-base max-w-xl mx-auto">
+          Deep neuro-symbolic cognitive pipeline analyzing wordplay ambiguity, punchline resolution, and child developmental appropriateness.
+        </p>
+      </div>
+
+      <!-- Main Input Card -->
+      <div class="apple-glass rounded-2xl p-6 sm:p-8 relative overflow-hidden transition-all duration-300">
+        <!-- Glow accents -->
+        <div class="absolute -top-24 -right-24 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-violet-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="relative z-10">
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+            Joke / Wordplay Text
+          </label>
+          <div class="relative">
+            <textarea
+              v-model="jokeInput"
+              rows="3"
+              placeholder="e.g. Why was 6 afraid of 7? Because 7 ate 9."
+              class="w-full bg-slate-950/70 border border-slate-800 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 rounded-xl p-4 text-slate-100 placeholder-slate-500 text-base sm:text-lg resize-none outline-none transition-all leading-relaxed"
+              @keydown.enter.prevent="startAnalysis"
+            ></textarea>
+            <button
+              v-if="jokeInput"
+              @click="jokeInput = ''"
+              class="absolute right-3 top-3 text-slate-500 hover:text-slate-300 transition-colors p-1"
+            >
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <!-- Target Age Selector -->
+          <div class="mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-slate-800/80">
+            <div>
+              <span class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">
+                Target Child Age
+              </span>
+              <div class="flex items-center gap-1.5">
+                <button
+                  v-for="age in [6, 8, 10, 12, 14]"
+                  :key="age"
+                  @click="targetAge = age"
+                  :class="[
+                    'px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
+                    targetAge === age
+                      ? 'bg-gradient-to-r from-cyan-500 to-violet-600 text-white shadow-md shadow-cyan-500/20 scale-105'
+                      : 'bg-slate-800/60 text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                  ]"
+                >
+                  Age {{ age }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Analyze Trigger Button -->
+            <button
+              @click="startAnalysis"
+              :disabled="!jokeInput.trim()"
+              class="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-xl font-semibold text-sm tracking-wide text-white bg-gradient-to-r from-cyan-500 via-teal-500 to-violet-600 hover:opacity-95 shadow-lg shadow-cyan-500/25 active:scale-95 transition-all disabled:opacity-40 disabled:pointer-events-none self-end sm:self-center"
+            >
+              <i data-lucide="play" class="w-4 h-4 fill-white"></i>
+              <span>Analyze Joke</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Preset Chips -->
+      <div class="mt-6">
+        <div class="flex items-center justify-between mb-3 px-1">
+          <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Try Curated Benchmarks</span>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button
+            v-for="(preset, idx) in presets"
+            :key="idx"
+            @click="selectPreset(preset)"
+            class="text-xs bg-slate-900/60 hover:bg-slate-800/80 border border-slate-800 hover:border-slate-700 text-slate-300 px-3 py-2 rounded-xl transition-all flex items-center gap-2"
+          >
+            <span>{{ preset.icon }}</span>
+            <span class="truncate max-w-[240px]">{{ preset.title }}</span>
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================================================================== -->
+    <!-- VIEW 2: Apple-Style Text Scanner & Punchline Locking Stage (Active)    -->
+    <!-- ==================================================================== -->
+    <section v-else-if="viewState === 'SCANNING'" class="my-auto max-w-4xl w-full mx-auto flex flex-col items-center">
+      
+      <!-- Live Status Subheader -->
+      <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-xs font-medium mb-6">
+        <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+        <span>{{ scannerStageMessage }}</span>
+      </div>
+
+      <!-- Big Typography Display Card -->
+      <div class="apple-glass rounded-3xl p-8 sm:p-12 w-full relative overflow-hidden transition-all duration-500 min-h-[300px] flex flex-col justify-center">
+        
+        <!-- The Moving Laser Scanner Line -->
+        <div
+          v-if="laserActive"
+          class="laser-line transition-all duration-75"
+          :style="{ left: laserPosition + '%' }"
+        >
+          <div class="laser-aura"></div>
+        </div>
+
+        <!-- Rendered Text with Dynamic Candidate & Punchline Word Spans -->
+        <div class="text-2xl sm:text-3xl md:text-4xl font-medium tracking-tight text-center leading-relaxed select-none relative z-10 flex flex-wrap items-center justify-center gap-x-2 gap-y-4">
+          <template v-for="(tok, idx) in tokens" :key="idx">
+            
+            <!-- Non-word token (e.g. whitespace or punctuation) -->
+            <span v-if="!tok.is_word" class="text-slate-400">
+              {{ tok.text }}
+            </span>
+
+            <!-- Candidate or Target Word -->
+            <span
+              v-else
+              :class="[
+                'relative inline-block transition-all duration-300 px-1 py-0.5 rounded-lg',
+                // Punchline locked state
+                isPunchlineLocked && tok.is_punchline
+                  ? 'text-cyan-200 font-bold scale-110 punchline-halo bg-cyan-500/20 border border-cyan-400 z-30'
+                  : '',
+                // Candidate highlighted state
+                isCandidateStage && tok.is_candidate && !isPunchlineLocked
+                  ? 'text-cyan-300 font-semibold border-b-2 border-dashed border-cyan-400 bg-cyan-500/10'
+                  : 'text-slate-200'
+              ]"
+            >
+              {{ tok.text }}
+
+              <!-- Floating Tag: Candidate Sense -->
+              <span
+                v-if="isCandidateStage && tok.is_candidate && !isPunchlineLocked"
+                class="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-mono px-2 py-0.5 rounded-md bg-slate-800/90 text-cyan-300 border border-cyan-500/30 shadow-lg pointer-events-none animate-bounce"
+              >
+                Sense candidate ({{ (tok.candidate_score * 100).toFixed(0) }}%)
+              </span>
+
+              <!-- Floating Tag: Punchline Target Locked -->
+              <span
+                v-if="isPunchlineLocked && tok.is_punchline"
+                class="absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-semibold px-2.5 py-1 rounded-lg bg-gradient-to-r from-cyan-500 to-violet-600 text-white shadow-xl shadow-cyan-500/30 border border-cyan-300 pointer-events-none flex items-center gap-1.5 animate-pulse"
+              >
+                <i data-lucide="target" class="w-3.5 h-3.5"></i>
+                <span>Punchline Site ({{ (analysisData.confidence * 100).toFixed(0) }}%)</span>
+              </span>
+            </span>
+
+          </template>
+        </div>
+
+        <!-- Real-time Terminal Log Ticker at Bottom -->
+        <div class="mt-10 pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono text-slate-400">
+          <div class="flex items-center gap-2 truncate">
+            <span class="text-cyan-400 font-semibold">[CRACK_PIPELINE]</span>
+            <span class="text-slate-300">{{ currentLogLine }}</span>
+          </div>
+          <span class="text-slate-500 hidden sm:inline">{{ (elapsedMs).toFixed(0) }}ms</span>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ==================================================================== -->
+    <!-- VIEW 3: Final Analysis Results Dashboard (Bento Grid)                 -->
+    <!-- ==================================================================== -->
+    <section v-else-if="viewState === 'DASHBOARD'" class="w-full flex-1 flex flex-col gap-6">
+      
+      <!-- Top Action & Return Bar -->
+      <div class="flex items-center justify-between">
+        <button
+          @click="resetToInput"
+          class="inline-flex items-center gap-2 text-xs font-medium text-slate-400 hover:text-white px-3 py-1.5 rounded-lg border border-slate-800 hover:border-slate-700 bg-slate-900/60 transition-all"
+        >
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+          <span>Analyze Another Joke</span>
+        </button>
+
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-slate-400">Target Age:</span>
+          <span class="text-xs font-bold text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-md border border-cyan-500/20">
+            Age {{ activeDisplayAge }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Bento Grid Module 1: Executive Verdict Badges -->
+      <div class="animate-spring-1 grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <!-- Classification Badge -->
+        <div class="apple-glass rounded-2xl p-4 flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 flex-shrink-0">
+            <i data-lucide="tag" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Classification</div>
+            <div class="text-sm font-bold text-slate-100 flex items-center gap-1.5">
+              <span>{{ formatClassification(analysisData.main_classification) }}</span>
+              <span class="text-xs text-cyan-400 font-mono">({{ (analysisData.confidence * 100).toFixed(0) }}%)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Age Comprehension Badge -->
+        <div class="apple-glass rounded-2xl p-4 flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400 flex-shrink-0">
+            <i data-lucide="brain" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Age {{ activeDisplayAge }} Comprehension</div>
+            <div class="text-sm font-bold text-violet-200">
+              {{ formatComprehension(currentAgeAssessment.comprehension) }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Child Safety Shield -->
+        <div class="apple-glass rounded-2xl p-4 flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0">
+            <i data-lucide="shield-check" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Child Safety Guardrail</div>
+            <div class="text-sm font-bold text-emerald-300">
+              {{ analysisData.safety.is_safe ? 'PASS (100% Compliant)' : 'CAUTION (Review Flagged)' }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bento Grid Module 2: The Core Dual-Sense Collision Card -->
+      <div class="animate-spring-2 apple-glass rounded-3xl p-6 sm:p-8">
+        
+        <!-- Joke Text Anchor Header -->
+        <div class="mb-6 pb-4 border-b border-slate-800/80">
+          <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Original Text & Punchline Site</div>
+          <div class="text-lg sm:text-xl font-medium text-slate-100 leading-relaxed">
+            <template v-for="(tok, idx) in analysisData.tokens" :key="idx">
+              <span v-if="!tok.is_word" class="text-slate-400">{{ tok.text }}</span>
+              <span
+                v-else
+                :class="[
+                  tok.is_punchline
+                    ? 'font-bold text-cyan-300 bg-cyan-500/20 px-2 py-0.5 rounded-lg border border-cyan-400/50 shadow-md shadow-cyan-500/20'
+                    : 'text-slate-200'
+                ]"
+              >{{ tok.text }}</span>
+            </template>
+          </div>
+        </div>
+
+        <!-- Side-by-side Dual Senses -->
+        <div v-if="analysisData.sense_a && analysisData.sense_b" class="grid grid-cols-1 md:grid-cols-2 gap-4 relative">
+          
+          <!-- Sense A Panel -->
+          <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 relative overflow-hidden">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider">
+                {{ analysisData.sense_a.label }}
+              </span>
+              <span class="text-[11px] font-mono text-slate-400 bg-slate-800 px-2 py-0.5 rounded">
+                AoA: {{ analysisData.sense_a.aoa }} yrs
+              </span>
+            </div>
+            <p class="text-sm text-slate-200 mb-3 leading-relaxed">
+              {{ analysisData.sense_a.definition }}
+            </p>
+            <div class="text-xs text-slate-400 flex items-center gap-1.5 font-mono">
+              <i data-lucide="quote" class="w-3.5 h-3.5 text-cyan-400"></i>
+              <span>Anchor quote: "<strong class="text-slate-200">{{ analysisData.sense_a.quote }}</strong>"</span>
+            </div>
+          </div>
+
+          <!-- Sense B Panel -->
+          <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 relative overflow-hidden">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold text-violet-400 uppercase tracking-wider">
+                {{ analysisData.sense_b.label }}
+              </span>
+              <span class="text-[11px] font-mono text-slate-400 bg-slate-800 px-2 py-0.5 rounded">
+                AoA: {{ analysisData.sense_b.aoa }} yrs
+              </span>
+            </div>
+            <p class="text-sm text-slate-200 mb-3 leading-relaxed">
+              {{ analysisData.sense_b.definition }}
+            </p>
+            <div class="text-xs text-slate-400 flex items-center gap-1.5 font-mono">
+              <i data-lucide="quote" class="w-3.5 h-3.5 text-violet-400"></i>
+              <span>Anchor quote: "<strong class="text-slate-200">{{ analysisData.sense_b.quote }}</strong>"</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Incongruity Resolution Explanation -->
+        <div class="mt-4 bg-gradient-to-r from-cyan-950/30 to-violet-950/30 border border-cyan-500/20 rounded-2xl p-4 flex items-start gap-3">
+          <div class="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400 flex-shrink-0 mt-0.5">
+            <i data-lucide="lightbulb" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-cyan-300 uppercase tracking-wider mb-1">Incongruity Resolution Mechanism</div>
+            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              {{ analysisData.resolution_explanation }}
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bento Grid Module 3: Developmental Age Spectrum & L8 Safety -->
+      <div class="animate-spring-3 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Developmental Spectrum (2 cols) -->
+        <div class="apple-glass rounded-3xl p-6 lg:col-span-2 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <h3 class="text-sm font-bold text-slate-100 uppercase tracking-wider">Child Developmental Spectrum</h3>
+                <p class="text-xs text-slate-400">Interactive comprehension progression across developmental milestones</p>
+              </div>
+              <span class="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 font-mono">
+                Selected: Age {{ activeDisplayAge }}
+              </span>
+            </div>
+
+            <!-- Interactive Age Slider / Buttons -->
+            <div class="grid grid-cols-6 gap-2 my-4">
+              <button
+                v-for="age in [4, 6, 8, 10, 12, 14]"
+                :key="age"
+                @click="activeDisplayAge = age"
+                :class="[
+                  'py-2 px-1 rounded-xl text-center transition-all border',
+                  activeDisplayAge === age
+                    ? 'bg-cyan-500/20 border-cyan-400 text-white font-bold shadow-md shadow-cyan-500/20 scale-105'
+                    : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200'
+                ]"
+              >
+                <div class="text-xs">Age</div>
+                <div class="text-base font-extrabold">{{ age }}</div>
+              </button>
+            </div>
+
+            <!-- Current Selected Age Detailed Insight -->
+            <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 text-xs">
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="font-bold text-slate-200">
+                  Developmental Verdict for Age {{ activeDisplayAge }}:
+                </span>
+                <span :class="[
+                  'font-semibold px-2 py-0.5 rounded text-[11px]',
+                  currentAgeAssessment.comprehension === 'FULLY_COMPREHENSIBLE' ? 'bg-emerald-500/20 text-emerald-300' :
+                  currentAgeAssessment.comprehension === 'PARTIALLY_COMPREHENSIBLE' ? 'bg-amber-500/20 text-amber-300' :
+                  'bg-rose-500/20 text-rose-300'
+                ]">
+                  {{ currentAgeAssessment.comprehension }}
+                </span>
+              </div>
+              <p class="text-slate-400 leading-relaxed">
+                {{ currentAgeAssessment.desc }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Metalinguistic Acquisition Floor Notice -->
+          <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+            <span>Metalinguistic Humor Floor: <strong>Age 7.0+</strong></span>
+            <span>AoA Join Status: <strong>EXACT (WordNet 3.0)</strong></span>
+          </div>
+        </div>
+
+        <!-- L8 Safety & Appropriateness Guardrails (1 col) -->
+        <div class="apple-glass rounded-3xl p-6 flex flex-col justify-between">
+          <div>
+            <h3 class="text-sm font-bold text-slate-100 uppercase tracking-wider mb-1">L8 Safety Guardrails</h3>
+            <p class="text-xs text-slate-400 mb-4">Two-axis safety and child content moderation audit</p>
+
+            <div class="space-y-3">
+              <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-3">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs text-slate-300">Surface Content Safety</span>
+                  <span class="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">CLEAN</span>
+                </div>
+                <div class="text-[11px] text-slate-500">Zero profanity, violence, or dangerous themes.</div>
+              </div>
+
+              <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-3">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs text-slate-300">Inferential Subtlety</span>
+                  <span class="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">SAFE</span>
+                </div>
+                <div class="text-[11px] text-slate-500">No inappropriate innuendo or harmful secondary senses.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-800/80 text-[11px] text-slate-400">
+            <span>Audit Verdict: </span>
+            <strong class="text-emerald-400 font-semibold">{{ analysisData.safety.notes }}</strong>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bento Grid Module 4: Pipeline Execution Trace (Accordion) -->
+      <div class="animate-spring-4 apple-glass rounded-2xl overflow-hidden">
+        <button
+          @click="showTrace = !showTrace"
+          class="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-white/[0.02] transition-colors"
+        >
+          <div class="flex items-center gap-2.5">
+            <i data-lucide="cpu" class="w-4 h-4 text-cyan-400"></i>
+            <span class="text-xs font-bold text-slate-200 uppercase tracking-wider">
+              Inspectable Neuro-Symbolic Execution Trace (L0–L8)
+            </span>
+          </div>
+          <div class="flex items-center gap-2 text-xs text-slate-400">
+            <span>{{ analysisData.trace.length }} Layers Executed</span>
+            <i :data-lucide="showTrace ? 'chevron-up' : 'chevron-down'" class="w-4 h-4"></i>
+          </div>
+        </button>
+
+        <div v-if="showTrace" class="p-6 pt-0 border-t border-slate-800/80">
+          <div class="overflow-x-auto my-3">
+            <table class="w-full text-left text-xs font-mono">
+              <thead>
+                <tr class="text-slate-500 border-b border-slate-800">
+                  <th class="py-2">Layer</th>
+                  <th class="py-2">Status</th>
+                  <th class="py-2">Duration</th>
+                  <th class="py-2">Reason / Details</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800/50 text-slate-300">
+                <tr v-for="(t, idx) in analysisData.trace" :key="idx" class="hover:bg-slate-800/20">
+                  <td class="py-2 font-bold text-cyan-400">{{ t.layer }}</td>
+                  <td class="py-2">
+                    <span :class="[
+                      'px-1.5 py-0.5 rounded text-[10px]',
+                      t.status === 'OK' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'
+                    ]">
+                      {{ t.status }}
+                    </span>
+                  </td>
+                  <td class="py-2 text-slate-400">{{ t.duration_ms }}ms</td>
+                  <td class="py-2 text-slate-400 truncate max-w-xs">{{ t.reason || '-' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="flex justify-end mt-2">
+            <button
+              @click="copyJson"
+              class="text-xs font-mono text-cyan-400 hover:text-cyan-300 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-cyan-500/20 bg-cyan-500/10 transition-colors"
+            >
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              <span>{{ copyStatus }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Footer -->
+    <footer class="mt-auto pt-8 pb-4 text-center text-xs text-slate-500 border-t border-white/5">
+      CRACK: Computational Resolution & Anchoring of Comedy & Knowledge • 2026
+    </footer>
+
+  </div>
+
+  <script>
+    const { createApp, ref, computed, nextTick, onMounted } = Vue;
+
+    createApp({
+      setup() {
+        // View States: 'INPUT', 'SCANNING', 'DASHBOARD'
+        const viewState = ref('INPUT');
+        const jokeInput = ref('Why was 6 afraid of 7? Because 7 ate 9.');
+        const targetAge = ref(8);
+        const activeDisplayAge = ref(8);
+
+        // Animation States
+        const laserActive = ref(false);
+        const laserPosition = ref(0);
+        const isCandidateStage = ref(false);
+        const isPunchlineLocked = ref(false);
+        const scannerStageMessage = ref('Initializing lexical scanner...');
+        const currentLogLine = ref('Tokenizing input string...');
+        const elapsedMs = ref(0);
+
+        // Data Storage
+        const tokens = ref([]);
+        const analysisData = ref(null);
+        const showTrace = ref(false);
+        const copyStatus = ref('Copy Raw JSON');
+
+        const presets = [
+          { icon: '🔢', title: 'Why was 6 afraid of 7? Because 7 ate 9.', text: 'Why was 6 afraid of 7? Because 7 ate 9.', age: 8 },
+          { icon: '🏦', title: 'I used to be a banker, but I lost interest.', text: 'I used to be a banker, but I lost interest.', age: 10 },
+          { icon: '🎹', title: 'What has keys but no locks? A piano.', text: 'What has keys but no locks? A piano.', age: 6 },
+          { icon: '🍝', title: 'What do you call a fake noodle? An impasta.', text: 'What do you call a fake noodle? An impasta.', age: 8 },
+          { icon: '🦊', title: 'The quick brown fox jumps over the lazy dog.', text: 'The quick brown fox jumps over the lazy dog.', age: 8 },
+        ];
+
+        function selectPreset(preset) {
+          jokeInput.value = preset.text;
+          targetAge.value = preset.age;
+        }
+
+        async function startAnalysis() {
+          if (!jokeInput.value.trim()) return;
+
+          viewState.value = 'SCANNING';
+          laserActive.value = true;
+          laserPosition.value = 0;
+          isCandidateStage.value = false;
+          isPunchlineLocked.value = false;
+          scannerStageMessage.value = 'Phase 1: Laser Radar Scanning...';
+          currentLogLine.value = 'Parsing sentence structure and tokens...';
+          elapsedMs.value = 0;
+
+          // Start millisecond timer
+          const startTime = performance.now();
+          const timerInterval = setInterval(() => {
+            elapsedMs.value = performance.now() - startTime;
+          }, 30);
+
+          try {
+            // Initiate backend request
+            const responsePromise = fetch('/api/analyze', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                text: jokeInput.value.trim(),
+                target_age: targetAge.value
+              })
+            });
+
+            // Smooth Laser Sweep Animation (0.0s -> 0.7s)
+            const sweepStart = performance.now();
+            const sweepDuration = 700;
+
+            await new Promise((resolve) => {
+              function step() {
+                const progress = Math.min(1, (performance.now() - sweepStart) / sweepDuration);
+                laserPosition.value = progress * 100;
+                if (progress < 1) {
+                  requestAnimationFrame(step);
+                } else {
+                  resolve();
+                }
+              }
+              requestAnimationFrame(step);
+            });
+
+            // Await backend response
+            const res = await responsePromise;
+            const data = await res.json();
+            analysisData.value = data;
+            tokens.value = data.tokens;
+            activeDisplayAge.value = targetAge.value;
+
+            // Beat 2: Candidate Highlighting (0.7s -> 1.1s)
+            laserActive.value = false;
+            isCandidateStage.value = true;
+            scannerStageMessage.value = 'Phase 2: WordNet Candidate Senses Identified';
+            currentLogLine.value = `Loaded ${data.candidates.length} candidate ambiguity terms...`;
+            await new Promise(r => setTimeout(r, 450));
+
+            // Beat 3: Punchline Spotlight Convergence (1.1s -> 1.5s)
+            isPunchlineLocked.value = true;
+            scannerStageMessage.value = 'Phase 3: Punchline Incongruity Locked';
+            currentLogLine.value = data.punchline 
+              ? `Locked punchline site on '${data.punchline}' (Confidence: ${(data.confidence * 100).toFixed(0)}%)`
+              : 'No ambiguity incongruity resolved.';
+            await new Promise(r => setTimeout(r, 550));
+
+            // Beat 4: Transition to Bento Dashboard (1.5s+)
+            clearInterval(timerInterval);
+            viewState.value = 'DASHBOARD';
+
+            await nextTick();
+            lucide.createIcons();
+
+          } catch (err) {
+            console.error('Analysis failed:', err);
+            clearInterval(timerInterval);
+            alert('Analysis failed: ' + err.message);
+            viewState.value = 'INPUT';
+          }
+        }
+
+        function resetToInput() {
+          viewState.value = 'INPUT';
+          nextTick(() => {
+            lucide.createIcons();
+          });
+        }
+
+        const currentAgeAssessment = computed(() => {
+          if (!analysisData.value || !analysisData.value.age_spectrum) {
+            return { comprehension: 'UNKNOWN', desc: '' };
+          }
+          return analysisData.value.age_spectrum[activeDisplayAge.value] || { comprehension: 'UNKNOWN', desc: '' };
+        });
+
+        function formatClassification(c) {
+          if (!c) return 'NO_AMBIGUITY_FOUND';
+          return c.replace(/_/g, ' ');
+        }
+
+        function formatComprehension(comp) {
+          if (!comp) return 'UNKNOWN';
+          return comp.replace(/_/g, ' ');
+        }
+
+        async function copyJson() {
+          if (!analysisData.value) return;
+          try {
+            await navigator.clipboard.writeText(JSON.stringify(analysisData.value, null, 2));
+            copyStatus.value = 'Copied!';
+            setTimeout(() => { copyStatus.value = 'Copy Raw JSON'; }, 2000);
+          } catch (e) {
+            copyStatus.value = 'Failed to copy';
+          }
+        }
+
+        onMounted(() => {
+          lucide.createIcons();
+        });
+
+        return {
+          viewState,
+          jokeInput,
+          targetAge,
+          activeDisplayAge,
+          presets,
+          selectPreset,
+          startAnalysis,
+          resetToInput,
+          tokens,
+          laserActive,
+          laserPosition,
+          isCandidateStage,
+          isPunchlineLocked,
+          scannerStageMessage,
+          currentLogLine,
+          elapsedMs,
+          analysisData,
+          currentAgeAssessment,
+          formatClassification,
+          formatComprehension,
+          showTrace,
+          copyJson,
+          copyStatus,
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

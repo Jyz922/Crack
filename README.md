@@ -264,6 +264,19 @@ pip install -e ".[test]"
 pytest tests/ -q -m "not live"
 ```
 
+### Interactive Web UI Demo
+
+To launch the interactive visual analysis dashboard with real-time laser scanning:
+
+```bash
+pip install -e ".[web]"
+crack --serve
+# or
+python -m crack.serve --port 8000
+```
+
+Open [http://127.0.0.1:8000](http://127.0.0.1:8000) in your browser.
+
 ### API Keys Configuration
 
 Create a `.env` file in the project root:
