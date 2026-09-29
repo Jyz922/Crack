@@ -33,8 +33,15 @@ Your task is to analyze the input text and determine whether TWO distinct meanin
    - null: if only one sense is present or anchoring failed.
 
 4. **Anchoring Status**:
-   - "PASS": Both senses are clearly active and supported by context spans in the text.
-   - "ONE_SENSE_ONLY": Only one meaning is supported by the context in the text (e.g. an ordinary sentence like "The bank was steep", or a non-joke where the punchline does not trigger the second meaning).
+   - "PASS": Both senses are genuinely and intentionally active, supported by distinct context spans in the text, creating true wordplay or a double entendre.
+   - "ONE_SENSE_ONLY": Only one meaning is genuinely supported by the context in the text. You MUST output "ONE_SENSE_ONLY" when:
+     - The text is an ordinary literal, mundane, or factual sentence (e.g. "The bank was steep", "The dog barked in the yard").
+     - An ambiguous word has multiple dictionary definitions, but the sentence only uses ONE literal definition in a straightforward manner. DO NOT invent or force remote, far-fetched second meanings (pareidolia):
+       * In "How many stories were in the library building? I think five floors", "stories" means architectural building levels/floors; the mention of "library" does NOT activate a pun on storybooks.
+       * In "The buck does get rather excited when the mailman arrives", "mailman" is simply a postal worker; do NOT invent a pun on "male man".
+       * In "There was a row between the oarsmen about who forgot the tent", "row" means an argument or dispute (/raʊ/); it is NOT a pun on rowing boats (/roʊ/) just because oarsmen are involved.
+       * In "Too many dishes left in the sink", "left" means remaining; do NOT invent an accounting debit pun just because an accountant is mentioned.
+     - The text is a non-joke or anti-joke where the punchline does not trigger any second lexical meaning.
    - "FAIL": No ambiguous wordplay can be identified or grounded.
 
 5. **Resolving Sense**:

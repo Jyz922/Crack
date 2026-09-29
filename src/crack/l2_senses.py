@@ -241,6 +241,7 @@ def retrieve(tokens: list[str]) -> list[SenseEntry]:
     Split-part senses keep term=<whole word> and source="wordnet_split:<a>+<b>".
     MWE senses have term=<surface phrase> and source="wordnet_mwe:<lemma>".
     """
+    token_counts = Counter(re.sub(r"['’]s?$", "", tok.lower()) for tok in tokens if tok.isalpha())
     out: list[SenseEntry] = []
     for phrase, key in mwe_spans(tokens):
         out += senses_for(key, term=phrase.lower(), source=f"wordnet_mwe:{key}")
@@ -249,7 +250,12 @@ def retrieve(tokens: list[str]) -> list[SenseEntry]:
         # Possessive 's / ’s -> the noun (car's, Dan’s). Contractions (don’t)
         # stay non-alpha and are skipped below as function words.
         t = re.sub(r"['’]s?$", "", tok.lower())
-        if t in seen or t in STOPWORDS or not t.isalpha():
+        if t in seen or not t.isalpha():
+            continue
+        # Words repeating in the sentence (count >= 2) indicate intentional
+        # polysemy/heteronym repetition wordplay (e.g. "does...does", "produce...produce");
+        # exempt them from STOPWORDS.
+        if t in STOPWORDS and token_counts[t] < 2:
             continue
         seen.add(t)
         out += senses_for(t)
