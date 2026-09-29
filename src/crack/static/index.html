@@ -296,7 +296,7 @@
       </div>
 
       <!-- Big Typography Display Card -->
-      <div class="apple-glass rounded-3xl p-8 sm:p-12 w-full relative overflow-hidden transition-all duration-500 min-h-[260px] flex flex-col justify-center">
+      <div class="apple-glass rounded-3xl px-6 sm:px-10 pt-7 pb-5 w-full relative overflow-hidden transition-all duration-500 flex flex-col">
         
         <!-- The Moving Laser Scanner Line -->
         <div
@@ -308,22 +308,22 @@
         </div>
 
         <!-- Rendered Text with Dynamic Candidate & Punchline Word Spans -->
-        <div class="text-2xl sm:text-3xl md:text-4xl font-medium tracking-tight text-center select-none relative z-10 flex flex-wrap items-center justify-center gap-y-6 sm:gap-y-8 py-10 px-6 leading-relaxed">
+        <div class="text-2xl sm:text-3xl md:text-4xl font-medium tracking-tight text-center select-none relative z-10 flex flex-wrap items-center justify-center gap-y-4 sm:gap-y-6 my-2 py-2 px-2 leading-relaxed">
           <template v-for="(tok, idx) in tokens" :key="idx"><span
             v-if="!tok.is_word"
             class="text-slate-400 select-none inline"
           >{{ tok.text }}</span><span
             v-else
             :class="[
-              'relative inline-block transition-all duration-300 px-2.5 py-1 rounded-xl',
+              'relative inline-block transition-all duration-300 px-2.5 py-1 rounded-xl mx-0.5 border-2',
               // Punchline locked state
               isPunchlineLocked && tok.is_punchline
-                ? 'text-cyan-100 font-extrabold scale-110 punchline-halo bg-cyan-500/25 border-2 border-cyan-300 z-30 shadow-2xl shadow-cyan-500/50'
+                ? 'text-cyan-100 font-extrabold scale-110 punchline-halo bg-cyan-500/30 border-cyan-300 z-30 shadow-2xl shadow-cyan-500/50'
                 : '',
-              // Candidate highlighted state
+              // Candidate highlighted state (Full 360-degree glowing dashed box)
               isCandidateStage && tok.is_candidate && !isPunchlineLocked
-                ? 'text-cyan-300 font-bold border-b-2 border-dashed border-cyan-400 bg-cyan-500/15 scale-105 shadow-md shadow-cyan-500/20'
-                : 'text-slate-200'
+                ? 'text-cyan-200 font-bold border-dashed border-cyan-400 bg-cyan-500/20 scale-105 shadow-[0_0_15px_rgba(6,182,212,0.4)] z-20'
+                : (!isPunchlineLocked || !tok.is_punchline ? 'text-slate-200 border-transparent' : '')
             ]"
           >{{ tok.text }}<!-- Floating Tag: Punchline Target Locked --><div
               v-if="isPunchlineLocked && tok.is_punchline"
@@ -339,7 +339,7 @@
         </div>
 
         <!-- Real-time Terminal Log Ticker at Bottom -->
-        <div class="mt-10 pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono text-slate-400">
+        <div class="mt-6 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono text-slate-400">
           <div class="flex items-center gap-2 truncate">
             <span class="text-cyan-400 font-semibold">[CRACK_PIPELINE]</span>
             <span class="text-slate-300">{{ currentLogLine }}</span>
