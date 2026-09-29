@@ -339,18 +339,14 @@ async def analyze_joke(req: AnalyzeRequest):
             start = time.monotonic()
             try:
                 rec = layer_fn(rec, settings)
-                status = "OK"
-                reason = None
             except Exception as exc:
-                status = "ERROR"
-                reason = str(exc)
-            rec.trace.append(LayerTrace(
-                layer=layer_name,
-                status=status,
-                reason=reason,
-                duration_ms=round((time.monotonic() - start) * 1000, 1),
-                hints_used=0,
-            ))
+                rec.trace.append(LayerTrace(
+                    layer=layer_name,
+                    status="ERROR",
+                    reason=str(exc),
+                    duration_ms=round((time.monotonic() - start) * 1000, 1),
+                    hints_used=0,
+                ))
         return rec
 
     rec = await loop.run_in_executor(None, _execute)
@@ -380,19 +376,15 @@ async def stream_analysis(text: str, target_age: int = 8):
             try:
                 # Run the actual layer in thread pool to prevent blocking event loop
                 rec = await loop.run_in_executor(None, layer_fn, rec, settings)
-                status = "OK"
-                reason = None
             except Exception as exc:
-                status = "ERROR"
-                reason = str(exc)
-            duration_ms = round((time.monotonic() - start) * 1000, 1)
-            rec.trace.append(LayerTrace(
-                layer=layer_name,
-                status=status,
-                reason=reason,
-                duration_ms=duration_ms,
-                hints_used=0,
-            ))
+                duration_ms = round((time.monotonic() - start) * 1000, 1)
+                rec.trace.append(LayerTrace(
+                    layer=layer_name,
+                    status="ERROR",
+                    reason=str(exc),
+                    duration_ms=duration_ms,
+                    hints_used=0,
+                ))
 
             # Send real event payload corresponding to layer completion
             if layer_name == "L1":
