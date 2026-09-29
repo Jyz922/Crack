@@ -115,6 +115,7 @@ The repository provides a curated, balanced evaluation set (`corpus/joke_corpus_
   - [Python SDK Usage](#python-sdk-usage)
   - [Reproducing Benchmark Results](#reproducing-benchmark-results)
 - [Repository Structure](#repository-structure)
+- [Roadmap & Planned Benchmarks](#roadmap--planned-benchmarks)
 - [License & Citation](#license--citation)
 
 ---
@@ -410,6 +411,22 @@ crack --input corpus/joke_corpus_blind.jsonl --eval corpus/joke_corpus_gold.json
 │   └── schema.py                      # Pydantic v2 data models & trace records
 └── tests/                             # 330+ unit & integration tests
 ```
+
+---
+
+## Roadmap & Planned Benchmarks
+
+To further validate CRACK's fine-grained wordplay explanation fidelity and child-directed safety guardrails, two subsequent gold-standard benchmark evaluations are planned:
+
+### 1. ExPUNations Benchmark (EMNLP 2022) — Priority 1
+- **Focus**: Quantitative evaluation of **Pun Explanation Quality** and **Ambiguity Site Keyword Localization**.
+- **Dataset**: EMNLP 2022 crowdsourced benchmark augmenting wordplay corpora with fine-grained keywords, dual-sense descriptions, and human funniness ratings.
+- **Evaluation Target**: Benchmark CRACK's verbatim quote extraction (`sense_a_anchor_quote` / `sense_b_anchor_quote`) against ExPUNations' gold keyword spans and human sense explanations, evaluating explanation fidelity without ungrounded LLM hallucination.
+
+### 2. SemEval-2021 Task 7: HaHackathon — Priority 2
+- **Focus**: Quantitative evaluation of **Humor Detection & Offense Severity Rating**.
+- **Dataset**: 10,000 multi-annotator short texts scored for humor presence, humor rating, and offense score (1–5 scale).
+- **Evaluation Target**: Directly evaluate CRACK's **L8 Two-Axis Safety Review** (Surface Content Safety vs. Inferential Complexity) against human offense annotations, demonstrating empirical child-safety and toxicity moderation guardrails.
 
 ---
 
