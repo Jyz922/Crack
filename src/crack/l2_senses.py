@@ -56,6 +56,9 @@ can could may might must just very too also only own same such both each all
 any some few more most other again once because until while don t s
 """.split())
 
+# Function words in STOPWORDS that can genuinely function as nouns/verbs in pun wordplay
+PUN_POSSIBLE_STOPWORDS = frozenset({"does", "can", "may", "will"})
+
 
 @lru_cache(maxsize=1)
 def wordnet():
@@ -254,9 +257,10 @@ def retrieve(tokens: list[str]) -> list[SenseEntry]:
             continue
         # Words repeating in the sentence (count >= 2) indicate intentional
         # polysemy/heteronym repetition wordplay (e.g. "does...does", "produce...produce");
-        # exempt them from STOPWORDS.
-        if t in STOPWORDS and token_counts[t] < 2:
-            continue
+        # exempt only dual-nature words from STOPWORDS, never pure function words like "was", "is", "he".
+        if t in STOPWORDS:
+            if t not in PUN_POSSIBLE_STOPWORDS or token_counts[t] < 2:
+                continue
         seen.add(t)
         out += senses_for(t)
         for a, b in compound_splits(t):

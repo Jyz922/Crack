@@ -34,10 +34,11 @@ Your task is to analyze the input text and determine whether TWO distinct meanin
 
 4. **Anchoring Status**:
    - "PASS": Both senses are genuinely and intentionally active, supported by distinct context spans in the text, creating true wordplay or a double entendre.
+     * In riddles or double entendres where two surrounding context cues activate two distinct senses (e.g. "How many stories were in the library building?" activating both book stories and building floors; "The mouse near the computer attracted the cat" activating both computer device and animal rodent), BOTH senses are active -> PASS.
    - "ONE_SENSE_ONLY": Only one meaning is genuinely supported by the context in the text. You MUST output "ONE_SENSE_ONLY" when:
      - The text is an ordinary literal, mundane, or factual sentence (e.g. "The bank was steep", "The dog barked in the yard").
      - An ambiguous word has multiple dictionary definitions, but the sentence only uses ONE literal definition in a straightforward manner. DO NOT invent or force remote, far-fetched second meanings (pareidolia):
-       * In "How many stories were in the library building? I think five floors", "stories" means architectural building levels/floors; the mention of "library" does NOT activate a pun on storybooks.
+       * In anti-jokes or factual statements with literal answers (e.g. "How many stories were in the library building? I think five floors"), the literal answer ("five floors") restricts the meaning strictly to architectural building levels with no humorous double reading.
        * In "The buck does get rather excited when the mailman arrives", "mailman" is simply a postal worker; do NOT invent a pun on "male man".
        * In "There was a row between the oarsmen about who forgot the tent", "row" means an argument or dispute (/raʊ/); it is NOT a pun on rowing boats (/roʊ/) just because oarsmen are involved.
        * In "Too many dishes left in the sink", "left" means remaining; do NOT invent an accounting debit pun just because an accountant is mentioned.

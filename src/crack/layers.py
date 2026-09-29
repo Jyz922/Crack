@@ -82,9 +82,13 @@ def run_l3(record: AnalysisRecord, settings: Settings) -> AnalysisRecord:
             preferred = m.group(1).lower()
     elif record.l1_result and record.l1_result.tokens and record.l2_result:
         from collections import Counter
+        from .l2_senses import PUN_POSSIBLE_STOPWORDS, STOPWORDS
         counts = Counter(re.sub(r"['’]s?$", "", t.lower()) for t in record.l1_result.tokens if t.isalpha())
         l2_terms = {s.term for s in record.l2_result.senses}
-        repeats = [w for w, c in counts.items() if c >= 2 and w in l2_terms]
+        repeats = [
+            w for w, c in counts.items()
+            if c >= 2 and w in l2_terms and (w not in STOPWORDS or w in PUN_POSSIBLE_STOPWORDS)
+        ]
         if repeats:
             preferred = repeats[0]
     record.l3_result = rank(record.l2_result.senses, settings.L3_TOP_K, preferred_term=preferred)

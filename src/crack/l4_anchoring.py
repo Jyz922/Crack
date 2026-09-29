@@ -239,8 +239,17 @@ def _complete_l4(
 ) -> _L4Call:
     backend = resolve_backend(settings.L4_BACKEND, settings)
 
-    # If client is a mock, dispatch according to backend and capabilities
-    if client is not None:
+    # Check for unit test mock objects
+    is_mock = (
+        client is not None
+        and (
+            hasattr(client, "_is_mock")
+            or type(client).__name__ in ("MagicMock", "Mock", "NonCallableMagicMock")
+            or "unittest.mock" in getattr(type(client), "__module__", "")
+        )
+    )
+
+    if is_mock:
         if backend == "gemini" and hasattr(client, "models"):
             resp = client.models.generate_content(model="mock", contents=prompt)
             raw = getattr(resp, "text", "")
