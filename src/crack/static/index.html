@@ -87,6 +87,48 @@
       animation: punchline-pulse 1.8s infinite cubic-bezier(0.4, 0, 0.6, 1);
     }
 
+    /* Floating Candidate Badges & Staggered Tiers */
+    .candidate-pill {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 25;
+    }
+
+    /* Tier 0 (Lower Tier): Generous clearance above word, never covering letters */
+    .tier-0 {
+      bottom: calc(100% + 14px);
+    }
+
+    /* Tier 1 (Higher Tier): Disjoint upper level for adjacent candidates */
+    .tier-1 {
+      bottom: calc(100% + 46px);
+    }
+
+    /* Punchline Hero Floating Badge */
+    .punchline-badge {
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 16px);
+      transform: translateX(-50%);
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 40;
+      animation: hero-float 2.5s ease-in-out infinite;
+    }
+
+    @keyframes hero-float {
+      0%, 100% {
+        transform: translate(-50%, 0);
+      }
+      50% {
+        transform: translate(-50%, -6px);
+      }
+    }
+
     /* Glassmorphism Card Style */
     .apple-glass {
       background: rgba(15, 23, 42, 0.65);
@@ -275,7 +317,7 @@
       </div>
 
       <!-- Big Typography Display Card -->
-      <div class="apple-glass rounded-3xl p-8 sm:p-12 w-full relative overflow-hidden transition-all duration-500 min-h-[300px] flex flex-col justify-center">
+      <div class="apple-glass rounded-3xl p-8 sm:p-12 w-full relative overflow-hidden transition-all duration-500 min-h-[340px] flex flex-col justify-center">
         
         <!-- The Moving Laser Scanner Line -->
         <div
@@ -287,50 +329,61 @@
         </div>
 
         <!-- Rendered Text with Dynamic Candidate & Punchline Word Spans -->
-        <div class="text-2xl sm:text-3xl md:text-4xl font-medium tracking-tight text-center leading-relaxed select-none relative z-10 flex flex-wrap items-center justify-center gap-x-2 gap-y-4">
-          <template v-for="(tok, idx) in tokens" :key="idx">
-            
-            <!-- Non-word token (e.g. whitespace or punctuation) -->
-            <span v-if="!tok.is_word" class="text-slate-400">
-              {{ tok.text }}
-            </span>
-
-            <!-- Candidate or Target Word -->
-            <span
-              v-else
+        <div class="text-2xl sm:text-3xl md:text-4xl font-medium tracking-tight text-center select-none relative z-10 flex flex-wrap items-center justify-center gap-y-24 sm:gap-y-28 py-14 px-6 leading-[4.5rem]">
+          <template v-for="(tok, idx) in tokens" :key="idx"><span
+            v-if="!tok.is_word"
+            class="text-slate-400 select-none inline"
+          >{{ tok.text }}</span><span
+            v-else
+            :class="[
+              'relative inline-block transition-all duration-300 px-2 py-0.5 rounded-xl',
+              // Punchline locked state
+              isPunchlineLocked && tok.is_punchline
+                ? 'text-cyan-100 font-extrabold scale-110 punchline-halo bg-cyan-500/25 border-2 border-cyan-300 z-30 shadow-2xl shadow-cyan-500/50'
+                : '',
+              // Candidate highlighted state
+              isCandidateStage && tok.is_candidate && !isPunchlineLocked
+                ? 'text-cyan-300 font-bold border-b-2 border-dashed border-cyan-400 bg-cyan-500/15 scale-105 shadow-lg shadow-cyan-500/20'
+                : 'text-slate-200'
+            ]"
+          >{{ tok.text }}<!-- Floating Tag: Compact Candidate Badge with Alternating Tier to Prevent Any Overlap --><div
+              v-if="isCandidateStage && tok.is_candidate && !isPunchlineLocked"
               :class="[
-                'relative inline-block transition-all duration-500 px-2 py-1 rounded-xl',
-                // Punchline locked state
-                isPunchlineLocked && tok.is_punchline
-                  ? 'text-cyan-100 font-extrabold scale-125 punchline-halo bg-cyan-500/30 border-2 border-cyan-300 z-30 shadow-2xl shadow-cyan-500/50'
-                  : '',
-                // Candidate highlighted state
-                isCandidateStage && tok.is_candidate && !isPunchlineLocked
-                  ? 'text-cyan-300 font-bold border-b-2 border-dashed border-cyan-400 bg-cyan-500/15 scale-110 shadow-lg shadow-cyan-500/20'
-                  : 'text-slate-200'
+                'candidate-pill flex items-center justify-center',
+                getCandidateTier(tok) === 0 ? 'tier-0' : 'tier-1'
               ]"
             >
-              {{ tok.text }}
+              <!-- Badge Pill Box -->
+              <div class="relative flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-900/95 text-cyan-300 border border-cyan-500/50 shadow-xl text-[11px] font-mono font-semibold">
+                <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span>
+                <span>{{ (tok.candidate_score * 100).toFixed(0) }}%</span>
 
-              <!-- Floating Tag: Candidate Sense -->
-              <span
-                v-if="isCandidateStage && tok.is_candidate && !isPunchlineLocked"
-                class="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-slate-900/95 text-cyan-300 border border-cyan-500/40 shadow-xl pointer-events-none transition-all duration-300 animate-pulse"
-              >
-                Candidate ({{ (tok.candidate_score * 100).toFixed(0) }}%)
-              </span>
+                <!-- Caret pointer for Tier 0 (comfortably points toward word) -->
+                <div
+                  v-if="getCandidateTier(tok) === 0"
+                  class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 border-r border-b border-cyan-500/50 rotate-45"
+                ></div>
+              </div>
 
-              <!-- Floating Tag: Punchline Target Locked -->
-              <span
-                v-if="isPunchlineLocked && tok.is_punchline"
-                class="absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-bold px-3 py-1 rounded-xl bg-gradient-to-r from-cyan-400 via-teal-400 to-violet-500 text-white shadow-2xl shadow-cyan-500/50 border border-white pointer-events-none flex items-center gap-1.5 animate-bounce"
+              <!-- Vertical Guide Stem for Tier 1 (sleek indicator connecting upper badge to word) -->
+              <div
+                v-if="getCandidateTier(tok) === 1"
+                class="absolute top-full left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none"
               >
+                <div class="w-[1.5px] h-[32px] bg-gradient-to-b from-cyan-400/80 via-cyan-400/40 to-transparent"></div>
+                <div class="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400 -mt-0.5"></div>
+              </div>
+            </div><!-- Floating Tag: Punchline Target Locked --><div
+              v-if="isPunchlineLocked && tok.is_punchline"
+              class="punchline-badge"
+            >
+              <div class="relative px-3.5 py-1 rounded-xl bg-gradient-to-r from-cyan-400 via-teal-400 to-violet-500 text-white shadow-2xl shadow-cyan-500/50 border border-white/60 flex items-center gap-1.5 font-bold text-xs">
                 <i data-lucide="sparkles" class="w-3.5 h-3.5 fill-white"></i>
                 <span>Punchline Locked ({{ (analysisData.confidence * 100).toFixed(0) }}%)</span>
-              </span>
-            </span>
-
-          </template>
+                <!-- Caret pointer -->
+                <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gradient-to-br from-teal-400 to-violet-500 rotate-45 border-r border-b border-white/40"></div>
+              </div>
+            </div></span></template>
         </div>
 
         <!-- Real-time Terminal Log Ticker at Bottom -->
@@ -838,6 +891,9 @@
 
             // Punchline locked in!
             isPunchlineLocked.value = true;
+            await nextTick();
+            lucide.createIcons();
+
             scannerStageMessage.value = payload.punchline
               ? `[L5] Punchline Site Locked: '${payload.punchline}' (${(payload.confidence * 100).toFixed(0)}%)`
               : 'Analysis complete: No punchline site found.';
@@ -866,6 +922,12 @@
             alert('Live analysis error. Check server console for details.');
             viewState.value = 'INPUT';
           };
+        }
+
+        function getCandidateTier(tok) {
+          const candidateTokens = tokens.value.filter(t => t.is_candidate);
+          const idx = candidateTokens.findIndex(t => t.id === tok.id);
+          return idx >= 0 ? (idx % 2) : 0;
         }
 
         function resetToInput() {
@@ -921,6 +983,7 @@
           laserPosition,
           isCandidateStage,
           isPunchlineLocked,
+          getCandidateTier,
           scannerStageMessage,
           currentLogLine,
           elapsedMs,
