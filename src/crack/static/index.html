@@ -279,100 +279,91 @@
         <!-- Internal Card Content -->
         <div class="relative z-10 w-full flex flex-col justify-center">
 
-          <!-- Text Area & Centered Single-Line Typography Container -->
-          <div class="relative w-full flex items-center justify-center min-h-[140px] sm:min-h-[160px] transition-all duration-700">
-
-            <!-- 1. Centered Single-Line Input (Matches analysis typography alignment & font size) -->
+          <!-- Wordplay Unified Central Stage Container (Zero Shift, Zero Flicker, 100% Continuous) -->
+          <div class="relative w-full flex items-center justify-center py-4 sm:py-6">
             <div
               :class="[
-                'w-full flex flex-col items-center justify-center transition-all duration-700 ease-out',
-                morphPhase >= 2 ? 'opacity-0 scale-95 pointer-events-none absolute inset-0' : 'opacity-100 scale-100 relative'
+                'w-full max-w-4xl rounded-2xl transition-all duration-700 flex items-center justify-center px-4 sm:px-6 h-16 sm:h-20 relative',
+                morphPhase === 0
+                  ? 'bg-slate-950/70 border border-slate-800'
+                  : (morphPhase === 1
+                      ? 'bg-slate-950/70 border-2 border-cyan-400 ring-4 ring-cyan-400/35 shadow-[0_0_35px_rgba(6,182,212,0.45)]'
+                      : 'bg-transparent border border-transparent shadow-none')
               ]"
             >
-              <label
+              <!-- State 0: Editable Input Element (Only active while in idle typing state) -->
+              <input
+                v-if="morphPhase === 0"
+                v-model="jokeInput"
+                type="text"
+                placeholder="e.g. Why was 6 afraid of 7? Because 7 ate 9."
                 :class="[
-                  'block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3 text-center transition-opacity duration-300 select-none',
-                  morphPhase >= 1 ? 'opacity-0' : 'opacity-100'
-                ]"
-              >
-                Joke / Wordplay Text
-              </label>
-              <div class="relative w-full flex items-center justify-center">
-                <input
-                  v-model="jokeInput"
-                  type="text"
-                  placeholder="e.g. Why was 6 afraid of 7? Because 7 ate 9."
-                  :class="[
-                    'w-full bg-slate-950/70 border rounded-2xl py-4 sm:py-5 px-6 sm:px-8 text-slate-100 placeholder-slate-500 outline-none transition-all duration-500 text-center font-medium tracking-tight leading-normal shadow-inner',
-                    computedFontSizeClass,
-                    morphPhase >= 1
-                      ? 'border-cyan-400 ring-4 ring-cyan-400/35 shadow-[0_0_35px_rgba(6,182,212,0.45)]'
-                      : 'border-slate-800 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20'
-                  ]"
-                  @keydown.enter.prevent="startAnalysis"
-                  @input="handleInputClean"
-                />
-                <button
-                  v-if="jokeInput && morphPhase === 0"
-                  @click="jokeInput = ''"
-                  class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors p-1.5 rounded-lg hover:bg-slate-800/50"
-                  title="Clear"
-                >
-                  <i data-lucide="x" class="w-4 h-4"></i>
-                </button>
-              </div>
-            </div>
-
-            <!-- 2. Single-Line Analysis Typography Display (Magnifies & centers smoothly without jumping) -->
-            <div
-              ref="jokeRowRef"
-              :class="[
-                'w-full select-none flex items-center justify-center overflow-visible transition-all duration-700 ease-out py-6',
-                morphPhase >= 2 ? 'opacity-100 scale-100 relative' : 'opacity-0 scale-95 pointer-events-none absolute inset-0'
-              ]"
-            >
-              <div
-                ref="jokeInnerRef"
-                :class="[
-                  'flex flex-nowrap items-center justify-center whitespace-nowrap tracking-tight font-medium transition-all duration-500',
+                  'w-full h-full bg-transparent border-none outline-none text-center font-medium tracking-tight text-slate-100 placeholder-slate-500 leading-none',
                   computedFontSizeClass
                 ]"
-                :style="textScaleStyle"
-              >
-                <template v-for="(tok, idx) in tokens" :key="idx"><span
-                  v-if="!tok.is_word"
-                  class="text-slate-400 select-none inline"
-                >{{ tok.text }}</span><span
-                  v-else
-                  :class="[
-                    'relative inline-flex items-center justify-center transition-all duration-400 rounded-xl leading-none border-2',
-                    // Spacing and padding around words (mx-2 on candidates gives clear gap between adjacent boxes)
-                    (isCandidateStage && tok.is_candidate) || (isPunchlineLocked && tok.is_punchline)
-                      ? 'mx-2 px-2.5 pt-1.5 pb-2'
-                      : 'mx-0.5 px-1 py-1 border-transparent',
-                    // Punchline locked state
-                    isPunchlineLocked && tok.is_punchline
-                      ? 'text-cyan-100 font-medium punchline-halo bg-cyan-500/30 border-cyan-300 z-30 shadow-2xl shadow-cyan-500/50'
-                      : '',
-                    // Candidate highlighted state (Full 360-degree glowing dashed box)
-                    isCandidateStage && tok.is_candidate && !isPunchlineLocked
-                      ? 'text-cyan-200 font-medium border-dashed border-cyan-400 bg-cyan-500/20 shadow-[0_0_16px_rgba(6,182,212,0.4)] z-20'
-                      : (!isPunchlineLocked || !tok.is_punchline ? 'text-slate-200' : '')
-                  ]"
-                ><span class="inline-block leading-none">{{ tok.text }}</span><!-- Floating Tag: Punchline Target Locked --><div
-                    v-if="isPunchlineLocked && tok.is_punchline"
-                    class="punchline-badge"
-                  >
-                    <div class="relative px-3.5 py-0.5 rounded-xl bg-gradient-to-r from-cyan-400 via-teal-400 to-violet-500 text-white shadow-2xl shadow-cyan-500/50 border border-white/60 flex items-center gap-1.5 font-bold text-xs">
-                      <i data-lucide="sparkles" class="w-3.5 h-3.5 fill-white"></i>
-                      <span>Punchline Locked</span>
-                      <!-- Caret pointer -->
-                      <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gradient-to-br from-teal-400 to-violet-500 rotate-45 border-r border-b border-white/40"></div>
-                    </div>
-                  </div></span></template>
-              </div>
-            </div>
+                @keydown.enter.prevent="startAnalysis"
+                @input="handleInputClean"
+              />
 
+              <!-- State 1, 2, 3: Continuous Tokenized Typography (NO fade out, NO jump, 100% stable) -->
+              <div
+                v-else
+                ref="jokeRowRef"
+                class="w-full h-full select-none flex items-center justify-center overflow-visible"
+              >
+                <div
+                  ref="jokeInnerRef"
+                  :class="[
+                    'flex flex-nowrap items-center justify-center whitespace-nowrap tracking-tight font-medium leading-none',
+                    computedFontSizeClass
+                  ]"
+                  :style="textScaleStyle"
+                >
+                  <template v-for="(tok, idx) in tokens" :key="idx"><span
+                    v-if="!tok.is_word"
+                    class="text-slate-400 select-none inline leading-none"
+                  >{{ tok.text }}</span><span
+                    v-else
+                    :class="[
+                      'relative inline-flex items-center justify-center transition-all duration-400 rounded-xl leading-none border-2',
+                      // Spacing and padding around words (mx-2 on candidates gives clear gap between adjacent boxes)
+                      (isCandidateStage && tok.is_candidate) || (isPunchlineLocked && tok.is_punchline)
+                        ? 'mx-2 px-2.5 pt-1.5 pb-2'
+                        : 'mx-0.5 px-1 py-1 border-transparent',
+                      // Punchline locked state
+                      isPunchlineLocked && tok.is_punchline
+                        ? 'text-cyan-100 font-medium punchline-halo bg-cyan-500/30 border-cyan-300 z-30 shadow-2xl shadow-cyan-500/50'
+                        : '',
+                      // Candidate highlighted state (Full 360-degree glowing dashed box)
+                      isCandidateStage && tok.is_candidate && !isPunchlineLocked
+                        ? 'text-cyan-200 font-medium border-dashed border-cyan-400 bg-cyan-500/20 shadow-[0_0_16px_rgba(6,182,212,0.4)] z-20'
+                        : (!isPunchlineLocked || !tok.is_punchline ? 'text-slate-200' : '')
+                    ]"
+                  ><span class="inline-block leading-none">{{ tok.text }}</span><!-- Floating Tag: Punchline Target Locked --><div
+                      v-if="isPunchlineLocked && tok.is_punchline"
+                      class="punchline-badge"
+                    >
+                      <div class="relative px-3.5 py-0.5 rounded-xl bg-gradient-to-r from-cyan-400 via-teal-400 to-violet-500 text-white shadow-2xl shadow-cyan-500/50 border border-white/60 flex items-center gap-1.5 font-bold text-xs">
+                        <i data-lucide="sparkles" class="w-3.5 h-3.5 fill-white"></i>
+                        <span>Punchline Locked</span>
+                        <!-- Caret pointer -->
+                        <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gradient-to-br from-teal-400 to-violet-500 rotate-45 border-r border-b border-white/40"></div>
+                      </div>
+                    </div></span></template>
+                </div>
+              </div>
+
+              <!-- Clear button (Only shown during idle input) -->
+              <button
+                v-if="jokeInput && morphPhase === 0"
+                @click="jokeInput = ''"
+                class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors p-1.5 rounded-lg hover:bg-slate-800/50"
+                title="Clear"
+              >
+                <i data-lucide="x" class="w-4 h-4"></i>
+              </button>
+
+            </div>
           </div>
 
           <!-- 3. Target Age & Analyze Trigger Button (Smoothly collapses via Grid) -->
