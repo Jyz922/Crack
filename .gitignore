@@ -4,7 +4,8 @@ __pycache__/
 .pytest_cache/
 .coverage
 *.egg-info/
-runs/
+runs/*
+!runs/semeval_subtask_report.json
 .env
 .env.*
 !.env.example

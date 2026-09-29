@@ -1,0 +1,21 @@
+{
+  "benchmark": "SemEval-2017 Task 7 (Homographic Puns)",
+  "total_items": 2250,
+  "subtask_1_detection": {
+    "accuracy": 0.8284,
+    "precision": 0.8911,
+    "recall": 0.8656,
+    "f1_score": 0.8782,
+    "pun_count": 1607,
+    "pun_correct": 1391,
+    "non_pun_count": 643,
+    "non_pun_correct": 473
+  },
+  "subtask_2_location": {
+    "total_puns": 1607,
+    "top1_exact_match": 1227,
+    "top1_accuracy": 0.7635,
+    "top3_match": 1390,
+    "top3_coverage": 0.865
+  }
+}
