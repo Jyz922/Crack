@@ -79,6 +79,23 @@ These are **reported local-run results, not an independently verified leaderboar
 
 No state-of-the-art claim is made. Results from other papers are not directly comparable unless the task, split, labels, and metric are the same. In particular, pun-sense interpretation scores should not be presented as pun-detection scores.
 
+### Historical SemEval comparison (unofficial)
+
+The table ranks CRACK's reported homographic-pun detection F1 alongside system results from SemEval-2017 Task 7. By reported F1, CRACK is **2nd of 8 scored system results**; among results covering all 2,250 items, it ranks **1st of 6**.
+
+| Rank | System | F1 | Evaluated items |
+|---:|---|---:|---:|
+| 1 | Fermi | 89.97% | 675 / 2,250 |
+| 2 | CRACK (local run) | 87.82% | 2,250 / 2,250 |
+| 3 | N-Hance (out of competition) | 83.50% | 2,250 / 2,250 |
+| 4 | Duluth | 82.54% | 2,250 / 2,250 |
+| 5 | JU_CSE_NLP | 80.63% | 2,250 / 2,250 |
+| 6 | PunFields | 76.51% | 2,250 / 2,250 |
+| 7 | ECNU | 67.85% | 2,237 / 2,250 |
+| 8 | UWAV | 55.87% | 2,250 / 2,250 |
+
+**Note:** This is an illustrative comparison, not an official leaderboard rank. Fermi's score used only 675 items after training/test overlap was removed; CRACK's score comes from a local run whose provider/model provenance is incomplete. Historical scores and coverage are from [Miller et al. (2017), Table 2](https://aclanthology.org/S17-2005.pdf).
+
 ### Project-curated corpus
 
 `corpus/joke_corpus_blind.jsonl` and `corpus/joke_corpus_gold.jsonl` contain 60 project-curated items: 25 positive wordplay examples and 35 `ONE_SENSE_ONLY` controls (25 de-joked examples and 10 ordinary statements). The labels and age judgments are project annotations; the repository does not include an annotator agreement study.
