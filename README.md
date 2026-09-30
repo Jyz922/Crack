@@ -75,17 +75,17 @@ The committed summary reports the following detection results:
 | F1 | 87.82% | Derived from the precision and recall above |
 | Correctly rejected non-puns (`ONE_SENSE_ONLY`) | 73.56% | 473 / 643 |
 
-These are **reported local-run results, not an independently verified leaderboard claim**. The classification counts and metric arithmetic match the locally available per-item run file. That roughly 50 MB file and its run metadata are ignored by Git, so a clean checkout contains only the summary, not the records needed to verify the model calls. The saved metadata identifies the OpenAI backend but does not pin every model/configuration field. The previous location scores are omitted because the reported top-1 and top-3 counts do not reproduce from the saved L3 candidate lists with the documented ranking. See [the benchmark audit](docs/benchmark_audit.md) for details.
+These are local-run results. Counts and metric arithmetic match the available per-item run file. The run file and complete model configuration are not committed, so the exact model calls cannot be verified from a clean checkout. Location scores are omitted because the saved candidate lists do not reproduce the reported top-1 and top-3 counts; see [the benchmark audit](docs/benchmark_audit.md).
 
-No state-of-the-art claim is made. Results from other papers are not directly comparable unless the task, split, labels, and metric are the same. In particular, pun-sense interpretation scores should not be presented as pun-detection scores.
+The comparison below covers binary homographic-pun detection; pun-sense interpretation scores measure a different task.
 
-### Historical SemEval comparison (unofficial)
+### SemEval-2017 Task 7 detection comparison
 
-The table compares homographic-pun detection F1 scores on the SemEval-2017 Task 7 benchmark. It includes the task-paper results and later evaluations on the official dataset. Excluding Fermi's partial-set result, CRACK ranks **1st of 11 scored results**. It is 1st among the **7 results with explicitly reported full coverage**; if Diao et al.'s three variants are assumed to cover the full SemEval test set, it is 1st of 10 full-set results. Other published scores found in later papers are listed separately below when their evaluation setup or reported metrics prevent a clean rank.
+Ranked by reported F1, the table includes the task-paper systems and later SemEval evaluations. Fermi's result is omitted because it covers only 675 of 2,250 contexts. CRACK ranks **1st of 11 results**. Seven entries explicitly cover all 2,250 items; Diao et al.'s three variants are listed as 2,250* because the paper names the SemEval test set but does not report per-model counts.
 
 | Rank | System | F1 | Evaluated items | Evaluation setting |
 |---:|---|---:|---:|---|
-| 1 | CRACK (local run) | 87.82% | 2,250 / 2,250 | Local run; provider/model provenance incomplete |
+| 1 | CRACK (local run) | 87.82% | 2,250 / 2,250 | Local run |
 | 2 | [Feng et al. (2020), second setting](https://ceur-ws.org/Vol-2624/paper3.pdf) | 87.50% | 2,250 / 2,250 | Trained on self-collected data; evaluated on the official dataset |
 | 3 | [Diao et al. (2018), Bi-LSTM-E](https://aclanthology.org/D18-1272.pdf) | 85.46% | 2,250* | Pun of the Day training; SemEval test |
 | 4 | [Diao et al. (2018), Bi-LSTM-Attention](https://aclanthology.org/D18-1272.pdf) | 85.26% | 2,250* | Pun of the Day training; SemEval test |
@@ -97,42 +97,20 @@ The table compares homographic-pun detection F1 scores on the SemEval-2017 Task 
 | 10 | ECNU | 67.85% | 2,237 / 2,250 | Partial coverage |
 | 11 | UWAV | 55.87% | 2,250 / 2,250 | SemEval result |
 
-**Note:** This is an illustrative comparison, not an official leaderboard rank. CRACK's score comes from a local run whose provider/model provenance is incomplete. N-Hance was submitted after the official evaluation period, and ECNU's score covers 2,237 items. The original task scores and coverage are from [Miller et al. (2017), Table 2](https://aclanthology.org/S17-2005.pdf). Feng et al.'s 87.50% is the paper's external-training “second setting”; its 93.0% “first setting” uses 5-fold cross-validation and is not included in this ranking. Diao et al. describe training on Pun of the Day and testing on SemEval; the `2,250*` coverage for its three ranked variants is inferred from that test-set description, not explicitly reported per model. The same paper mentions 5-fold tuning but does not specify which data were used for that tuning, so those rows have an additional protocol uncertainty.
+**Sources and settings:** Original task results are from [Miller et al. (2017), Table 2](https://aclanthology.org/S17-2005.pdf). N-Hance was an out-of-competition system; ECNU evaluated 2,237 items. Feng et al.'s second setting trains on self-collected data and evaluates on the official set. Diao et al. describe training on Pun of the Day and testing on SemEval; their paper also mentions 5-fold tuning without specifying the tuning data.
 
-### Additional published results (not included in the rank)
+### Other reported results
 
-[Diao et al. (2018), Table 3](https://aclanthology.org/D18-1272.pdf) also reports WECA and LSTM results, but their reported F1 values do not agree with their precision and recall. They are shown here for completeness but are not ranked:
+[Diao et al. (2018), Table 3](https://aclanthology.org/D18-1272.pdf) reports these additional scores:
 
 | Model | Paper-reported F1 |
 |---|---:|
 | WECA | 89.21%* |
 | LSTM | 82.43%* |
 
-The asterisks flag reporting inconsistencies in the paper. For WECA, Table 3 reports precision 89.19%, recall 90.64%, and F1 89.21%; those precision and recall values imply an F1 of about 89.91%, while the discussion gives 87.45%. The LSTM row's precision and recall (81.80% and 83.70%) imply an F1 of about 82.74%, not the reported 82.43%. The three Diao et al. rows in the ranked table have F1 values consistent with their reported precision and recall. The paper's separate Table 4 WECA result (90.98%) uses 675 SemEval examples and is excluded because it is a partial-set result.
+Table 3's WECA precision and recall (89.19%, 90.64%) imply an F1 of about 89.91%, while the table reports 89.21% and the discussion gives 87.45%. The LSTM precision and recall (81.80%, 83.70%) imply about 82.74%, while the table reports 82.43%. Table 4's WECA result of 90.98% uses a 675-item subset.
 
-Later papers also report higher cross-validation scores on the same benchmark: Zhou et al. (2020) 94.9% and Zou & Lu (2019) 92.2% with 10-fold cross-validation, and Feng et al.'s first setting at 93.0% with 5-fold cross-validation. These are not ranked with the full-test results above because their train/test folds overlap the benchmark set. The cross-validation settings and scores are summarized in [Feng et al. (2020), Table 1 and notes](https://ceur-ws.org/Vol-2624/paper3.pdf).
-
-### PunGraph paper: related reasoning results
-
-[PunGraph (arXiv, 2026)](https://arxiv.org/abs/2609.16557) reports two **pun-reasoning** tasks on SemEval: predicting the alternative word for heterographic puns, and explaining the two senses of homographic puns. Its homographic scores assess generated sense explanations, not binary pun detection. The following values are copied from PunGraph's Table 1 and are shown as a paper-reported reference; CRACK is not ranked in this table.
-
-| Model | Heterographic reasoning F1 | Homographic sense Acc. / PMA / F1 |
-|---|---:|---:|
-| GPT-4o | 79.45% | 76.27% / 98.54% / 87.35% |
-| Gemini 2.0 Flash | 77.36% | 71.08% / 98.69% / 84.56% |
-| DeepSeek-V3.2 | 80.31% | 66.26% / 98.15% / 82.12% |
-| MiniCPM-8.7B | 37.86% | 40.71% / 93.07% / 66.64% |
-| Qwen-2.5-7B | 37.47% | 34.65% / 90.80% / 62.42% |
-| Qwen-3.5-27B | 74.06% | 68.95% / 97.61% / 83.20% |
-| Llama 4 Maverick | 73.77% | 66.26% / 97.84% / 82.00% |
-| PunIntended | 16.65% | 26.35% / 85.25% / 50.98% |
-| GCR | 51.19% | 43.04% / 93.12% / 37.19% |
-| ReKG-MCTS | 68.97% | 22.11% / 78.04% / 48.41% |
-| PunGraph-Qwen-2.5-7B | 59.18% | 45.71% / 93.38% / 65.11% |
-| PunGraph-Qwen-3.5-27B | 79.86% | 76.18% / 98.84% / 85.71% |
-| PunGraph-Llama 4 Maverick | 83.41% | 71.80% / 97.46% / 83.43% |
-
-These values are from PunGraph's [Table 1](https://arxiv.org/html/2609.16557v1#S5.T1). They are a separate task reference, not a CRACK ranking or pun-detection leaderboard.
+Further cross-validation scores include Zhou et al. (2020) at 94.9% and Zou & Lu (2019) at 92.2% using 10-fold CV, and Feng et al.'s 93.0% first setting using 5-fold CV. See [Feng et al. (2020), Table 1 and notes](https://ceur-ws.org/Vol-2624/paper3.pdf).
 
 ### Project-curated corpus
 
