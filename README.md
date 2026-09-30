@@ -81,20 +81,41 @@ No state-of-the-art claim is made. Results from other papers are not directly co
 
 ### Historical SemEval comparison (unofficial)
 
-The table ranks CRACK's reported homographic-pun detection F1 alongside system results from SemEval-2017 Task 7. By reported F1, CRACK is **2nd of 8 scored system results**; among results covering all 2,250 items, it ranks **1st of 6**.
+The table compares reported homographic-pun detection F1 scores from SemEval-2017 Task 7. Excluding Fermi's partial-set result, CRACK ranks **1st of 7 scored system results** and **1st of 6 systems covering all 2,250 items**.
 
 | Rank | System | F1 | Evaluated items |
 |---:|---|---:|---:|
-| 1 | Fermi | 89.97% | 675 / 2,250 |
-| 2 | CRACK (local run) | 87.82% | 2,250 / 2,250 |
-| 3 | N-Hance (out of competition) | 83.50% | 2,250 / 2,250 |
-| 4 | Duluth | 82.54% | 2,250 / 2,250 |
-| 5 | JU_CSE_NLP | 80.63% | 2,250 / 2,250 |
-| 6 | PunFields | 76.51% | 2,250 / 2,250 |
-| 7 | ECNU | 67.85% | 2,237 / 2,250 |
-| 8 | UWAV | 55.87% | 2,250 / 2,250 |
+| 1 | CRACK (local run) | 87.82% | 2,250 / 2,250 |
+| 2 | N-Hance (out of competition) | 83.50% | 2,250 / 2,250 |
+| 3 | Duluth | 82.54% | 2,250 / 2,250 |
+| 4 | JU_CSE_NLP | 80.63% | 2,250 / 2,250 |
+| 5 | PunFields | 76.51% | 2,250 / 2,250 |
+| 6 | ECNU | 67.85% | 2,237 / 2,250 |
+| 7 | UWAV | 55.87% | 2,250 / 2,250 |
 
-**Note:** This is an illustrative comparison, not an official leaderboard rank. Fermi's score used only 675 items after training/test overlap was removed; CRACK's score comes from a local run whose provider/model provenance is incomplete. Historical scores and coverage are from [Miller et al. (2017), Table 2](https://aclanthology.org/S17-2005.pdf).
+**Note:** This is an illustrative comparison, not an official leaderboard rank. CRACK's score comes from a local run whose provider/model provenance is incomplete. N-Hance was submitted after the official evaluation period, and ECNU's score covers 2,237 items. Historical scores and coverage are from [Miller et al. (2017), Table 2](https://aclanthology.org/S17-2005.pdf).
+
+### PunGraph paper: related reasoning results (not ranked with CRACK)
+
+[PunGraph (arXiv, 2026)](https://arxiv.org/abs/2609.16557) reports results on SemEval for two **pun-reasoning** tasks: predicting the alternative word for heterographic puns, and explaining the two senses of homographic puns. Its inputs already include a pun and its target word; these are not binary pun-detection scores, so they cannot be inserted into the ranking above. The table summarizes its SemEval results; heterographic F1 uses exact matching of the alternative word, while homographic metrics assess generated sense explanations against gold explanations.
+
+| Model | Heterographic reasoning F1 | Homographic sense Acc. / PMA / F1 |
+|---|---:|---:|
+| GPT-4o | 79.45% | 76.27% / 98.54% / 87.35% |
+| Gemini 2.0 Flash | 77.36% | 71.08% / 98.69% / 84.56% |
+| DeepSeek-V3.2 | 80.31% | 66.26% / 98.15% / 82.12% |
+| MiniCPM-8.7B | 37.86% | 40.71% / 93.07% / 66.64% |
+| Qwen-2.5-7B | 37.47% | 34.65% / 90.80% / 62.42% |
+| Qwen-3.5-27B | 74.06% | 68.95% / 97.61% / 83.20% |
+| Llama 4 Maverick | 73.77% | 66.26% / 97.84% / 82.00% |
+| PunIntended | 16.65% | 26.35% / 85.25% / 50.98% |
+| GCR | 51.19% | 43.04% / 93.12% / 37.19% |
+| ReKG-MCTS | 68.97% | 22.11% / 78.04% / 48.41% |
+| PunGraph-Qwen-2.5-7B | 59.18% | 45.71% / 93.38% / 65.11% |
+| PunGraph-Qwen-3.5-27B | 79.86% | 76.18% / 98.84% / 85.71% |
+| PunGraph-Llama 4 Maverick | 83.41% | 71.80% / 97.46% / 83.43% |
+
+These are the values reported in PunGraph's [Table 1](https://arxiv.org/html/2609.16557v1#S5.T1). They are a separate task reference, not a detection leaderboard.
 
 ### Project-curated corpus
 
