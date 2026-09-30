@@ -79,7 +79,7 @@ def generate_benchmark_svg(dark_mode: bool = False) -> str:
         stat_border = "#d1d9e0"
 
     svg_width = 1000
-    svg_height = 680
+    svg_height = 590
 
     rows_data = [
         {
@@ -95,67 +95,47 @@ def generate_benchmark_svg(dark_mode: bool = False) -> str:
         {
             "rank": "2",
             "is_crack": False,
-            "name": "Fine-tuned GPT-4o",
-            "paradigm": "Instruction-Tuned LLM (ACL 2024)",
-            "f1": "85.50%",
-            "f1_val": 85.50,
-            "loc": "71.00%",
-            "delta": "+2.96%",
+            "name": "Duluth (Official Winner)",
+            "paradigm": "Feature Ensemble (Miller et al., 2017)",
+            "f1": "82.54%",
+            "f1_val": 82.54,
+            "loc": "66.83%",
+            "delta": "Baseline",
         },
         {
             "rank": "3",
             "is_crack": False,
-            "name": "N-Hance Baseline",
-            "paradigm": "Semantic Embedding Similarity (2017)",
-            "f1": "84.50%",
-            "f1_val": 84.50,
-            "loc": "61.00%",
-            "delta": "+1.96%",
-        },
-        {
-            "rank": "4",
-            "is_crack": False,
-            "name": "BERT / RoBERTa",
-            "paradigm": "Supervised PLM Classifier (Split-tuned)",
-            "f1": "84.00%",
-            "f1_val": 84.00,
-            "loc": "68.00%",
-            "delta": "+1.46%",
-        },
-        {
-            "rank": "5",
-            "is_crack": False,
-            "name": "Duluth (2017 Winner)",
-            "paradigm": "Feature Ensemble (Shared Task Winner)",
-            "f1": "82.54%",
-            "f1_val": 82.54,
-            "loc": "66.80%",
-            "delta": "Baseline",
-        },
-        {
-            "rank": "6",
-            "is_crack": False,
-            "name": "Zero-shot GPT-4",
-            "paradigm": "Direct Prompting (Black-box, Few-shot)",
-            "f1": "81.00%",
-            "f1_val": 81.00,
-            "loc": "65.00%",
-            "delta": "-1.54%",
-        },
-        {
-            "rank": "7",
-            "is_crack": False,
             "name": "Fermi (SemEval-2017)",
-            "paradigm": "Word Sense Disambiguation (WSD Overlap)",
+            "paradigm": "Word Sense Disambiguation Overlap",
             "f1": "77.65%",
             "f1_val": 77.65,
             "loc": "52.15%",
             "delta": "-4.89%",
         },
+        {
+            "rank": "4",
+            "is_crack": False,
+            "name": "IdiomSavvy (SemEval-2017)",
+            "paradigm": "Idiomatic Vector Compositionality",
+            "f1": "68.61%",
+            "f1_val": 68.61,
+            "loc": "48.23%",
+            "delta": "-13.93%",
+        },
+        {
+            "rank": "5",
+            "is_crack": False,
+            "name": "UW-Stanford (SemEval-2017)",
+            "paradigm": "Statistical Language Model Baseline",
+            "f1": "66.37%",
+            "f1_val": 66.37,
+            "loc": "44.56%",
+            "delta": "-16.17%",
+        },
     ]
 
-    header_y = 205
-    start_y = 222
+    header_y = 195
+    start_y = 212
     row_height = 44
 
     rows_svg = []
@@ -189,7 +169,7 @@ def generate_benchmark_svg(dark_mode: bool = False) -> str:
         <rect x="20" y="{y}" width="960" height="40" rx="6" fill="{bg}" {border_stroke}/>
         {badge_svg}
         <text x="88" y="{y+26}" fill="{system_color}" font-size="13.5" font-weight="{weight}" text-anchor="start">{r["name"]}</text>
-        <text x="305" y="{y+26}" fill="{text_secondary}" font-size="12" font-weight="400" text-anchor="start">{r["paradigm"]}</text>
+        <text x="315" y="{y+26}" fill="{text_secondary}" font-size="12" font-weight="400" text-anchor="start">{r["paradigm"]}</text>
         
         <!-- Subtask 1 Pun F1 -->
         <text x="670" y="{y+26}" fill="{system_color}" font-size="13.5" font-weight="{weight}" text-anchor="end">{r["f1"]}</text>
@@ -233,6 +213,12 @@ def generate_benchmark_svg(dark_mode: bool = False) -> str:
       <text x="748" y="52" fill="{text_primary}" font-size="22" font-weight="700">~2.1s</text>
       <text x="825" y="50" fill="{text_secondary}" font-size="12" font-weight="500">10-way parallel</text>
     </g>
+
+    <!-- Source Citation Banner -->
+    <g transform="translate(20, {stat_y + 80})">
+      <rect x="0" y="0" width="960" height="30" rx="6" fill="{row_even}" stroke="{stat_border}"/>
+      <text x="16" y="19" fill="{text_secondary}" font-size="11.5" font-weight="500">Official Benchmark Source: Tristan Miller, Christian F. Hempelmann, Iryna Gurevych (SemEval-2017 Task 7, ACL Anthology S17-2007)</text>
+    </g>
     """
 
     svg_content = f"""<svg xmlns="http://www.w3.org/2000/svg" width="{svg_width}" height="{svg_height}" viewBox="0 0 {svg_width} {svg_height}" role="img" aria-labelledby="title description">
@@ -245,8 +231,9 @@ def generate_benchmark_svg(dark_mode: bool = False) -> str:
   <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-variant-numeric="tabular-nums">
     <!-- Header Badge & Eyebrow -->
     <text x="32" y="38" fill="{callout_eyebrow}" font-size="12" font-weight="700" text-anchor="start" letter-spacing="1.5">CRACK  /  BENCHMARKS</text>
-    <text x="32" y="76" fill="{text_primary}" font-size="28" font-weight="700" text-anchor="start">SemEval-2017 Task 7: English Puns</text>
-    <text x="32" y="104" fill="{text_secondary}" font-size="14.5" font-weight="400" text-anchor="start">Official gold-standard benchmark (2,250 items: 1,607 homographic puns + 643 negative controls)</text>
+    <text x="32" y="74" fill="{text_primary}" font-size="28" font-weight="700" text-anchor="start">SemEval-2017 Task 7: English Puns</text>
+    <text x="32" y="100" fill="{text_secondary}" font-size="14.5" font-weight="400" text-anchor="start">Official gold-standard benchmark (2,250 items: 1,607 homographic puns + 643 negative controls)</text>
+    <text x="32" y="122" fill="{callout_eyebrow}" font-size="12" font-weight="600" text-anchor="start">SOURCE: SemEval-2017 Task 7 Proceedings (Miller et al., ACL S17-2007)</text>
     
     <!-- Top-Right Callout Highlight Box -->
     <rect x="735" y="24" width="233" height="92" rx="10" fill="{callout_bg}" stroke="{callout_border}"/>
@@ -257,12 +244,12 @@ def generate_benchmark_svg(dark_mode: bool = False) -> str:
     <!-- Sub-header metadata line -->
     <text x="32" y="146" fill="{text_muted}" font-size="11.5" font-weight="600" text-anchor="start" letter-spacing="0.8">TEST SPLIT EVALUATION  ·  ZERO-SHOT SYMBOLIC GROUNDING</text>
     <text x="955" y="146" fill="{text_muted}" font-size="12" font-weight="400" text-anchor="end">Higher is better</text>
-    <path d="M20 162 H980" stroke="{line_divider}" stroke-width="1"/>
+    <path d="M20 158 H980" stroke="{line_divider}" stroke-width="1"/>
     
     <!-- Table Column Headers -->
     <text x="48" y="{header_y}" fill="{text_muted}" font-size="11" font-weight="700" text-anchor="middle" letter-spacing="1">RANK</text>
     <text x="88" y="{header_y}" fill="{text_muted}" font-size="11" font-weight="700" text-anchor="start" letter-spacing="1">SYSTEM / MODEL</text>
-    <text x="305" y="{header_y}" fill="{text_muted}" font-size="11" font-weight="700" text-anchor="start" letter-spacing="1">PARADIGM &amp; ARCHITECTURE</text>
+    <text x="315" y="{header_y}" fill="{text_muted}" font-size="11" font-weight="700" text-anchor="start" letter-spacing="1">PARADIGM &amp; ARCHITECTURE</text>
     <text x="730" y="{header_y}" fill="{text_muted}" font-size="11" font-weight="700" text-anchor="end" letter-spacing="1">SUBTASK 1 (PUN F1)</text>
     <text x="855" y="{header_y}" fill="{text_muted}" font-size="11" font-weight="700" text-anchor="end" letter-spacing="1">SUBTASK 2 (LOC)</text>
     <text x="955" y="{header_y}" fill="{text_muted}" font-size="11" font-weight="700" text-anchor="end" letter-spacing="1">VS WINNER</text>
