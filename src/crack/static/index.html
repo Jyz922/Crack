@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CRACK — Neuro-Symbolic Humor & Pun Analysis Engine</title>
+  <link rel="preconnect" href="https://cdn.tailwindcss.com">
+  <link rel="preconnect" href="https://unpkg.com" crossorigin>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -51,6 +53,7 @@
     /* Laser Scanner Beam */
     .laser-line {
       position: absolute;
+      left: 0;
       top: 0;
       bottom: 0;
       width: 2px;
@@ -58,6 +61,7 @@
       box-shadow: 0 0 15px #06b6d4, 0 0 30px #38bdf8, 0 0 50px rgba(6, 182, 212, 0.5);
       z-index: 20;
       pointer-events: none;
+      will-change: transform;
     }
 
     .laser-aura {
@@ -116,11 +120,6 @@
       box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
     }
 
-    .apple-glass-hover:hover {
-      border-color: rgba(255, 255, 255, 0.18);
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-    }
-
     /* Staggered Spring Fade-in for Dashboard Cards */
     @keyframes spring-up {
       0% {
@@ -134,7 +133,6 @@
     }
 
     .animate-spring-1 { animation: spring-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-    .animate-spring-2 { animation: spring-up 0.55s 0.08s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
     .animate-spring-3 { animation: spring-up 0.6s 0.16s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
     .animate-spring-4 { animation: spring-up 0.65s 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
 
@@ -150,29 +148,6 @@
 
     .animate-card-fade {
       animation: card-fade 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    /* Smooth CSS Grid Accordion Collapse (Zero layout jank / reflow) */
-    .smooth-collapse {
-      display: grid;
-      grid-template-rows: 1fr;
-      transition: grid-template-rows 0.85s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), margin 0.85s cubic-bezier(0.16, 1, 0.3, 1), padding 0.85s cubic-bezier(0.16, 1, 0.3, 1);
-      will-change: grid-template-rows, opacity;
-    }
-
-    .smooth-collapse.collapsed {
-      grid-template-rows: 0fr;
-      opacity: 0;
-      margin-top: 0 !important;
-      margin-bottom: 0 !important;
-      padding-top: 0 !important;
-      padding-bottom: 0 !important;
-      pointer-events: none;
-    }
-
-    .smooth-collapse-inner {
-      overflow: hidden;
-      min-height: 0;
     }
 
     /* Custom Scrollbar */
@@ -826,7 +801,6 @@
 
         // Animation States
         const laserActive = ref(false);
-        const laserPosition = ref(0);
         const laserDir = ref(1);
         const isCandidateStage = ref(false);
         const isPunchlineLocked = ref(false);
@@ -842,8 +816,6 @@
         // Single-Line Dynamic Scaling & Phased Transition
         // morphPhase: 0 = IDLE, 1 = FRAMING, 2 = MORPHING & CENTERING, 3 = SCANNING
         const morphPhase = ref(0);
-        const isMorphing = computed(() => morphPhase.value > 0);
-        const isScanningMode = computed(() => viewState.value === 'SCANNING');
         const jokeRowRef = ref(null);
         const jokeInnerRef = ref(null);
         const laserLineRef = ref(null);
@@ -851,6 +823,8 @@
         const isMagicMoving = ref(false);
         const textScale = ref(1);
         let laserAnimationId = null;
+        let laserTrackWidth = 0;
+        let laserResizeObserver = null;
         let candidateTimeouts = [];
 
         function updateTextScale() {
@@ -900,20 +874,16 @@
 
         function handleInputClean(e) {
           if (e && e.target) {
-            jokeInput.value = e.target.value.replace(/[\r\n]+/g, ' ');
+            const cleaned = e.target.value.replace(/[\r\n]+/g, ' ');
+            if (cleaned !== e.target.value) e.target.value = cleaned;
+            jokeInput.value = cleaned;
           }
-          nextTick(() => {
-            updateTextScale();
-          });
         }
 
         function selectPreset(preset) {
           if (morphPhase.value > 0) return;
           jokeInput.value = preset.text;
           targetAge.value = preset.age;
-          nextTick(() => {
-            updateTextScale();
-          });
         }
 
         async function startAnalysis() {
@@ -946,10 +916,19 @@
           lucide.createIcons();
 
           laserActive.value = true;
-          laserPosition.value = 0;
           laserDir.value = 1;
           isCandidateStage.value = false;
           isPunchlineLocked.value = false;
+          await nextTick();
+          const laserTrack = laserLineRef.value?.parentElement;
+          laserTrackWidth = laserTrack?.clientWidth || 0;
+          laserResizeObserver?.disconnect();
+          if (laserTrack && window.ResizeObserver) {
+            laserResizeObserver = new ResizeObserver(([entry]) => {
+              laserTrackWidth = entry.contentRect.width;
+            });
+            laserResizeObserver.observe(laserTrack);
+          }
 
           // Clear any pending animations or candidate timeouts
           if (laserAnimationId) {
@@ -961,28 +940,28 @@
 
           // Direct DOM RAF animation: zero VDOM diff overhead, zero CSS transition fighting, zero border hitch
           let laserPos = 0;
-          const laserSpeed = 0.38;
+          let previousFrameTime = null;
 
-          function animateLaser() {
+          function animateLaser(timestamp) {
             if (!laserActive.value) return;
-            laserPos += laserSpeed * laserDir.value;
+            if (previousFrameTime !== null) {
+              const elapsedMs = Math.min(timestamp - previousFrameTime, 50);
+              laserPos += 22.8 * elapsedMs / 1000 * laserDir.value;
+            }
+            previousFrameTime = timestamp;
             if (laserPos >= 98) {
               laserPos = 98;
-              laserPosition.value = 98;
               laserDir.value = -1;
             } else if (laserPos <= 2) {
               laserPos = 2;
-              laserPosition.value = 2;
               laserDir.value = 1;
             }
             if (laserLineRef.value) {
-              laserLineRef.value.style.left = `${laserPos}%`;
+              laserLineRef.value.style.transform = `translate3d(${laserTrackWidth * laserPos / 100}px, 0, 0)`;
             }
             laserAnimationId = requestAnimationFrame(animateLaser);
           }
-          if (laserLineRef.value) {
-            laserLineRef.value.style.left = '0%';
-          }
+          if (laserLineRef.value) laserLineRef.value.style.transform = 'translate3d(0, 0, 0)';
           laserAnimationId = requestAnimationFrame(animateLaser);
 
           // Dynamic reasoning ticker for the deep LLM thinking phase
@@ -1155,6 +1134,8 @@
 
             // Stop laser, timers and interval
             laserActive.value = false;
+            laserResizeObserver?.disconnect();
+            laserResizeObserver = null;
             clearInterval(reasonInterval);
             evtSource.close();
 
@@ -1252,6 +1233,8 @@
             candidateTimeouts.forEach(clearTimeout);
             candidateTimeouts = [];
             laserActive.value = false;
+            laserResizeObserver?.disconnect();
+            laserResizeObserver = null;
             alert('Live analysis error. Check server console for details.');
             viewState.value = 'INPUT';
             morphPhase.value = 0;
@@ -1272,11 +1255,10 @@
           viewState.value = 'INPUT';
           morphPhase.value = 0;
           laserActive.value = false;
-          laserPosition.value = 0;
+          laserResizeObserver?.disconnect();
+          laserResizeObserver = null;
+          laserTrackWidth = 0;
           laserDir.value = 1;
-          if (laserLineRef.value) {
-            laserLineRef.value.style.left = '0%';
-          }
           isPunchlineLocked.value = false;
           isCandidateStage.value = false;
           nextTick(() => {
@@ -1434,16 +1416,6 @@
           return analysisData.value.age_spectrum[activeDisplayAge.value] || { comprehension: 'UNKNOWN', desc: '' };
         });
 
-        function formatClassification(c) {
-          if (!c) return 'NO_AMBIGUITY_FOUND';
-          return c.replace(/_/g, ' ');
-        }
-
-        function formatComprehension(comp) {
-          if (!comp) return 'UNKNOWN';
-          return comp.replace(/_/g, ' ');
-        }
-
         async function copyJson() {
           if (!analysisData.value) return;
           try {
@@ -1472,13 +1444,10 @@
           resetToInput,
           tokens,
           laserActive,
-          laserPosition,
           laserDir,
           isCandidateStage,
           isPunchlineLocked,
           morphPhase,
-          isMorphing,
-          isScanningMode,
           jokeRowRef,
           jokeInnerRef,
           laserLineRef,
@@ -1486,7 +1455,6 @@
           isMagicMoving,
           computedFontSizeClass,
           textScaleStyle,
-          updateTextScale,
           scannerStageMessage,
           currentLogLine,
           analysisData,
@@ -1496,8 +1464,6 @@
           formatAoA,
           friendlyComprehension,
           currentAgeAssessment,
-          formatClassification,
-          formatComprehension,
           showTrace,
           copyJson,
           copyStatus,

@@ -17,16 +17,15 @@ import json
 import logging
 import os
 import re
-import sys
 import time
 from pathlib import Path
-from typing import Any, AsyncGenerator, Dict, List, Optional
+from typing import Any, AsyncGenerator
 
 # Ensure .env is loaded before configuring backends
 from crack.providers import load_dotenv, resolve_backend
 load_dotenv()
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -375,7 +374,13 @@ async def stream_analysis(text: str, target_age: int = 8):
             start = time.monotonic()
             try:
                 # Run the actual layer in thread pool to prevent blocking event loop
-                rec = await loop.run_in_executor(None, layer_fn, rec, settings)
+                layer_future = loop.run_in_executor(None, layer_fn, rec, settings)
+                while not layer_future.done():
+                    done, _ = await asyncio.wait((layer_future,), timeout=15)
+                    if not done:
+                        # Keep proxies and browsers from treating a slow model call as a dead stream.
+                        yield ": keep-alive\n\n"
+                rec = layer_future.result()
             except Exception as exc:
                 err_ms = round((time.monotonic() - start) * 1000, 1)
                 rec.trace.append(LayerTrace(
@@ -452,7 +457,14 @@ async def stream_analysis(text: str, target_age: int = 8):
             }
             yield f"event: complete\ndata: {json.dumps(err_payload)}\n\n"
 
-    return StreamingResponse(event_generator(), media_type="text/event-stream")
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 def main() -> None:
