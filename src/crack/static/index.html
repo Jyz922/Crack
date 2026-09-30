@@ -452,50 +452,96 @@
         </div>
       </div>
 
-      <!-- Bento Grid Module 1: Executive Verdict Badges -->
-      <div class="animate-spring-1 grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <!-- Classification Badge -->
-        <div class="apple-glass rounded-2xl p-4 flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 flex-shrink-0">
-            <i data-lucide="tag" class="w-5 h-5"></i>
-          </div>
-          <div>
-            <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Classification</div>
-            <div class="text-sm font-bold text-slate-100 flex items-center gap-1.5">
-              <span>{{ formatClassification(analysisData.main_classification) }}</span>
-              <span class="text-xs text-cyan-400 font-mono">({{ (analysisData.confidence * 100).toFixed(0) }}%)</span>
+      <!-- Bento Grid Module 1: Executive Verdict Card (The Direct Answer: Is it a Joke?) -->
+      <div class="animate-spring-1 apple-glass rounded-3xl p-6 sm:p-7 border border-white/10 relative overflow-hidden">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          
+          <!-- Left: Big Direct Verdict Statement -->
+          <div class="flex items-start gap-4">
+            <div
+              :class="[
+                'w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg text-white',
+                heroVerdict.isJoke
+                  ? 'bg-gradient-to-tr from-emerald-500 via-teal-500 to-cyan-500 shadow-emerald-500/20'
+                  : 'bg-slate-800 border border-slate-700 text-slate-400'
+              ]"
+            >
+              <i :data-lucide="heroVerdict.isJoke ? 'smile' : 'message-square'" class="w-7 h-7"></i>
             </div>
-          </div>
-        </div>
 
-        <!-- Age Comprehension Badge -->
-        <div class="apple-glass rounded-2xl p-4 flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400 flex-shrink-0">
-            <i data-lucide="brain" class="w-5 h-5"></i>
-          </div>
-          <div>
-            <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Age {{ activeDisplayAge }} Comprehension</div>
-            <div class="text-sm font-bold text-violet-200">
-              {{ formatComprehension(currentAgeAssessment.comprehension) }}
-            </div>
-          </div>
-        </div>
+            <div>
+              <div class="flex flex-wrap items-center gap-2 mb-1.5">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Verdict:</span>
+                <span
+                  :class="[
+                    'text-xs font-bold px-2.5 py-0.5 rounded-full border',
+                    heroVerdict.badgeBg
+                  ]"
+                >
+                  {{ heroVerdict.typeLabel }}
+                </span>
+                <span class="text-xs font-mono text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">
+                  {{ heroVerdict.confidencePct }}% Confidence
+                </span>
+              </div>
 
-        <!-- Child Safety Shield -->
-        <div class="apple-glass rounded-2xl p-4 flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0">
-            <i data-lucide="shield-check" class="w-5 h-5"></i>
-          </div>
-          <div>
-            <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Child Safety Guardrail</div>
-            <div class="text-sm font-bold text-emerald-300">
-              {{ analysisData.safety.is_safe ? 'PASS (100% Compliant)' : 'CAUTION (Review Flagged)' }}
+              <h3 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mb-1 flex items-center gap-2">
+                <span>{{ heroVerdict.headline }}</span>
+                <span v-if="heroVerdict.isJoke" class="text-base font-normal text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
+                  Verified Humor
+                </span>
+              </h3>
+
+              <p class="text-sm text-slate-300 max-w-2xl leading-relaxed">
+                {{ heroVerdict.summary }}
+              </p>
             </div>
           </div>
+
+          <!-- Right: Key Executive Takeaways (Punchline, Recommended Age, Safety) -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-col gap-3 pt-4 lg:pt-0 border-t lg:border-t-0 lg:border-l border-slate-800 lg:pl-6 min-w-[220px]">
+            
+            <!-- Punchline site -->
+            <div v-if="analysisData.punchline" class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 flex-shrink-0">
+                <i data-lucide="target" class="w-4 h-4"></i>
+              </div>
+              <div class="truncate">
+                <div class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">Punchline Word</div>
+                <div class="text-xs font-bold text-cyan-300 font-mono">"{{ analysisData.punchline }}"</div>
+              </div>
+            </div>
+
+            <!-- Recommended Age -->
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400 flex-shrink-0">
+                <i data-lucide="users" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <div class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">Best Audience</div>
+                <div class="text-xs font-bold text-violet-300">Ages {{ recommendedAge }}+</div>
+              </div>
+            </div>
+
+            <!-- Safety Guardrail -->
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0">
+                <i data-lucide="shield-check" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <div class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">Child Safety</div>
+                <div class="text-xs font-bold text-emerald-300">
+                  {{ analysisData.safety.is_safe ? '100% Family Safe' : 'Review Flagged' }}
+                </div>
+              </div>
+            </div>
+
+          </div>
+
         </div>
       </div>
 
-      <!-- Bento Grid Module 2: The Core Dual-Sense Collision Card -->
+      <!-- Bento Grid Module 2: The Core Joke Anatomy (Text + Double Meaning Collision) -->
       <div class="apple-glass rounded-3xl p-6 sm:p-8 animate-card-fade">
         
         <!-- Joke Text Anchor Header -->
@@ -523,60 +569,72 @@
           </div>
         </div>
 
-        <!-- Side-by-side Dual Senses -->
+        <!-- The Punchline Explained (Comic Twist Mechanism in Plain Language) -->
+        <div class="mb-6 bg-gradient-to-r from-cyan-950/40 via-slate-900/60 to-violet-950/40 border border-cyan-500/20 rounded-2xl p-4 sm:p-5 flex items-start gap-3.5">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500/20 to-violet-500/20 border border-cyan-400/30 flex items-center justify-center text-cyan-300 flex-shrink-0 mt-0.5 shadow-md shadow-cyan-500/10">
+            <i data-lucide="lightbulb" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-cyan-300 uppercase tracking-wider mb-1">
+              {{ heroVerdict.isJoke ? 'Why It\'s Funny: The Punchline Explained' : 'Linguistic Meaning & Structure' }}
+            </div>
+            <p class="text-sm text-slate-200 leading-relaxed font-normal">
+              {{ humanExplanation }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Side-by-side Dual Senses (Only shown when 2 senses exist) -->
         <div v-if="analysisData.sense_a && analysisData.sense_b" class="grid grid-cols-1 md:grid-cols-2 gap-4 relative">
           
           <!-- Sense A Panel -->
-          <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 relative overflow-hidden">
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider">
-                {{ analysisData.sense_a.label }}
-              </span>
-              <span class="text-[11px] font-mono text-slate-400 bg-slate-800 px-2 py-0.5 rounded">
-                AoA: {{ analysisData.sense_a.aoa }} yrs
-              </span>
+          <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
+                  <span>Meaning 1 (Everyday Sense)</span>
+                </span>
+                <span class="text-[11px] font-mono text-slate-400 bg-slate-800 px-2 py-0.5 rounded">
+                  Learned {{ formatAoA(analysisData.sense_a.aoa) }}
+                </span>
+              </div>
+              <p class="text-sm text-slate-200 mb-3 leading-relaxed font-medium">
+                "{{ analysisData.sense_a.definition }}"
+              </p>
             </div>
-            <p class="text-sm text-slate-200 mb-3 leading-relaxed">
-              {{ analysisData.sense_a.definition }}
-            </p>
-            <div class="text-xs text-slate-400 flex items-center gap-1.5 font-mono">
-              <i data-lucide="quote" class="w-3.5 h-3.5 text-cyan-400"></i>
-              <span>Anchor quote: "<strong class="text-slate-200">{{ analysisData.sense_a.quote }}</strong>"</span>
+            <div class="text-xs text-slate-400 flex items-center gap-1.5 pt-2 border-t border-slate-800/60">
+              <span class="text-slate-500">Triggered by context clue:</span>
+              <span class="text-cyan-300 font-mono bg-cyan-500/10 px-1.5 py-0.5 rounded border border-cyan-500/20 font-semibold">
+                "{{ analysisData.sense_a.quote }}"
+              </span>
             </div>
           </div>
 
           <!-- Sense B Panel -->
-          <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 relative overflow-hidden">
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-xs font-bold text-violet-400 uppercase tracking-wider">
-                {{ analysisData.sense_b.label }}
-              </span>
-              <span class="text-[11px] font-mono text-slate-400 bg-slate-800 px-2 py-0.5 rounded">
-                AoA: {{ analysisData.sense_b.aoa }} yrs
-              </span>
+          <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold text-violet-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                  <span>Meaning 2 (Wordplay Twist)</span>
+                </span>
+                <span class="text-[11px] font-mono text-slate-400 bg-slate-800 px-2 py-0.5 rounded">
+                  Learned {{ formatAoA(analysisData.sense_b.aoa) }}
+                </span>
+              </div>
+              <p class="text-sm text-slate-200 mb-3 leading-relaxed font-medium">
+                "{{ analysisData.sense_b.definition }}"
+              </p>
             </div>
-            <p class="text-sm text-slate-200 mb-3 leading-relaxed">
-              {{ analysisData.sense_b.definition }}
-            </p>
-            <div class="text-xs text-slate-400 flex items-center gap-1.5 font-mono">
-              <i data-lucide="quote" class="w-3.5 h-3.5 text-violet-400"></i>
-              <span>Anchor quote: "<strong class="text-slate-200">{{ analysisData.sense_b.quote }}</strong>"</span>
+            <div class="text-xs text-slate-400 flex items-center gap-1.5 pt-2 border-t border-slate-800/60">
+              <span class="text-slate-500">Triggered by context clue:</span>
+              <span class="text-violet-300 font-mono bg-violet-500/10 px-1.5 py-0.5 rounded border border-violet-500/20 font-semibold">
+                "{{ analysisData.sense_b.quote }}"
+              </span>
             </div>
           </div>
 
-        </div>
-
-        <!-- Incongruity Resolution Explanation -->
-        <div class="mt-4 bg-gradient-to-r from-cyan-950/30 to-violet-950/30 border border-cyan-500/20 rounded-2xl p-4 flex items-start gap-3">
-          <div class="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400 flex-shrink-0 mt-0.5">
-            <i data-lucide="lightbulb" class="w-4 h-4"></i>
-          </div>
-          <div>
-            <div class="text-xs font-bold text-cyan-300 uppercase tracking-wider mb-1">Incongruity Resolution Mechanism</div>
-            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              {{ analysisData.resolution_explanation }}
-            </p>
-          </div>
         </div>
 
       </div>
@@ -589,11 +647,14 @@
           <div>
             <div class="flex items-center justify-between mb-3">
               <div>
-                <h3 class="text-sm font-bold text-slate-100 uppercase tracking-wider">Child Developmental Spectrum</h3>
-                <p class="text-xs text-slate-400">Interactive comprehension progression across developmental milestones</p>
+                <h3 class="text-sm font-bold text-slate-100 uppercase tracking-wider flex items-center gap-2">
+                  <i data-lucide="brain" class="w-4 h-4 text-cyan-400"></i>
+                  <span>Who Can Understand This Joke?</span>
+                </h3>
+                <p class="text-xs text-slate-400">Click any age to see how children at that developmental stage perceive this humor</p>
               </div>
               <span class="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 font-mono">
-                Selected: Age {{ activeDisplayAge }}
+                Viewing: Age {{ activeDisplayAge }}
               </span>
             </div>
 
@@ -610,7 +671,7 @@
                     : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200'
                 ]"
               >
-                <div class="text-xs">Age</div>
+                <div class="text-[11px] text-slate-400">Age</div>
                 <div class="text-base font-extrabold">{{ age }}</div>
               </button>
             </div>
@@ -618,58 +679,63 @@
             <!-- Current Selected Age Detailed Insight -->
             <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 text-xs">
               <div class="flex items-center justify-between mb-1.5">
-                <span class="font-bold text-slate-200">
-                  Developmental Verdict for Age {{ activeDisplayAge }}:
+                <span class="font-bold text-slate-200 text-sm">
+                  At Age {{ activeDisplayAge }}:
                 </span>
                 <span :class="[
-                  'font-semibold px-2 py-0.5 rounded text-[11px]',
-                  currentAgeAssessment.comprehension === 'FULLY_COMPREHENSIBLE' ? 'bg-emerald-500/20 text-emerald-300' :
-                  currentAgeAssessment.comprehension === 'PARTIALLY_COMPREHENSIBLE' ? 'bg-amber-500/20 text-amber-300' :
-                  'bg-rose-500/20 text-rose-300'
+                  'font-semibold px-2.5 py-0.5 rounded-full text-xs',
+                  friendlyComprehension(currentAgeAssessment.comprehension).tagClass
                 ]">
-                  {{ currentAgeAssessment.comprehension }}
+                  {{ friendlyComprehension(currentAgeAssessment.comprehension).label }}
                 </span>
               </div>
-              <p class="text-slate-400 leading-relaxed">
+              <p class="text-slate-300 leading-relaxed text-xs sm:text-sm">
                 {{ currentAgeAssessment.desc }}
               </p>
             </div>
           </div>
 
-          <!-- Metalinguistic Acquisition Floor Notice -->
-          <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 font-mono">
-            <span>Metalinguistic Humor Floor: <strong>Age 7.0+</strong></span>
-            <span>AoA Join Status: <strong>EXACT (WordNet 3.0)</strong></span>
+          <!-- Metalinguistic Acquisition Floor Notice in plain English -->
+          <div class="mt-4 pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
+            <span>💡 <strong>Developmental Floor:</strong> Children typically begin grasping puns and double meanings around <strong>Age 7 to 8</strong>.</span>
           </div>
         </div>
 
         <!-- L8 Safety & Appropriateness Guardrails (1 col) -->
         <div class="apple-glass rounded-3xl p-6 flex flex-col justify-between">
           <div>
-            <h3 class="text-sm font-bold text-slate-100 uppercase tracking-wider mb-1">L8 Safety Guardrails</h3>
-            <p class="text-xs text-slate-400 mb-4">Two-axis safety and child content moderation audit</p>
+            <div class="flex items-center justify-between mb-1">
+              <h3 class="text-sm font-bold text-slate-100 uppercase tracking-wider flex items-center gap-2">
+                <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+                <span>Child Safety Check</span>
+              </h3>
+              <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 font-bold">
+                {{ analysisData.safety.is_safe ? 'SAFE' : 'CAUTION' }}
+              </span>
+            </div>
+            <p class="text-xs text-slate-400 mb-4">Dual-axis moderation audit ensuring family friendliness</p>
 
             <div class="space-y-3">
               <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-3">
                 <div class="flex items-center justify-between mb-1">
-                  <span class="text-xs text-slate-300">Surface Content Safety</span>
-                  <span class="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">CLEAN</span>
+                  <span class="text-xs font-semibold text-slate-200">Surface Language</span>
+                  <span class="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">CLEAN</span>
                 </div>
-                <div class="text-[11px] text-slate-500">Zero profanity, violence, or dangerous themes.</div>
+                <div class="text-[11px] text-slate-400">Zero profanity, violence, or sensitive keywords.</div>
               </div>
 
               <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-3">
                 <div class="flex items-center justify-between mb-1">
-                  <span class="text-xs text-slate-300">Inferential Subtlety</span>
-                  <span class="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">SAFE</span>
+                  <span class="text-xs font-semibold text-slate-200">Secondary Innuendo</span>
+                  <span class="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">SAFE</span>
                 </div>
-                <div class="text-[11px] text-slate-500">No inappropriate innuendo or harmful secondary senses.</div>
+                <div class="text-[11px] text-slate-400">No inappropriate double entendre or harmful hidden senses.</div>
               </div>
             </div>
           </div>
 
-          <div class="mt-4 pt-3 border-t border-slate-800/80 text-[11px] text-slate-400">
-            <span>Audit Verdict: </span>
+          <div class="mt-4 pt-3 border-t border-slate-800/80 text-xs text-slate-400">
+            <span>Safety Verdict: </span>
             <strong class="text-emerald-400 font-semibold">{{ analysisData.safety.notes }}</strong>
           </div>
         </div>
@@ -1129,6 +1195,148 @@
           });
         }
 
+        const heroVerdict = computed(() => {
+          if (!analysisData.value) {
+            return {
+              isJoke: false,
+              headline: 'Analyzing...',
+              typeLabel: 'Pending',
+              badgeBg: 'bg-slate-800 text-slate-300 border-slate-700',
+              confidencePct: 0,
+              summary: '',
+            };
+          }
+
+          const cls = analysisData.value.main_classification || '';
+          const punch = analysisData.value.punchline;
+          const conf = Math.round((analysisData.value.confidence || 0.85) * 100);
+
+          if (cls === 'VALID_HOMOGRAPH_JOKE' || (!cls && punch)) {
+            return {
+              isJoke: true,
+              headline: 'Yes, this is a Joke!',
+              typeLabel: 'Wordplay / Pun Joke (双关语笑话)',
+              badgeBg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+              confidencePct: conf,
+              summary: punch
+                ? `Exploits dual meanings of the key word "${punch}".`
+                : 'Contains verified comedic incongruity and lexical resolution.',
+            };
+          }
+          if (cls === 'VALID_COMPOUND_SPLIT_JOKE') {
+            return {
+              isJoke: true,
+              headline: 'Yes, this is a Joke!',
+              typeLabel: 'Compound Wordplay Joke (复合词拆解笑话)',
+              badgeBg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+              confidencePct: conf,
+              summary: 'Humor is created by creatively splitting and re-interpreting word boundaries.',
+            };
+          }
+          if (cls === 'OUT_OF_SCOPE_HOMOPHONE') {
+            return {
+              isJoke: true,
+              headline: 'Yes, this is a Joke!',
+              typeLabel: 'Soundalike / Homophone Joke (谐音梗笑话)',
+              badgeBg: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30',
+              confidencePct: conf,
+              summary: 'Humor relies on words that sound identical despite having different spellings.',
+            };
+          }
+          if (cls === 'OUT_OF_SCOPE_NONLEXICAL_JOKE') {
+            return {
+              isJoke: true,
+              headline: 'Yes, this is a Joke!',
+              typeLabel: 'Riddle / Situational Joke (脑筋急转弯 / 问答笑话)',
+              badgeBg: 'bg-violet-500/10 text-violet-400 border-violet-500/30',
+              confidencePct: conf,
+              summary: 'Humor stems from question-and-answer riddle logic or situational surprise.',
+            };
+          }
+
+          // Non-joke verdicts:
+          let nonJokeType = 'Ordinary Statement (普通陈述句)';
+          let nonJokeSummary = 'No humorous double meaning or punchline resolution was detected in this text.';
+
+          if (cls === 'ONE_SENSE_ONLY') {
+            nonJokeType = 'Literal Language (仅单一语义)';
+            nonJokeSummary = 'All words carry only their standard literal meaning without comedic ambiguity.';
+          } else if (cls === 'SENSES_TOO_CLOSE') {
+            nonJokeType = 'Synonymous Terms (语义相近)';
+            nonJokeSummary = 'Candidate meanings are too similar in context to create a comedic twist.';
+          }
+
+          return {
+            isJoke: false,
+            headline: 'Not a Joke',
+            typeLabel: nonJokeType,
+            badgeBg: 'bg-slate-800 text-slate-300 border-slate-700',
+            confidencePct: conf,
+            summary: nonJokeSummary,
+          };
+        });
+
+        const recommendedAge = computed(() => {
+          if (!analysisData.value || !analysisData.value.age_spectrum) return 8;
+          for (const a of [4, 6, 8, 10, 12, 14]) {
+            const item = analysisData.value.age_spectrum[a];
+            if (item && item.comprehension === 'FULLY_COMPREHENSIBLE') {
+              return a;
+            }
+          }
+          return 8;
+        });
+
+        const humanExplanation = computed(() => {
+          if (!analysisData.value) return '';
+          const d = analysisData.value;
+          const punch = d.punchline;
+          const sA = d.sense_a;
+          const sB = d.sense_b;
+
+          if (punch && sA && sB) {
+            const qA = sA.quote && sA.quote !== punch ? ` (anchored by "${sA.quote}")` : '';
+            const qB = sB.quote && sB.quote !== punch ? ` (anchored by "${sB.quote}")` : '';
+            return `The setup primes the listener for Sense 1: ${sA.definition.replace(/\.$/, '')}${qA}. However, the context ${qB} triggers a surprise shift to Sense 2: ${sB.definition.replace(/\.$/, '')}. This sudden contrast between two unrelated interpretations of "${punch}" resolves the incongruity and creates the punchline.`;
+          }
+
+          if (d.resolution_explanation) {
+            return d.resolution_explanation
+              .replace(/Resolved with status \w+ \(score: [0-9.]+\)\.\s*/i, '')
+              .replace(/The punchline exploits lexical ambiguity on '([^']+)'\./i, 'The punchline pivots on the double meaning of "$1".');
+          }
+
+          if (punch) {
+            return `The sentence creates a humorous double interpretation centered on the word "${punch}".`;
+          }
+
+          return 'This sentence functions as a straightforward, literal communication without underlying wordplay or humorous incongruity.';
+        });
+
+        function formatAoA(val) {
+          if (!val) return '~5 yrs';
+          const num = typeof val === 'number' ? val : parseFloat(val);
+          if (isNaN(num)) return '~5 yrs';
+          return `${num.toFixed(1)} yrs`;
+        }
+
+        function friendlyComprehension(comp) {
+          if (!comp) return { label: 'Unknown', tagClass: 'bg-slate-800 text-slate-400' };
+          switch (comp) {
+            case 'FULLY_COMPREHENSIBLE':
+              return { label: 'Easily Understood (完全理解)', tagClass: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' };
+            case 'PARTIALLY_COMPREHENSIBLE':
+              return { label: 'Partially Understood (部分理解)', tagClass: 'bg-amber-500/20 text-amber-300 border border-amber-500/30' };
+            case 'SENSE_B_TOO_ADVANCED':
+            case 'VOCABULARY_TOO_ADVANCED':
+              return { label: 'Vocabulary Too Advanced (生词难度过高)', tagClass: 'bg-rose-500/20 text-rose-300 border border-rose-500/30' };
+            case 'WORDPLAY_SKILL_TOO_ADVANCED':
+              return { label: 'Wordplay Too Complex (双关逻辑过深)', tagClass: 'bg-rose-500/20 text-rose-300 border border-rose-500/30' };
+            default:
+              return { label: comp.replace(/_/g, ' '), tagClass: 'bg-slate-800 text-slate-300' };
+          }
+        }
+
         const currentAgeAssessment = computed(() => {
           if (!analysisData.value || !analysisData.value.age_spectrum) {
             return { comprehension: 'UNKNOWN', desc: '' };
@@ -1191,6 +1399,11 @@
           currentLogLine,
           elapsedMs,
           analysisData,
+          heroVerdict,
+          recommendedAge,
+          humanExplanation,
+          formatAoA,
+          friendlyComprehension,
           currentAgeAssessment,
           formatClassification,
           formatComprehension,
