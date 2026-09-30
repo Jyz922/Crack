@@ -20,7 +20,7 @@ CRACK automatically detects homographic wordplay and compound splits, extracts v
 ## 🎬 Interactive Web UI Demo (v1.0)
 
 <p align="center">
-  <img src="docs/design/02_result_dashboard.jpg" alt="CRACK v1.0 Interactive Bento Dashboard & Real-Time Scanner" width="100%" style="border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.6);" />
+  <video src="https://github.com/user-attachments/assets/c50578f7-0c83-4516-a4c1-d3e854414c03" controls="controls" width="100%"></video>
 </p>
 
 CRACK v1.0 introduces an **Apple-inspired Bento Intelligence Dashboard** and a real-time SSE streaming radar scanner:
@@ -38,29 +38,6 @@ crack-serve
 # or: python -m crack.serve --port 8000
 ```
 Open **[http://localhost:8000](http://localhost:8000)** in your browser.
-
-### 📹 How to Embed a Demo Video in GitHub README
-
-GitHub natively supports rich HTML5 inline video playback directly inside repository `README.md` files:
-
-1. **Record your screen**: Use macOS QuickTime (`Cmd + Shift + 5`) or [Kap](https://getkap.co/) to record a 15–30 second walkthrough of the radar scanner and Bento dashboard.
-2. **Upload to GitHub**:
-   - Go to any Issue or PR in this repository (e.g. [`New Issue`](https://github.com/Jyz922/Crack/issues/new)).
-   - Drag and drop your `.mp4` or `.mov` file (under 100 MB) into the text box.
-   - GitHub uploads the video to its asset CDN and outputs a markdown URL:
-     ```html
-     https://github.com/user-attachments/assets/xxxx-xxxx-xxxx.mp4
-     ```
-3. **Embed in README**:
-   Replace the image tag in this section with either of the following snippets:
-   ```html
-   <!-- Option A: HTML5 Video Tag with Full Controls (Recommended) -->
-   <video src="https://github.com/user-attachments/assets/YOUR-VIDEO-ID.mp4" controls="controls" muted="muted" width="100%"></video>
-   ```
-   ```markdown
-   <!-- Option B: Autoplaying Animated GIF -->
-   ![CRACK Interactive Demo](assets/demo.gif)
-   ```
 
 ---
 
@@ -148,7 +125,6 @@ The repository provides a curated, balanced evaluation set (`corpus/joke_corpus_
 ## Table of Contents
 
 - [Interactive Web UI Demo (v1.0)](#-interactive-web-ui-demo-v10)
-  - [How to Embed a Demo Video in GitHub README](#-how-to-embed-a-demo-video-in-github-readme)
 - [Benchmark Performance & SOTA Results](#-benchmark-performance--sota-results)
   - [SemEval-2017 Task 7 (Full 2,250 Items)](#1-semeval-2017-task-7-full-2250-official-items)
   - [Child-Directed Humor Corpus (110 Items)](#2-child-directed-humor--developmental-corpus-110-items)
