@@ -317,7 +317,7 @@
                   :class="[
                     'relative inline-flex items-center justify-center transition-all duration-300 rounded-xl leading-none border-2',
                     // Spacing and padding around words (mx-2 on candidates gives clear gap between adjacent boxes)
-                    (isCandidateStage && tok.is_candidate) || (isPunchlineLocked && tok.is_punchline)
+                    (isCandidateStage && tok.is_candidate && !isPunchlineLocked) || (isPunchlineLocked && tok.is_punchline)
                       ? 'mx-2 px-2.5 pt-1.5 pb-2'
                       : 'mx-0.5 px-1 py-1 border-transparent',
                     // Punchline locked state
@@ -550,8 +550,11 @@
           <div class="w-full overflow-hidden py-1">
             <div
               ref="dashboardJokeRef"
-              :style="{ opacity: isMagicMoving ? 0 : 1 }"
-              class="inline-flex flex-nowrap items-center whitespace-nowrap text-lg sm:text-xl font-medium tracking-tight text-slate-100 leading-none"
+              :style="[textScaleStyle, { opacity: isMagicMoving ? 0 : 1 }]"
+              :class="[
+                'inline-flex flex-nowrap items-center whitespace-nowrap tracking-tight font-medium leading-none',
+                computedFontSizeClass
+              ]"
             >
               <template v-for="(tok, idx) in analysisData.tokens" :key="idx"><span
                 v-if="!tok.is_word"
@@ -559,7 +562,7 @@
               >{{ tok.text }}</span><span
                 v-else
                 :class="[
-                  'relative inline-flex items-center justify-center rounded-xl leading-none border-2 transition-all',
+                  'relative inline-flex items-center justify-center rounded-xl leading-none border-2',
                   tok.is_punchline
                     ? 'mx-2 px-2.5 pt-1.5 pb-2 text-cyan-100 font-medium punchline-halo bg-cyan-500/30 border-cyan-300 z-30 shadow-2xl shadow-cyan-500/50'
                     : 'mx-0.5 px-1 py-1 border-transparent text-slate-200'
