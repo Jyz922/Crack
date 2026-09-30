@@ -81,23 +81,11 @@ The comparison below covers binary homographic-pun detection; pun-sense interpre
 
 ### SemEval-2017 Task 7 detection comparison
 
-Ranked by reported F1, the table includes the task-paper systems and later SemEval evaluations. Fermi's result is omitted because it covers only 675 of 2,250 contexts. CRACK ranks **1st of 11 results**. Seven entries explicitly cover all 2,250 items; Diao et al.'s three variants are listed as 2,250* because the paper names the SemEval test set but does not report per-model counts.
+Ranked by reported F1, the table includes the task-paper systems and later SemEval evaluations. Fermi's result is omitted because it covers only 675 of 2,250 contexts. CRACK ranks **1st of 11 results**.
 
-| Rank | System | F1 | Evaluated items | Evaluation setting |
-|---:|---|---:|---:|---|
-| 1 | CRACK (local run) | 87.82% | 2,250 / 2,250 | Local run |
-| 2 | [Feng et al. (2020), second setting](https://ceur-ws.org/Vol-2624/paper3.pdf) | 87.50% | 2,250 / 2,250 | Trained on self-collected data; evaluated on the official dataset |
-| 3 | [Diao et al. (2018), Bi-LSTM-E](https://aclanthology.org/D18-1272.pdf) | 85.46% | 2,250* | Pun of the Day training; SemEval test |
-| 4 | [Diao et al. (2018), Bi-LSTM-Attention](https://aclanthology.org/D18-1272.pdf) | 85.26% | 2,250* | Pun of the Day training; SemEval test |
-| 5 | [Diao et al. (2018), Bi-LSTM](https://aclanthology.org/D18-1272.pdf) | 84.51% | 2,250* | Pun of the Day training; SemEval test |
-| 6 | N-Hance (out of competition) | 83.50% | 2,250 / 2,250 | SemEval result |
-| 7 | Duluth | 82.54% | 2,250 / 2,250 | SemEval result |
-| 8 | JU_CSE_NLP | 80.63% | 2,250 / 2,250 | SemEval result |
-| 9 | PunFields | 76.51% | 2,250 / 2,250 | SemEval result |
-| 10 | ECNU | 67.85% | 2,237 / 2,250 | Partial coverage |
-| 11 | UWAV | 55.87% | 2,250 / 2,250 | SemEval result |
+![SemEval-2017 Task 7 homographic pun detection ranking by reported F1](assets/semeval-detection-ranking.svg)
 
-**Sources and settings:** Original task results are from [Miller et al. (2017), Table 2](https://aclanthology.org/S17-2005.pdf). N-Hance was an out-of-competition system; ECNU evaluated 2,237 items. Feng et al.'s second setting trains on self-collected data and evaluates on the official set. Diao et al. describe training on Pun of the Day and testing on SemEval; their paper also mentions 5-fold tuning without specifying the tuning data.
+**Sources and settings:** Original task results are from [Miller et al. (2017), Table 2](https://aclanthology.org/S17-2005.pdf). N-Hance was an out-of-competition system; ECNU evaluated 2,237 items. Feng et al.'s second setting trains on self-collected data and evaluates on the official set. Diao et al. describe training on Pun of the Day and testing on SemEval; the three model variants report no per-model item counts, and the paper does not identify the data used for 5-fold tuning.
 
 ### Other reported results
 
