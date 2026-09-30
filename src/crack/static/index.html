@@ -70,24 +70,24 @@
       pointer-events: none;
     }
 
-    /* Punchline Halo Pulse */
+    /* Starlight Halo Pulse (Purple/Violet flowing starlight, NO CYAN) */
     @keyframes punchline-pulse {
       0% {
-        box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.7), 0 0 20px rgba(139, 92, 246, 0.4);
+        box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.7), 0 0 18px rgba(192, 132, 252, 0.5);
       }
       50% {
-        box-shadow: 0 0 0 12px rgba(6, 182, 212, 0), 0 0 35px rgba(139, 92, 246, 0.8);
+        box-shadow: 0 0 0 10px rgba(168, 85, 247, 0), 0 0 35px rgba(233, 213, 255, 0.8);
       }
       100% {
-        box-shadow: 0 0 0 0 rgba(6, 182, 212, 0), 0 0 20px rgba(139, 92, 246, 0.4);
+        box-shadow: 0 0 0 0 rgba(168, 85, 247, 0), 0 0 18px rgba(192, 132, 252, 0.5);
       }
     }
 
     .punchline-halo {
-      animation: punchline-pulse 1.8s infinite cubic-bezier(0.4, 0, 0.6, 1);
+      animation: punchline-pulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
     }
 
-    /* Punchline Hero Floating Badge */
+    /* Punchline Hero Floating Badge (Violet/Purple) */
     .punchline-badge {
       position: absolute;
       left: 50%;
@@ -109,25 +109,22 @@
     }
 
     /* ==================================================================== */
-    /* Claude Effort Starfield Constellation (璀璨星空微晶动效)              */
+    /* Flowing Starlight Constellation (流动的星芒微晶动效)                  */
     /* ==================================================================== */
 
     .claude-starfield-box {
       position: relative;
-      border-color: rgba(192, 132, 252, 0.9) !important;
+      border-color: rgba(192, 132, 252, 0.75) !important;
       border-style: solid !important;
-      animation: claude-border-glow 2.4s ease-in-out infinite;
+      box-shadow: 0 0 14px rgba(168, 85, 247, 0.35), inset 0 0 8px rgba(168, 85, 247, 0.2);
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
     }
 
-    @keyframes claude-border-glow {
-      0%, 100% {
-        border-color: rgba(192, 132, 252, 0.8);
-        box-shadow: 0 0 16px rgba(168, 85, 247, 0.5), 0 0 4px rgba(233, 213, 255, 0.6), inset 0 0 8px rgba(168, 85, 247, 0.35);
-      }
-      50% {
-        border-color: rgba(245, 208, 254, 1);
-        box-shadow: 0 0 28px rgba(192, 132, 252, 0.85), 0 0 10px rgba(255, 255, 255, 0.9), inset 0 0 14px rgba(192, 132, 252, 0.55);
-      }
+    /* True Double-Meaning Word (真正的双义词) Enhanced Starlight Glow */
+    .claude-starfield-box.punchline-locked-starlight {
+      border-color: rgba(233, 213, 255, 0.95) !important;
+      box-shadow: 0 0 24px rgba(168, 85, 247, 0.6), 0 0 10px rgba(233, 213, 255, 0.8), inset 0 0 12px rgba(192, 132, 252, 0.4);
+      animation: punchline-pulse 2.2s infinite cubic-bezier(0.4, 0, 0.6, 1);
     }
 
     .claude-starfield {
@@ -137,57 +134,71 @@
       overflow: hidden;
       pointer-events: none;
       z-index: 1;
-      background: linear-gradient(135deg, rgba(88, 28, 135, 0.85), rgba(46, 16, 101, 0.95), rgba(76, 29, 149, 0.85));
+      background: linear-gradient(135deg, rgba(76, 29, 149, 0.9), rgba(46, 16, 101, 0.96), rgba(88, 28, 135, 0.9));
     }
 
+    /* Flowing Star Matrix 1: Horizontally drifting pixel river */
     .claude-star-matrix {
       position: absolute;
       inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Crect x='0.5' y='0.5' width='3' height='3' rx='0.8' fill='%23ffffff' opacity='0.85'/%3E%3Crect x='4.5' y='0.5' width='3' height='3' rx='0.8' fill='%23c084fc' opacity='0.4'/%3E%3Crect x='8.5' y='0.5' width='3' height='3' rx='0.8' fill='%23e9d5ff' opacity='0.7'/%3E%3Crect x='12.5' y='0.5' width='3' height='3' rx='0.8' fill='%23a855f7' opacity='0.3'/%3E%3Crect x='0.5' y='4.5' width='3' height='3' rx='0.8' fill='%23a855f7' opacity='0.35'/%3E%3Crect x='4.5' y='4.5' width='3' height='3' rx='0.8' fill='%23ffffff' opacity='0.95'/%3E%3Crect x='8.5' y='4.5' width='3' height='3' rx='0.8' fill='%23c084fc' opacity='0.5'/%3E%3Crect x='12.5' y='4.5' width='3' height='3' rx='0.8' fill='%23e9d5ff' opacity='0.65'/%3E%3Crect x='0.5' y='8.5' width='3' height='3' rx='0.8' fill='%23e9d5ff' opacity='0.6'/%3E%3Crect x='4.5' y='8.5' width='3' height='3' rx='0.8' fill='%23c084fc' opacity='0.45'/%3E%3Crect x='8.5' y='8.5' width='3' height='3' rx='0.8' fill='%23ffffff' opacity='0.9'/%3E%3Crect x='12.5' y='8.5' width='3' height='3' rx='0.8' fill='%239333ea' opacity='0.25'/%3E%3Crect x='0.5' y='12.5' width='3' height='3' rx='0.8' fill='%23c084fc' opacity='0.55'/%3E%3Crect x='4.5' y='12.5' width='3' height='3' rx='0.8' fill='%23a855f7' opacity='0.3'/%3E%3Crect x='8.5' y='12.5' width='3' height='3' rx='0.8' fill='%23e9d5ff' opacity='0.75'/%3E%3Crect x='12.5' y='12.5' width='3' height='3' rx='0.8' fill='%23ffffff' opacity='0.8'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Crect x='0.5' y='0.5' width='3' height='3' rx='0.8' fill='%23ffffff' opacity='0.85'/%3E%3Crect x='4.5' y='0.5' width='3' height='3' rx='0.8' fill='%23c084fc' opacity='0.45'/%3E%3Crect x='8.5' y='0.5' width='3' height='3' rx='0.8' fill='%23e9d5ff' opacity='0.7'/%3E%3Crect x='12.5' y='0.5' width='3' height='3' rx='0.8' fill='%23a855f7' opacity='0.35'/%3E%3Crect x='0.5' y='4.5' width='3' height='3' rx='0.8' fill='%23a855f7' opacity='0.4'/%3E%3Crect x='4.5' y='4.5' width='3' height='3' rx='0.8' fill='%23ffffff' opacity='0.95'/%3E%3Crect x='8.5' y='4.5' width='3' height='3' rx='0.8' fill='%23c084fc' opacity='0.5'/%3E%3Crect x='12.5' y='4.5' width='3' height='3' rx='0.8' fill='%23e9d5ff' opacity='0.65'/%3E%3Crect x='0.5' y='8.5' width='3' height='3' rx='0.8' fill='%23e9d5ff' opacity='0.6'/%3E%3Crect x='4.5' y='8.5' width='3' height='3' rx='0.8' fill='%23c084fc' opacity='0.45'/%3E%3Crect x='8.5' y='8.5' width='3' height='3' rx='0.8' fill='%23ffffff' opacity='0.9'/%3E%3Crect x='12.5' y='8.5' width='3' height='3' rx='0.8' fill='%239333ea' opacity='0.3'/%3E%3Crect x='0.5' y='12.5' width='3' height='3' rx='0.8' fill='%23c084fc' opacity='0.55'/%3E%3Crect x='4.5' y='12.5' width='3' height='3' rx='0.8' fill='%23a855f7' opacity='0.35'/%3E%3Crect x='8.5' y='12.5' width='3' height='3' rx='0.8' fill='%23e9d5ff' opacity='0.75'/%3E%3Crect x='12.5' y='12.5' width='3' height='3' rx='0.8' fill='%23ffffff' opacity='0.85'/%3E%3C/svg%3E");
       background-size: 16px 16px;
       background-repeat: repeat;
+      opacity: 0.85;
+      animation: starlight-flow 12s linear infinite;
+      will-change: background-position;
     }
 
-    .claude-matrix-1 {
-      animation: claude-scintillate-1 1.9s ease-in-out infinite;
-    }
-
+    /* Flowing Star Matrix 2: Depth layer drifting slower */
     .claude-matrix-2 {
       background-position: 8px 8px;
-      animation: claude-scintillate-2 2.6s ease-in-out infinite;
+      opacity: 0.45;
+      animation: starlight-flow-depth 18s linear infinite;
     }
 
-    @keyframes claude-scintillate-1 {
-      0%, 100% { opacity: 0.45; }
-      50% { opacity: 0.95; }
+    @keyframes starlight-flow {
+      0% {
+        background-position: 0 0;
+      }
+      100% {
+        background-position: -64px 0;
+      }
     }
 
-    @keyframes claude-scintillate-2 {
-      0%, 100% { opacity: 0.85; }
-      50% { opacity: 0.3; }
+    @keyframes starlight-flow-depth {
+      0% {
+        background-position: 8px 8px;
+      }
+      100% {
+        background-position: -56px 8px;
+      }
     }
 
-    /* Sweeping celestial starlight aurora glare */
+    /* Smooth starlight aurora flow (平滑流动的极光柔光) */
     .claude-aurora-sweep {
       position: absolute;
       inset: 0;
       background: linear-gradient(
-        115deg,
+        105deg,
         transparent 15%,
-        rgba(255, 255, 255, 0.35) 45%,
-        rgba(233, 213, 255, 0.75) 50%,
-        rgba(255, 255, 255, 0.35) 55%,
+        rgba(255, 255, 255, 0.2) 45%,
+        rgba(233, 213, 255, 0.55) 50%,
+        rgba(255, 255, 255, 0.2) 55%,
         transparent 85%
       );
-      background-size: 300% 100%;
-      animation: claude-sweep 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      background-size: 250% 100%;
+      animation: aurora-flow 3.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
       mix-blend-mode: overlay;
       pointer-events: none;
     }
 
-    @keyframes claude-sweep {
-      0% { background-position: 220% 0; }
-      100% { background-position: -120% 0; }
+    @keyframes aurora-flow {
+      0% {
+        background-position: 180% 0;
+      }
+      100% {
+        background-position: -80% 0;
+      }
     }
 
     /* Glassmorphism Card Style */
@@ -402,31 +413,31 @@
                     (isCandidateStage && tok.is_candidate && !isPunchlineLocked) || (isPunchlineLocked && tok.is_punchline)
                       ? 'mx-2 px-2.5 pt-1.5 pb-2'
                       : 'mx-0.5 px-1 py-1 border-transparent',
-                    // Punchline locked state
+                    // Punchline locked state (Flowing Starlight Master, NO CYAN)
                     isPunchlineLocked && tok.is_punchline
-                      ? 'text-cyan-100 font-medium punchline-halo bg-cyan-500/30 border-cyan-300 z-30 shadow-2xl shadow-cyan-500/50'
+                      ? 'claude-starfield-box punchline-locked-starlight text-white font-bold z-30'
                       : '',
-                    // Candidate highlighted state (Claude Starlight Constellation)
+                    // Candidate highlighted state (Flowing Starlight)
                     isCandidateStage && tok.is_candidate && !isPunchlineLocked
                       ? 'claude-starfield-box text-white font-bold z-20'
                       : (!isPunchlineLocked || !tok.is_punchline ? 'text-slate-200' : '')
                   ]"
-                ><template v-if="isCandidateStage && tok.is_candidate && !isPunchlineLocked">
-                  <!-- Claude Constellation Starfield Background -->
+                ><template v-if="(isCandidateStage && tok.is_candidate && !isPunchlineLocked) || (isPunchlineLocked && tok.is_punchline)">
+                  <!-- Flowing Starlight Background for Both Candidates & Locked Punchline -->
                   <div class="claude-starfield">
-                    <div class="claude-star-matrix claude-matrix-1"></div>
+                    <div class="claude-star-matrix"></div>
                     <div class="claude-star-matrix claude-matrix-2"></div>
                     <div class="claude-aurora-sweep"></div>
                   </div>
-                </template><span class="relative z-10 inline-block leading-none drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">{{ tok.text }}</span><!-- Floating Tag: Punchline Target Locked --><div
+                </template><span class="relative z-10 inline-block leading-none drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">{{ tok.text }}</span><!-- Floating Tag: Punchline Target Locked (Violet/Purple Starlight Theme) --><div
                     v-if="isPunchlineLocked && tok.is_punchline"
                     class="punchline-badge"
                   >
-                    <div class="relative px-3.5 py-0.5 rounded-xl bg-gradient-to-r from-cyan-400 via-teal-400 to-violet-500 text-white shadow-2xl shadow-cyan-500/50 border border-white/60 flex items-center gap-1.5 font-bold text-xs">
+                    <div class="relative px-3.5 py-0.5 rounded-xl bg-gradient-to-r from-violet-600 via-purple-500 to-fuchsia-600 text-white shadow-2xl shadow-purple-500/50 border border-white/60 flex items-center gap-1.5 font-bold text-xs">
                       <i data-lucide="sparkles" class="w-3.5 h-3.5 fill-white"></i>
-                      <span>Punchline Locked</span>
+                      <span>双关笑点锁定</span>
                       <!-- Caret pointer -->
-                      <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gradient-to-br from-teal-400 to-violet-500 rotate-45 border-r border-b border-white/40"></div>
+                      <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gradient-to-br from-purple-500 to-fuchsia-600 rotate-45 border-r border-b border-white/40"></div>
                     </div>
                   </div></span></template>
               </div>
@@ -592,12 +603,12 @@
             
             <!-- Punchline site -->
             <div v-if="analysisData.punchline" class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 flex-shrink-0">
-                <i data-lucide="target" class="w-4 h-4"></i>
+              <div class="w-8 h-8 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 flex-shrink-0">
+                <i data-lucide="sparkles" class="w-4 h-4"></i>
               </div>
               <div class="truncate">
-                <div class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">Punchline Word</div>
-                <div class="text-xs font-bold text-cyan-300 font-mono">"{{ analysisData.punchline }}"</div>
+                <div class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">双关核心词 (Punchline)</div>
+                <div class="text-xs font-bold text-purple-300 font-mono">"{{ analysisData.punchline }}"</div>
               </div>
             </div>
 
@@ -653,10 +664,17 @@
                 :class="[
                   'relative inline-flex items-center justify-center rounded-xl leading-none border-2',
                   tok.is_punchline
-                    ? 'mx-2 px-2.5 pt-1.5 pb-2 text-cyan-100 font-medium punchline-halo bg-cyan-500/30 border-cyan-300 z-30 shadow-2xl shadow-cyan-500/50'
+                    ? 'mx-2 px-2.5 pt-1.5 pb-2 claude-starfield-box punchline-locked-starlight text-white font-bold z-30'
                     : 'mx-0.5 px-1 py-1 border-transparent text-slate-200'
                 ]"
-              ><span class="inline-block leading-none">{{ tok.text }}</span></span></template>
+              ><template v-if="tok.is_punchline">
+                <!-- Flowing Starlight Background for True Double-Meaning Word -->
+                <div class="claude-starfield">
+                  <div class="claude-star-matrix"></div>
+                  <div class="claude-star-matrix claude-matrix-2"></div>
+                  <div class="claude-aurora-sweep"></div>
+                </div>
+              </template><span class="relative z-10 inline-block leading-none drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">{{ tok.text }}</span></span></template>
             </div>
           </div>
         </div>
@@ -665,7 +683,7 @@
         <div v-if="analysisData.candidates && analysisData.candidates.length > 1" class="mb-6 pb-4 border-b border-slate-800/60 flex flex-wrap items-center gap-2 text-xs">
           <span class="text-slate-400 font-semibold uppercase tracking-wider text-[11px] flex items-center gap-1.5 mr-1">
             <i data-lucide="sparkles" class="w-3.5 h-3.5 text-violet-400"></i>
-            <span>Ambiguity Sites Evaluated:</span>
+            <span>双关歧义点评估 (Ambiguity Candidates):</span>
           </span>
           <div
             v-for="(cand, cIdx) in analysisData.candidates"
@@ -673,29 +691,28 @@
             :class="[
               'relative inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold overflow-hidden transition-all',
               cand.term.toLowerCase() === (analysisData.punchline || '').toLowerCase()
-                ? 'bg-cyan-500/20 border border-cyan-400 text-cyan-200 shadow-md shadow-cyan-500/20'
-                : 'claude-starfield-box text-white border border-violet-400/80 shadow-md shadow-violet-500/20'
+                ? 'claude-starfield-box punchline-locked-starlight text-white shadow-lg shadow-purple-500/25 ring-1 ring-purple-300/50'
+                : 'claude-starfield-box text-white/90 border border-violet-400/50'
             ]"
           >
-            <template v-if="cand.term.toLowerCase() !== (analysisData.punchline || '').toLowerCase()">
-              <div class="claude-starfield">
-                <div class="claude-star-matrix claude-matrix-1 opacity-70"></div>
-                <div class="claude-aurora-sweep"></div>
-              </div>
-            </template>
+            <div class="claude-starfield">
+              <div class="claude-star-matrix"></div>
+              <div class="claude-aurora-sweep"></div>
+            </div>
             <span class="relative z-10 font-mono font-bold">"{{ cand.term }}"</span>
             <span class="relative z-10 text-[10px] opacity-80 font-mono">score: {{ cand.score }}</span>
-            <span v-if="cand.term.toLowerCase() === (analysisData.punchline || '').toLowerCase()" class="relative z-10 text-[10px] bg-cyan-400/30 text-cyan-100 px-1.5 py-0.5 rounded font-bold">PUNCHLINE</span>
+            <span v-if="cand.term.toLowerCase() === (analysisData.punchline || '').toLowerCase()" class="relative z-10 text-[10px] bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">★ 双关核心</span>
+            <span v-else class="relative z-10 text-[10px] bg-purple-950/80 text-purple-200 px-1 py-0.5 rounded font-medium">预选</span>
           </div>
         </div>
 
         <!-- The Punchline Explained (Comic Twist Mechanism in Plain Language) -->
-        <div class="mb-6 bg-gradient-to-r from-cyan-950/40 via-slate-900/60 to-violet-950/40 border border-cyan-500/20 rounded-2xl p-4 sm:p-5 flex items-start gap-3.5">
-          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500/20 to-violet-500/20 border border-cyan-400/30 flex items-center justify-center text-cyan-300 flex-shrink-0 mt-0.5 shadow-md shadow-cyan-500/10">
+        <div class="mb-6 bg-gradient-to-r from-purple-950/40 via-slate-900/60 to-indigo-950/40 border border-purple-500/20 rounded-2xl p-4 sm:p-5 flex items-start gap-3.5">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-500/20 to-violet-500/20 border border-purple-400/30 flex items-center justify-center text-purple-300 flex-shrink-0 mt-0.5 shadow-md shadow-purple-500/10">
             <i data-lucide="lightbulb" class="w-4 h-4"></i>
           </div>
           <div>
-            <div class="text-xs font-bold text-cyan-300 uppercase tracking-wider mb-1">
+            <div class="text-xs font-bold text-purple-300 uppercase tracking-wider mb-1">
               {{ heroVerdict.isJoke ? 'Why It\'s Funny: The Punchline Explained' : 'Linguistic Meaning & Structure' }}
             </div>
             <p class="text-sm text-slate-200 leading-relaxed font-normal">
@@ -1229,7 +1246,6 @@
             const flyer = sourceEl.cloneNode(true);
             const badge = flyer.querySelector('.punchline-badge');
             if (badge) badge.remove();
-            flyer.querySelectorAll('.claude-starfield, .claude-glint').forEach(el => el.remove());
 
             flyer.id = 'magic-move-flyer';
             flyer.style.position = 'fixed';
