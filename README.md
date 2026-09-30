@@ -35,7 +35,41 @@ Evaluated on the full test set of **SemEval-2017 Task 7: Detection and Interpret
   </picture>
 </p>
 
-#### Comparison with SemEval-2017 Official Systems & Baselines
+#### Modern Frontier LLM & Knowledge-Graph SOTA Leaderboard (2024–2026)
+
+Recently published in **EMNLP 2026** ([Su et al., arXiv:2609.16557](https://arxiv.org/abs/2609.16557), Table 1), the gold-standard SemEval-2017 benchmark was comprehensively evaluated across the current generation of proprietary frontier LLMs, open-weight reasoning models, and retrieval-augmented knowledge graph architectures on Homographic Pun detection:
+
+| Rank | Model / Framework | Architecture & Paradigm | Source / Venue | Detection Acc | Pun F1 | Key Characteristics & Hallucination Defense |
+|:---:|---|---|---|:---:|:---:|---|
+| 👑 | **CRACK (Ours)** | **Neuro-Symbolic + gpt-6-luna** | This Work (2026) | **82.84%** | **87.82%** | **Dual High Acc & F1**: L4 verbatim dual quotes prevent humor hallucination on negative controls |
+| 2 | **GPT-4o** [^1] | Frontier Proprietary LLM (Zero-shot) | Hurst et al. (2024) | **76.27%** | **87.35%** | Strong general semantics; unconstrained generation confabulates secondary senses on non-jokes |
+| 3 | **PunGraph-Qwen-3.5-27B** [^2] | Retrieval-Enhanced Knowledge Graph | Su et al. (EMNLP 2026) | **76.18%** | **85.71%** | WordNet graph candidate retrieval restricts LLM decision space |
+| 4 | **Gemini-2.0 Flash** [^3] | High-Throughput Reasoning LLM | Google DeepMind (2025) | **71.08%** | **84.56%** | High inference throughput; lower precision under nuanced lexical polysemy |
+| 5 | **PunGraph-Llama4-Maverick** [^2] | Retrieval-Enhanced Knowledge Graph | Su et al. (EMNLP 2026) | **71.80%** | **83.43%** | Phonetic-semantic graph augmentation on open-weight backbone |
+| 6 | **Qwen-3.5-27B** [^4] | Open-Weight LLM (Direct Prompting) | Qwen Team (2026) | **68.95%** | **83.20%** | Unconstrained direct generation baseline |
+| 7 | **Duluth** [^5] | Feature-based Ensemble | Miller et al. (SemEval 2017) | **73.64%** | **82.54%** | Official Shared Task Winner (Historical Baseline) |
+| 8 | **DeepSeek-V3.2** [^6] | Mixture-of-Experts (MoE) LLM | DeepSeek-AI (2025) | **66.26%** | **82.12%** | High generative fluency; accuracy penalized by over-identifying puns in literal sentences |
+| 9 | **Llama4-Maverick** [^7] | Open-Weight LLM (Direct Prompting) | Meta (2025) | **66.26%** | **82.00%** | Raw baseline without external graph grounding |
+| 10 | **Fermi** [^5] | Word Sense Overlap (WSD) | SemEval-2017 | — | **77.65%** | Official Shared Task Rank #2 |
+| 11 | **MiniCPM-8.7B** [^8] | Edge-scale Lightweight LLM | Hu et al. (2024) | **40.71%** | **66.64%** | Parameter-constrained; fails to resolve dual lexical contexts |
+| 12 | **Qwen-2.5-7B** [^9] | Open-Weight Lightweight LLM | Qwen et al. (2024) | **34.65%** | **62.42%** | Frequent confabulation on polysemous candidates |
+| 13 | **ReKG-MCTS** [^10] | Monte Carlo Tree Search + KG | Song et al. (ACL 2025) | **22.11%** | **48.41%** | Factual path-traversal fails to capture rhetorical wordplay incongruity |
+| 14 | **GCR** [^11] | Graph-Constrained Reasoning | Luo et al. (2024) | **43.04%** | **37.19%** | Lacks dedicated rhetorical/pun dual-sense graph paths |
+
+> **Leaderboard Provenance & Verified Literature Citations:**  
+> [^1]: A. Hurst et al. 2024. *GPT-4o System Card*. [arXiv:2410.21276](https://arxiv.org/abs/2410.21276). Evaluated in Su et al. (2026), Table 1.  
+> [^2]: Yuchen Su, Shanshan Zhong, Yicheng Zhu, Rui Wang, Zhenghua Huang, Qi Wang, Ning Zhao, Diana Benavides-Prado, and Michael Witbrock. 2026. *PunGraph: Retrieval-Enhanced Phonetic-Semantic Graph Reasoning for Pun Understanding*. In *Proceedings of EMNLP 2026*. [arXiv:2609.16557](https://arxiv.org/abs/2609.16557), Table 1.  
+> [^3]: Google DeepMind. 2025. *Gemini 2.0 Flash Model Card*. Technical report. Evaluated in Su et al. (2026), Table 1.  
+> [^4]: Qwen Team. 2026. *Qwen3.5: Towards Native Multimodal Agents*. Evaluated in Su et al. (2026), Table 1.  
+> [^5]: Tristan Miller, Christian F. Hempelmann, and Iryna Gurevych. 2017. *SemEval-2017 Task 7: Detection and Interpretation of English Puns*. In *Proceedings of SemEval-2017*, pages 58–68. [DOI: 10.18653/v1/S17-2007](https://aclanthology.org/S17-2007/).  
+> [^6]: DeepSeek-AI. 2025. *DeepSeek-V3.2: Pushing the Frontier of Open Large Language Models*. Evaluated in Su et al. (2026), Table 1.  
+> [^7]: Meta. 2025. *Llama 4 Model Card*. Evaluated in Su et al. (2026), Table 1.  
+> [^8]: Shengding Hu et al. 2024. *MiniCPM: Unveiling the Potential of Small Language Models with Scalable Training Strategies*. [arXiv:2404.06395](https://arxiv.org/abs/2404.06395). Evaluated in Su et al. (2026), Table 1.  
+> [^9]: An Yang et al. 2024. *Qwen2.5 Technical Report*. [arXiv:2412.15115](https://arxiv.org/abs/2412.15115). Evaluated in Su et al. (2026), Table 1.  
+> [^10]: Xintao Song, Shanshan Zhang, and Tao Yu. 2025. *ReKG-MCTS: Reinforcing LLM Reasoning on Knowledge Graphs via Training-Free Monte Carlo Tree Search*. In *Findings of the Association for Computational Linguistics: ACL 2025*, pages 9288–9306. Evaluated in Su et al. (2026), Table 1.  
+> [^11]: Linhao Luo et al. 2024. *Graph-Constrained Reasoning: Faithful Reasoning on Knowledge Graphs with Large Language Models*. [arXiv:2410.13080](https://arxiv.org/abs/2410.13080). Evaluated in Su et al. (2026), Table 1.
+
+#### Historical Shared Task Participants (SemEval-2017 Official)
 
 | System / Model | Architecture Type | Subtask 1: Detection Acc | Subtask 1: Pun F1 | Subtask 2: Location Acc | Notes |
 |---|---|:---:|:---:|:---:|---|
@@ -105,7 +139,9 @@ The repository provides a curated, balanced evaluation set (`corpus/joke_corpus_
 
 - [Benchmark Performance & SOTA Results](#-benchmark-performance--sota-results)
   - [SemEval-2017 Task 7 (Full 2,250 Items)](#1-semeval-2017-task-7-full-2250-official-items)
-  - [Supervised Deep Learning SOTA (Zou & Lu, NAACL 2019)](#comparison-with-supervised-deep-learning-sota-zou--lu-naacl-2019)
+    - [Modern Frontier LLM & Knowledge-Graph SOTA Leaderboard (2024–2026)](#modern-frontier-llm--knowledge-graph-sota-leaderboard-20242026)
+    - [Historical Shared Task Participants (SemEval-2017 Official)](#historical-shared-task-participants-semeval-2017-official)
+    - [Supervised Deep Learning SOTA (Zou & Lu, NAACL 2019)](#comparison-with-supervised-deep-learning-sota-zou--lu-naacl-2019)
   - [Assignment Evaluation Corpus (60 Texts)](#2-assignment-evaluation-corpus-60-texts-25-jokes-25-de-joked-pairs-10-non-jokes)
 - [The Challenge: Why Humor AI Fails](#the-challenge-why-humor-ai-fails)
 - [Key Features](#key-features)
@@ -487,5 +523,32 @@ If you use CRACK in your research, please cite:
   year = "2019",
   pages = "2117--2123",
   doi = "10.18653/v1/N19-1218"
+}
+
+@inproceedings{su-etal-2026-pungraph,
+  title = "{P}un{G}raph: Retrieval-Enhanced Phonetic-Semantic Graph Reasoning for Pun Understanding",
+  author = "Su, Yuchen and Zhong, Shanshan and Zhu, Yicheng and Wang, Rui and Huang, Zhenghua and Wang, Qi and Zhao, Ning and Benavides-Prado, Diana and Witbrock, Michael",
+  booktitle = "Proceedings of the 2026 Conference on Empirical Methods in Natural Language Processing (EMNLP 2026)",
+  year = "2026",
+  eprint = "2609.16557",
+  archivePrefix = "arXiv",
+  primaryClass = "cs.CL"
+}
+
+@inproceedings{zangari-etal-2025-pun,
+  title = "Pun Unintended: {LLM}s and the Illusion of Humor Understanding",
+  author = "Zangari, Alessandro and Marcuzzo, Matteo and Albarelli, Andrea and Pilehvar, Mohammad Taher and Camacho-Collados, Jose",
+  booktitle = "Proceedings of the 2025 Conference on Empirical Methods in Natural Language Processing (EMNLP 2025)",
+  year = "2025",
+  pages = "27924--27959",
+  eprint = "2410.15852",
+  archivePrefix = "arXiv"
+}
+
+@article{hurst-etal-2024-gpt4o,
+  title = "{GPT}-4o System Card",
+  author = "Hurst, Aaron and Lerer, Adam and Goucher, Adam P. and Perelman, Alec and Ramesh, Aditya and Clark, Aidan and Ostrow, Alex and others",
+  journal = "arXiv preprint arXiv:2410.21276",
+  year = "2024"
 }
 ```
