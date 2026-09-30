@@ -20,7 +20,10 @@ CRACK automatically detects homographic wordplay and compound splits, extracts v
 ## 🎬 Interactive Web UI Demo (v1.0)
 
 <p align="center">
-  <video src="https://github.com/user-attachments/assets/c50578f7-0c83-4516-a4c1-d3e854414c03" controls="controls" width="100%"></video>
+  <img src="assets/demo.gif" alt="CRACK Interactive Web UI Demo" width="100%">
+</p>
+<p align="center">
+  <sub>🎥 Prefer high-definition video with controls? <a href="https://github.com/user-attachments/assets/c50578f7-0c83-4516-a4c1-d3e854414c03"><b>Watch the full 1080P video walkthrough</b></a></sub>
 </p>
 
 CRACK v1.0 introduces an **Apple-inspired Bento Intelligence Dashboard** and a real-time SSE streaming radar scanner:
