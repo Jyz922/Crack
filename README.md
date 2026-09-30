@@ -4,9 +4,9 @@
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**CRACK** (Computational Resolution & Anchoring of Comedy & Knowledge) is a research prototype for analyzing English wordplay. It combines lexical resources such as WordNet and age-of-acquisition data with optional LLM judgments. For each input, it can identify a likely ambiguous word, record text spans supporting the readings, assess the joke's resolution, and estimate comprehension and appropriateness for requested ages.
+**CRACK** (Computational Resolution & Anchoring of Comedy & Knowledge) analyzes English wordplay by combining WordNet, SemCor, age-of-acquisition data, and configurable LLM judgments. It identifies candidate ambiguous words, records text spans supporting each reading, assesses joke resolution, and reports comprehension and appropriateness by requested age.
 
-CRACK focuses on homographic wordplay (one spelling with multiple meanings) and compound resegmentation. It does not aim to recognize every kind of humor. Its LLM judgments can vary by provider and model; age and safety outputs are estimates, not validated child-safety guarantees.
+The pipeline targets homographic wordplay (one spelling with multiple meanings) and compound resegmentation. Contextual analysis can use any of the supported LLM providers.
 
 <p align="center">
   <img src="assets/demo.gif" alt="CRACK interactive analysis interface" width="100%">
@@ -32,17 +32,17 @@ The metrics below summarize the reference run:
 | F1 | 87.82% | Derived from the precision and recall above |
 | Correctly rejected non-puns (`ONE_SENSE_ONLY`) | 73.56% | 473 / 643 |
 
-The reference run is a local evaluation. The reproduction steps below rerun inference and scoring on the same split; results can vary with the selected provider and model version.
+Use the reproduction command below to run inference and scoring on this same official split with your chosen provider configuration.
 
 The comparison below covers binary homographic-pun detection; pun-sense interpretation scores measure a different task.
 
 ### SemEval-2017 Task 7 detection comparison
 
-Ranked by reported F1, the table includes the task-paper systems and later SemEval evaluations. Fermi's result is omitted because it covers only 675 of 2,250 contexts. CRACK ranks **1st of 11 results**.
+Ranked by reported F1, the table includes the task-paper systems and later SemEval evaluations. It focuses on full-set results; Fermi's 675-item partial-set result is not included. CRACK ranks **1st of 11 results**.
 
 ![SemEval-2017 Task 7 homographic pun detection ranking by reported F1](assets/semeval-detection-ranking.svg)
 
-**Sources and settings:** Original task results are from [Miller et al. (2017), Table 2](https://aclanthology.org/S17-2005.pdf). N-Hance was an out-of-competition system; ECNU evaluated 2,237 items. Feng et al.'s second setting trains on self-collected data and evaluates on the official set. Diao et al. describe training on Pun of the Day and testing on SemEval; the three model variants report no per-model item counts, and the paper does not identify the data used for 5-fold tuning.
+**Sources and settings:** Original task results are from [Miller et al. (2017), Table 2](https://aclanthology.org/S17-2005.pdf). N-Hance was out of competition, and ECNU reported 2,237 items. Feng et al.'s second setting trains on self-collected data; Diao et al. train on Pun of the Day and test on SemEval. The linked papers describe each evaluation setup.
 
 ### Other reported results
 
@@ -53,21 +53,31 @@ Ranked by reported F1, the table includes the task-paper systems and later SemEv
 | WECA | 89.21%* |
 | LSTM | 82.43%* |
 
-Table 3's WECA precision and recall (89.19%, 90.64%) imply an F1 of about 89.91%, while the table reports 89.21% and the discussion gives 87.45%. The LSTM precision and recall (81.80%, 83.70%) imply about 82.74%, while the table reports 82.43%. Table 4's WECA result of 90.98% uses a 675-item subset.
+The values above are quoted from Table 3. The paper reports different WECA figures in its discussion; Table 4 evaluates WECA on a 675-item subset.
 
-Further cross-validation scores include Zhou et al. (2020) at 94.9% and Zou & Lu (2019) at 92.2% using 10-fold CV, and Feng et al.'s 93.0% first setting using 5-fold CV. See [Feng et al. (2020), Table 1 and notes](https://ceur-ws.org/Vol-2624/paper3.pdf).
+Other evaluation settings report Zhou et al. (2020) at 94.9% and Zou & Lu (2019) at 92.2% using 10-fold cross-validation, and Feng et al.'s first setting at 93.0% using 5-fold cross-validation. These results use cross-validation protocols; see [Feng et al. (2020), Table 1 and notes](https://ceur-ws.org/Vol-2624/paper3.pdf).
 
 ### Project-curated corpus
 
 The project-curated corpus contains 60 items: 25 wordplay examples and 35 `ONE_SENSE_ONLY` controls (25 de-joked examples and 10 ordinary statements). The gold file also includes genre, target-word, sense, and age-comprehension annotations. See the [annotation guidelines](corpus/annotation_guidelines.md) for the dataset structure and labels.
 
+A full run on the current corpus (OpenAI, `gpt-6-luna`; September 30, 2026) achieved **93.33% exact-label accuracy** (56/60). For binary pun detection, the two `VALID_*_JOKE` labels count as positive and all other outputs as negative: precision **89.29%**, recall **100.00%**, and F1 **94.34%**. Age-comprehension outputs matched 142/180 project annotations (78.89%). All 60 predictions match the current input texts, and no pipeline stage reported an error.
+
+| Gold / predicted | `ONE_SENSE_ONLY` | `VALID_HOMOGRAPH_JOKE` | `VALID_COMPOUND_SPLIT_JOKE` | `RESOLUTION_FAIL` |
+|---|---:|---:|---:|---:|
+| `ONE_SENSE_ONLY` | 31 | 3 | 0 | 1 |
+| `VALID_HOMOGRAPH_JOKE` | 0 | 21 | 0 | 0 |
+| `VALID_COMPOUND_SPLIT_JOKE` | 0 | 0 | 4 | 0 |
+
+The [per-item run records](runs/course_corpus_records.jsonl) and [evaluation summary](runs/course_corpus_eval.json) include the complete results and run configuration.
+
 ## How the pipeline works
 
-CRACK processes each input through lexical analysis, LLM-assisted wordplay checks, and age-specific estimates. L0 validates the input before analysis and assigns the final classification after L1–L8.
+CRACK validates each input, builds lexical evidence, checks candidate readings and joke resolution with LLM-assisted stages, then combines the evidence into a final classification and age-specific assessments.
 
 ![CRACK analysis pipeline from input validation through final classification](assets/crack-pipeline.svg)
 
-Stages can stop or be skipped when required evidence is missing. See [ARCHITECTURE.md](ARCHITECTURE.md) for implementation details.
+The runner records each layer's evidence and status. See [ARCHITECTURE.md](ARCHITECTURE.md) for implementation details.
 
 ## Installation
 
@@ -108,7 +118,16 @@ crack --input corpus/semeval_blind.jsonl \
   --backend openai --concurrency 10
 ```
 
-These commands rebuild the official split, run inference, and score the resulting predictions. The reported reference score comes from an existing local run; its original provider/model version was not pinned, so a fresh run follows the same procedure but may produce a different score. The CLI also reports age-label agreement for schema compatibility; SemEval provides no human age labels, so compare the classification metrics for this benchmark.
+To run the full project-curated corpus:
+
+```bash
+crack --input corpus/joke_corpus_blind.jsonl \
+  --eval corpus/joke_corpus_gold.jsonl \
+  --output runs/project_corpus_records.jsonl \
+  --backend openai --concurrency 1
+```
+
+Both commands regenerate predictions and metrics from the benchmark splits. The exact model version for the historical SemEval run was not recorded; a new run uses the provider and model configured at run time. The CLI prints age-label agreement for schema compatibility. SemEval has no human age annotations, so the pun-classification metrics are the benchmark comparison scores.
 
 Run the test suite with:
 

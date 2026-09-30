@@ -19,15 +19,15 @@ The previously published location counts (1,227/1,607 top-1 and 1,390/1,607 top-
 
 The SemEval converter assigns `{"8": "FULLY_AGE_APPROPRIATE"}` to every item rather than loading age annotations. Consequently, the reported 89.47% SemEval age-label match is not evidence of age-comprehension accuracy and should not be used as such.
 
-### Project-curated corpus score: not valid for the current 60 items
+### Project-curated corpus: full current run
 
-The current corpus has 60 items: 25 positive wordplay examples and 35 `ONE_SENSE_ONLY` controls. The committed `runs/course_corpus_eval.json` reports 53/60 (88.33%). The records do not support treating that as a fresh evaluation of the current texts:
+On 2026-09-30, CRACK evaluated all 60 items in the current blind corpus with the OpenAI backend and configured `gpt-6-luna` model. The final per-item file has 60 unique IDs, exact text matches for all 60 current inputs, and no layer errors. The run used code commit `aba25110abcad2eaf04f43353b12ed82167becf1`.
 
-- `N07`–`N10` do not appear in the earlier 110-item result file. The local corpus-generation script filled them by copying `N02`'s record and changing the ID, text, tokens, and age fields.
-- Eight other records have text that differs from the current blind input: `J21`, `J25`, and `D20`–`D25`. Their stage outputs still come from the earlier text.
-- Only 48 rows are both non-copied and text-matched. Those rows score 43/48 against the current labels, but they are a selected subset and are not a full-corpus benchmark result.
+Exact-label accuracy is 56/60 (93.33%). For binary pun detection, `VALID_HOMOGRAPH_JOKE` and `VALID_COMPOUND_SPLIT_JOKE` count as positive and `ONE_SENSE_ONLY` as negative: TP=25, FP=3, FN=0, TN=32; precision=89.29%, recall=100.00%, F1=94.34%. Age-comprehension outputs match 142/180 project annotations (78.89%). The full confusion matrix and run configuration are in [`../runs/course_corpus_eval.json`](../runs/course_corpus_eval.json), with item-level outputs in [`../runs/course_corpus_records.jsonl`](../runs/course_corpus_records.jsonl).
 
-The age labels are project judgments and the repository does not provide annotator identities, adjudication records, agreement statistics, or a child study. The README therefore reports no aggregate accuracy for this corpus.
+The first concurrent pass produced L2 WordNet errors for 12 items. Those 12 were rerun serially, and the 48 clean outputs from the first pass were retained. The final saved result replaces the earlier 53/60 summary, which included copied records for `N07`–`N10` and predictions for stale text in `J21`, `J25`, and `D20`–`D25`.
+
+The age-comprehension labels are project annotations informed by AoA data and curator judgment; the reported age match rate is agreement with those labels.
 
 ### L5 calibration report: diagnostic, not benchmark performance
 

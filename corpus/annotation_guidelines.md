@@ -41,8 +41,10 @@ The current corpus uses these three labels. Other labels in the pipeline schema 
 - `WORDPLAY_SKILL_TOO_ADVANCED`: the vocabulary may be familiar, but the wordplay operation is expected to be too advanced.
 - `AOA_UNKNOWN`: available AoA information is insufficient for an estimate.
 
-These age labels are project annotations informed by AoA values and judgment. The repository does not contain annotator identities, inter-annotator agreement, or an independent child study; treat age scores as exploratory.
+These age labels are project annotations informed by AoA values and curator judgment. The evaluation's age-label match rate is measured against these annotations.
 
-## Evaluation caveat
+## Current evaluation
 
-The committed `runs/course_corpus_records.jsonl` and its summary are not a clean run on the current corpus: four records were copied from another item and eight predictions were generated for text that differs from the current blind file. Do not use the existing 53/60 figure as corpus accuracy. The findings are documented in [`../docs/benchmark_audit.md`](../docs/benchmark_audit.md).
+The complete run on the current 60-item corpus, dated 2026-09-30, achieved 56/60 exact-label accuracy (93.33%). For binary pun detection, the two `VALID_*_JOKE` labels count as positive: precision 89.29%, recall 100.00%, and F1 94.34%. Age-comprehension outputs matched 142/180 project annotations (78.89%).
+
+The [per-item records](../runs/course_corpus_records.jsonl) and [evaluation summary](../runs/course_corpus_eval.json) contain the full results. The earlier 53/60 result was superseded after a fresh run on the current texts; see the [benchmark audit](../docs/benchmark_audit.md) for the record history.

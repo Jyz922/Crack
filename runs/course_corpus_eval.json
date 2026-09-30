@@ -1,30 +1,80 @@
 {
-  "audit_status": "INVALID_FOR_CURRENT_FULL_CORPUS",
-  "audit_notes": [
-    "Four records (N07-N10) were copied from N02 rather than produced by a run on those texts.",
-    "Eight saved predictions (J21, J25, D20-D25) refer to text that differs from the current blind corpus.",
-    "Do not report the 53/60 classification accuracy or 125/180 age agreement as current-corpus benchmark results. See docs/benchmark_audit.md."
-  ],
+  "dataset": "current project-curated corpus",
+  "run_date": "2026-09-30",
+  "code_commit": "aba25110abcad2eaf04f43353b12ed82167becf1",
+  "backend": "openai",
+  "model_id": "gpt-6-luna",
+  "items": 60,
+  "exact_input_text_matches": 60,
+  "layer_errors": 0,
+  "correct_classification": 56,
   "total_items": 60,
-  "classification_accuracy": 0.8833,
-  "correct_classification": 53,
-  "total_age_evals": 180,
-  "age_accuracy": 0.6944,
-  "correct_age_evals": 125,
+  "classification_accuracy": 0.933333,
   "confusion_matrix": {
-    "VALID_HOMOGRAPH_JOKE": {
-      "VALID_HOMOGRAPH_JOKE": 19,
-      "ONE_SENSE_ONLY": 1,
-      "RESOLUTION_FAIL": 1
-    },
-    "VALID_COMPOUND_SPLIT_JOKE": {
-      "VALID_COMPOUND_SPLIT_JOKE": 3,
-      "VALID_HOMOGRAPH_JOKE": 1
-    },
     "ONE_SENSE_ONLY": {
       "ONE_SENSE_ONLY": 31,
-      "VALID_HOMOGRAPH_JOKE": 2,
-      "RESOLUTION_FAIL": 2
+      "RESOLUTION_FAIL": 1,
+      "VALID_COMPOUND_SPLIT_JOKE": 0,
+      "VALID_HOMOGRAPH_JOKE": 3
+    },
+    "VALID_COMPOUND_SPLIT_JOKE": {
+      "ONE_SENSE_ONLY": 0,
+      "RESOLUTION_FAIL": 0,
+      "VALID_COMPOUND_SPLIT_JOKE": 4,
+      "VALID_HOMOGRAPH_JOKE": 0
+    },
+    "VALID_HOMOGRAPH_JOKE": {
+      "ONE_SENSE_ONLY": 0,
+      "RESOLUTION_FAIL": 0,
+      "VALID_COMPOUND_SPLIT_JOKE": 0,
+      "VALID_HOMOGRAPH_JOKE": 21
     }
-  }
+  },
+  "binary_pun_detection": {
+    "positive_labels": [
+      "VALID_COMPOUND_SPLIT_JOKE",
+      "VALID_HOMOGRAPH_JOKE"
+    ],
+    "negative_gold_label": "ONE_SENSE_ONLY",
+    "true_positive": 25,
+    "false_positive": 3,
+    "false_negative": 0,
+    "true_negative": 32,
+    "accuracy": 0.95,
+    "precision": 0.892857,
+    "recall": 1.0,
+    "f1": 0.943396
+  },
+  "correct_age_evals": 142,
+  "total_age_evals": 180,
+  "age_accuracy": 0.7889,
+  "run_configuration": {
+    "MAX_INPUT_CHARS": 500,
+    "MIN_INPUT_CHARS": 3,
+    "MAX_NON_ASCII_RATIO": 0.15,
+    "L3_TOP_K": 8,
+    "L4_BACKEND": "openai",
+    "L5_BACKEND": "openai",
+    "L6_BACKEND": "openai",
+    "L7_BACKEND": "openai",
+    "L8_BACKEND": "openai",
+    "L5_QA_WEIGHTS": {
+      "polarity_or_direction": 0.45,
+      "answer_relevance": 0.25,
+      "causal": 0.15,
+      "agent": 0.1,
+      "tense_aspect": 0.05
+    },
+    "L5_RESOLUTION_THRESHOLDS": {
+      "QA_RIDDLE": 0.46,
+      "DEFINITIONAL_ONELINER": 0.6,
+      "DIALOGUE_MISUNDERSTANDING": 0.6,
+      "DECLARATIVE": 0.25
+    }
+  },
+  "run_notes": [
+    "The final file includes all 60 current blind items with exact text matches and no layer errors.",
+    "Forty-eight clean records were retained from the first batch; the twelve records affected by concurrent local WordNet errors were rerun serially.",
+    "Age-label agreement is measured against the project annotations in the gold file."
+  ]
 }
