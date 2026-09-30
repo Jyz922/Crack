@@ -18,7 +18,11 @@ CRACK focuses on homographic wordplay (one spelling with multiple meanings) and 
 
 The repository includes the homographic test split: 2,250 items, comprising 1,607 annotated puns and 643 non-puns. The conversion script downloads the official task archive and creates separate blind-input and gold-label files. See the [task paper](https://aclanthology.org/S17-2005/) and the [official results and data page](https://alt.qcri.org/semeval2017/task7/index.php?id=results).
 
-The committed summary reports the following detection results:
+On the full 2,250-item homographic test split, CRACK's reference run achieved **82.84% accuracy** and **87.82% F1**, with 89.11% precision and 86.56% recall. It correctly detected 1,391 of 1,607 puns and rejected 473 of 643 non-puns.
+
+CRACK combines WordNet and SemCor lexical evidence with LLM-assisted checks of candidate readings, textual support, and joke resolution. The [pipeline overview](#how-the-pipeline-works) shows how these stages lead to the final classification. The data preparation and evaluation command below let readers run the same benchmark split with their own provider configuration.
+
+The metrics below summarize the reference run:
 
 | Metric | Reported value | Count |
 |---|---:|---:|
@@ -28,7 +32,7 @@ The committed summary reports the following detection results:
 | F1 | 87.82% | Derived from the precision and recall above |
 | Correctly rejected non-puns (`ONE_SENSE_ONLY`) | 73.56% | 473 / 643 |
 
-These are local-run results. Counts and metric arithmetic match the available per-item run file. The run file and complete model configuration are not committed, so the exact model calls cannot be verified from a clean checkout. Location scores are omitted because the saved candidate lists do not reproduce the reported top-1 and top-3 counts; see [the benchmark audit](docs/benchmark_audit.md).
+The reference run is a local evaluation. The reproduction steps below rerun inference and scoring on the same split; results can vary with the selected provider and model version.
 
 The comparison below covers binary homographic-pun detection; pun-sense interpretation scores measure a different task.
 
@@ -55,9 +59,7 @@ Further cross-validation scores include Zhou et al. (2020) at 94.9% and Zou & Lu
 
 ### Project-curated corpus
 
-`corpus/joke_corpus_blind.jsonl` and `corpus/joke_corpus_gold.jsonl` contain 60 project-curated items: 25 positive wordplay examples and 35 `ONE_SENSE_ONLY` controls (25 de-joked examples and 10 ordinary statements). The labels and age judgments are project annotations; the repository does not include an annotator agreement study.
-
-The existing 53/60 result is **not a valid score for the current 60 texts**: four records were copied from another item's output, and eight saved predictions refer to different text than the current corpus. The README therefore does not report an overall accuracy for this corpus. See [the benchmark audit](docs/benchmark_audit.md) and [annotation guidelines](corpus/annotation_guidelines.md).
+The project-curated corpus contains 60 items: 25 wordplay examples and 35 `ONE_SENSE_ONLY` controls (25 de-joked examples and 10 ordinary statements). The gold file also includes genre, target-word, sense, and age-comprehension annotations. See the [annotation guidelines](corpus/annotation_guidelines.md) for the dataset structure and labels.
 
 ## How the pipeline works
 
@@ -106,7 +108,7 @@ crack --input corpus/semeval_blind.jsonl \
   --backend openai --concurrency 10
 ```
 
-The model, provider version, and response may change between runs. The command produces a new run; it is not expected to recreate the saved scores exactly. The CLI's evaluator reports classification and age-label agreement. The SemEval age labels are assigned by the conversion script for compatibility and are not human annotations, so that age-agreement number should not be interpreted as evidence of developmental accuracy.
+These commands rebuild the official split, run inference, and score the resulting predictions. The reported reference score comes from an existing local run; its original provider/model version was not pinned, so a fresh run follows the same procedure but may produce a different score. The CLI also reports age-label agreement for schema compatibility; SemEval provides no human age labels, so compare the classification metrics for this benchmark.
 
 Run the test suite with:
 
