@@ -393,12 +393,11 @@
             </div>
 
             <!-- State 1, 2, 3: Terminal Log Ticker in the exact same bottom slot -->
-            <div v-else class="w-full flex items-center justify-between text-xs font-mono text-slate-400">
+            <div v-else class="w-full flex items-center text-xs font-mono text-slate-400">
               <div class="flex items-center gap-2 truncate">
                 <span class="text-cyan-400 font-semibold">[CRACK_PIPELINE]</span>
                 <span class="text-slate-300">{{ currentLogLine }}</span>
               </div>
-              <span class="text-slate-500 hidden sm:inline">{{ (elapsedMs).toFixed(0) }}ms</span>
             </div>
 
           </div>
@@ -834,7 +833,6 @@
         const isPunchlineLocked = ref(false);
         const scannerStageMessage = ref('Initializing lexical scanner...');
         const currentLogLine = ref('Tokenizing input string...');
-        const elapsedMs = ref(0);
 
         // Data Storage
         const tokens = ref([]);
@@ -943,7 +941,6 @@
           viewState.value = 'SCANNING';
           scannerStageMessage.value = 'Connecting to real-time CRACK pipeline...';
           currentLogLine.value = 'Initializing neuro-symbolic layers (L0-L8)...';
-          elapsedMs.value = 0;
           textScale.value = 1;
           await nextTick();
           updateTextScale();
@@ -962,12 +959,6 @@
           }
           candidateTimeouts.forEach(clearTimeout);
           candidateTimeouts = [];
-
-          // Start millisecond timer (60ms throttled to prevent main-thread layout contention)
-          const startTime = performance.now();
-          const timerInterval = setInterval(() => {
-            elapsedMs.value = performance.now() - startTime;
-          }, 60);
 
           // Direct DOM RAF animation: zero VDOM diff overhead, zero CSS transition fighting, zero border hitch
           let laserPos = 0;
@@ -1160,7 +1151,6 @@
 
             // Stop laser, timers and interval
             laserActive.value = false;
-            clearInterval(timerInterval);
             clearInterval(reasonInterval);
             evtSource.close();
 
@@ -1250,7 +1240,6 @@
           evtSource.onerror = (err) => {
             console.error('SSE Error:', err);
             evtSource.close();
-            clearInterval(timerInterval);
             clearInterval(reasonInterval);
             if (laserAnimationId) {
               cancelAnimationFrame(laserAnimationId);
@@ -1493,7 +1482,6 @@
           updateTextScale,
           scannerStageMessage,
           currentLogLine,
-          elapsedMs,
           analysisData,
           heroVerdict,
           recommendedAge,
