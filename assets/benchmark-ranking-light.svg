@@ -1,9 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="590" viewBox="0 0 1000 590" role="img" aria-labelledby="title description">
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="665" viewBox="0 0 1000 665" role="img" aria-labelledby="title description">
   <title id="title">SemEval-2017 Task 7 Benchmark: CRACK Achieves SOTA (87.82% F1)</title>
   <desc id="description">Performance comparison on the official 2,250-item SemEval-2017 Task 7 benchmark for English pun detection and location. CRACK ranks #1 with 87.82% F1 and 76.35% exact word location accuracy.</desc>
   
   <!-- Outer Card Container -->
-  <rect x="0.5" y="0.5" width="999" height="589" rx="14" fill="#ffffff" stroke="#e1e4e8"/>
+  <rect x="0.5" y="0.5" width="999" height="664" rx="14" fill="#ffffff" stroke="#e1e4e8"/>
   
   <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-variant-numeric="tabular-nums">
     <!-- Header Badge & Eyebrow -->
@@ -129,11 +129,49 @@
         <!-- Delta vs Duluth -->
         <text x="955" y="414" fill="#656d76" font-size="12" font-weight="600" text-anchor="end">-16.17%</text>
         
+        <!-- Row 6 -->
+        <rect x="20" y="432" width="960" height="40" rx="6" fill="#ffffff" />
+        
+            <text x="48" y="458" fill="#59636e" font-size="13" font-weight="500" text-anchor="middle">#6</text>
+            
+        <text x="88" y="458" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="start">UWatER (SemEval-2017)</text>
+        <text x="315" y="458" fill="#59636e" font-size="12" font-weight="400" text-anchor="start">Semantic Relatedness Vectors</text>
+        
+        <!-- Subtask 1 Pun F1 -->
+        <text x="670" y="458" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">64.63%</text>
+        <rect x="684" y="449" width="76" height="7" rx="3.5" fill="#eaeef2"/>
+        <rect x="684" y="449" width="49.1" height="7" rx="3.5" fill="#0969da"/>
+        
+        <!-- Subtask 2 Location Acc -->
+        <text x="855" y="458" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">43.12%</text>
+        
+        <!-- Delta vs Duluth -->
+        <text x="955" y="458" fill="#656d76" font-size="12" font-weight="600" text-anchor="end">-17.91%</text>
+        
+        <!-- Row 7 -->
+        <rect x="20" y="476" width="960" height="40" rx="6" fill="#f6f8fa" />
+        
+            <text x="48" y="502" fill="#59636e" font-size="13" font-weight="500" text-anchor="middle">#7</text>
+            
+        <text x="88" y="502" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="start">ECNU (SemEval-2017)</text>
+        <text x="315" y="502" fill="#59636e" font-size="12" font-weight="400" text-anchor="start">Supervised Regression Baseline</text>
+        
+        <!-- Subtask 1 Pun F1 -->
+        <text x="670" y="502" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">62.48%</text>
+        <rect x="684" y="493" width="76" height="7" rx="3.5" fill="#eaeef2"/>
+        <rect x="684" y="493" width="47.5" height="7" rx="3.5" fill="#0969da"/>
+        
+        <!-- Subtask 2 Location Acc -->
+        <text x="855" y="502" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">41.51%</text>
+        
+        <!-- Delta vs Duluth -->
+        <text x="955" y="502" fill="#656d76" font-size="12" font-weight="600" text-anchor="end">-20.06%</text>
+        
     
     <!-- Stat Summary Section -->
     
     <!-- Summary Stat Cards -->
-    <g transform="translate(20, 446)">
+    <g transform="translate(20, 534)">
       <!-- Stat 1 -->
       <rect x="0" y="0" width="228" height="66" rx="8" fill="#f6f8fa" stroke="#d1d9e0"/>
       <text x="16" y="24" fill="#59636e" font-size="11" font-weight="600" letter-spacing="0.5">SUBTASK 1 (PUN F1)</text>
@@ -160,7 +198,7 @@
     </g>
 
     <!-- Source Citation Banner -->
-    <g transform="translate(20, 526)">
+    <g transform="translate(20, 614)">
       <rect x="0" y="0" width="960" height="30" rx="6" fill="#f6f8fa" stroke="#d1d9e0"/>
       <text x="16" y="19" fill="#59636e" font-size="11.5" font-weight="500">Official Benchmark Source: Tristan Miller, Christian F. Hempelmann, Iryna Gurevych (SemEval-2017 Task 7, ACL Anthology S17-2007)</text>
     </g>

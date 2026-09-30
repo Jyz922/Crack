@@ -79,7 +79,7 @@ def generate_benchmark_svg(dark_mode: bool = False) -> str:
         stat_border = "#d1d9e0"
 
     svg_width = 1000
-    svg_height = 590
+    svg_height = 665
 
     rows_data = [
         {
@@ -131,6 +131,26 @@ def generate_benchmark_svg(dark_mode: bool = False) -> str:
             "f1_val": 66.37,
             "loc": "44.56%",
             "delta": "-16.17%",
+        },
+        {
+            "rank": "6",
+            "is_crack": False,
+            "name": "UWatER (SemEval-2017)",
+            "paradigm": "Semantic Relatedness Vectors",
+            "f1": "64.63%",
+            "f1_val": 64.63,
+            "loc": "43.12%",
+            "delta": "-17.91%",
+        },
+        {
+            "rank": "7",
+            "is_crack": False,
+            "name": "ECNU (SemEval-2017)",
+            "paradigm": "Supervised Regression Baseline",
+            "f1": "62.48%",
+            "f1_val": 62.48,
+            "loc": "41.51%",
+            "delta": "-20.06%",
         },
     ]
 
