@@ -106,6 +106,117 @@
       50% {
         transform: translate(-50%, -6px);
       }
+    /* ==================================================================== */
+    /* Claude Effort Starfield Constellation (璀璨星空微晶动效)              */
+    /* ==================================================================== */
+
+    .claude-starfield-box {
+      position: relative;
+      background: linear-gradient(135deg, rgba(88, 28, 135, 0.8), rgba(46, 16, 101, 0.9), rgba(76, 29, 149, 0.8)) !important;
+      border-color: rgba(192, 132, 252, 0.9) !important;
+      border-style: solid !important;
+      animation: claude-border-glow 2.4s ease-in-out infinite;
+    }
+
+    @keyframes claude-border-glow {
+      0%, 100% {
+        border-color: rgba(192, 132, 252, 0.8);
+        box-shadow: 0 0 18px rgba(168, 85, 247, 0.5), 0 0 4px rgba(233, 213, 255, 0.6), inset 0 0 8px rgba(168, 85, 247, 0.35);
+      }
+      50% {
+        border-color: rgba(245, 208, 254, 1);
+        box-shadow: 0 0 28px rgba(192, 132, 252, 0.85), 0 0 10px rgba(255, 255, 255, 0.9), inset 0 0 14px rgba(192, 132, 252, 0.55);
+      }
+    }
+
+    .claude-starfield {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .claude-star-matrix {
+      position: absolute;
+      inset: -12px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Crect x='0.5' y='0.5' width='3' height='3' rx='0.8' fill='%23ffffff' opacity='0.85'/%3E%3Crect x='4.5' y='0.5' width='3' height='3' rx='0.8' fill='%23c084fc' opacity='0.4'/%3E%3Crect x='8.5' y='0.5' width='3' height='3' rx='0.8' fill='%23e9d5ff' opacity='0.7'/%3E%3Crect x='12.5' y='0.5' width='3' height='3' rx='0.8' fill='%23a855f7' opacity='0.3'/%3E%3Crect x='0.5' y='4.5' width='3' height='3' rx='0.8' fill='%23a855f7' opacity='0.35'/%3E%3Crect x='4.5' y='4.5' width='3' height='3' rx='0.8' fill='%23ffffff' opacity='0.95'/%3E%3Crect x='8.5' y='4.5' width='3' height='3' rx='0.8' fill='%23c084fc' opacity='0.5'/%3E%3Crect x='12.5' y='4.5' width='3' height='3' rx='0.8' fill='%23e9d5ff' opacity='0.65'/%3E%3Crect x='0.5' y='8.5' width='3' height='3' rx='0.8' fill='%23e9d5ff' opacity='0.6'/%3E%3Crect x='4.5' y='8.5' width='3' height='3' rx='0.8' fill='%23c084fc' opacity='0.45'/%3E%3Crect x='8.5' y='8.5' width='3' height='3' rx='0.8' fill='%23ffffff' opacity='0.9'/%3E%3Crect x='12.5' y='8.5' width='3' height='3' rx='0.8' fill='%239333ea' opacity='0.25'/%3E%3Crect x='0.5' y='12.5' width='3' height='3' rx='0.8' fill='%23c084fc' opacity='0.55'/%3E%3Crect x='4.5' y='12.5' width='3' height='3' rx='0.8' fill='%23a855f7' opacity='0.3'/%3E%3Crect x='8.5' y='12.5' width='3' height='3' rx='0.8' fill='%23e9d5ff' opacity='0.75'/%3E%3Crect x='12.5' y='12.5' width='3' height='3' rx='0.8' fill='%23ffffff' opacity='0.8'/%3E%3C/svg%3E");
+      background-size: 16px 16px;
+      background-repeat: repeat;
+    }
+
+    .claude-matrix-1 {
+      animation: claude-scintillate-1 1.9s ease-in-out infinite;
+    }
+
+    .claude-matrix-2 {
+      background-position: 8px 8px;
+      animation: claude-scintillate-2 2.6s ease-in-out infinite;
+    }
+
+    @keyframes claude-scintillate-1 {
+      0%, 100% { opacity: 0.45; }
+      50% { opacity: 0.95; }
+    }
+
+    @keyframes claude-scintillate-2 {
+      0%, 100% { opacity: 0.85; }
+      50% { opacity: 0.3; }
+    }
+
+    /* Sweeping celestial starlight aurora glare */
+    .claude-aurora-sweep {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        115deg,
+        transparent 15%,
+        rgba(255, 255, 255, 0.35) 45%,
+        rgba(233, 213, 255, 0.75) 50%,
+        rgba(255, 255, 255, 0.35) 55%,
+        transparent 85%
+      );
+      background-size: 300% 100%;
+      animation: claude-sweep 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      mix-blend-mode: overlay;
+      pointer-events: none;
+    }
+
+    @keyframes claude-sweep {
+      0% { background-position: 220% 0; }
+      100% { background-position: -120% 0; }
+    }
+
+    /* Twinkling Star Glints (✦) */
+    .claude-glint {
+      position: absolute;
+      pointer-events: none;
+      z-index: 25;
+      animation: claude-glint-sparkle 1.8s ease-in-out infinite;
+      filter: drop-shadow(0 0 5px #e9d5ff) drop-shadow(0 0 8px #c084fc);
+    }
+
+    .claude-glint-tr {
+      top: -6px;
+      right: -6px;
+    }
+
+    .claude-glint-bl {
+      bottom: -6px;
+      left: -6px;
+      animation-delay: 0.9s;
+    }
+
+    @keyframes claude-glint-sparkle {
+      0%, 100% {
+        transform: scale(0.25) rotate(0deg);
+        opacity: 0.2;
+      }
+      50% {
+        transform: scale(1.15) rotate(90deg);
+        opacity: 1;
+      }
     }
 
     /* Glassmorphism Card Style */
@@ -324,12 +435,26 @@
                     isPunchlineLocked && tok.is_punchline
                       ? 'text-cyan-100 font-medium punchline-halo bg-cyan-500/30 border-cyan-300 z-30 shadow-2xl shadow-cyan-500/50'
                       : '',
-                    // Candidate highlighted state (Full 360-degree glowing dashed box)
+                    // Candidate highlighted state (Claude Starlight Constellation)
                     isCandidateStage && tok.is_candidate && !isPunchlineLocked
-                      ? 'text-cyan-200 font-medium border-dashed border-cyan-400 bg-cyan-500/20 shadow-[0_0_16px_rgba(6,182,212,0.4)] z-20'
+                      ? 'claude-starfield-box text-white font-bold z-20'
                       : (!isPunchlineLocked || !tok.is_punchline ? 'text-slate-200' : '')
                   ]"
-                ><span class="inline-block leading-none">{{ tok.text }}</span><!-- Floating Tag: Punchline Target Locked --><div
+                ><template v-if="isCandidateStage && tok.is_candidate && !isPunchlineLocked">
+                  <!-- Claude Constellation Starfield Background -->
+                  <div class="claude-starfield">
+                    <div class="claude-star-matrix claude-matrix-1"></div>
+                    <div class="claude-star-matrix claude-matrix-2"></div>
+                    <div class="claude-aurora-sweep"></div>
+                  </div>
+                  <!-- Twinkling Star Glints (✦) at Corners -->
+                  <svg class="claude-glint claude-glint-tr w-3 h-3 fill-white" viewBox="0 0 24 24">
+                    <path d="M12 0L14.5 9.5L24 12L14.5 14.5L12 24L9.5 14.5L0 12L9.5 9.5Z"/>
+                  </svg>
+                  <svg class="claude-glint claude-glint-bl w-3 h-3 fill-white" viewBox="0 0 24 24">
+                    <path d="M12 0L14.5 9.5L24 12L14.5 14.5L12 24L9.5 14.5L0 12L9.5 9.5Z"/>
+                  </svg>
+                </template><span class="relative z-10 inline-block leading-none drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">{{ tok.text }}</span><!-- Floating Tag: Punchline Target Locked --><div
                     v-if="isPunchlineLocked && tok.is_punchline"
                     class="punchline-badge"
                   >
@@ -569,6 +694,34 @@
                 ]"
               ><span class="inline-block leading-none">{{ tok.text }}</span></span></template>
             </div>
+          </div>
+        </div>
+
+        <!-- Evaluated Candidates Chips (with Claude Starfield effect) -->
+        <div v-if="analysisData.candidates && analysisData.candidates.length > 1" class="mb-6 pb-4 border-b border-slate-800/60 flex flex-wrap items-center gap-2 text-xs">
+          <span class="text-slate-400 font-semibold uppercase tracking-wider text-[11px] flex items-center gap-1.5 mr-1">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-violet-400"></i>
+            <span>Ambiguity Sites Evaluated:</span>
+          </span>
+          <div
+            v-for="(cand, cIdx) in analysisData.candidates"
+            :key="cIdx"
+            :class="[
+              'relative inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold overflow-hidden transition-all',
+              cand.term.toLowerCase() === (analysisData.punchline || '').toLowerCase()
+                ? 'bg-cyan-500/20 border border-cyan-400 text-cyan-200 shadow-md shadow-cyan-500/20'
+                : 'claude-starfield-box text-white border border-violet-400/80 shadow-md shadow-violet-500/20'
+            ]"
+          >
+            <template v-if="cand.term.toLowerCase() !== (analysisData.punchline || '').toLowerCase()">
+              <div class="claude-starfield">
+                <div class="claude-star-matrix claude-matrix-1 opacity-70"></div>
+                <div class="claude-aurora-sweep"></div>
+              </div>
+            </template>
+            <span class="relative z-10 font-mono font-bold">"{{ cand.term }}"</span>
+            <span class="relative z-10 text-[10px] opacity-80 font-mono">score: {{ cand.score }}</span>
+            <span v-if="cand.term.toLowerCase() === (analysisData.punchline || '').toLowerCase()" class="relative z-10 text-[10px] bg-cyan-400/30 text-cyan-100 px-1.5 py-0.5 rounded font-bold">PUNCHLINE</span>
           </div>
         </div>
 
@@ -1112,6 +1265,7 @@
             const flyer = sourceEl.cloneNode(true);
             const badge = flyer.querySelector('.punchline-badge');
             if (badge) badge.remove();
+            flyer.querySelectorAll('.claude-starfield, .claude-glint').forEach(el => el.remove());
 
             flyer.id = 'magic-move-flyer';
             flyer.style.position = 'fixed';
