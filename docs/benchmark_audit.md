@@ -39,6 +39,18 @@ The age labels are project judgments and the repository does not provide annotat
 - Zou and Lu's pun detection/location paper is [N19-1217](https://aclanthology.org/N19-1217/), not N19-1218. Its reported setting is not directly comparable to the CRACK run on the official test split.
 - The PunGraph paper's Table 1 reports pun reasoning and sense-explanation metrics. Its homographic-pun figures are not pun-detection accuracy/F1, so they do not support the README's former leaderboard ranking.
 
+### PunGraph homographic sense re-score: saved outputs, local protocol
+
+The ignored local `runs/semeval_results.jsonl` contains generated `sense_a`/`sense_b` text, so this comparison did not call a model or regenerate predictions. The official Subtask 3 IDs were recovered from the SemEval archive by joining its interpretation gold file to the Subtask 2 target-word IDs. All 1,298 official items joined to the local prediction and gold files. Seventeen did not have a complete generated sense pair and were counted incorrect.
+
+The offline re-score uses `sentence-transformers/all-MiniLM-L6-v2` through FastEmbed and cosine similarity. For each generated explanation, it takes the maximum similarity to either official gold gloss. At threshold 0.50, Acc requires both generated explanations to pass; PMA requires at least one. This gives 446/1,298 (34.36%) Acc and 949/1,298 (73.11%) PMA. A stricter one-to-one matching variant gives 429/1,298 (33.05%) exact-pair accuracy.
+
+F1 is not reported for CRACK because the paper does not provide enough detail to reconstruct that calculation from its outputs.
+
+These values are an exploratory re-score, not an exact reproduction of PunGraph Table 1. The paper describes cosine similarity and a predefined semantic threshold but does not name its embedding encoder or give the Table 1 threshold. It mentions 0.50 for the initial error-filtering stage; this audit selected 0.50 as a transparent local threshold, not as a confirmed paper setting. The mechanical ordering against the paper's 13 reported homographic Acc scores places CRACK 12th of 14 at 0.50, but that position is not a comparable leaderboard claim. Across thresholds 0.30–0.70, CRACK's Acc varies from 67.80% to 9.94%, shifting its mechanical position from 6th to 14th. CRACK's inference run also has incomplete provider/model provenance and does not receive the pun word as a supplied input, unlike PunGraph's task setup.
+
+The re-score can be rerun with `pip install -e '.[eval]'` and `python scripts/evaluate_pungraph_senses.py --archive /path/to/semeval2017_task7.tar.xz --cache-dir /path/to/embedding-cache`, provided the ignored local prediction file is available.
+
 The external leaderboard and "SOTA" wording were removed. CRACK's reported detection score has not been independently reproduced against a literature-wide leaderboard.
 
 ### Other overclaims removed

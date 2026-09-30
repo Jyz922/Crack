@@ -95,27 +95,30 @@ The table compares reported homographic-pun detection F1 scores from SemEval-201
 
 **Note:** This is an illustrative comparison, not an official leaderboard rank. CRACK's score comes from a local run whose provider/model provenance is incomplete. N-Hance was submitted after the official evaluation period, and ECNU's score covers 2,237 items. Historical scores and coverage are from [Miller et al. (2017), Table 2](https://aclanthology.org/S17-2005.pdf).
 
-### PunGraph paper: related reasoning results (not ranked with CRACK)
+### PunGraph: homographic sense reasoning comparison
 
-[PunGraph (arXiv, 2026)](https://arxiv.org/abs/2609.16557) reports results on SemEval for two **pun-reasoning** tasks: predicting the alternative word for heterographic puns, and explaining the two senses of homographic puns. Its inputs already include a pun and its target word; these are not binary pun-detection scores, so they cannot be inserted into the ranking above. The table summarizes its SemEval results; heterographic F1 uses exact matching of the alternative word, while homographic metrics assess generated sense explanations against gold explanations.
+[PunGraph (arXiv, 2026)](https://arxiv.org/abs/2609.16557) reports two **pun-reasoning** tasks on SemEval: predicting the alternative word for heterographic puns, and explaining the two senses of homographic puns. The homographic column below compares sense explanations, not binary pun detection. CRACK's saved predictions can be re-scored for this task without another model run.
 
-| Model | Heterographic reasoning F1 | Homographic sense Acc. / PMA / F1 |
-|---|---:|---:|
-| GPT-4o | 79.45% | 76.27% / 98.54% / 87.35% |
-| Gemini 2.0 Flash | 77.36% | 71.08% / 98.69% / 84.56% |
-| DeepSeek-V3.2 | 80.31% | 66.26% / 98.15% / 82.12% |
-| MiniCPM-8.7B | 37.86% | 40.71% / 93.07% / 66.64% |
-| Qwen-2.5-7B | 37.47% | 34.65% / 90.80% / 62.42% |
-| Qwen-3.5-27B | 74.06% | 68.95% / 97.61% / 83.20% |
-| Llama 4 Maverick | 73.77% | 66.26% / 97.84% / 82.00% |
-| PunIntended | 16.65% | 26.35% / 85.25% / 50.98% |
-| GCR | 51.19% | 43.04% / 93.12% / 37.19% |
-| ReKG-MCTS | 68.97% | 22.11% / 78.04% / 48.41% |
-| PunGraph-Qwen-2.5-7B | 59.18% | 45.71% / 93.38% / 65.11% |
-| PunGraph-Qwen-3.5-27B | 79.86% | 76.18% / 98.84% / 85.71% |
-| PunGraph-Llama 4 Maverick | 83.41% | 71.80% / 97.46% / 83.43% |
+The CRACK row is an **exploratory offline re-score** of its saved sense outputs on the 1,298 official SemEval Subtask 3 examples. It uses `sentence-transformers/all-MiniLM-L6-v2` cosine similarity with a locally fixed 0.50 threshold: both generated senses must match a gold gloss for Acc, and at least one must match for PMA. CRACK scores **34.36% Acc (446/1,298)** and **73.11% PMA (949/1,298)**; 17 items without a complete generated sense pair count as incorrect. By homographic Acc, its mechanical position among the 13 paper-reported systems plus CRACK is **12th of 14**; by PMA it is **14th of 14**. F1 is left blank because the paper does not specify enough detail to reconstruct its exact calculation from these outputs.
 
-These are the values reported in PunGraph's [Table 1](https://arxiv.org/html/2609.16557v1#S5.T1). They are a separate task reference, not a detection leaderboard.
+| Acc rank* | Model | Heterographic reasoning F1 | Homographic sense Acc. / PMA / F1 |
+|---:|---|---:|---:|
+| 1 | GPT-4o | 79.45% | 76.27% / 98.54% / 87.35% |
+| 2 | PunGraph-Qwen-3.5-27B | 79.86% | 76.18% / 98.84% / 85.71% |
+| 3 | PunGraph-Llama 4 Maverick | 83.41% | 71.80% / 97.46% / 83.43% |
+| 4 | Gemini 2.0 Flash | 77.36% | 71.08% / 98.69% / 84.56% |
+| 5 | Qwen-3.5-27B | 74.06% | 68.95% / 97.61% / 83.20% |
+| 6 (tie) | DeepSeek-V3.2 | 80.31% | 66.26% / 98.15% / 82.12% |
+| 6 (tie) | Llama 4 Maverick | 73.77% | 66.26% / 97.84% / 82.00% |
+| 8 | PunGraph-Qwen-2.5-7B | 59.18% | 45.71% / 93.38% / 65.11% |
+| 9 | GCR | 51.19% | 43.04% / 93.12% / 37.19% |
+| 10 | MiniCPM-8.7B | 37.86% | 40.71% / 93.07% / 66.64% |
+| 11 | Qwen-2.5-7B | 37.47% | 34.65% / 90.80% / 62.42% |
+| 12* | CRACK (offline re-score) | — | **34.36% / 73.11% / —** |
+| 13 | PunIntended | 16.65% | 26.35% / 85.25% / 50.98% |
+| 14 | ReKG-MCTS | 68.97% | 22.11% / 78.04% / 48.41% |
+
+Paper-system figures are from PunGraph's [Table 1](https://arxiv.org/html/2609.16557v1#S5.T1). **The CRACK placement is not a paper-comparable leaderboard rank:** PunGraph does not specify the embedding model or the threshold used for its reported table, so the CRACK score uses the explicit local protocol above. The paper mentions 0.50 for its initial error-filtering stage, not as a confirmed Table 1 scoring threshold. The saved CRACK run also does not record complete provider/model provenance, and its pipeline does not receive the pun word as a supplied input. Its 34.36% is therefore a transparent local re-score, not an official result. Full threshold sensitivity is in the [re-evaluation report](docs/pungraph_homographic_re_evaluation.json). The score can be regenerated with `pip install -e '.[eval]'` and `python scripts/evaluate_pungraph_senses.py --archive /path/to/semeval2017_task7.tar.xz --cache-dir /path/to/embedding-cache` when the ignored local prediction file is available.
 
 ### Project-curated corpus
 

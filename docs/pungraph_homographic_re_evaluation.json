@@ -1,0 +1,85 @@
+{
+  "evaluation": "offline post-hoc re-scoring of saved CRACK outputs",
+  "benchmark_subset": "SemEval-2017 Task 7 Subtask 3 (official homographic interpretation gold IDs)",
+  "n": 1298,
+  "encoder": "sentence-transformers/all-MiniLM-L6-v2",
+  "similarity": "cosine over normalized sentence embeddings",
+  "scoring_rule": "For each generated sense, take max cosine against either of the two gold glosses; Acc requires both generated senses >= threshold; PMA requires at least one.",
+  "paper_protocol_note": "PunGraph describes cosine matching and a predefined semantic threshold, but does not name the encoder or publish the result-table threshold. The reported threshold is an explicit local choice, not a claim to reproduce the paper's exact evaluator.",
+  "missing_prediction_pairs_counted_incorrect": 17,
+  "archive_sha256": "70e82d89a102fced7dd1b1db90daa4ead55357d399d23f4d99e888634b4f4d0a",
+  "threshold_metrics": {
+    "0.30": {
+      "homographic_sense_accuracy": 0.6779661016949152,
+      "homographic_sense_accuracy_count": 880,
+      "partial_matching_accuracy": 0.9106317411402157,
+      "partial_matching_accuracy_count": 1182,
+      "one_to_one_two_sense_accuracy": 0.6417565485362096,
+      "one_to_one_two_sense_accuracy_count": 833
+    },
+    "0.35": {
+      "homographic_sense_accuracy": 0.588597842835131,
+      "homographic_sense_accuracy_count": 764,
+      "partial_matching_accuracy": 0.8790446841294299,
+      "partial_matching_accuracy_count": 1141,
+      "one_to_one_two_sense_accuracy": 0.5654853620955316,
+      "one_to_one_two_sense_accuracy_count": 734
+    },
+    "0.40": {
+      "homographic_sense_accuracy": 0.5038520801232665,
+      "homographic_sense_accuracy_count": 654,
+      "partial_matching_accuracy": 0.8420647149460708,
+      "partial_matching_accuracy_count": 1093,
+      "one_to_one_two_sense_accuracy": 0.48382126348228044,
+      "one_to_one_two_sense_accuracy_count": 628
+    },
+    "0.45": {
+      "homographic_sense_accuracy": 0.4206471494607088,
+      "homographic_sense_accuracy_count": 546,
+      "partial_matching_accuracy": 0.7973805855161787,
+      "partial_matching_accuracy_count": 1035,
+      "one_to_one_two_sense_accuracy": 0.4067796610169492,
+      "one_to_one_two_sense_accuracy_count": 528
+    },
+    "0.50": {
+      "homographic_sense_accuracy": 0.3436055469953775,
+      "homographic_sense_accuracy_count": 446,
+      "partial_matching_accuracy": 0.7311248073959938,
+      "partial_matching_accuracy_count": 949,
+      "one_to_one_two_sense_accuracy": 0.3305084745762712,
+      "one_to_one_two_sense_accuracy_count": 429
+    },
+    "0.55": {
+      "homographic_sense_accuracy": 0.2711864406779661,
+      "homographic_sense_accuracy_count": 352,
+      "partial_matching_accuracy": 0.6571648690292758,
+      "partial_matching_accuracy_count": 853,
+      "one_to_one_two_sense_accuracy": 0.2665639445300462,
+      "one_to_one_two_sense_accuracy_count": 346
+    },
+    "0.60": {
+      "homographic_sense_accuracy": 0.1926040061633282,
+      "homographic_sense_accuracy_count": 250,
+      "partial_matching_accuracy": 0.5724191063174114,
+      "partial_matching_accuracy_count": 743,
+      "one_to_one_two_sense_accuracy": 0.19183359013867488,
+      "one_to_one_two_sense_accuracy_count": 249
+    },
+    "0.65": {
+      "homographic_sense_accuracy": 0.14637904468412943,
+      "homographic_sense_accuracy_count": 190,
+      "partial_matching_accuracy": 0.4946070878274268,
+      "partial_matching_accuracy_count": 642,
+      "one_to_one_two_sense_accuracy": 0.14560862865947613,
+      "one_to_one_two_sense_accuracy_count": 189
+    },
+    "0.70": {
+      "homographic_sense_accuracy": 0.09938366718027734,
+      "homographic_sense_accuracy_count": 129,
+      "partial_matching_accuracy": 0.40446841294298924,
+      "partial_matching_accuracy_count": 525,
+      "one_to_one_two_sense_accuracy": 0.09938366718027734,
+      "one_to_one_two_sense_accuracy_count": 129
+    }
+  }
+}
