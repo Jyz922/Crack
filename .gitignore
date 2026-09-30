@@ -11,4 +11,5 @@ runs/*
 !.env.example
 .venv/
 spike/out/
-data/
+data/*
+!data/aoa_kuperman.csv

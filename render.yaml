@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: crack-web
+    runtime: python
+    plan: free
+    buildCommand: "pip install -e '.[web]' && python -c 'from crack.l2_senses import wordnet; wordnet()'"
+    startCommand: "uvicorn crack.serve:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: CRACK_BACKEND
+        value: openai
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false

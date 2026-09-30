@@ -457,9 +457,11 @@ async def stream_analysis(text: str, target_age: int = 8):
 
 def main() -> None:
     import uvicorn
+    env_port = int(os.environ.get("PORT", 8000))
+    env_host = "0.0.0.0" if os.environ.get("PORT") else "127.0.0.1"
     parser = argparse.ArgumentParser(prog="crack.serve", description="Start CRACK Web UI server.")
-    parser.add_argument("--port", type=int, default=8000, help="Port to listen on (default: 8000)")
-    parser.add_argument("--host", default="127.0.0.1", help="Host address (default: 127.0.0.1)")
+    parser.add_argument("--port", type=int, default=env_port, help=f"Port to listen on (default: {env_port})")
+    parser.add_argument("--host", default=env_host, help=f"Host address (default: {env_host})")
     parser.add_argument("--reload", action="store_true", help="Enable hot reload")
     args = parser.parse_args()
 

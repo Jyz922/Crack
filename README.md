@@ -281,6 +281,10 @@ python -m crack.serve --port 8000
 
 Open [http://127.0.0.1:8000](http://127.0.0.1:8000) in your browser.
 
+#### Cloud Deployment (1-Click on Render)
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Jyz922/Crack)
+
 ### API Keys Configuration
 
 Create a `.env` file in the project root:
