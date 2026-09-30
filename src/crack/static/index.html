@@ -87,27 +87,6 @@
       animation: punchline-pulse 1.8s infinite cubic-bezier(0.4, 0, 0.6, 1);
     }
 
-    /* Punchline Hero Floating Badge */
-    .punchline-badge {
-      position: absolute;
-      left: 50%;
-      bottom: calc(100% + 14px);
-      transform: translateX(-50%);
-      white-space: nowrap;
-      pointer-events: none;
-      z-index: 40;
-      animation: hero-float 2.5s ease-in-out infinite;
-    }
-
-    @keyframes hero-float {
-      0%, 100% {
-        transform: translate(-50%, 0);
-      }
-      50% {
-        transform: translate(-50%, -6px);
-      }
-    }
-
     /* Glassmorphism Card Style */
     .apple-glass {
       background: rgba(15, 23, 42, 0.65);
@@ -332,17 +311,7 @@
                       ? 'text-cyan-200 font-medium border-dashed border-cyan-400 bg-cyan-500/20 shadow-[0_0_16px_rgba(6,182,212,0.4)] z-20'
                       : (!isPunchlineLocked || !tok.is_punchline ? 'text-slate-200' : '')
                   ]"
-                ><span class="inline-block leading-none">{{ tok.text }}</span><!-- Floating Tag: Punchline Target Locked --><div
-                    v-if="isPunchlineLocked && tok.is_punchline"
-                    class="punchline-badge"
-                  >
-                    <div class="relative px-3.5 py-0.5 rounded-xl bg-gradient-to-r from-cyan-400 via-teal-400 to-violet-500 text-white shadow-2xl shadow-cyan-500/50 border border-white/60 flex items-center gap-1.5 font-bold text-xs">
-                      <i data-lucide="sparkles" class="w-3.5 h-3.5 fill-white"></i>
-                      <span>Punchline Locked</span>
-                      <!-- Caret pointer -->
-                      <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gradient-to-br from-teal-400 to-violet-500 rotate-45 border-r border-b border-white/40"></div>
-                    </div>
-                  </div></span></template>
+                ><span class="inline-block leading-none">{{ tok.text }}</span></span></template>
               </div>
             </div>
 
@@ -1221,7 +1190,7 @@
             return {
               isJoke: true,
               headline: 'Yes, this is a Joke!',
-              typeLabel: 'Wordplay / Pun Joke (双关语笑话)',
+              typeLabel: 'Wordplay / Pun Joke',
               badgeBg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
               confidencePct: conf,
               summary: punch
@@ -1233,7 +1202,7 @@
             return {
               isJoke: true,
               headline: 'Yes, this is a Joke!',
-              typeLabel: 'Compound Wordplay Joke (复合词拆解笑话)',
+              typeLabel: 'Compound Wordplay Joke',
               badgeBg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
               confidencePct: conf,
               summary: 'Humor is created by creatively splitting and re-interpreting word boundaries.',
@@ -1243,7 +1212,7 @@
             return {
               isJoke: true,
               headline: 'Yes, this is a Joke!',
-              typeLabel: 'Soundalike / Homophone Joke (谐音梗笑话)',
+              typeLabel: 'Soundalike / Homophone Joke',
               badgeBg: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30',
               confidencePct: conf,
               summary: 'Humor relies on words that sound identical despite having different spellings.',
@@ -1253,7 +1222,7 @@
             return {
               isJoke: true,
               headline: 'Yes, this is a Joke!',
-              typeLabel: 'Riddle / Situational Joke (脑筋急转弯 / 问答笑话)',
+              typeLabel: 'Riddle / Situational Joke',
               badgeBg: 'bg-violet-500/10 text-violet-400 border-violet-500/30',
               confidencePct: conf,
               summary: 'Humor stems from question-and-answer riddle logic or situational surprise.',
@@ -1261,14 +1230,14 @@
           }
 
           // Non-joke verdicts:
-          let nonJokeType = 'Ordinary Statement (普通陈述句)';
+          let nonJokeType = 'Ordinary Statement';
           let nonJokeSummary = 'No humorous double meaning or punchline resolution was detected in this text.';
 
           if (cls === 'ONE_SENSE_ONLY') {
-            nonJokeType = 'Literal Language (仅单一语义)';
+            nonJokeType = 'Literal Language';
             nonJokeSummary = 'All words carry only their standard literal meaning without comedic ambiguity.';
           } else if (cls === 'SENSES_TOO_CLOSE') {
-            nonJokeType = 'Synonymous Terms (语义相近)';
+            nonJokeType = 'Synonymous Terms';
             nonJokeSummary = 'Candidate meanings are too similar in context to create a comedic twist.';
           }
 
@@ -1330,14 +1299,14 @@
           if (!comp) return { label: 'Unknown', tagClass: 'bg-slate-800 text-slate-400' };
           switch (comp) {
             case 'FULLY_COMPREHENSIBLE':
-              return { label: 'Easily Understood (完全理解)', tagClass: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' };
+              return { label: 'Easily Understood', tagClass: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' };
             case 'PARTIALLY_COMPREHENSIBLE':
-              return { label: 'Partially Understood (部分理解)', tagClass: 'bg-amber-500/20 text-amber-300 border border-amber-500/30' };
+              return { label: 'Partially Understood', tagClass: 'bg-amber-500/20 text-amber-300 border border-amber-500/30' };
             case 'SENSE_B_TOO_ADVANCED':
             case 'VOCABULARY_TOO_ADVANCED':
-              return { label: 'Vocabulary Too Advanced (生词难度过高)', tagClass: 'bg-rose-500/20 text-rose-300 border border-rose-500/30' };
+              return { label: 'Vocabulary Too Advanced', tagClass: 'bg-rose-500/20 text-rose-300 border border-rose-500/30' };
             case 'WORDPLAY_SKILL_TOO_ADVANCED':
-              return { label: 'Wordplay Too Complex (双关逻辑过深)', tagClass: 'bg-rose-500/20 text-rose-300 border border-rose-500/30' };
+              return { label: 'Wordplay Too Complex', tagClass: 'bg-rose-500/20 text-rose-300 border border-rose-500/30' };
             default:
               return { label: comp.replace(/_/g, ' '), tagClass: 'bg-slate-800 text-slate-300' };
           }
