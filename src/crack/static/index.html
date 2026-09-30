@@ -419,7 +419,7 @@
           <span>Analyze Another Joke</span>
         </button>
 
-        <div class="flex items-center gap-2">
+        <div v-if="heroVerdict.isJoke" class="flex items-center gap-2">
           <span class="text-xs text-slate-400">Target Age:</span>
           <span class="text-xs font-bold text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-md border border-cyan-500/20">
             Age {{ activeDisplayAge }}
@@ -455,7 +455,7 @@
                 >
                   {{ heroVerdict.typeLabel }}
                 </span>
-                <span class="text-xs font-mono text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">
+                <span v-if="heroVerdict.isJoke" class="text-xs font-mono text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">
                   {{ heroVerdict.confidencePct }}% Confidence
                 </span>
               </div>
@@ -474,7 +474,7 @@
           </div>
 
           <!-- Right: Key Executive Takeaways (Punchline, Recommended Age, Safety) -->
-          <div class="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-col gap-3 pt-4 lg:pt-0 border-t lg:border-t-0 lg:border-l border-slate-800 lg:pl-6 min-w-[220px]">
+          <div v-if="heroVerdict.isJoke" class="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-col gap-3 pt-4 lg:pt-0 border-t lg:border-t-0 lg:border-l border-slate-800 lg:pl-6 min-w-[220px]">
             
             <!-- Punchline site -->
             <div v-if="analysisData.punchline" class="flex items-center gap-3">
@@ -517,6 +517,7 @@
       </div>
 
       <!-- Bento Grid Module 2: The Core Joke Anatomy (Text + Double Meaning Collision) -->
+      <template v-if="heroVerdict.isJoke">
       <div class="apple-glass rounded-3xl p-6 sm:p-8 animate-card-fade">
         
         <!-- Joke Text Anchor Header -->
@@ -616,9 +617,15 @@
         </div>
 
       </div>
+      </template>
+
+      <div v-else class="apple-glass rounded-3xl p-6 sm:p-8 animate-card-fade">
+        <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">Analyzed Text</div>
+        <p class="text-lg text-slate-200 leading-relaxed">{{ analysisData.text }}</p>
+      </div>
 
       <!-- Bento Grid Module 3: Developmental Age Spectrum & L8 Safety -->
-      <div class="animate-spring-3 grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div v-if="heroVerdict.isJoke" class="animate-spring-3 grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         <!-- Developmental Spectrum (2 cols) -->
         <div class="apple-glass rounded-3xl p-6 lg:col-span-2 flex flex-col justify-between">

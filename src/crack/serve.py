@@ -140,20 +140,33 @@ def _build_final_payload(rec: AnalysisRecord, target_age: int) -> dict[str, Any]
                 "components": c.score_components,
             })
 
+    # Only expose a punchline and dual readings after the pipeline confirms a
+    # resolved homographic or compound-split joke. L3 candidates alone are
+    # hypotheses, not evidence that a text uses both meanings.
+    classification = rec.final.main_classification if rec.final else None
+    has_confirmed_wordplay = classification in {
+        MainClassification.VALID_HOMOGRAPH_JOKE,
+        MainClassification.VALID_COMPOUND_SPLIT_JOKE,
+    }
+    is_joke_result = has_confirmed_wordplay or classification in {
+        MainClassification.OUT_OF_SCOPE_HOMOPHONE,
+        MainClassification.OUT_OF_SCOPE_NONLEXICAL_JOKE,
+    }
+
     # 2. Punchline ambiguity site determination
     punchline = None
-    if rec.l4_result and rec.l4_result.anchoring_status == AnchoringStatus.PASS:
+    if has_confirmed_wordplay and rec.l4_result and rec.l4_result.anchoring_status == AnchoringStatus.PASS:
         if getattr(rec.l4_result, "ambiguous_term", None):
             punchline = rec.l4_result.ambiguous_term
         elif candidates:
             punchline = candidates[0]["term"]
-    elif candidates and candidates[0]["score"] > 0.4:
+    elif has_confirmed_wordplay and candidates:
         punchline = candidates[0]["term"]
 
     # 3. Dual Senses (from real L4 result if present, else WordNet/L2)
     sense_a = None
     sense_b = None
-    if rec.l4_result and rec.l4_result.anchoring_status == AnchoringStatus.PASS:
+    if has_confirmed_wordplay and rec.l4_result and rec.l4_result.anchoring_status == AnchoringStatus.PASS:
         sense_a = {
             "definition": rec.l4_result.sense_a,
             "quote": rec.l4_result.sense_a_anchor_quote,
@@ -166,7 +179,7 @@ def _build_final_payload(rec: AnalysisRecord, target_age: int) -> dict[str, Any]
             "aoa": getattr(rec.l7_result, "sense_b_aoa", 7.0) or 7.0,
             "label": "Sense B (Wordplay Resolution)",
         }
-    elif punchline:
+    elif has_confirmed_wordplay and punchline:
         # Fallback to WordNet synsets
         try:
             wn = wordnet()
@@ -187,7 +200,7 @@ def _build_final_payload(rec: AnalysisRecord, target_age: int) -> dict[str, Any]
         except Exception:
             pass
 
-    if not sense_a and punchline:
+    if has_confirmed_wordplay and not sense_a and punchline:
         sense_a = {
             "definition": f"Primary lexical meaning of '{punchline}' in context.",
             "quote": punchline,
@@ -203,7 +216,13 @@ def _build_final_payload(rec: AnalysisRecord, target_age: int) -> dict[str, Any]
 
     # 4. Incongruity Resolution explanation
     resolution_explanation = ""
-    if rec.l5_result:
+    if classification == MainClassification.OUT_OF_SCOPE_HOMOPHONE:
+        resolution_explanation = "This joke relies on sound similarity rather than a word with two meanings."
+    elif classification == MainClassification.OUT_OF_SCOPE_NONLEXICAL_JOKE:
+        resolution_explanation = "This joke relies on riddle logic or situational surprise rather than lexical ambiguity."
+    elif not has_confirmed_wordplay:
+        resolution_explanation = "No confirmed humorous wordplay was found in this text."
+    elif rec.l5_result:
         expl = getattr(rec.l5_result, "explanation", "")
         if expl:
             resolution_explanation = expl
@@ -240,35 +259,39 @@ def _build_final_payload(rec: AnalysisRecord, target_age: int) -> dict[str, Any]
 
     # 6. Age Spectrum & Target Evaluation (from real L7 and L8)
     age_spectrum = {}
-    tested_ages = [4, 6, 8, 10, 12, 14]
-    for a in tested_ages:
-        comp = "FULLY_COMPREHENSIBLE"
-        if rec.l7_result and a in rec.l7_result.per_age_comprehension:
-            comp = rec.l7_result.per_age_comprehension[a].value
-        else:
-            comp = "FULLY_COMPREHENSIBLE" if a >= 8 else ("PARTIALLY_COMPREHENSIBLE" if a >= 6 else "INCOMPREHENSIBLE")
+    if is_joke_result:
+        tested_ages = [4, 6, 8, 10, 12, 14]
+        for a in tested_ages:
+            if rec.l7_result and a in rec.l7_result.per_age_comprehension:
+                comp = rec.l7_result.per_age_comprehension[a].value
+            else:
+                comp = "FULLY_COMPREHENSIBLE" if a >= 8 else ("PARTIALLY_COMPREHENSIBLE" if a >= 6 else "INCOMPREHENSIBLE")
 
-        appr = "FULLY_AGE_APPROPRIATE"
-        if rec.l8_result and a in rec.l8_result.per_age_verdict:
-            appr = rec.l8_result.per_age_verdict[a].value
-        else:
-            appr = "FULLY_AGE_APPROPRIATE" if a >= 8 else "CONTENT_OK_INFERENCE_TOO_ADVANCED"
+            if rec.l8_result and a in rec.l8_result.per_age_verdict:
+                appr = rec.l8_result.per_age_verdict[a].value
+            else:
+                appr = "FULLY_AGE_APPROPRIATE" if a >= 8 else "CONTENT_OK_INFERENCE_TOO_ADVANCED"
 
-        desc = ""
-        if a < 7:
-            desc = "Below the metalinguistic humor acquisition floor (Age 7.0); misses abstract double meaning."
-        elif a <= 8:
-            desc = f"Emergent wordplay mastery. Aligned with AoA benchmarks ({getattr(rec.l7_result, 'sense_b_aoa', 6.5) or 6.5} yrs)."
-        else:
-            desc = "Full cognitive competence and vocabulary mastery for this wordplay genre."
+            if a < 7:
+                desc = "Below the metalinguistic humor acquisition floor (Age 7.0); misses abstract double meaning."
+            elif a <= 8:
+                desc = f"Emergent wordplay mastery. Aligned with AoA benchmarks ({getattr(rec.l7_result, 'sense_b_aoa', 6.5) or 6.5} yrs)."
+            else:
+                desc = "Full cognitive competence and vocabulary mastery for this wordplay genre."
 
-        age_spectrum[a] = {
-            "comprehension": comp,
-            "appropriateness": appr,
-            "desc": desc,
+            age_spectrum[a] = {
+                "comprehension": comp,
+                "appropriateness": appr,
+                "desc": desc,
+            }
+
+        target_eval = age_spectrum.get(target_age, age_spectrum[8])
+    else:
+        target_eval = {
+            "comprehension": "NOT_APPLICABLE",
+            "appropriateness": "NOT_APPLICABLE",
+            "desc": "Age-specific joke comprehension is not applicable because no joke was detected.",
         }
-
-    target_eval = age_spectrum.get(target_age, age_spectrum[8])
 
     # 7. Safety summary from L8
     content_issues = rec.l8_result.content_issues if rec.l8_result else []
@@ -300,9 +323,7 @@ def _build_final_payload(rec: AnalysisRecord, target_age: int) -> dict[str, Any]
         "target_age": target_age,
         "genre": rec.l1_result.genre.value if rec.l1_result else "DECLARATIVE",
         "scope_label": rec.final.scope_label.value if rec.final else "HOMOGRAPH",
-        "main_classification": rec.final.main_classification.value if rec.final else (
-            "VALID_HOMOGRAPH_JOKE" if punchline else "NO_AMBIGUITY_FOUND"
-        ),
+        "main_classification": classification.value if classification else "NO_AMBIGUITY_FOUND",
         "confidence": rec.confidence or (candidates[0]["score"] if candidates else 0.5),
         "punchline": punchline,
         "tokens": annotated_tokens,
