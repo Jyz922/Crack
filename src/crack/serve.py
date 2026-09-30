@@ -59,7 +59,7 @@ _STATIC_DIR = Path(__file__).resolve().parent / "static"
 app = FastAPI(
     title="CRACK Web UI",
     description="Interactive visual demonstration for CRACK neuro-symbolic humor analysis.",
-    version="0.1.0",
+    version="1.0.0",
 )
 
 app.add_middleware(

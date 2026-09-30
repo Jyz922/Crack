@@ -1,5 +1,6 @@
 # CRACK: Computational Resolution & Anchoring of Comedy & Knowledge
 
+[![Version: v1.0.0](https://img.shields.io/badge/version-v1.0.0-blue.svg)](https://github.com/Jyz922/Crack/releases/tag/v1.0.0)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tests: Passing](https://img.shields.io/badge/tests-332%20passed-brightgreen.svg)](tests/)
@@ -13,6 +14,53 @@
 **CRACK** is an open-source **neuro-symbolic humor analysis and developmental appropriateness engine**. Designed to overcome the pervasive issues of "humor hallucination" in pure Large Language Models (LLMs), CRACK pairs deterministic lexical ontologies (WordNet 3.0, SemCor sense frequencies, Kuperman Age-of-Acquisition) with schema-constrained LLM inference.
 
 CRACK automatically detects homographic wordplay and compound splits, extracts verbatim context spans anchoring dual meanings, tests form-specific semantic incongruity resolution, and evaluates target-age comprehension and child-safety appropriateness across ages 6 to 12.
+
+---
+
+## 🎬 Interactive Web UI Demo (v1.0)
+
+<p align="center">
+  <img src="docs/design/02_result_dashboard.jpg" alt="CRACK v1.0 Interactive Bento Dashboard & Real-Time Scanner" width="100%" style="border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.6);" />
+</p>
+
+CRACK v1.0 introduces an **Apple-inspired Bento Intelligence Dashboard** and a real-time SSE streaming radar scanner:
+
+- ⚡ **Direction-Aware Radar Laser Scan**: Bidirectional laser sweep with dynamic trailing afterglow matching optical movement physics.
+- 🎯 **Single-Line Continuous Typography**: Fluid subpixel auto-scaling that preserves sentence geometry and eliminates jarring line wrap shifts.
+- 💡 **Punchline Spotlight & In-Place Flight**: Automatically isolates ambiguous double-entendre sites with ambient cyan halos and smooth flight transitions.
+- 📊 **Multi-Age Spectrum & AoA Analysis**: Psycholinguistic Age-of-Acquisition (AoA) distribution curves across developmental brackets (Ages 6, 8, 10, 12).
+- 🛡️ **Distraction-Free English Interface**: Unambiguous verdict cards with human-readable linguistic breakdowns and verbatim anchor quotes.
+
+To launch the web interface locally:
+```bash
+pip install -e ".[web]"
+crack-serve
+# or: python -m crack.serve --port 8000
+```
+Open **[http://localhost:8000](http://localhost:8000)** in your browser.
+
+### 📹 How to Embed a Demo Video in GitHub README
+
+GitHub natively supports rich HTML5 inline video playback directly inside repository `README.md` files:
+
+1. **Record your screen**: Use macOS QuickTime (`Cmd + Shift + 5`) or [Kap](https://getkap.co/) to record a 15–30 second walkthrough of the radar scanner and Bento dashboard.
+2. **Upload to GitHub**:
+   - Go to any Issue or PR in this repository (e.g. [`New Issue`](https://github.com/Jyz922/Crack/issues/new)).
+   - Drag and drop your `.mp4` or `.mov` file (under 100 MB) into the text box.
+   - GitHub uploads the video to its asset CDN and outputs a markdown URL:
+     ```html
+     https://github.com/user-attachments/assets/xxxx-xxxx-xxxx.mp4
+     ```
+3. **Embed in README**:
+   Replace the image tag in this section with either of the following snippets:
+   ```html
+   <!-- Option A: HTML5 Video Tag with Full Controls (Recommended) -->
+   <video src="https://github.com/user-attachments/assets/YOUR-VIDEO-ID.mp4" controls="controls" muted="muted" width="100%"></video>
+   ```
+   ```markdown
+   <!-- Option B: Autoplaying Animated GIF -->
+   ![CRACK Interactive Demo](assets/demo.gif)
+   ```
 
 ---
 
@@ -99,6 +147,8 @@ The repository provides a curated, balanced evaluation set (`corpus/joke_corpus_
 
 ## Table of Contents
 
+- [Interactive Web UI Demo (v1.0)](#-interactive-web-ui-demo-v10)
+  - [How to Embed a Demo Video in GitHub README](#-how-to-embed-a-demo-video-in-github-readme)
 - [Benchmark Performance & SOTA Results](#-benchmark-performance--sota-results)
   - [SemEval-2017 Task 7 (Full 2,250 Items)](#1-semeval-2017-task-7-full-2250-official-items)
   - [Child-Directed Humor Corpus (110 Items)](#2-child-directed-humor--developmental-corpus-110-items)
@@ -110,6 +160,7 @@ The repository provides a curated, balanced evaluation set (`corpus/joke_corpus_
 - [Supported Model Providers](#supported-model-providers)
 - [Quick Start](#quick-start)
   - [Installation](#installation)
+  - [Interactive Web UI](#interactive-web-ui-demo)
   - [API Keys Configuration](#api-keys-configuration)
   - [CLI Usage](#cli-usage)
   - [Python SDK Usage](#python-sdk-usage)
