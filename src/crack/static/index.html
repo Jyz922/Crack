@@ -296,7 +296,8 @@
                 class="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none z-10"
               >
                 <div
-                  class="laser-line transition-all duration-75"
+                  ref="laserLineRef"
+                  class="laser-line"
                   :style="{ left: laserPosition + '%' }"
                 >
                   <!-- Trailing afterglow when moving right (stretches to the left) -->
@@ -848,9 +849,12 @@
         const isScanningMode = computed(() => viewState.value === 'SCANNING');
         const jokeRowRef = ref(null);
         const jokeInnerRef = ref(null);
+        const laserLineRef = ref(null);
         const dashboardJokeRef = ref(null);
         const isMagicMoving = ref(false);
         const textScale = ref(1);
+        let laserAnimationId = null;
+        let candidateTimeouts = [];
 
         function updateTextScale() {
           nextTick(() => {
@@ -951,21 +955,40 @@
           isCandidateStage.value = false;
           isPunchlineLocked.value = false;
 
-          // Start millisecond timer
+          // Clear any pending animations or candidate timeouts
+          if (laserAnimationId) {
+            cancelAnimationFrame(laserAnimationId);
+            laserAnimationId = null;
+          }
+          candidateTimeouts.forEach(clearTimeout);
+          candidateTimeouts = [];
+
+          // Start millisecond timer (60ms throttled to prevent main-thread layout contention)
           const startTime = performance.now();
           const timerInterval = setInterval(() => {
             elapsedMs.value = performance.now() - startTime;
-          }, 30);
+          }, 60);
 
-          // Smooth, deliberate radar laser sweep animation (paced for elegant cadence)
+          // Direct DOM RAF animation: zero VDOM diff overhead, zero CSS transition fighting, zero border hitch
+          let laserPos = 0;
+          const laserSpeed = 0.38;
+
           function animateLaser() {
             if (!laserActive.value) return;
-            laserPosition.value += 0.38 * laserDir.value;
-            if (laserPosition.value >= 98) laserDir.value = -1;
-            if (laserPosition.value <= 2) laserDir.value = 1;
-            requestAnimationFrame(animateLaser);
+            laserPos += laserSpeed * laserDir.value;
+            if (laserPos >= 98) {
+              laserPos = 98;
+              laserDir.value = -1;
+            } else if (laserPos <= 2) {
+              laserPos = 2;
+              laserDir.value = 1;
+            }
+            if (laserLineRef.value) {
+              laserLineRef.value.style.left = `${laserPos}%`;
+            }
+            laserAnimationId = requestAnimationFrame(animateLaser);
           }
-          requestAnimationFrame(animateLaser);
+          laserAnimationId = requestAnimationFrame(animateLaser);
 
           // Dynamic reasoning ticker for the deep LLM thinking phase
           const reasoningMessages = [
@@ -988,86 +1011,137 @@
           const evtSource = new EventSource(streamUrl);
 
           evtSource.addEventListener('start', (e) => {
-            const d = JSON.parse(e.data);
-            currentLogLine.value = d.message;
-            if (d.tokens) {
-              tokens.value = d.tokens;
-              updateTextScale();
+            try {
+              const d = JSON.parse(e.data);
+              currentLogLine.value = d.message;
+              if (d.tokens) {
+                tokens.value = d.tokens;
+                updateTextScale();
+              }
+            } catch (err) {
+              console.warn('Error handling start event:', err);
             }
           });
 
           evtSource.addEventListener('l1', (e) => {
-            const d = JSON.parse(e.data);
-            scannerStageMessage.value = `[L1] Genre: ${d.genre}`;
-            currentLogLine.value = d.message;
+            try {
+              const d = JSON.parse(e.data);
+              scannerStageMessage.value = `[L1] Genre: ${d.genre}`;
+              currentLogLine.value = d.message;
+            } catch (err) {
+              console.warn('Error handling l1 event:', err);
+            }
           });
 
           evtSource.addEventListener('l2', (e) => {
-            const d = JSON.parse(e.data);
-            scannerStageMessage.value = `[L2] WordNet & AoA: ${d.senses_count} Senses`;
-            currentLogLine.value = d.message;
+            try {
+              const d = JSON.parse(e.data);
+              scannerStageMessage.value = `[L2] WordNet & AoA: ${d.senses_count} Senses`;
+              currentLogLine.value = d.message;
+            } catch (err) {
+              console.warn('Error handling l2 event:', err);
+            }
           });
 
           evtSource.addEventListener('l3', (e) => {
-            const d = JSON.parse(e.data);
-            scannerStageMessage.value = `[L3] Ambiguity Sites: Scanning ${d.candidates.length} candidates...`;
-            currentLogLine.value = `Running lexical contrast and SemCor balance metrics...`;
+            try {
+              const d = JSON.parse(e.data);
+              scannerStageMessage.value = `[L3] Ambiguity Sites: Scanning ${d.candidates.length} candidates...`;
+              currentLogLine.value = `Running lexical contrast and SemCor balance metrics...`;
 
-            // Stagger candidate reveals deliberately (1350ms apart) so user enjoys each reveal
-            d.candidates.forEach((cand, cIdx) => {
-              setTimeout(() => {
-                if (viewState.value !== 'SCANNING') return;
-                isCandidateStage.value = true;
-                const candTerm = cand.term.toLowerCase();
-                tokens.value = tokens.value.map(t => {
-                  if (t.lower === candTerm || t.candidate_term === candTerm) {
-                    return {
-                      ...t,
-                      is_candidate: true,
-                      candidate_score: cand.score,
-                      candidate_term: candTerm,
-                    };
+              // Stagger candidate reveals smoothly (750ms apart)
+              d.candidates.forEach((cand, cIdx) => {
+                const tId = setTimeout(() => {
+                  if (viewState.value !== 'SCANNING' || isPunchlineLocked.value) return;
+                  isCandidateStage.value = true;
+                  const candTerm = cand.term.toLowerCase();
+                  tokens.value = tokens.value.map(t => {
+                    if (t.lower === candTerm || t.candidate_term === candTerm) {
+                      return {
+                        ...t,
+                        is_candidate: true,
+                        candidate_score: cand.score,
+                        candidate_term: candTerm,
+                      };
+                    }
+                    return t;
+                  });
+                  updateTextScale();
+                  if (!isPunchlineLocked.value && viewState.value === 'SCANNING') {
+                    scannerStageMessage.value = `[L3] Candidate #${cIdx + 1}: "${cand.term}"`;
+                    currentLogLine.value = `Identified dual synsets for "${cand.term}". Evaluating incongruity potential...`;
                   }
-                  return t;
-                });
-                updateTextScale();
-                scannerStageMessage.value = `[L3] Candidate #${cIdx + 1}: "${cand.term}"`;
-                currentLogLine.value = `Identified dual synsets for "${cand.term}". Evaluating incongruity potential...`;
-              }, (cIdx + 1) * 1350);
-            });
+                }, (cIdx + 1) * 750);
+                candidateTimeouts.push(tId);
+              });
+            } catch (err) {
+              console.warn('Error handling l3 event:', err);
+            }
           });
 
           evtSource.addEventListener('l4', (e) => {
-            const d = JSON.parse(e.data);
-            scannerStageMessage.value = `[L4] Sense Anchoring: ${d.status}`;
-            currentLogLine.value = d.message;
+            try {
+              // Clear pending L3 timeouts so L3 doesn't overwrite L4/L5 status
+              candidateTimeouts.forEach(clearTimeout);
+              candidateTimeouts = [];
+
+              const d = JSON.parse(e.data);
+              scannerStageMessage.value = `[L4] Sense Anchoring: ${d.status}`;
+              currentLogLine.value = d.message;
+            } catch (err) {
+              console.warn('Error handling l4 event:', err);
+            }
           });
 
           evtSource.addEventListener('l5', (e) => {
-            const d = JSON.parse(e.data);
-            scannerStageMessage.value = `[L5] Incongruity Resolution: ${d.status}`;
-            currentLogLine.value = d.message;
+            try {
+              const d = JSON.parse(e.data);
+              scannerStageMessage.value = `[L5] Incongruity Resolution: ${d.status}`;
+              currentLogLine.value = d.message;
+            } catch (err) {
+              console.warn('Error handling l5 event:', err);
+            }
           });
 
           evtSource.addEventListener('l6', (e) => {
-            const d = JSON.parse(e.data);
-            scannerStageMessage.value = `[L6] Distinctness: ${d.distinctness}`;
-            currentLogLine.value = d.message;
+            try {
+              const d = JSON.parse(e.data);
+              scannerStageMessage.value = `[L6] Distinctness: ${d.distinctness}`;
+              currentLogLine.value = d.message;
+            } catch (err) {
+              console.warn('Error handling l6 event:', err);
+            }
           });
 
           evtSource.addEventListener('l7', (e) => {
-            const d = JSON.parse(e.data);
-            scannerStageMessage.value = `[L7] Developmental: Age ${targetAge.value} -> ${d.comprehension}`;
-            currentLogLine.value = d.message;
+            try {
+              const d = JSON.parse(e.data);
+              scannerStageMessage.value = `[L7] Developmental: Age ${targetAge.value} -> ${d.comprehension}`;
+              currentLogLine.value = d.message;
+            } catch (err) {
+              console.warn('Error handling l7 event:', err);
+            }
           });
 
           evtSource.addEventListener('l8', (e) => {
-            const d = JSON.parse(e.data);
-            scannerStageMessage.value = `[L8] Child Safety: ${d.verdict}`;
-            currentLogLine.value = d.message;
+            try {
+              const d = JSON.parse(e.data);
+              scannerStageMessage.value = `[L8] Child Safety: ${d.verdict}`;
+              currentLogLine.value = d.message;
+            } catch (err) {
+              console.warn('Error handling l8 event:', err);
+            }
           });
 
           evtSource.addEventListener('complete', async (e) => {
+            candidateTimeouts.forEach(clearTimeout);
+            candidateTimeouts = [];
+
+            if (laserAnimationId) {
+              cancelAnimationFrame(laserAnimationId);
+              laserAnimationId = null;
+            }
+
             const payload = JSON.parse(e.data);
             analysisData.value = payload;
             tokens.value = payload.tokens;
@@ -1178,6 +1252,12 @@
             evtSource.close();
             clearInterval(timerInterval);
             clearInterval(reasonInterval);
+            if (laserAnimationId) {
+              cancelAnimationFrame(laserAnimationId);
+              laserAnimationId = null;
+            }
+            candidateTimeouts.forEach(clearTimeout);
+            candidateTimeouts = [];
             laserActive.value = false;
             alert('Live analysis error. Check server console for details.');
             viewState.value = 'INPUT';
@@ -1186,6 +1266,13 @@
         }
 
         function resetToInput() {
+          if (laserAnimationId) {
+            cancelAnimationFrame(laserAnimationId);
+            laserAnimationId = null;
+          }
+          candidateTimeouts.forEach(clearTimeout);
+          candidateTimeouts = [];
+
           const oldFlyer = document.getElementById('magic-move-flyer');
           if (oldFlyer) oldFlyer.remove();
           isMagicMoving.value = false;
@@ -1398,6 +1485,7 @@
           isScanningMode,
           jokeRowRef,
           jokeInnerRef,
+          laserLineRef,
           dashboardJokeRef,
           isMagicMoving,
           computedFontSizeClass,

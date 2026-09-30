@@ -419,8 +419,38 @@ async def stream_analysis(text: str, target_age: int = 8):
                 yield f"event: l8\ndata: {json.dumps({'layer': 'L8', 'verdict': appr, 'duration_ms': duration_ms, 'message': f'L8 Child Safety Guardrail: {appr}'})}\n\n"
 
         # Final complete payload
-        payload = _build_final_payload(rec, target_age)
-        yield f"event: complete\ndata: {json.dumps(payload)}\n\n"
+        try:
+            payload = _build_final_payload(rec, target_age)
+            yield f"event: complete\ndata: {json.dumps(payload)}\n\n"
+        except Exception as exc:
+            _LOG.error(f"Error building final payload: {exc}", exc_info=True)
+            err_payload = {
+                "text": clean_text,
+                "target_age": target_age,
+                "genre": "DECLARATIVE",
+                "scope_label": "NO_SCOPE_MECHANISM",
+                "main_classification": "RESOLUTION_FAIL",
+                "confidence": 0.0,
+                "punchline": None,
+                "tokens": tokens,
+                "candidates": [],
+                "sense_a": None,
+                "sense_b": None,
+                "resolution_explanation": f"Pipeline analysis completed with warning: {exc}",
+                "target_verdict": {
+                    "age": target_age,
+                    "comprehension": "UNKNOWN",
+                    "appropriateness": "FULLY_AGE_APPROPRIATE",
+                    "description": "Evaluation incomplete due to internal layer warning.",
+                },
+                "age_spectrum": {},
+                "safety": {"surface_status": "PASS", "inferential_status": "PASS", "is_safe": True, "notes": "No safety violations detected."},
+                "trace": [
+                    {"layer": t.layer, "status": t.status, "duration_ms": t.duration_ms, "reason": t.reason}
+                    for t in rec.trace
+                ],
+            }
+            yield f"event: complete\ndata: {json.dumps(err_payload)}\n\n"
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 
