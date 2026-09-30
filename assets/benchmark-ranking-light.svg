@@ -1,22 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="665" viewBox="0 0 1000 665" role="img" aria-labelledby="title description">
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="755" viewBox="0 0 1000 755" role="img" aria-labelledby="title description">
   <title id="title">SemEval-2017 Task 7 Benchmark: CRACK Achieves SOTA (87.82% F1)</title>
-  <desc id="description">Performance comparison on the official 2,250-item SemEval-2017 Task 7 benchmark for English pun detection and location. CRACK ranks #1 with 87.82% F1 and 76.35% exact word location accuracy.</desc>
+  <desc id="description">Performance comparison on the official 2,250-item SemEval-2017 Task 7 benchmark for English pun detection and location. CRACK ranks #1 with 87.82% F1 and 82.84% accuracy against frontier LLMs and graph architectures.</desc>
   
   <!-- Outer Card Container -->
-  <rect x="0.5" y="0.5" width="999" height="664" rx="14" fill="#ffffff" stroke="#e1e4e8"/>
+  <rect x="0.5" y="0.5" width="999" height="754" rx="14" fill="#ffffff" stroke="#e1e4e8"/>
   
   <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-variant-numeric="tabular-nums">
     <!-- Header Badge & Eyebrow -->
     <text x="32" y="38" fill="#0969da" font-size="12" font-weight="700" text-anchor="start" letter-spacing="1.5">CRACK  /  BENCHMARKS</text>
     <text x="32" y="74" fill="#1f2328" font-size="28" font-weight="700" text-anchor="start">SemEval-2017 Task 7: English Puns</text>
     <text x="32" y="100" fill="#59636e" font-size="14.5" font-weight="400" text-anchor="start">Official gold-standard benchmark (2,250 items: 1,607 homographic puns + 643 negative controls)</text>
-    <text x="32" y="122" fill="#0969da" font-size="12" font-weight="600" text-anchor="start">SOURCE: SemEval-2017 Task 7 Proceedings (Miller et al., ACL S17-2007)</text>
+    <text x="32" y="122" fill="#0969da" font-size="12" font-weight="600" text-anchor="start">SOURCE: EMNLP 2026 (Su et al., arXiv:2609.16557 Table 1) &amp; SemEval-2017 (Miller et al., S17-2007)</text>
     
     <!-- Top-Right Callout Highlight Box -->
     <rect x="735" y="24" width="233" height="92" rx="10" fill="#f0f6ff" stroke="#bfdbfe"/>
     <text x="851" y="49" fill="#0969da" font-size="10.5" font-weight="700" text-anchor="middle" letter-spacing="1.2">LEADERBOARD RANK</text>
     <text x="851" y="85" fill="#0969da" font-size="30" font-weight="800" text-anchor="middle">#1 SOTA</text>
-    <text x="851" y="103" fill="#656d76" font-size="11" font-weight="500" text-anchor="middle">87.82% F1 · Subtask 1 &amp; 2</text>
+    <text x="851" y="103" fill="#656d76" font-size="11" font-weight="500" text-anchor="middle">87.82% F1 · 82.84% Acc</text>
     
     <!-- Sub-header metadata line -->
     <text x="32" y="146" fill="#656d76" font-size="11.5" font-weight="600" text-anchor="start" letter-spacing="0.8">TEST SPLIT EVALUATION  ·  ZERO-SHOT SYMBOLIC GROUNDING</text>
@@ -26,10 +26,10 @@
     <!-- Table Column Headers -->
     <text x="48" y="195" fill="#656d76" font-size="11" font-weight="700" text-anchor="middle" letter-spacing="1">RANK</text>
     <text x="88" y="195" fill="#656d76" font-size="11" font-weight="700" text-anchor="start" letter-spacing="1">SYSTEM / MODEL</text>
-    <text x="315" y="195" fill="#656d76" font-size="11" font-weight="700" text-anchor="start" letter-spacing="1">PARADIGM &amp; ARCHITECTURE</text>
+    <text x="330" y="195" fill="#656d76" font-size="11" font-weight="700" text-anchor="start" letter-spacing="1">PARADIGM &amp; ARCHITECTURE</text>
     <text x="730" y="195" fill="#656d76" font-size="11" font-weight="700" text-anchor="end" letter-spacing="1">SUBTASK 1 (PUN F1)</text>
-    <text x="855" y="195" fill="#656d76" font-size="11" font-weight="700" text-anchor="end" letter-spacing="1">SUBTASK 2 (LOC)</text>
-    <text x="955" y="195" fill="#656d76" font-size="11" font-weight="700" text-anchor="end" letter-spacing="1">VS WINNER</text>
+    <text x="855" y="195" fill="#656d76" font-size="11" font-weight="700" text-anchor="end" letter-spacing="1">DETECTION ACC</text>
+    <text x="955" y="195" fill="#656d76" font-size="11" font-weight="700" text-anchor="end" letter-spacing="1">VS SOTA</text>
     
     <!-- Table Rows -->
     
@@ -40,149 +40,187 @@
             <text x="48" y="236" fill="#ffffff" font-size="10" font-weight="700" text-anchor="middle">#1 SOTA</text>
             
         <text x="88" y="238" fill="#1a7f37" font-size="13.5" font-weight="700" text-anchor="start">CRACK (Ours)</text>
-        <text x="315" y="238" fill="#59636e" font-size="12" font-weight="400" text-anchor="start">Neuro-Symbolic (WordNet + gpt-6-luna)</text>
+        <text x="330" y="238" fill="#59636e" font-size="12" font-weight="400" text-anchor="start">Neuro-Symbolic (WordNet + gpt-6-luna)</text>
         
         <!-- Subtask 1 Pun F1 -->
         <text x="670" y="238" fill="#1a7f37" font-size="13.5" font-weight="700" text-anchor="end">87.82%</text>
         <rect x="684" y="229" width="76" height="7" rx="3.5" fill="#cce5d6"/>
         <rect x="684" y="229" width="66.7" height="7" rx="3.5" fill="#1a7f37"/>
         
-        <!-- Subtask 2 Location Acc -->
-        <text x="855" y="238" fill="#1a7f37" font-size="13.5" font-weight="700" text-anchor="end">76.35%</text>
+        <!-- Detection Acc -->
+        <text x="855" y="238" fill="#1a7f37" font-size="13.5" font-weight="700" text-anchor="end">82.84%</text>
         
-        <!-- Delta vs Duluth -->
-        <text x="955" y="238" fill="#1a7f37" font-size="12" font-weight="600" text-anchor="end">+5.28%</text>
+        <!-- Delta vs SOTA -->
+        <text x="955" y="238" fill="#1a7f37" font-size="12" font-weight="600" text-anchor="end">+0.47%</text>
         
         <!-- Row 2 -->
         <rect x="20" y="256" width="960" height="40" rx="6" fill="#ffffff" />
         
             <text x="48" y="282" fill="#59636e" font-size="13" font-weight="500" text-anchor="middle">#2</text>
             
-        <text x="88" y="282" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="start">Duluth (Official Winner)</text>
-        <text x="315" y="282" fill="#59636e" font-size="12" font-weight="400" text-anchor="start">Feature Ensemble (Miller et al., 2017)</text>
+        <text x="88" y="282" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="start">GPT-4o (Frontier LLM)</text>
+        <text x="330" y="282" fill="#59636e" font-size="12" font-weight="400" text-anchor="start">Zero-shot Reasoning (Hurst et al., 2024)</text>
         
         <!-- Subtask 1 Pun F1 -->
-        <text x="670" y="282" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">82.54%</text>
+        <text x="670" y="282" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">87.35%</text>
         <rect x="684" y="273" width="76" height="7" rx="3.5" fill="#eaeef2"/>
-        <rect x="684" y="273" width="62.7" height="7" rx="3.5" fill="#0969da"/>
+        <rect x="684" y="273" width="66.4" height="7" rx="3.5" fill="#0969da"/>
         
-        <!-- Subtask 2 Location Acc -->
-        <text x="855" y="282" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">66.83%</text>
+        <!-- Detection Acc -->
+        <text x="855" y="282" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">76.27%</text>
         
-        <!-- Delta vs Duluth -->
-        <text x="955" y="282" fill="#656d76" font-size="12" font-weight="600" text-anchor="end">Baseline</text>
+        <!-- Delta vs SOTA -->
+        <text x="955" y="282" fill="#656d76" font-size="12" font-weight="600" text-anchor="end">-0.47%</text>
         
         <!-- Row 3 -->
         <rect x="20" y="300" width="960" height="40" rx="6" fill="#f6f8fa" />
         
             <text x="48" y="326" fill="#59636e" font-size="13" font-weight="500" text-anchor="middle">#3</text>
             
-        <text x="88" y="326" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="start">Fermi (SemEval-2017)</text>
-        <text x="315" y="326" fill="#59636e" font-size="12" font-weight="400" text-anchor="start">Word Sense Disambiguation Overlap</text>
+        <text x="88" y="326" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="start">PunGraph-Qwen-3.5 (EMNLP '26)</text>
+        <text x="330" y="326" fill="#59636e" font-size="12" font-weight="400" text-anchor="start">KG Retrieval + LLM (Su et al., 2026)</text>
         
         <!-- Subtask 1 Pun F1 -->
-        <text x="670" y="326" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">77.65%</text>
+        <text x="670" y="326" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">85.71%</text>
         <rect x="684" y="317" width="76" height="7" rx="3.5" fill="#eaeef2"/>
-        <rect x="684" y="317" width="59.0" height="7" rx="3.5" fill="#0969da"/>
+        <rect x="684" y="317" width="65.1" height="7" rx="3.5" fill="#0969da"/>
         
-        <!-- Subtask 2 Location Acc -->
-        <text x="855" y="326" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">52.15%</text>
+        <!-- Detection Acc -->
+        <text x="855" y="326" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">76.18%</text>
         
-        <!-- Delta vs Duluth -->
-        <text x="955" y="326" fill="#656d76" font-size="12" font-weight="600" text-anchor="end">-4.89%</text>
+        <!-- Delta vs SOTA -->
+        <text x="955" y="326" fill="#656d76" font-size="12" font-weight="600" text-anchor="end">-2.11%</text>
         
         <!-- Row 4 -->
         <rect x="20" y="344" width="960" height="40" rx="6" fill="#ffffff" />
         
             <text x="48" y="370" fill="#59636e" font-size="13" font-weight="500" text-anchor="middle">#4</text>
             
-        <text x="88" y="370" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="start">IdiomSavvy (SemEval-2017)</text>
-        <text x="315" y="370" fill="#59636e" font-size="12" font-weight="400" text-anchor="start">Idiomatic Vector Compositionality</text>
+        <text x="88" y="370" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="start">Gemini-2.0 Flash</text>
+        <text x="330" y="370" fill="#59636e" font-size="12" font-weight="400" text-anchor="start">High-Throughput Reasoning (Google, 2025)</text>
         
         <!-- Subtask 1 Pun F1 -->
-        <text x="670" y="370" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">68.61%</text>
+        <text x="670" y="370" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">84.56%</text>
         <rect x="684" y="361" width="76" height="7" rx="3.5" fill="#eaeef2"/>
-        <rect x="684" y="361" width="52.1" height="7" rx="3.5" fill="#0969da"/>
+        <rect x="684" y="361" width="64.3" height="7" rx="3.5" fill="#0969da"/>
         
-        <!-- Subtask 2 Location Acc -->
-        <text x="855" y="370" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">48.23%</text>
+        <!-- Detection Acc -->
+        <text x="855" y="370" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">71.08%</text>
         
-        <!-- Delta vs Duluth -->
-        <text x="955" y="370" fill="#656d76" font-size="12" font-weight="600" text-anchor="end">-13.93%</text>
+        <!-- Delta vs SOTA -->
+        <text x="955" y="370" fill="#656d76" font-size="12" font-weight="600" text-anchor="end">-3.26%</text>
         
         <!-- Row 5 -->
         <rect x="20" y="388" width="960" height="40" rx="6" fill="#f6f8fa" />
         
             <text x="48" y="414" fill="#59636e" font-size="13" font-weight="500" text-anchor="middle">#5</text>
             
-        <text x="88" y="414" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="start">UW-Stanford (SemEval-2017)</text>
-        <text x="315" y="414" fill="#59636e" font-size="12" font-weight="400" text-anchor="start">Statistical Language Model Baseline</text>
+        <text x="88" y="414" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="start">PunGraph-Llama4 (EMNLP '26)</text>
+        <text x="330" y="414" fill="#59636e" font-size="12" font-weight="400" text-anchor="start">KG Retrieval + LLM (Su et al., 2026)</text>
         
         <!-- Subtask 1 Pun F1 -->
-        <text x="670" y="414" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">66.37%</text>
+        <text x="670" y="414" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">83.43%</text>
         <rect x="684" y="405" width="76" height="7" rx="3.5" fill="#eaeef2"/>
-        <rect x="684" y="405" width="50.4" height="7" rx="3.5" fill="#0969da"/>
+        <rect x="684" y="405" width="63.4" height="7" rx="3.5" fill="#0969da"/>
         
-        <!-- Subtask 2 Location Acc -->
-        <text x="855" y="414" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">44.56%</text>
+        <!-- Detection Acc -->
+        <text x="855" y="414" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">71.80%</text>
         
-        <!-- Delta vs Duluth -->
-        <text x="955" y="414" fill="#656d76" font-size="12" font-weight="600" text-anchor="end">-16.17%</text>
+        <!-- Delta vs SOTA -->
+        <text x="955" y="414" fill="#656d76" font-size="12" font-weight="600" text-anchor="end">-4.39%</text>
         
         <!-- Row 6 -->
         <rect x="20" y="432" width="960" height="40" rx="6" fill="#ffffff" />
         
             <text x="48" y="458" fill="#59636e" font-size="13" font-weight="500" text-anchor="middle">#6</text>
             
-        <text x="88" y="458" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="start">UWatER (SemEval-2017)</text>
-        <text x="315" y="458" fill="#59636e" font-size="12" font-weight="400" text-anchor="start">Semantic Relatedness Vectors</text>
+        <text x="88" y="458" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="start">Qwen-3.5-27B (Raw LLM)</text>
+        <text x="330" y="458" fill="#59636e" font-size="12" font-weight="400" text-anchor="start">Direct Prompting (Qwen Team, 2026)</text>
         
         <!-- Subtask 1 Pun F1 -->
-        <text x="670" y="458" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">64.63%</text>
+        <text x="670" y="458" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">83.20%</text>
         <rect x="684" y="449" width="76" height="7" rx="3.5" fill="#eaeef2"/>
-        <rect x="684" y="449" width="49.1" height="7" rx="3.5" fill="#0969da"/>
+        <rect x="684" y="449" width="63.2" height="7" rx="3.5" fill="#0969da"/>
         
-        <!-- Subtask 2 Location Acc -->
-        <text x="855" y="458" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">43.12%</text>
+        <!-- Detection Acc -->
+        <text x="855" y="458" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">68.95%</text>
         
-        <!-- Delta vs Duluth -->
-        <text x="955" y="458" fill="#656d76" font-size="12" font-weight="600" text-anchor="end">-17.91%</text>
+        <!-- Delta vs SOTA -->
+        <text x="955" y="458" fill="#656d76" font-size="12" font-weight="600" text-anchor="end">-4.62%</text>
         
         <!-- Row 7 -->
         <rect x="20" y="476" width="960" height="40" rx="6" fill="#f6f8fa" />
         
             <text x="48" y="502" fill="#59636e" font-size="13" font-weight="500" text-anchor="middle">#7</text>
             
-        <text x="88" y="502" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="start">ECNU (SemEval-2017)</text>
-        <text x="315" y="502" fill="#59636e" font-size="12" font-weight="400" text-anchor="start">Supervised Regression Baseline</text>
+        <text x="88" y="502" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="start">Duluth (SemEval-2017 Winner)</text>
+        <text x="330" y="502" fill="#59636e" font-size="12" font-weight="400" text-anchor="start">Feature Ensemble (Miller et al., 2017)</text>
         
         <!-- Subtask 1 Pun F1 -->
-        <text x="670" y="502" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">62.48%</text>
+        <text x="670" y="502" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">82.54%</text>
         <rect x="684" y="493" width="76" height="7" rx="3.5" fill="#eaeef2"/>
-        <rect x="684" y="493" width="47.5" height="7" rx="3.5" fill="#0969da"/>
+        <rect x="684" y="493" width="62.7" height="7" rx="3.5" fill="#0969da"/>
         
-        <!-- Subtask 2 Location Acc -->
-        <text x="855" y="502" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">41.51%</text>
+        <!-- Detection Acc -->
+        <text x="855" y="502" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">73.64%</text>
         
-        <!-- Delta vs Duluth -->
-        <text x="955" y="502" fill="#656d76" font-size="12" font-weight="600" text-anchor="end">-20.06%</text>
+        <!-- Delta vs SOTA -->
+        <text x="955" y="502" fill="#656d76" font-size="12" font-weight="600" text-anchor="end">-5.28%</text>
+        
+        <!-- Row 8 -->
+        <rect x="20" y="520" width="960" height="40" rx="6" fill="#ffffff" />
+        
+            <text x="48" y="546" fill="#59636e" font-size="13" font-weight="500" text-anchor="middle">#8</text>
+            
+        <text x="88" y="546" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="start">DeepSeek-V3.2</text>
+        <text x="330" y="546" fill="#59636e" font-size="12" font-weight="400" text-anchor="start">Mixture-of-Experts LLM (DeepSeek, 2025)</text>
+        
+        <!-- Subtask 1 Pun F1 -->
+        <text x="670" y="546" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">82.12%</text>
+        <rect x="684" y="537" width="76" height="7" rx="3.5" fill="#eaeef2"/>
+        <rect x="684" y="537" width="62.4" height="7" rx="3.5" fill="#0969da"/>
+        
+        <!-- Detection Acc -->
+        <text x="855" y="546" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">66.26%</text>
+        
+        <!-- Delta vs SOTA -->
+        <text x="955" y="546" fill="#656d76" font-size="12" font-weight="600" text-anchor="end">-5.70%</text>
+        
+        <!-- Row 9 -->
+        <rect x="20" y="564" width="960" height="40" rx="6" fill="#f6f8fa" />
+        
+            <text x="48" y="590" fill="#59636e" font-size="13" font-weight="500" text-anchor="middle">#9</text>
+            
+        <text x="88" y="590" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="start">Llama4-Maverick (Raw LLM)</text>
+        <text x="330" y="590" fill="#59636e" font-size="12" font-weight="400" text-anchor="start">Direct Prompting (Meta, 2025)</text>
+        
+        <!-- Subtask 1 Pun F1 -->
+        <text x="670" y="590" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">82.00%</text>
+        <rect x="684" y="581" width="76" height="7" rx="3.5" fill="#eaeef2"/>
+        <rect x="684" y="581" width="62.3" height="7" rx="3.5" fill="#0969da"/>
+        
+        <!-- Detection Acc -->
+        <text x="855" y="590" fill="#1f2328" font-size="13.5" font-weight="500" text-anchor="end">66.26%</text>
+        
+        <!-- Delta vs SOTA -->
+        <text x="955" y="590" fill="#656d76" font-size="12" font-weight="600" text-anchor="end">-5.82%</text>
         
     
     <!-- Stat Summary Section -->
     
     <!-- Summary Stat Cards -->
-    <g transform="translate(20, 534)">
+    <g transform="translate(20, 622)">
       <!-- Stat 1 -->
       <rect x="0" y="0" width="228" height="66" rx="8" fill="#f6f8fa" stroke="#d1d9e0"/>
       <text x="16" y="24" fill="#59636e" font-size="11" font-weight="600" letter-spacing="0.5">SUBTASK 1 (PUN F1)</text>
       <text x="16" y="52" fill="#1a7f37" font-size="22" font-weight="700">87.82%</text>
-      <text x="110" y="50" fill="#59636e" font-size="12" font-weight="500">+5.28% vs Winner</text>
+      <text x="110" y="50" fill="#59636e" font-size="12" font-weight="500">+0.47% vs GPT-4o</text>
 
       <!-- Stat 2 -->
       <rect x="244" y="0" width="228" height="66" rx="8" fill="#f6f8fa" stroke="#d1d9e0"/>
-      <text x="260" y="24" fill="#59636e" font-size="11" font-weight="600" letter-spacing="0.5">SUBTASK 2 (LOCATION)</text>
-      <text x="260" y="52" fill="#1a7f37" font-size="22" font-weight="700">76.35%</text>
-      <text x="355" y="50" fill="#59636e" font-size="12" font-weight="500">+9.55% vs Winner</text>
+      <text x="260" y="24" fill="#59636e" font-size="11" font-weight="600" letter-spacing="0.5">DETECTION ACCURACY</text>
+      <text x="260" y="52" fill="#1a7f37" font-size="22" font-weight="700">82.84%</text>
+      <text x="355" y="50" fill="#59636e" font-size="12" font-weight="500">+6.57% vs GPT-4o</text>
 
       <!-- Stat 3 -->
       <rect x="488" y="0" width="228" height="66" rx="8" fill="#f6f8fa" stroke="#d1d9e0"/>
@@ -198,9 +236,9 @@
     </g>
 
     <!-- Source Citation Banner -->
-    <g transform="translate(20, 614)">
+    <g transform="translate(20, 702)">
       <rect x="0" y="0" width="960" height="30" rx="6" fill="#f6f8fa" stroke="#d1d9e0"/>
-      <text x="16" y="19" fill="#59636e" font-size="11.5" font-weight="500">Official Benchmark Source: Tristan Miller, Christian F. Hempelmann, Iryna Gurevych (SemEval-2017 Task 7, ACL Anthology S17-2007)</text>
+      <text x="16" y="19" fill="#59636e" font-size="11.5" font-weight="500">Official Sources: Su et al. (EMNLP 2026, Table 1), Miller et al. (SemEval-2017, S17-2007), Hurst et al. (GPT-4o, 2024)</text>
     </g>
     
   </g>
