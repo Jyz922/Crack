@@ -249,16 +249,6 @@
           morphPhase >= 1 ? 'border-cyan-400/80 shadow-[0_0_40px_rgba(6,182,212,0.3)] ring-1 ring-cyan-400/30' : 'border-white/10'
         ]"
       >
-        
-        <!-- Moving Laser Scanner Line -->
-        <div
-          v-if="laserActive"
-          class="laser-line transition-all duration-75"
-          :style="{ left: laserPosition + '%' }"
-        >
-          <div class="laser-aura"></div>
-        </div>
-
         <!-- Glow accents -->
         <div class="absolute -top-24 -right-24 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
         <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-violet-500/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -299,8 +289,21 @@
             <div
               v-else
               ref="jokeRowRef"
-              class="w-full h-full select-none flex items-center justify-center overflow-visible bg-slate-950/40 border border-cyan-500/20 rounded-2xl px-6 sm:px-10"
+              class="relative w-full h-full select-none flex items-center justify-center overflow-visible bg-slate-950/40 border border-cyan-500/20 rounded-2xl px-6 sm:px-10"
             >
+              <!-- Moving Laser Scanner Line (Confined strictly inside text box) -->
+              <div
+                v-if="laserActive"
+                class="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none z-10"
+              >
+                <div
+                  class="laser-line transition-all duration-75"
+                  :style="{ left: laserPosition + '%' }"
+                >
+                  <div class="laser-aura"></div>
+                </div>
+              </div>
+
               <div
                 ref="jokeInnerRef"
                 :class="[
