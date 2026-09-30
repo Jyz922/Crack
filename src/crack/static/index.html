@@ -139,8 +139,8 @@
     .animate-spring-3 { animation: spring-up 0.6s 0.16s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
     .animate-spring-4 { animation: spring-up 0.65s 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
 
-    /* Magic Move Card Reveal & Fade */
-    @keyframes magic-fade-in {
+    /* Clean, rock-solid card fade for Module 2 (No transform shifts, no re-triggering) */
+    @keyframes card-fade {
       0% {
         opacity: 0;
       }
@@ -149,8 +149,8 @@
       }
     }
 
-    .magic-card-enter {
-      animation: magic-fade-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    .animate-card-fade {
+      animation: card-fade 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
     /* Smooth CSS Grid Accordion Collapse (Zero layout jank / reflow) */
@@ -496,7 +496,7 @@
       </div>
 
       <!-- Bento Grid Module 2: The Core Dual-Sense Collision Card -->
-      <div :class="['apple-glass rounded-3xl p-6 sm:p-8', isMagicMoving ? 'magic-card-enter' : 'animate-spring-2']">
+      <div class="apple-glass rounded-3xl p-6 sm:p-8 animate-card-fade">
         
         <!-- Joke Text Anchor Header -->
         <div class="mb-6 pb-4 border-b border-slate-800/80">
@@ -504,7 +504,7 @@
           <div class="w-full overflow-hidden py-1">
             <div
               ref="dashboardJokeRef"
-              :style="{ opacity: isMagicMoving ? 0 : 1, transition: 'opacity 0.2s ease' }"
+              :style="{ opacity: isMagicMoving ? 0 : 1 }"
               class="inline-flex flex-nowrap items-center whitespace-nowrap text-lg sm:text-xl font-medium tracking-tight text-slate-100 leading-none"
             >
               <template v-for="(tok, idx) in analysisData.tokens" :key="idx"><span
@@ -515,7 +515,7 @@
                 :class="[
                   'relative inline-flex items-center justify-center rounded-xl leading-none border-2 transition-all',
                   tok.is_punchline
-                    ? 'mx-2 px-2.5 pt-1.5 pb-2 text-cyan-100 font-medium punchline-halo bg-cyan-500/30 border-cyan-300 z-20 shadow-xl shadow-cyan-500/40'
+                    ? 'mx-2 px-2.5 pt-1.5 pb-2 text-cyan-100 font-medium punchline-halo bg-cyan-500/30 border-cyan-300 z-30 shadow-2xl shadow-cyan-500/50'
                     : 'mx-0.5 px-1 py-1 border-transparent text-slate-200'
                 ]"
               ><span class="inline-block leading-none">{{ tok.text }}</span></span></template>
@@ -1022,6 +1022,9 @@
             // Savor the punchline lock and halo spotlight for 1.2s before smooth flight transition
             await new Promise(r => setTimeout(r, 1200));
 
+            // Ensure viewport is at top before measuring any coordinate frames
+            window.scrollTo({ top: 0, behavior: 'instant' });
+
             const sourceEl = jokeInnerRef.value;
             if (!sourceEl) {
               viewState.value = 'DASHBOARD';
@@ -1061,7 +1064,6 @@
             // 3. Switch to DASHBOARD view with isMagicMoving active
             isMagicMoving.value = true;
             viewState.value = 'DASHBOARD';
-            window.scrollTo({ top: 0, behavior: 'instant' });
 
             await nextTick();
             lucide.createIcons();
@@ -1089,13 +1091,15 @@
               flyer.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0) scale(${targetScaleX}, ${targetScaleY})`;
             });
 
-            // 7. Clean handoff at target landing
+            // 7. Clean, seamless handoff at target landing (Zero blink / zero flash)
             setTimeout(() => {
               isMagicMoving.value = false;
-              if (flyer.parentNode) {
-                flyer.remove();
-              }
-            }, 870);
+              requestAnimationFrame(() => {
+                if (flyer.parentNode) {
+                  flyer.remove();
+                }
+              });
+            }, 850);
           });
 
           evtSource.onerror = (err) => {
