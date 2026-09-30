@@ -64,10 +64,30 @@
       position: absolute;
       top: 0;
       bottom: 0;
-      width: 80px;
-      transform: translateX(-100%);
-      background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.15));
+      width: 110px;
       pointer-events: none;
+      opacity: 0;
+      transform: scaleX(0.2);
+      transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .laser-aura.is-active {
+      opacity: 1;
+      transform: scaleX(1);
+    }
+
+    /* Trailing afterglow when moving RIGHT (extends backwards to the left) */
+    .laser-aura-left {
+      right: 100%;
+      transform-origin: right center;
+      background: linear-gradient(to right, transparent 0%, rgba(6, 182, 212, 0.04) 45%, rgba(6, 182, 212, 0.22) 100%);
+    }
+
+    /* Trailing afterglow when moving LEFT (extends backwards to the right) */
+    .laser-aura-right {
+      left: 100%;
+      transform-origin: left center;
+      background: linear-gradient(to right, rgba(6, 182, 212, 0.22) 0%, rgba(6, 182, 212, 0.04) 55%, transparent 100%);
     }
 
     /* Punchline Halo Pulse */
@@ -279,7 +299,16 @@
                   class="laser-line transition-all duration-75"
                   :style="{ left: laserPosition + '%' }"
                 >
-                  <div class="laser-aura"></div>
+                  <!-- Trailing afterglow when moving right (stretches to the left) -->
+                  <div
+                    class="laser-aura laser-aura-left"
+                    :class="{ 'is-active': laserDir > 0 }"
+                  ></div>
+                  <!-- Trailing afterglow when moving left (stretches to the right) -->
+                  <div
+                    class="laser-aura laser-aura-right"
+                    :class="{ 'is-active': laserDir < 0 }"
+                  ></div>
                 </div>
               </div>
 
@@ -799,6 +828,7 @@
         // Animation States
         const laserActive = ref(false);
         const laserPosition = ref(0);
+        const laserDir = ref(1);
         const isCandidateStage = ref(false);
         const isPunchlineLocked = ref(false);
         const scannerStageMessage = ref('Initializing lexical scanner...');
@@ -917,6 +947,7 @@
 
           laserActive.value = true;
           laserPosition.value = 0;
+          laserDir.value = 1;
           isCandidateStage.value = false;
           isPunchlineLocked.value = false;
 
@@ -927,12 +958,11 @@
           }, 30);
 
           // Smooth, deliberate radar laser sweep animation (paced for elegant cadence)
-          let laserDir = 1;
           function animateLaser() {
             if (!laserActive.value) return;
-            laserPosition.value += 0.38 * laserDir;
-            if (laserPosition.value >= 98) laserDir = -1;
-            if (laserPosition.value <= 2) laserDir = 1;
+            laserPosition.value += 0.38 * laserDir.value;
+            if (laserPosition.value >= 98) laserDir.value = -1;
+            if (laserPosition.value <= 2) laserDir.value = 1;
             requestAnimationFrame(animateLaser);
           }
           requestAnimationFrame(animateLaser);
@@ -1162,6 +1192,8 @@
           viewState.value = 'INPUT';
           morphPhase.value = 0;
           laserActive.value = false;
+          laserPosition.value = 0;
+          laserDir.value = 1;
           isPunchlineLocked.value = false;
           isCandidateStage.value = false;
           nextTick(() => {
@@ -1358,6 +1390,7 @@
           tokens,
           laserActive,
           laserPosition,
+          laserDir,
           isCandidateStage,
           isPunchlineLocked,
           morphPhase,
