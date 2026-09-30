@@ -29,9 +29,9 @@ Evaluated on the full test set of **SemEval-2017 Task 7: Detection and Interpret
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/benchmark-ranking-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="assets/benchmark-ranking-light.svg">
-    <img src="assets/benchmark-ranking-light.svg" alt="SemEval-2017 Task 7 Benchmark SOTA Leaderboard" width="100%">
+    <source media="(prefers-color-scheme: dark)" srcset="assets/benchmark-leaderboard-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/benchmark-leaderboard-light.svg">
+    <img src="assets/benchmark-leaderboard-light.svg" alt="SemEval-2017 Task 7 Benchmark SOTA Leaderboard" width="100%">
   </picture>
 </p>
 

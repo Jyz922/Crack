@@ -640,7 +640,9 @@ def main():
     assets_dir = Path(__file__).resolve().parents[1] / "assets"
     assets_dir.mkdir(parents=True, exist_ok=True)
 
-    # 1. Benchmark Ranking SVGs
+    # 1. Benchmark Ranking & Leaderboard SVGs (cache-busting canonical names)
+    (assets_dir / "benchmark-leaderboard-light.svg").write_text(generate_benchmark_svg(dark_mode=False), encoding="utf-8")
+    (assets_dir / "benchmark-leaderboard-dark.svg").write_text(generate_benchmark_svg(dark_mode=True), encoding="utf-8")
     (assets_dir / "benchmark-ranking-light.svg").write_text(generate_benchmark_svg(dark_mode=False), encoding="utf-8")
     (assets_dir / "benchmark-ranking-dark.svg").write_text(generate_benchmark_svg(dark_mode=True), encoding="utf-8")
 
