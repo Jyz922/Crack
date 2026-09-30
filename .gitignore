@@ -1,4 +1,4 @@
-
+.DS_Store
 __pycache__/
 *.pyc
 .pytest_cache/
@@ -6,10 +6,13 @@ __pycache__/
 *.egg-info/
 runs/*
 !runs/semeval_subtask_report.json
+!runs/course_corpus_records.jsonl
+!runs/course_corpus_eval.json
 .env
 .env.*
 !.env.example
 .venv/
 spike/out/
+scratch/
 data/*
 !data/aoa_kuperman.csv

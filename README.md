@@ -35,17 +35,18 @@ Evaluated on the full test set of **SemEval-2017 Task 7: Detection and Interpret
   </picture>
 </p>
 
-#### Comparison with Prior SOTA, Shared Task Winners & LLMs
+#### Comparison with SemEval-2017 Official Systems & Baselines
 
 | System / Model | Architecture Type | Subtask 1: Detection Acc | Subtask 1: Pun F1 | Subtask 2: Location Acc | Notes |
 |---|---|:---:|:---:|:---:|---|
-| **Duluth** *(Miller et al., 2017)* | Specialized Feature-based | 73.64% | 82.54% | ~66.8% | **SemEval-2017 Official Shared Task Winner** |
-| **N-Hance Baseline** *(2017)* | Semantic Embedding Similarity | ~78.0% | ~84.5% | ~61.0% | Official SemEval Baseline System |
+| **Duluth** *(Miller et al., 2017)* | Specialized Feature-based | 73.64% | 82.54% | 66.83% | **SemEval-2017 Official Shared Task Winner** |
 | **Fermi** *(2017)* | Word Sense / WSD Overlap | — | 77.65% | 52.15% | Official Participant |
-| **BERT / RoBERTa (Fine-tuned)** | Supervised PLM Classifier | 80.0% ~ 83.5% | 84.0% ~ 86.5% | ~68.0% | Supervised training on pun corpus splits |
-| **Zero-shot LLM (GPT-4 / ChatGPT)** | Direct Prompting (Black-box) | 75.0% ~ 79.5% | 81.0% ~ 83.0% | ~65.0% | Prone to humor hallucination on ordinary proverbs |
-| **Fine-tuned GPT-4o** *(ACL 2024)* | Instruction-Tuned LLM | ~83.0% | ~85.5% | ~71.0% | Fine-tuned specifically on humor datasets |
+| **IdiomSavvy** *(2017)* | Idiom & Sense Scoring | 58.00% | 68.61% | 48.23% | Official Participant |
+| **UW-Stanford** *(2017)* | Statistical Language Modeling | 57.29% | 66.37% | 44.56% | Official Participant |
 | **CRACK (Ours)** | **Neuro-Symbolic + gpt-6-luna** | **82.84%** *(+9.2%)* | **87.82%** *(+5.3%)* | **76.35%** *(+9.5%)* | **Zero-shot + Symbolic Grounding (WordNet + L4 Quotes)** |
+
+> **Official Benchmark Citation:**  
+> Tristan Miller, Christian F. Hempelmann, and Iryna Gurevych. 2017. **SemEval-2017 Task 7: Detection and Interpretation of English Puns**. In *Proceedings of the 11th International Workshop on Semantic Evaluation (SemEval-2017)*, pages 58–68, Vancouver, Canada. Association for Computational Linguistics. [DOI: 10.18653/v1/S17-2007](https://aclanthology.org/S17-2007/)
 
 #### Detailed Dual-Task Metrics (`gpt-6-luna` / OpenAI Backend)
 
@@ -61,41 +62,23 @@ Evaluated across all 2,250 items with 10-worker multi-threaded concurrency (tota
 | **Subtask 2: Top-1 Pun Location Accuracy** | **76.35%** | 1,227 / 1,607 | Exactly pinpoints the target pun word at rank #1 |
 | **Subtask 2: Top-3 Pun Location Coverage** | **86.50%** | 1,390 / 1,607 | Target pun word present within Top-3 candidate ranking |
 
-#### Confusion Matrix Breakdown ($N = 2,250$)
-
-- **True Pun Jokes ($N = 1,607$)**:
-  - `1,391` correctly classified as `VALID_HOMOGRAPH_JOKE`
-  - `8` identified as `VALID_COMPOUND_SPLIT_JOKE` (total **1,399 / 1,607 = 87.05%** recognized as wordplay)
-  - `153` classified as `ONE_SENSE_ONLY` (false negatives)
-  - `29` flagged as `RESOLUTION_FAIL`
-  - `25` flagged as `SENSES_TOO_CLOSE`
-- **Negative Control Texts ($N = 643$)**:
-  - `473` correctly rejected as `ONE_SENSE_ONLY` (short-circuited early at L4)
-  - `23` correctly rejected as `SENSES_TOO_CLOSE` (rejected at L6)
-  - `145` false positives
+*Note on Reproducibility:* The full per-item JSON trace log (~50 MB raw output) is excluded from Git to prevent repository bloat, while the summary metrics report is preserved at [`runs/semeval_subtask_report.json`](runs/semeval_subtask_report.json) and can be regenerated on demand via `python scripts/prepare_semeval.py`.
 
 ---
 
-### 2. Child-Directed Humor & Developmental Corpus (110 Items)
+### 2. Assignment Evaluation Corpus (60 Texts: 25 Jokes, 25 De-Joked Pairs, 10 Non-Jokes)
 
-The repository provides a curated, balanced evaluation set (`corpus/joke_corpus_gold.jsonl`) comprising:
-- **60 Positive Wordplay Items**: Valid homograph jokes, compound splits, and heteronym double entendres across diverse genres.
-- **40 Minimal-Pair De-Joked Controls**: Closely matched negative controls where humor is removed to test specificity against hallucination.
-- **10 Out-of-Scope Negative Controls**: Homophones, rhymes, and non-lexical absurdist jokes.
-
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/developmental-breakdown-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="assets/developmental-breakdown-light.svg">
-    <img src="assets/developmental-breakdown-light.svg" alt="CRACK Developmental Cognition and Funnel Analysis" width="100%">
-  </picture>
-</p>
+The repository provides a curated, balanced evaluation set (`corpus/joke_corpus_gold.jsonl` & `corpus/joke_corpus_blind.jsonl`) strictly conforming to the 50–60 texts course assignment specification:
+- **25 Positive Wordplay Jokes (`J01`–`J25`)**: Homograph riddles, definitional one-liners, and dialogue wordplay.
+- **25 Minimal-Pair De-Joked Controls (`D01`–`D25`)**: Exactly matched 1:1 counterparts where wordplay is resolved or removed to test specificity against hallucination.
+- **10 Definite Non-Jokes (`N01`–`N10`)**: Unambiguous factual declarative sentences (news, science, everyday statements).
 
 | Metric | CRACK Score | Details |
 |---|---|---|
-| **Classification Accuracy** | **88.2%** | 97 / 110 items correctly classified |
-| **Developmental Age Verdict Match** | **90.0%** | 251 / 279 target-age evaluations aligned (Ages 6, 8, 10, 12) |
-| **Negative Control Specificity** | **95.5%** | Correctly rejects 42 / 44 non-joke / anti-joke controls |
+| **Classification Accuracy** | **88.3%** | 53 / 60 items correctly classified (`runs/course_corpus_eval.json`) |
+| **Developmental Age Verdict Match** | **69.4%** | 125 / 180 age evaluations across Ages 6, 8, 10, 12 (unbiased metric) |
+| **Negative Control Specificity** | **88.6%** | Correctly rejects 31 / 35 negative controls as `ONE_SENSE_ONLY` |
+| **Per-Item Audit Records** | **100% Verifiable** | Full per-item predictions committed at [`runs/course_corpus_records.jsonl`](runs/course_corpus_records.jsonl) |
 | **Test Suite Coverage** | **100% Pass** | 332 automated tests passing |
 
 ---
@@ -104,7 +87,7 @@ The repository provides a curated, balanced evaluation set (`corpus/joke_corpus_
 
 - [Benchmark Performance & SOTA Results](#-benchmark-performance--sota-results)
   - [SemEval-2017 Task 7 (Full 2,250 Items)](#1-semeval-2017-task-7-full-2250-official-items)
-  - [Child-Directed Humor Corpus (110 Items)](#2-child-directed-humor--developmental-corpus-110-items)
+  - [Assignment Evaluation Corpus (60 Texts)](#2-assignment-evaluation-corpus-60-texts-25-jokes-25-de-joked-pairs-10-non-jokes)
 - [The Challenge: Why Humor AI Fails](#the-challenge-why-humor-ai-fails)
 - [Key Features](#key-features)
 - [Architecture Overview](#architecture-overview)
@@ -241,8 +224,8 @@ CRACK includes zero-shot structured-output connectors for all major frontier pro
 | Provider | Supported Models | Config Flag / Env Var | Notes |
 |---|---|---|---|
 | **OpenAI** | `gpt-6-luna` (default), `gpt-4o`, `o1`, `o3` | `--backend openai`<br>`OPENAI_API_KEY` | Native `max_completion_tokens` support; automatic temperature omission for reasoning models. |
-| **Google Gemini** | `gemini-2.5-flash`, `gemini-1.5-pro` | `--backend gemini`<br>`GEMINI_API_KEY` | High-throughput structured JSON schema generation. |
-| **Anthropic** | `claude-3-7-sonnet`, `claude-3-5-haiku` | `--backend anthropic`<br>`ANTHROPIC_API_KEY` | Tool-use / JSON schema output. |
+| **Google Gemini** | `gemini-3.6-flash`, `gemini-3.8-flash` | `--backend gemini`<br>`GEMINI_API_KEY` | High-throughput structured JSON schema generation. |
+| **Anthropic** | `claude-sonnet-5`, `claude-3-5-haiku` | `--backend anthropic`<br>`ANTHROPIC_API_KEY` | Tool-use / JSON schema output. |
 | **DeepSeek & Local** | `deepseek-chat`, vLLM, Ollama | `--backend deepseek`<br>`DEEPSEEK_API_KEY` | Fully OpenAI-compatible client integration. |
 
 ---

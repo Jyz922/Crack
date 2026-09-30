@@ -1,0 +1,24 @@
+{
+  "total_items": 60,
+  "classification_accuracy": 0.8833,
+  "correct_classification": 53,
+  "total_age_evals": 180,
+  "age_accuracy": 0.6944,
+  "correct_age_evals": 125,
+  "confusion_matrix": {
+    "VALID_HOMOGRAPH_JOKE": {
+      "VALID_HOMOGRAPH_JOKE": 19,
+      "ONE_SENSE_ONLY": 1,
+      "RESOLUTION_FAIL": 1
+    },
+    "VALID_COMPOUND_SPLIT_JOKE": {
+      "VALID_COMPOUND_SPLIT_JOKE": 3,
+      "VALID_HOMOGRAPH_JOKE": 1
+    },
+    "ONE_SENSE_ONLY": {
+      "ONE_SENSE_ONLY": 31,
+      "VALID_HOMOGRAPH_JOKE": 2,
+      "RESOLUTION_FAIL": 2
+    }
+  }
+}

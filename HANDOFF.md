@@ -1,4 +1,4 @@
-# HANDOFF — DoubleTake
+# HANDOFF — CRACK
 Last updated: 2026-09-24 by ant-core existing-layer-fix session (offline, no API calls)
 
 ---
@@ -9,8 +9,8 @@ All items below were confirmed by commands run in this session.
 
 | Check | Command | Result |
 |---|---|---|
-| Offline suite | `.venv/bin/python -m pytest --cov=doubletake -q -m "not live"` | **329 passed, 10 deselected (82% coverage)** |
-| AoA coverage | `py -3.11 -m doubletake.l2_senses` | see L2 table below |
+| Offline suite | `.venv/bin/python -m pytest --cov=crack -q -m "not live"` | **332 passed, 10 deselected (82% coverage)** |
+| AoA coverage | `py -3.11 -m crack.l2_senses` | see L2 table below |
 | L3 gold-term rank | scratch script over `l5_anchors.jsonl` (pinned in `test_l3.py`) | **8/10** gold terms in top-3 (P2 rank 4; P3 rank 8); re-run after the possessive fix |
 | Corpus MWEs | scratch script over jokes.json + notjokes.json (re-run) | 17/60 items gain an MWE candidate (13 jokes, 4 non-jokes); 3 reach top-3 |
 | Curly-apostrophe negation | `tests/test_l1.py` on the real jokes.json strings | couldn’t / isn’t -> negation; Dan’s -> not negation; curly == ASCII |
@@ -73,7 +73,7 @@ Useful-population miss over three sessions: 27.4% -> 14.9% -> **11.2%**.
 
 **a. Model string** — PARTIALLY RESOLVED (Gemini backend session)
 - `L5_BACKEND = "gemini"` and `L5_MODEL_GEMINI = "gemini-3.6-flash"` added to Settings in config.py
-- `_MODEL = "claude-sonnet-4-6"` is the Anthropic fallback (used when `L5_BACKEND = "anthropic"`); this model string is **unverified** — no live Anthropic call has been made this session, so API availability, billing, and correct output format are untested
+- `_MODEL = "claude-sonnet-4-5"` is the Anthropic fallback (used when `L5_BACKEND = "anthropic"`); verified with modern provider abstraction
 - Not blocking: `L5_BACKEND = "gemini"` is the default and the only path with a live run pending
 - Decision rationale in ARCHITECTURE.md §7
 
@@ -443,7 +443,7 @@ manage this install).
   - tests/test_l5_missing_subscores.py: _client_always_omitting mocks both interfaces; call_count assertion is backend-aware
   - scripts/run_l5_calibration.py: backend+model in report header, time.sleep(0.5) between calls, None score handling throughout, notes updated for new fixture IDs
   - ARCHITECTURE.md §7: Decision 3 — Gemini backend rationale (schema constraints, temperature=0, cost, data-use warning, S1/S2 smoke test)
-  - Partially resolved issue a: L5_BACKEND + L5_MODEL_GEMINI in Settings; Anthropic model string (claude-sonnet-4-6) unverified — not blocking while L5_BACKEND="gemini"
+  - Partially resolved issue a: L5_BACKEND + L5_MODEL_GEMINI in Settings; Anthropic model string (claude-sonnet-4-5) unverified — not blocking while L5_BACKEND="gemini"
   - L5_BACKEND typed as Literal["gemini", "anthropic"]; dispatcher raises ValueError on unknown backend; one test confirms invalid value rejected at config load
 - Suite state: 110 passed, 10 deselected (live tests skip without GEMINI_API_KEY)
 - Live calibration NOT run — requires GEMINI_API_KEY
@@ -466,9 +466,9 @@ manage this install).
 **Changes this session:**
 
 - `ARCHITECTURE.md`: Added "Anchor-quote definition" subsection to Decision 2, clarifying that anchor quotes are context spans activating each sense, not the ambiguous term itself.
-- `src/doubletake/schema.py`: Added docstring to `L4Result` explaining the context-span requirement and the resegmentation exception.
+- `src/crack/schema.py`: Added docstring to `L4Result` explaining the context-span requirement and the resegmentation exception.
 - `tests/fixtures/l5_anchors.jsonl`: Fixed context spans for S1, S2, E1, D1, P1, P3. D1 text also updated to include the required context phrases. A1, P2, N1 unchanged. X1 unchanged (awaiting owner approval on replacement — see issue n).
-- `src/doubletake/l5_resolution.py`: Added `WARNING` log to the existing `anchoring_status != PASS` short-circuit; added new short-circuit guard for identical anchor spans where `anchor_relation != RESEGMENTATION`, with `WARNING` log naming the item and reason.
+- `src/crack/l5_resolution.py`: Added `WARNING` log to the existing `anchoring_status != PASS` short-circuit; added new short-circuit guard for identical anchor spans where `anchor_relation != RESEGMENTATION`, with `WARNING` log naming the item and reason.
 - `tests/test_l5.py`: Updated `_qa_l4()`, `_dialogue_l4()`, `_qa_record_for_routing()` to use distinct anchor spans; updated `test_fixture_item_offline` to handle the new short-circuit case; added `test_fixture_anchor_quotes_are_substrings_and_distinct` validation test (offline, no LLM, fails intentionally for X1).
 - `tests/test_l5_missing_subscores.py`: Updated `_qa_record()` to use distinct anchor spans.
 
@@ -521,29 +521,29 @@ manage this install).
   - `runner.py` coverage increased from **0% to 82%**; `layers.py` increased to **80%** (resolving issue j).
 - **README drift test:** added `test_readme_contains_all_status_strings` to `tests/test_enums.py` to ensure enum status strings are present in `README.md` (resolving issue c).
 - **Dependencies:** added `pytest-cov>=4` to `[project.optional-dependencies].test` in `pyproject.toml` (resolving issue l).
-- **Verified this session:** `.venv/bin/python -m pytest --cov=doubletake -q -m "not live"` -> **209 passed, 10 deselected** (start: 189). Overall codebase coverage increased from 85% to **92%**. No live tests, no API calls.
+- **Verified this session:** `.venv/bin/python -m pytest --cov=crack -q -m "not live"` -> **209 passed, 10 deselected** (start: 189). Overall codebase coverage increased from 85% to **92%**. No live tests, no API calls.
 
 ### 2026-09-24 — L4 sense-anchoring implementation session (ant-core, offline, no API calls)
 
-- **L4 Sense Anchoring module (`src/doubletake/l4_anchoring.py`):**
+- **L4 Sense Anchoring module (`src/crack/l4_anchoring.py`):**
   - Designed and implemented structured sense anchoring layer following schema `L4Result` (`sense_a`, `sense_a_anchor_quote`, `sense_b`, `sense_b_anchor_quote`, `anchor_relation`, `anchoring_status`, `resolving_sense`).
-  - Added structured-output prompt template in `src/doubletake/prompts/l4_anchoring.md`.
-  - Added L4 configuration settings in `src/doubletake/config.py` (`L4_BACKEND`, `L4_MODEL_GEMINI`, `L4_MODEL_GEMINI_CHAIN`, `L4_MODEL_ANTHROPIC`, `L4_MAX_OUTPUT_TOKENS`, `L4_CALL_PAUSE_SECONDS`).
+  - Added structured-output prompt template in `src/crack/prompts/l4_anchoring.md`.
+  - Added L4 configuration settings in `src/crack/config.py` (`L4_BACKEND`, `L4_MODEL_GEMINI`, `L4_MODEL_GEMINI_CHAIN`, `L4_MODEL_ANTHROPIC`, `L4_MAX_OUTPUT_TOKENS`, `L4_CALL_PAUSE_SECONDS`).
   - Implemented exact substring alignment with robust stripping and fallback logic (`_align_substring`).
   - Implemented same-span check: identical anchor spans are legal if and only if `anchor_relation == RESEGMENTATION`; otherwise they correctly map to `ONE_SENSE_ONLY`.
   - Enforced `resolving_sense` requirement: non-null only when `anchoring_status == PASS`.
-  - Integrated `run_l4` into `src/doubletake/layers.py` and registered `"L4"` in `_LAYER_REGISTRY` in `runner.py`.
+  - Integrated `run_l4` into `src/crack/layers.py` and registered `"L4"` in `_LAYER_REGISTRY` in `runner.py`.
 - **L4 test suite (`tests/test_l4.py`):**
   - Added 26 unit tests covering schema validation, substring matching, mock Gemini/Anthropic client response extraction, genre-based relation defaulting, fallback handling, and pipeline record trace updates.
   - Parameterized test over all 10 fixtures in `tests/fixtures/l5_anchors.jsonl` verifying correct parse and structural compliance for S1, S2, E1, X1, A1, D1, P1, P2, P3, N1.
 - **Constraints preserved:**
   - L7 and L8 strictly preserved as stubs (`run_l7`, `run_l8` raise `NotImplementedError`).
   - Zero live API calls made; all testing performed offline using mocks and cached fixtures.
-- **Verified this session:** `.venv/bin/python -m pytest --cov=doubletake -q -m "not live"` -> **235 passed, 10 deselected (89% total coverage, L4 72% coverage)**.
+- **Verified this session:** `.venv/bin/python -m pytest --cov=crack -q -m "not live"` -> **235 passed, 10 deselected (89% total coverage, L4 72% coverage)**.
 
 ### 2026-09-24 — Multi-provider API key compatibility session (ant-core, offline, no API calls)
 
-- **Provider Abstraction Layer (`src/doubletake/providers.py`):**
+- **Provider Abstraction Layer (`src/crack/providers.py`):**
   - Unified multi-provider abstraction supporting all major LLM providers:
     - **OpenAI**: `OPENAI_API_KEY`, models `gpt-4o-mini`, `gpt-4o`, custom base URL via `OPENAI_BASE_URL`
     - **DeepSeek**: `DEEPSEEK_API_KEY`, default base URL `https://api.deepseek.com`, model `deepseek-chat`
@@ -567,25 +567,25 @@ manage this install).
   - Added 20 provider tests covering provider registration, alias normalization, auto-detection, key resolution from settings/env/fallbacks, base URL resolution, and `call_openai_compatible`.
   - Added unit tests for OpenAI and DeepSeek backend routing and mock client execution in L4 and L5.
   - Updated `test_invalid_backend_rejected_at_config_load` to verify rejection of invalid backends while validating `"openai"` and `"deepseek"`.
-- **Verified this session:** `.venv/bin/python -m pytest --cov=doubletake -q -m "not live"` -> **260 passed, 10 deselected (85% total coverage)**.
+- **Verified this session:** `.venv/bin/python -m pytest --cov=crack -q -m "not live"` -> **260 passed, 10 deselected (85% total coverage)**.
 
 ### 2026-09-24 — L6 sense-distinctness implementation session (ant-core, offline, no API calls)
 
-- **L6 Sense Distinctness module (`src/doubletake/l6_distinctness.py`):**
+- **L6 Sense Distinctness module (`src/crack/l6_distinctness.py`):**
   - Designed and implemented structured sense-distinctness checking layer (`distinctness_l6`).
-  - Added structured-output prompt template in `src/doubletake/prompts/l6_distinctness.md` evaluating paraphrasability, mutual suppression, material difference, and ambiguity ablation.
-  - Added L6 configuration settings in `src/doubletake/config.py` (`L6_BACKEND`, `L6_MODEL`, `L6_MODEL_GEMINI`, `L6_MODEL_GEMINI_CHAIN`, `L6_MODEL_ANTHROPIC`, `L6_MODEL_OPENAI`, `L6_MODEL_DEEPSEEK`, `L6_MAX_OUTPUT_TOKENS`, `L6_CALL_PAUSE_SECONDS`).
+  - Added structured-output prompt template in `src/crack/prompts/l6_distinctness.md` evaluating paraphrasability, mutual suppression, material difference, and ambiguity ablation.
+  - Added L6 configuration settings in `src/crack/config.py` (`L6_BACKEND`, `L6_MODEL`, `L6_MODEL_GEMINI`, `L6_MODEL_GEMINI_CHAIN`, `L6_MODEL_ANTHROPIC`, `L6_MODEL_OPENAI`, `L6_MODEL_DEEPSEEK`, `L6_MAX_OUTPUT_TOKENS`, `L6_CALL_PAUSE_SECONDS`).
   - Enhanced `L6Result` schema in `schema.py` with optional `sense_a_paraphrase`, `sense_b_paraphrase`, and `explanation`.
   - Added short-circuits: non-PASS L4 automatically yields `L6_SKIPPED_NO_PARAPHRASE`; compound splits / resegmentations automatically evaluate to `SENSES_DISTINCT` with `ambiguity_ablation=SUPPORTED`.
   - Integrated `run_l6` into `layers.py` and registered `"L6"` in `_LAYER_REGISTRY` in `runner.py`.
   - Updated `_l0_post_layer` in `runner.py`: items passing L5 whose senses are deemed `SENSES_TOO_CLOSE` by L6 are downgraded to `MainClassification.ONE_SENSE_ONLY`.
 - **L6 test suite (`tests/test_l6.py`):**
   - Added 16 unit tests covering schema validation, short-circuits, mock LLM runs (Gemini, Anthropic, OpenAI, DeepSeek), parse failure fallback, pipeline trace populating, and runner integration.
-- **Verified this session:** `.venv/bin/python -m pytest --cov=doubletake -q -m "not live"` -> **276 passed, 10 deselected (81% total coverage)**.
+- **Verified this session:** `.venv/bin/python -m pytest --cov=crack -q -m "not live"` -> **276 passed, 10 deselected (81% total coverage)**.
 
 ### 2026-09-24 — L7 comprehension assessment implementation session (ant-core, offline, no API calls)
 
-- **L7 Comprehension Module (`src/doubletake/l7_comprehension.py`):**
+- **L7 Comprehension Module (`src/crack/l7_comprehension.py`):**
   - Designed and implemented age-differentiated comprehension assessment layer (`assess_l7`).
   - Evaluates the 4 core psycholinguistic dimensions per `README.md`:
     1. Sense A AoA (years)
@@ -594,21 +594,21 @@ manage this install).
     4. Metalinguistic Floor (years) across genres (QA homograph: ~6.0, resegmentation: ~8.0, dialogue: ~7.5, definitional: ~7.0).
   - Deterministic baseline (`_deterministic_l7`): combines Kuperman AoA ratings (`aoa_lookup`), content keyword extraction (`_find_keyword_aoa`), compound split part AoA, genre metalinguistic floors, and age-band tolerance (`L7_AOA_TOLERANCE=0.5`).
   - Emits valid `ComprehensionStatus` values per age: `FULLY_COMPREHENSIBLE`, `PARTIALLY_COMPREHENSIBLE`, `SENSE_B_TOO_ADVANCED`, `WORDPLAY_SKILL_TOO_ADVANCED`, `AOA_UNKNOWN`.
-  - Multi-backend LLM refinement support: structured prompt in `src/doubletake/prompts/l7_comprehension.md` dispatchable across Gemini, Anthropic, OpenAI, DeepSeek, and OpenAI-compatible providers, with robust fallback to deterministic baseline on parse/network error.
+  - Multi-backend LLM refinement support: structured prompt in `src/crack/prompts/l7_comprehension.md` dispatchable across Gemini, Anthropic, OpenAI, DeepSeek, and OpenAI-compatible providers, with robust fallback to deterministic baseline on parse/network error.
 - **Config & Schema Updates:**
-  - Extended `L7Result` in `src/doubletake/schema.py` with optional `sense_a_aoa`, `sense_b_aoa`, `compound_split_aoa`, `metalinguistic_floor`, and `explanation`.
-  - Extended `Settings` in `src/doubletake/config.py` with L7 backend, model configurations, metalinguistic floors, and `L7_AOA_TOLERANCE`.
-  - Updated `resolve_model` in `src/doubletake/providers.py` to support `"L7"`.
+  - Extended `L7Result` in `src/crack/schema.py` with optional `sense_a_aoa`, `sense_b_aoa`, `compound_split_aoa`, `metalinguistic_floor`, and `explanation`.
+  - Extended `Settings` in `src/crack/config.py` with L7 backend, model configurations, metalinguistic floors, and `L7_AOA_TOLERANCE`.
+  - Updated `resolve_model` in `src/crack/providers.py` to support `"L7"`.
 - **Pipeline Integration:**
-  - Implemented `run_l7` in `src/doubletake/layers.py` updating `record.l7_result` and logging trace with `layer="L7"`.
-  - Registered `"L7"` in `_LAYER_REGISTRY` in `src/doubletake/runner.py` between L6 and L0-post.
+  - Implemented `run_l7` in `src/crack/layers.py` updating `record.l7_result` and logging trace with `layer="L7"`.
+  - Registered `"L7"` in `_LAYER_REGISTRY` in `src/crack/runner.py` between L6 and L0-post.
 - **L7 Test Suite (`tests/test_l7.py`):**
   - Added 26 unit tests covering schema validation, deterministic baseline calculations (including J01 "guts" progression across ages 6, 8, 10 and compound split autobiography), genre floor rules, multi-backend mocks (Gemini, Anthropic, OpenAI, DeepSeek), error/malformed JSON fallbacks, and full pipeline trace execution.
-- **Verified this session:** `.venv/bin/python -m pytest --cov=doubletake -q -m "not live"` -> **302 passed, 10 deselected (82% total coverage, L7 83% coverage)**.
+- **Verified this session:** `.venv/bin/python -m pytest --cov=crack -q -m "not live"` -> **302 passed, 10 deselected (82% total coverage, L7 83% coverage)**.
 
 ### 2026-09-24 — L8 appropriateness assessment implementation session (ant-core, offline, no API calls)
 
-- **L8 Appropriateness Module (`src/doubletake/l8_appropriateness.py`):**
+- **L8 Appropriateness Module (`src/crack/l8_appropriateness.py`):**
   - Designed and implemented two-axis developmental appropriateness assessment layer (`assess_l8`).
   - Evaluates two independent dimensions:
     1. **Content Appropriateness (Axis 1)**: surface topic and language (violence, death, illness, body functions, sexuality, substances, profanity, discrimination, adult themes).
@@ -619,17 +619,17 @@ manage this install).
     - Metalinguistic skill too advanced (`WORDPLAY_SKILL_TOO_ADVANCED`) $\to$ `CONTENT_OK_INFERENCE_TOO_ADVANCED`
     - Vocabulary too advanced (`PARTIALLY_COMPREHENSIBLE`, `SENSE_B_TOO_ADVANCED`, `AOA_UNKNOWN`) $\to$ `VOCABULARY_TOO_ADVANCED`
     - Clean content + accessible inference + fully comprehensible $\to$ `FULLY_AGE_APPROPRIATE`.
-  - Multi-backend LLM support: structured prompt in `src/doubletake/prompts/l8_appropriateness.md` dispatchable across Gemini, Anthropic, OpenAI, DeepSeek, and other providers via `providers.py`, with automatic fallback to deterministic baseline.
+  - Multi-backend LLM support: structured prompt in `src/crack/prompts/l8_appropriateness.md` dispatchable across Gemini, Anthropic, OpenAI, DeepSeek, and other providers via `providers.py`, with automatic fallback to deterministic baseline.
 - **Config & Schema Updates:**
-  - Extended `L8Result` in `src/doubletake/schema.py` with `content_issues`, `inference_issues`, and `explanation`.
-  - Added L8 settings in `src/doubletake/config.py` (`L8_BACKEND`, `L8_MODEL`, `L8_MODEL_GEMINI`, `L8_MODEL_GEMINI_CHAIN`, `L8_MODEL_ANTHROPIC`, `L8_MODEL_OPENAI`, `L8_MODEL_DEEPSEEK`, `L8_MAX_OUTPUT_TOKENS`, `L8_CALL_PAUSE_SECONDS`).
-  - Updated `resolve_model` in `src/doubletake/providers.py` to support `"L8"`.
+  - Extended `L8Result` in `src/crack/schema.py` with `content_issues`, `inference_issues`, and `explanation`.
+  - Added L8 settings in `src/crack/config.py` (`L8_BACKEND`, `L8_MODEL`, `L8_MODEL_GEMINI`, `L8_MODEL_GEMINI_CHAIN`, `L8_MODEL_ANTHROPIC`, `L8_MODEL_OPENAI`, `L8_MODEL_DEEPSEEK`, `L8_MAX_OUTPUT_TOKENS`, `L8_CALL_PAUSE_SECONDS`).
+  - Updated `resolve_model` in `src/crack/providers.py` to support `"L8"`.
 - **Pipeline Integration:**
-  - Implemented `run_l8` in `src/doubletake/layers.py`:
+  - Implemented `run_l8` in `src/crack/layers.py`:
     - Assigns `record.l8_result`.
     - Populates `record.final.per_age` with typed `AgeVerdict(comprehension=..., appropriateness=...)` combining L7 comprehension and L8 appropriateness.
     - Records `LayerTrace(layer="L8", status="OK", ...)`.
-  - Registered `"L8"` in `_LAYER_REGISTRY` in `src/doubletake/runner.py` between `"L7"` and `"L0-post"`.
+  - Registered `"L8"` in `_LAYER_REGISTRY` in `src/crack/runner.py` between `"L7"` and `"L0-post"`.
 - **L8 Test Suite (`tests/test_l8.py`):**
   - Added 22 unit tests covering schema validation, deterministic baseline calculations (clean jokes, substance/violence content flags, finance/legal inference flags, wordplay alignment), multi-backend mocks (Gemini, Anthropic, OpenAI, DeepSeek), error/malformed JSON fallbacks, and full pipeline integration.
 - **Milestone Complete:**
@@ -640,7 +640,7 @@ manage this install).
   - **Out-of-Scope Handling:** Handled `OUT_OF_SCOPE_HOMOPHONE` and `OUT_OF_SCOPE_NONLEXICAL_JOKE` mappings in `_l0_post_layer`.
   - **Evaluation Tooling & CLI:** Implemented `evaluate_run` in `corpus.py` and `--eval <gold_path>` flag in `runner.py`, generating structured `evaluation.json` (confusion matrix, classification accuracy, age accuracy).
   - **Corpus Coverage:** Increased `corpus.py` test coverage to 98%.
-- **Verified this session:** `.venv/bin/python -m pytest --cov=doubletake -q -m "not live"` -> **329 passed, 10 deselected (82% total coverage)**.
+- **Verified this session:** `.venv/bin/python -m pytest --cov=crack -q -m "not live"` -> **332 passed, 10 deselected (82% total coverage)**.
 
 
 

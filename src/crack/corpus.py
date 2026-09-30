@@ -7,7 +7,15 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from .enums import Genre, MainClassification
+from .enums import (
+    AgeAppropriatenessVerdict,
+    ComprehensionStatus,
+    Genre,
+    MainClassification,
+)
+
+_COMPREHENSION_STATUSES = frozenset({e.value for e in ComprehensionStatus})
+_APPROPRIATENESS_STATUSES = frozenset({e.value for e in AgeAppropriatenessVerdict})
 
 
 @dataclass
@@ -199,7 +207,13 @@ def evaluate_run(
             if age_actual:
                 appr = age_actual.get("appropriateness")
                 comp = age_actual.get("comprehension")
-                if expected in (appr, comp):
+                if expected in _COMPREHENSION_STATUSES:
+                    if comp == expected:
+                        correct_age_evals += 1
+                elif expected in _APPROPRIATENESS_STATUSES:
+                    if appr == expected:
+                        correct_age_evals += 1
+                elif expected in (appr, comp):
                     correct_age_evals += 1
 
     return {
