@@ -1,554 +1,137 @@
-# CRACK: Computational Resolution & Anchoring of Comedy & Knowledge
+# CRACK
 
 [![Version: v1.0.0](https://img.shields.io/badge/version-v1.0.0-blue.svg)](https://github.com/Jyz922/Crack/releases/tag/v1.0.0)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests: Passing](https://img.shields.io/badge/tests-332%20passed-brightgreen.svg)](tests/)
-[![SemEval-2017 F1: 87.8%](https://img.shields.io/badge/SemEval--2017%20F1-87.8%25%20(SOTA)-blueviolet.svg)](#1-semeval-2017-task-7-full-2250-official-items)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+**CRACK** (Computational Resolution & Anchoring of Comedy & Knowledge) is a research prototype for analyzing English wordplay. It combines lexical resources such as WordNet and age-of-acquisition data with optional LLM judgments. For each input, it can identify a likely ambiguous word, record text spans supporting the readings, assess the joke's resolution, and estimate comprehension and appropriateness for requested ages.
+
+CRACK focuses on homographic wordplay (one spelling with multiple meanings) and compound resegmentation. It does not aim to recognize every kind of humor. Its LLM judgments can vary by provider and model; age and safety outputs are estimates, not validated child-safety guarantees.
 
 <p align="center">
-  <img src="assets/demo.gif" alt="CRACK Interactive Web UI Demo" width="100%">
-</p>
-<p align="center">
-  <sub>🎥 Prefer high-definition video with controls? <a href="https://github.com/user-attachments/assets/c50578f7-0c83-4516-a4c1-d3e854414c03"><b>Watch the full 1080P video walkthrough</b></a></sub>
+  <img src="assets/demo.gif" alt="CRACK interactive analysis interface" width="100%">
 </p>
 
-**CRACK** is an open-source **neuro-symbolic humor analysis and developmental appropriateness engine**. Designed to overcome the pervasive issues of "humor hallucination" in pure Large Language Models (LLMs), CRACK pairs deterministic lexical ontologies (WordNet 3.0, SemCor sense frequencies, Kuperman Age-of-Acquisition) with schema-constrained LLM inference.
+## How the pipeline works
 
-CRACK automatically detects homographic wordplay and compound splits, extracts verbatim context spans anchoring dual meanings, tests form-specific semantic incongruity resolution, and evaluates target-age comprehension and child-safety appropriateness across ages 6 to 12.
+The pipeline is named L0–L8. L0 runs before and after the analysis stages: it validates the input and assigns the final classification.
 
----
+| Stage | What it does |
+|---|---|
+| L0 | Checks input and supported wordplay scope; assigns the final class. |
+| L1 | Tokenizes the text and selects a genre branch. |
+| L2 | Retrieves WordNet senses, SemCor frequency data, and available AoA values. |
+| L3 | Ranks ambiguous-word and compound-split candidates. |
+| L4 | Uses an LLM to assess whether distinct readings are supported by text spans. |
+| L5 | Assesses whether the setup and punchline form a coherent resolution. |
+| L6 | Checks whether the proposed senses are meaningfully distinct. |
+| L7 | Estimates comprehension for each requested age using AoA data and heuristics. |
+| L8 | Separately estimates surface-content and inference-related appropriateness. |
 
-## 🏆 Benchmark Performance & SOTA Results
+Stages may stop early when a required condition fails. Typed output schemas make results easier to inspect, but do not guarantee that a model judgment is correct.
 
-CRACK establishes new state-of-the-art benchmarks on both **gold-standard academic humor datasets** (SemEval-2017 Task 7) and **developmental child-directed humor corpora** without requiring task-specific fine-tuning:
+See [ARCHITECTURE.md](ARCHITECTURE.md) for implementation details.
 
-### 1. SemEval-2017 Task 7 (Full 2,250 Official Items)
+## Installation
 
-Evaluated on the full test set of **SemEval-2017 Task 7: Detection and Interpretation of English Puns** (1,607 positive homographic pun jokes + 643 negative controls, including proverbs and literal sentences).
-
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/benchmark-leaderboard-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="assets/benchmark-leaderboard-light.svg">
-    <img src="assets/benchmark-leaderboard-light.svg" alt="SemEval-2017 Task 7 Benchmark SOTA Leaderboard" width="100%">
-  </picture>
-</p>
-
-#### Modern Frontier LLM & Knowledge-Graph SOTA Leaderboard (2024–2026)
-
-Recently published in **EMNLP 2026** ([Su et al., arXiv:2609.16557](https://arxiv.org/abs/2609.16557), Table 1), the gold-standard SemEval-2017 benchmark was comprehensively evaluated across the current generation of proprietary frontier LLMs, open-weight reasoning models, and retrieval-augmented knowledge graph architectures on Homographic Pun detection:
-
-| Rank | Model / Framework | Architecture & Paradigm | Source / Venue | Detection Acc | Pun F1 | Key Characteristics & Hallucination Defense |
-|:---:|---|---|---|:---:|:---:|---|
-| 👑 | **CRACK (Ours)** | **Neuro-Symbolic + gpt-6-luna** | This Work (2026) | **82.84%** | **87.82%** | **Dual High Acc & F1**: L4 verbatim dual quotes prevent humor hallucination on negative controls |
-| 2 | **GPT-4o** [^1] | Frontier Proprietary LLM (Zero-shot) | Hurst et al. (2024) | **76.27%** | **87.35%** | Strong general semantics; unconstrained generation confabulates secondary senses on non-jokes |
-| 3 | **PunGraph-Qwen-3.5-27B** [^2] | Retrieval-Enhanced Knowledge Graph | Su et al. (EMNLP 2026) | **76.18%** | **85.71%** | WordNet graph candidate retrieval restricts LLM decision space |
-| 4 | **Gemini-2.0 Flash** [^3] | High-Throughput Reasoning LLM | Google DeepMind (2025) | **71.08%** | **84.56%** | High inference throughput; lower precision under nuanced lexical polysemy |
-| 5 | **PunGraph-Llama4-Maverick** [^2] | Retrieval-Enhanced Knowledge Graph | Su et al. (EMNLP 2026) | **71.80%** | **83.43%** | Phonetic-semantic graph augmentation on open-weight backbone |
-| 6 | **Qwen-3.5-27B** [^4] | Open-Weight LLM (Direct Prompting) | Qwen Team (2026) | **68.95%** | **83.20%** | Unconstrained direct generation baseline |
-| 7 | **Duluth** [^5] | Feature-based Ensemble | Miller et al. (SemEval 2017) | **73.64%** | **82.54%** | Official Shared Task Winner (Historical Baseline) |
-| 8 | **DeepSeek-V3.2** [^6] | Mixture-of-Experts (MoE) LLM | DeepSeek-AI (2025) | **66.26%** | **82.12%** | High generative fluency; accuracy penalized by over-identifying puns in literal sentences |
-| 9 | **Llama4-Maverick** [^7] | Open-Weight LLM (Direct Prompting) | Meta (2025) | **66.26%** | **82.00%** | Raw baseline without external graph grounding |
-| 10 | **Fermi** [^5] | Word Sense Overlap (WSD) | SemEval-2017 | — | **77.65%** | Official Shared Task Rank #2 |
-| 11 | **MiniCPM-8.7B** [^8] | Edge-scale Lightweight LLM | Hu et al. (2024) | **40.71%** | **66.64%** | Parameter-constrained; fails to resolve dual lexical contexts |
-| 12 | **Qwen-2.5-7B** [^9] | Open-Weight Lightweight LLM | Qwen et al. (2024) | **34.65%** | **62.42%** | Frequent confabulation on polysemous candidates |
-| 13 | **ReKG-MCTS** [^10] | Monte Carlo Tree Search + KG | Song et al. (ACL 2025) | **22.11%** | **48.41%** | Factual path-traversal fails to capture rhetorical wordplay incongruity |
-| 14 | **GCR** [^11] | Graph-Constrained Reasoning | Luo et al. (2024) | **43.04%** | **37.19%** | Lacks dedicated rhetorical/pun dual-sense graph paths |
-
-> **Leaderboard Provenance & Verified Literature Citations:**  
-> [^1]: A. Hurst et al. 2024. *GPT-4o System Card*. [arXiv:2410.21276](https://arxiv.org/abs/2410.21276). Evaluated in Su et al. (2026), Table 1.  
-> [^2]: Yuchen Su, Shanshan Zhong, Yicheng Zhu, Rui Wang, Zhenghua Huang, Qi Wang, Ning Zhao, Diana Benavides-Prado, and Michael Witbrock. 2026. *PunGraph: Retrieval-Enhanced Phonetic-Semantic Graph Reasoning for Pun Understanding*. In *Proceedings of EMNLP 2026*. [arXiv:2609.16557](https://arxiv.org/abs/2609.16557), Table 1.  
-> [^3]: Google DeepMind. 2025. *Gemini 2.0 Flash Model Card*. Technical report. Evaluated in Su et al. (2026), Table 1.  
-> [^4]: Qwen Team. 2026. *Qwen3.5: Towards Native Multimodal Agents*. Evaluated in Su et al. (2026), Table 1.  
-> [^5]: Tristan Miller, Christian F. Hempelmann, and Iryna Gurevych. 2017. *SemEval-2017 Task 7: Detection and Interpretation of English Puns*. In *Proceedings of SemEval-2017*, pages 58–68. [DOI: 10.18653/v1/S17-2007](https://aclanthology.org/S17-2007/).  
-> [^6]: DeepSeek-AI. 2025. *DeepSeek-V3.2: Pushing the Frontier of Open Large Language Models*. Evaluated in Su et al. (2026), Table 1.  
-> [^7]: Meta. 2025. *Llama 4 Model Card*. Evaluated in Su et al. (2026), Table 1.  
-> [^8]: Shengding Hu et al. 2024. *MiniCPM: Unveiling the Potential of Small Language Models with Scalable Training Strategies*. [arXiv:2404.06395](https://arxiv.org/abs/2404.06395). Evaluated in Su et al. (2026), Table 1.  
-> [^9]: An Yang et al. 2024. *Qwen2.5 Technical Report*. [arXiv:2412.15115](https://arxiv.org/abs/2412.15115). Evaluated in Su et al. (2026), Table 1.  
-> [^10]: Xintao Song, Shanshan Zhang, and Tao Yu. 2025. *ReKG-MCTS: Reinforcing LLM Reasoning on Knowledge Graphs via Training-Free Monte Carlo Tree Search*. In *Findings of the Association for Computational Linguistics: ACL 2025*, pages 9288–9306. Evaluated in Su et al. (2026), Table 1.  
-> [^11]: Linhao Luo et al. 2024. *Graph-Constrained Reasoning: Faithful Reasoning on Knowledge Graphs with Large Language Models*. [arXiv:2410.13080](https://arxiv.org/abs/2410.13080). Evaluated in Su et al. (2026), Table 1.
-
-#### Historical Shared Task Participants (SemEval-2017 Official)
-
-| System / Model | Architecture Type | Subtask 1: Detection Acc | Subtask 1: Pun F1 | Subtask 2: Location Acc | Notes |
-|---|---|:---:|:---:|:---:|---|
-| **Duluth** *(Miller et al., 2017)* | Specialized Feature-based | 73.64% | 82.54% | 66.83% | **SemEval-2017 Official Shared Task Winner** |
-| **Fermi** *(2017)* | Word Sense / WSD Overlap | — | 77.65% | 52.15% | Official Participant (Rank #2 in F1) |
-| **IdiomSavvy** *(2017)* | Idiom & Sense Scoring | 58.00% | 68.61% | 48.23% | Official Participant |
-| **UW-Stanford** *(2017)* | Statistical Language Modeling | 57.29% | 66.37% | 44.56% | Official Participant |
-| **UWatER** *(2017)* | Mutual Information / N-gram | 54.31% | 64.63% | 43.12% | Official Participant |
-| **ECNU** *(2017)* | Neural / Lexical Classifier | 52.09% | 62.48% | 41.51% | Official Participant |
-| **CRACK (Ours)** | **Neuro-Symbolic + gpt-6-luna** | **82.84%** *(+9.2%)* | **87.82%** *(+5.3%)* | **76.35%** *(+9.5%)* | **Zero-shot + Symbolic Grounding (WordNet + L4 Quotes)** |
-
-> **Official Benchmark Citation:**  
-> Tristan Miller, Christian F. Hempelmann, and Iryna Gurevych. 2017. **SemEval-2017 Task 7: Detection and Interpretation of English Puns**. In *Proceedings of the 11th International Workshop on Semantic Evaluation (SemEval-2017)*, pages 58–68, Vancouver, Canada. Association for Computational Linguistics. [DOI: 10.18653/v1/S17-2007](https://aclanthology.org/S17-2007/)
-
-#### Comparison with Supervised Deep Learning SOTA (Zou & Lu, NAACL 2019)
-
-Beyond the original shared task participants, post-competition research introduced supervised neural sequence labeling systems trained directly on labeled pun splits. The recognized peer-reviewed benchmark is the supervised joint BiLSTM-CRF model by **Zou & Lu (NAACL 2019)**:
-
-| System / Model | Paradigm | Training Data Required | Subtask 1: Detection F1 | Subtask 2: Location Acc / F1 | Interpretability & Child Safety |
-|---|---|:---:|:---:|:---:|---|
-| **Zou & Lu (NAACL 2019)** | Supervised Joint BiLSTM-CRF | **Yes** (thousands of labeled pun pairs) | **92.19%** | **80.19%** (F1) | Black-box token tags; no grounding quotes or safety analysis |
-| **CRACK (Ours)** | **Zero-Shot Neuro-Symbolic** | **Zero (0)** (No task-specific fine-tuning) | **87.82%** | **76.35%** (Top-1 Acc)<br>*(86.50% Top-3)* | Verbatim dual quotes, WordNet synset grounding, AoA developmental scoring, and dual-axis child safety |
-
-> **Supervised Benchmark Citation:**  
-> Yanyan Zou and Wei Lu. 2019. **Joint Detection and Location of English Puns**. In *Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 1 (Long and Short Papers)*, pages 2117–2123, Minneapolis, Minnesota. Association for Computational Linguistics. [DOI: 10.18653/v1/N19-1218](https://aclanthology.org/N19-1218/)
-
-**Key Architectural Distinction:**  
-- **Supervised models (Zou & Lu)** require extensive hand-annotated pun training data and perform sequence tagging without lexical explanation or developmental calibration.  
-- **CRACK operates purely zero-shot**: with zero fine-tuning data, it surpasses all official SemEval-2017 competition systems, while generating structured causal explanations (verbatim textual quotes grounding both meanings), age-appropriateness ratings, and surface content toxicity checks.
-
-#### Detailed Dual-Task Metrics (`gpt-6-luna` / OpenAI Backend)
-
-Evaluated across all 2,250 items with 10-worker multi-threaded concurrency (total run time: ~80 minutes):
-
-| Task & Metric | CRACK Score | Sample Breakdown | Details |
-|---|:---:|:---:|---|
-| **Subtask 1: Pun Detection (Accuracy)** | **82.84%** | 1,864 / 2,250 | Overall binary classification accuracy |
-| **Subtask 1: Pun Precision** | **89.11%** | 1,391 / 1,561 | Minimizes false-positive humor hallucinations |
-| **Subtask 1: Pun Recall** | **86.56%** | 1,391 / 1,607 | Captures true homographic double entendres |
-| **Subtask 1: Pun F1-Score** | **87.82%** | — | Harmonic mean of pun detection precision & recall |
-| **Negative Control Specificity** | **73.56%** | 473 / 643 | Rejects ordinary non-joke statements & proverbs |
-| **Subtask 2: Top-1 Pun Location Accuracy** | **76.35%** | 1,227 / 1,607 | Exactly pinpoints the target pun word at rank #1 |
-| **Subtask 2: Top-3 Pun Location Coverage** | **86.50%** | 1,390 / 1,607 | Target pun word present within Top-3 candidate ranking |
-
-*Note on Reproducibility:* The full per-item JSON trace log (~50 MB raw output) is excluded from Git to prevent repository bloat, while the summary metrics report is preserved at [`runs/semeval_subtask_report.json`](runs/semeval_subtask_report.json) and can be regenerated on demand via `python scripts/prepare_semeval.py`.
-
----
-
-### 2. Assignment Evaluation Corpus (60 Texts: 25 Jokes, 25 De-Joked Pairs, 10 Non-Jokes)
-
-The repository provides a curated, balanced evaluation set (`corpus/joke_corpus_gold.jsonl` & `corpus/joke_corpus_blind.jsonl`) strictly conforming to the 50–60 texts course assignment specification:
-- **25 Positive Wordplay Jokes (`J01`–`J25`)**: Homograph riddles, definitional one-liners, and dialogue wordplay.
-- **25 Minimal-Pair De-Joked Controls (`D01`–`D25`)**: Exactly matched 1:1 counterparts where wordplay is resolved or removed to test specificity against hallucination.
-- **10 Definite Non-Jokes (`N01`–`N10`)**: Unambiguous factual declarative sentences (news, science, everyday statements).
-
-| Metric | CRACK Score | Details |
-|---|---|---|
-| **Classification Accuracy** | **88.3%** | 53 / 60 items correctly classified (`runs/course_corpus_eval.json`) |
-| **Developmental Age Verdict Match** | **69.4%** | 125 / 180 age evaluations across Ages 6, 8, 10, 12 (unbiased metric) |
-| **Negative Control Specificity** | **88.6%** | Correctly rejects 31 / 35 negative controls as `ONE_SENSE_ONLY` |
-| **Per-Item Audit Records** | **100% Verifiable** | Full per-item predictions committed at [`runs/course_corpus_records.jsonl`](runs/course_corpus_records.jsonl) |
-| **Test Suite Coverage** | **100% Pass** | 332 automated tests passing |
-
----
-
-## Table of Contents
-
-- [Benchmark Performance & SOTA Results](#-benchmark-performance--sota-results)
-  - [SemEval-2017 Task 7 (Full 2,250 Items)](#1-semeval-2017-task-7-full-2250-official-items)
-    - [Modern Frontier LLM & Knowledge-Graph SOTA Leaderboard (2024–2026)](#modern-frontier-llm--knowledge-graph-sota-leaderboard-20242026)
-    - [Historical Shared Task Participants (SemEval-2017 Official)](#historical-shared-task-participants-semeval-2017-official)
-    - [Supervised Deep Learning SOTA (Zou & Lu, NAACL 2019)](#comparison-with-supervised-deep-learning-sota-zou--lu-naacl-2019)
-  - [Assignment Evaluation Corpus (60 Texts)](#2-assignment-evaluation-corpus-60-texts-25-jokes-25-de-joked-pairs-10-non-jokes)
-- [The Challenge: Why Humor AI Fails](#the-challenge-why-humor-ai-fails)
-- [Key Features](#key-features)
-- [Architecture Overview](#architecture-overview)
-- [The 8-Layer Pipeline (L0–L8)](#the-8-layer-pipeline-l0l8)
-- [Pipeline Taxonomy & Output Enums](#pipeline-taxonomy--output-enums)
-- [Supported Model Providers](#supported-model-providers)
-- [Quick Start](#quick-start)
-  - [Installation](#installation)
-  - [Interactive Web UI](#interactive-web-ui-demo)
-  - [API Keys Configuration](#api-keys-configuration)
-  - [CLI Usage](#cli-usage)
-  - [Python SDK Usage](#python-sdk-usage)
-  - [Reproducing Benchmark Results](#reproducing-benchmark-results)
-- [Repository Structure](#repository-structure)
-- [Roadmap & Planned Benchmarks](#roadmap--planned-benchmarks)
-- [License & Citation](#license--citation)
-
----
-
-## The Challenge: Why Humor AI Fails
-
-State-of-the-art LLMs struggle with humor verification for two primary reasons:
-1. **Humor Hallucination (False Positives)**: Prompting an LLM to explain why an ordinary sentence is funny often causes it to invent far-fetched, ungrounded secondary meanings (pareidolia). For example, in *"The dog barked in the yard"*, an unconstrained LLM might hallucinate a pun on tree bark.
-2. **Ungrounded Punchlines (False Negatives)**: Models frequently classify a riddle as funny without verifying whether both meanings are contextually grounded in the text, or fail to assess whether the punchline resolves the incongruity.
-
-**CRACK solves this through a hybrid neuro-symbolic design**:
-- **Symbolic Foundation**: WordNet 3.0 synsets, SemCor sense frequencies, and Kuperman Age-of-Acquisition (AoA) data establish strict lexical reality before any LLM is called.
-- **Constrained LLM Inference**: Prompt schemas enforce verbatim textual quote alignment (`sense_a_anchor_quote`, `sense_b_anchor_quote`). If two distinct contexts cannot be quoted, the sentence is rejected early as `ONE_SENSE_ONLY`.
-- **Genre-Specific Incongruity Calibration**: Form-dependent tests verify semantic polarity, causal fit, and directionality across Q&A riddles, definitional one-liners, dialogues, and declaratives.
-
----
-
-## Key Features
-
-- **Neuro-Symbolic Lexical Anchoring**: Merges symbolic lexical search with modern reasoning models to guarantee grounded double entendres.
-- **Multi-Genre Semantic Resolution**: Specialized resolution verifiers for:
-  - `QA_RIDDLE` (Question-answer riddles)
-  - `DEFINITIONAL_ONELINER` (Witty single-line definitions)
-  - `DIALOGUE_MISUNDERSTANDING` (Cross-speaker semantic divergence)
-  - `DECLARATIVE` (Single-sentence double entendre narratives)
-- **Developmental Comprehension Modeling (L7)**: Quantifies lexical and metalinguistic comprehension thresholds using empirical Age-of-Acquisition (AoA) distributions (ages 6–12).
-- **Two-Axis Appropriateness Assessment (L8)**: Separates **Surface Content Safety** (violence, profanity, adult themes) from **Inferential Complexity** (financial, legal, or abstract adult knowledge).
-- **Multi-Provider LLM Engine**: Native support for **OpenAI** (`gpt-6-luna`, `gpt-4o`, `o1/o3`), **Google Gemini** (`gemini-2.5-flash`, `gemini-1.5-pro`), and **Anthropic** (`claude-3-7-sonnet`), plus local OpenAI-compatible endpoints.
-- **Enterprise-Grade Performance**: Early short-circuiting saves up to 70% of downstream LLM tokens by terminating negative controls at L4.
-
----
-
-## Architecture Overview
-
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/architecture-diagram-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="assets/architecture-diagram-light.svg">
-    <img src="assets/architecture-diagram-light.svg" alt="CRACK Neuro-Symbolic 8-Layer Pipeline Architecture" width="100%">
-  </picture>
-</p>
-
----
-
-## The 8-Layer Pipeline (L0–L8)
-
-### L0 — Scope Boundary Gate
-Enforces strict lexical humor criteria.
-- **Accepted Mechanisms**: Homographic lexical ambiguity (same spelling, divergent meanings) and compound resegmentations (`auto + biography`).
-- **Excluded Mechanisms**: Heterographic homophones (`knight` / `night`), phonological rhyming jokes, purely absurdist narratives, or sarcasm lacking lexical ambiguity.
-
-### L1 — Surface Analysis & Genre Routing
-Applies deterministic syntax parsing (regex tokenization, lemmatization, question markers, dialogue turn detection). Routes inputs to their respective semantic branch:
-- `QA_RIDDLE`: Question-answer structures (*"Why did the..."*).
-- `DEFINITIONAL_ONELINER`: Definitional statements (*"Autobiography: when your car..."*).
-- `DIALOGUE_MISUNDERSTANDING`: Turn-taking conversations between two speakers.
-- `DECLARATIVE`: Self-contained narrative statements (*"The mouse near the computer attracted the cat."*).
-
-### L2 — Symbolic Sense Retrieval
-Retrieves grounded dictionary senses from **WordNet 3.0** and frequencies from **SemCor**. Incorporates a multi-stage **Age-of-Acquisition (AoA)** join (exact surface match $\to$ lowercase $\to$ lemmatized $\to$ pertainym adjective $\to$ compound split parts) based on Kuperman et al. (2012).
-
-### L3 — Ambiguity Site Candidate Ranking
-Ranks potential wordplay candidates without age bias:
-$$\text{Score} = 0.70 \times \text{Contrast} + 0.30 \times \text{Balance}$$
-- **Contrast**: Indicates whether two candidate senses span different WordNet lexicographer files (`lexname`).
-- **Balance**: Frequency ratio between top senses ($\frac{c_2 + 1}{c_1 + 1}$).
-- Top-K windowing (default: 8) passes the strongest candidates downstream to L4.
-
-### L4 — Bidirectional Sense Anchoring (LLM)
-Grounds the candidate in the sentence text. Requires the LLM to provide verbatim, non-overlapping substring quotes for `sense_a_anchor_quote` and `sense_b_anchor_quote`.
-- If both meanings are active and supported by context $\to$ `PASS`.
-- If only one meaning is supported (or context is ordinary) $\to$ `ONE_SENSE_ONLY` (short-circuiting L5–L8).
-- If the wordplay cannot be grounded $\to$ `FAIL`.
-
-### L5 — Genre-Calibrated Semantic Incongruity Resolution
-Evaluates whether the secondary sense completes the comedic incongruity resolution:
-- **QA Riddles**: Weighted score over Answer Relevance (0.25), Polarity & Event Direction Fit (0.45), Causal Fit (0.15), Agent Compatibility (0.10), and Tense-Aspect Fit (0.05).
-- **Definitional**: Conventional setup reading vs. resegmented punchline reading.
-- **Dialogue**: Speaker A intention vs. Speaker B mismatch resolution.
-- **Declarative**: Contextual juxtaposition coherence.
-
-### L6 — Sense-Distinctness & Lexical Granularity Check
-Prevents polysemous overfitting where WordNet lists trivial sense nuances. Performs single-sense paraphrase ablation to confirm that Sense A and Sense B are mutually distinct in context (`SENSES_DISTINCT` vs. `SENSES_TOO_CLOSE`).
-
-### L7 — Developmental Comprehension Assessment
-Evaluates whether an individual of the target age can understand the joke:
-- Compares Sense A and Sense B AoA estimates against target age.
-- Assesses metalinguistic comprehension floor (e.g., understanding that words can have double meanings).
-- Verdicts: `FULLY_COMPREHENSIBLE`, `PARTIALLY_COMPREHENSIBLE`, `SENSE_B_TOO_ADVANCED`, `WORDPLAY_SKILL_TOO_ADVANCED`.
-
-### L8 — Two-Axis Appropriateness Assessment
-Independently analyzes two safety and developmental axes:
-1. **Surface Content Appropriateness**: Flags violence, death, illness, substances, profanity, sexuality, and adult themes.
-2. **Inferential Appropriateness**: Flags jokes requiring adult professional knowledge (e.g. mortgage amortization, divorce legalities) or mature political symbolism.
-
-### Pipeline Taxonomy & Output Enums
-
-Every stage in the CRACK pipeline emits strictly typed enumerated verdicts, guaranteeing reproducible downstream decisions and zero unstructured parsing ambiguities:
-
-| Pipeline Stage / Scope | Enum Type | Allowed Status Values & Semantic Meaning |
-|---|---|---|
-| **Scope Filtering** | `ScopeLabel` | `HOMOGRAPH` (accepted lexical pun), `COMPOUND_SPLIT` (accepted morphological split), `OUT_OF_SCOPE_HOMOPHONE` (sound-alike pun excluded), `OUT_OF_SCOPE_NONLEXICAL_JOKE` (non-punning humor), `NO_SCOPE_MECHANISM` (no wordplay found) |
-| **Genre Classification (L1)** | `Genre` | `QA_RIDDLE`, `DEFINITIONAL_ONELINER`, `DIALOGUE_MISUNDERSTANDING`, `DECLARATIVE` |
-| **Sense Anchoring (L4)** | `AnchoringStatus` | `PASS` (both senses anchored in text), `FAIL` (anchoring rejected), `ONE_SENSE_ONLY` (only one sense supported by context) |
-| **Anchoring Structural Relation** | `AnchorRelation` | `separate_contexts` (independent textual clauses), `resegmentation` (sub-word token split), `speaker_mismatch` (dialogue turn misinterpretation) |
-| **Semantic Resolution (L5)** | `ResolutionStatus` | `RESOLUTION_PASS` (incongruity resolved), `RESOLUTION_FAIL` (logic collapses), `INSUFFICIENT_CONTEXT` (context too sparse to resolve) |
-| **Sense Distinctness (L6)** | `DistinctnessStatus` | `SENSES_DISTINCT` (different concepts), `SENSES_TOO_CLOSE` (trivial polysemy), `L6_SKIPPED_NO_PARAPHRASE` (no paraphrase available) |
-| **Ambiguity Ablation (L6)** | `AmbiguityAblation` | `SUPPORTED` (disambiguated rewrite confirmed), `UNSUPPORTED`, `SKIPPED` |
-| **Developmental Comprehension (L7)** | `ComprehensionStatus` | `FULLY_COMPREHENSIBLE`, `PARTIALLY_COMPREHENSIBLE`, `SENSE_B_TOO_ADVANCED`, `WORDPLAY_SKILL_TOO_ADVANCED`, `AOA_UNKNOWN` |
-| **Developmental Verdict (L8)** | `AgeAppropriatenessVerdict` | `FULLY_AGE_APPROPRIATE`, `CONTENT_OK_INFERENCE_TOO_ADVANCED`, `VOCABULARY_TOO_ADVANCED`, `CONTENT_NOT_APPROPRIATE` |
-| **Final Classification** | `MainClassification` | `VALID_HOMOGRAPH_JOKE`, `VALID_COMPOUND_SPLIT_JOKE`, `NO_AMBIGUITY_FOUND`, `ONE_SENSE_ONLY`, `ANCHORING_FAIL`, `RESOLUTION_FAIL`, `SENSES_TOO_CLOSE`, `OUT_OF_SCOPE_HOMOPHONE`, `OUT_OF_SCOPE_NONLEXICAL_JOKE` |
-
----
-
-## Supported Model Providers
-
-CRACK includes zero-shot structured-output connectors for all major frontier providers:
-
-| Provider | Supported Models | Config Flag / Env Var | Notes |
-|---|---|---|---|
-| **OpenAI** | `gpt-6-luna` (default), `gpt-4o`, `o1`, `o3` | `--backend openai`<br>`OPENAI_API_KEY` | Native `max_completion_tokens` support; automatic temperature omission for reasoning models. |
-| **Google Gemini** | `gemini-3.6-flash`, `gemini-3.8-flash` | `--backend gemini`<br>`GEMINI_API_KEY` | High-throughput structured JSON schema generation. |
-| **Anthropic** | `claude-sonnet-5`, `claude-3-5-haiku` | `--backend anthropic`<br>`ANTHROPIC_API_KEY` | Tool-use / JSON schema output. |
-| **DeepSeek & Local** | `deepseek-chat`, vLLM, Ollama | `--backend deepseek`<br>`DEEPSEEK_API_KEY` | Fully OpenAI-compatible client integration. |
-
----
-
-## Quick Start
-
-### Installation
-
-Clone the repository and install dependencies in an isolated virtual environment:
+Use Python 3.11 or later:
 
 ```bash
 git clone https://github.com/Jyz922/Crack.git
 cd Crack
-
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e .
 ```
 
-To run tests:
+CRACK needs an API key for the selected LLM provider. Copy `.env.example` to `.env`, then set the provider key and, if needed, `DOUBLETAKE_BACKEND` (`openai`, `gemini`, `anthropic`, or `deepseek`). You can also pass a provider with `--backend`.
+
+Analyze one text:
+
 ```bash
-pip install -e ".[test]"
-pytest tests/ -q -m "not live"
+crack --text "Why don't skeletons fight? Because they have no guts." --age 8 --backend openai
 ```
 
-### Interactive Web UI Demo
-
-To launch the interactive visual analysis dashboard with real-time laser scanning:
+The interactive web interface is optional:
 
 ```bash
 pip install -e ".[web]"
 crack --serve
-# or
-python -m crack.serve --port 8000
 ```
 
-Open [http://127.0.0.1:8000](http://127.0.0.1:8000) in your browser.
+## Evaluation data and reported results
 
-#### Cloud Deployment (1-Click on Render)
+### SemEval-2017 Task 7
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Jyz922/Crack)
+The repository includes the homographic test split: 2,250 items, comprising 1,607 annotated puns and 643 non-puns. The conversion script downloads the official task archive and creates separate blind-input and gold-label files. See the [task paper](https://aclanthology.org/S17-2005/) and the [official results and data page](https://alt.qcri.org/semeval2017/task7/index.php?id=results).
 
-### API Keys Configuration
+The committed summary reports the following detection results:
 
-Create a `.env` file in the project root:
+| Metric | Reported value | Count |
+|---|---:|---:|
+| Accuracy | 82.84% | 1,864 / 2,250 |
+| Precision | 89.11% | 1,391 / 1,561 predicted puns |
+| Recall | 86.56% | 1,391 / 1,607 annotated puns |
+| F1 | 87.82% | Derived from the precision and recall above |
+| Correctly rejected non-puns (`ONE_SENSE_ONLY`) | 73.56% | 473 / 643 |
 
-```bash
-# Choose your preferred provider(s)
-OPENAI_API_KEY="sk-..."
-# GEMINI_API_KEY="AIza..."
-# ANTHROPIC_API_KEY="sk-ant-..."
+These are **reported local-run results, not an independently verified leaderboard claim**. The classification counts and metric arithmetic match the locally available per-item run file. That roughly 50 MB file and its run metadata are ignored by Git, so a clean checkout contains only the summary, not the records needed to verify the model calls. The saved metadata identifies the OpenAI backend but does not pin every model/configuration field. The previous location scores are omitted because the reported top-1 and top-3 counts do not reproduce from the saved L3 candidate lists with the documented ranking. See [the benchmark audit](docs/benchmark_audit.md) for details.
 
-# Optional defaults
-CRACK_BACKEND="openai"
-CRACK_MODEL="gpt-6-luna"
-```
+No state-of-the-art claim is made. Results from other papers are not directly comparable unless the task, split, labels, and metric are the same. In particular, pun-sense interpretation scores should not be presented as pun-detection scores.
 
-### CLI Usage
+### Project-curated corpus
 
-#### 1. Interactive Single Joke Analysis
+`corpus/joke_corpus_blind.jsonl` and `corpus/joke_corpus_gold.jsonl` contain 60 project-curated items: 25 positive wordplay examples and 35 `ONE_SENSE_ONLY` controls (25 de-joked examples and 10 ordinary statements). The labels and age judgments are project annotations; the repository does not include an annotator agreement study.
 
-Analyze any text directly from the terminal across one or more target ages:
+The existing 53/60 result is **not a valid score for the current 60 texts**: four records were copied from another item's output, and eight saved predictions refer to different text than the current corpus. The README therefore does not report an overall accuracy for this corpus. See [the benchmark audit](docs/benchmark_audit.md) and [annotation guidelines](corpus/annotation_guidelines.md).
 
-```bash
-crack --text "Why don't skeletons fight each other? Because they have no guts." --age 8
-```
+## Reproduce a run
 
-Output:
-```text
-=== CRACK Analysis Summary ===
-Item ID:        CLI_INPUT
-Input Text:     Why don't skeletons fight each other? Because they have no guts.
-Genre:          QA_RIDDLE
-Ambiguous Term: guts
-Anchor Status:  PASS
-  • Sense A: internal organs or viscera (anchor: "skeletons")
-  • Sense B: courage or fortitude (anchor: "fight each other")
-Resolution:     RESOLUTION_PASS (score: 0.950)
-Classification: VALID_HOMOGRAPH_JOKE
-Confidence:     0.950
+To rebuild the SemEval files from the official archive and evaluate a fresh run, configure a provider API key first:
 
---- Developmental Assessment ---
-Age 8:
-  • Comprehension:   FULLY_COMPREHENSIBLE
-  • Age Verdict:     FULLY_AGE_APPROPRIATE
-```
-
-#### 2. Negative Control Rejection (Anti-Joke Detection)
-
-Contrast with a non-joke containing the same lexical word:
-
-```bash
-crack --text "The butcher threw away the spoiled meat and animal guts." --age 8
-```
-
-Output:
-```text
-Classification: ONE_SENSE_ONLY
-Anchor Status:  ONE_SENSE_ONLY
-(Pipeline short-circuits: no second active meaning found in context.)
-```
-
-#### 3. Batch Evaluation on a Corpus
-
-Run batch inference with resume support and automated gold-standard evaluation:
-
-```bash
-crack \
-  --backend openai \
-  --input corpus/joke_corpus_blind.jsonl \
-  --output runs/crack_results.jsonl \
-  --eval corpus/joke_corpus_gold.jsonl
-```
-
-### Python SDK Usage
-
-CRACK can be imported directly into Python workflows:
-
-```python
-from crack.config import DEFAULT_SETTINGS
-from crack.runner import analyze_text
-
-settings = DEFAULT_SETTINGS.model_copy(update={"L4_BACKEND": "openai"})
-
-record = analyze_text(
-    text="Why did the intern at the coffee company get fired? Turns out he had no grounds for advancement.",
-    target_ages=[8, 10, 12],
-    settings=settings,
-)
-
-print(f"Classification: {record.final.main_classification}")
-print(f"Ambiguous Term: {record.l3_result.candidates[0].term}")
-print(f"Age 10 Verdict: {record.final.age_verdicts['10']}")
-```
-
-#### 3. Reproducing Benchmark Results
-
-Download and build the official SemEval-2017 dataset:
 ```bash
 python scripts/prepare_semeval.py
+crack --input corpus/semeval_blind.jsonl \
+  --eval corpus/semeval_gold.jsonl \
+  --output runs/semeval_results.jsonl \
+  --backend openai --concurrency 10
 ```
 
-Run high-throughput multi-threaded evaluation (e.g. 10 workers, ~80 minutes):
+The model, provider version, and response may change between runs. The command produces a new run; it is not expected to recreate the saved scores exactly. The CLI's evaluator reports classification and age-label agreement. The SemEval age labels are assigned by the conversion script for compatibility and are not human annotations, so that age-agreement number should not be interpreted as evidence of developmental accuracy.
+
+Run the test suite with:
+
 ```bash
-# Fast 200-item smoke test (~4 minutes)
-crack -j 10 --input corpus/semeval_sample200_blind.jsonl --eval corpus/semeval_sample200_gold.jsonl
-
-# Full 2,250-item benchmark
-crack -j 10 --input corpus/semeval_blind.jsonl --eval corpus/semeval_gold.jsonl --output runs/semeval_results.jsonl
-
-# Curated 110-item child-directed humor corpus
-crack --input corpus/joke_corpus_blind.jsonl --eval corpus/joke_corpus_gold.jsonl
+pip install -e ".[test]"
+pytest -q -m "not live"
 ```
 
----
-
-## Repository Structure
+## Repository layout
 
 ```text
-├── corpus/
-│   ├── joke_corpus_blind.jsonl        # 110-item blind evaluation set
-│   ├── joke_corpus_gold.jsonl         # 110-item gold annotations
-│   ├── semeval_blind.jsonl            # SemEval-2017 Task 7 (2,250 items)
-│   ├── semeval_gold.jsonl             # SemEval-2017 Task 7 gold annotations
-│   └── annotation_guidelines.md       # Human annotation protocol
-├── data/
-│   ├── aoa_kuperman.csv               # Kuperman empirical AoA ratings (30,000+ words)
-│   └── nltk_data/                     # WordNet 3.0 & SemCor lexical assets
-├── scripts/
-│   ├── prepare_semeval.py             # SemEval-2017 Task 7 data generator
-│   ├── fetch_aoa.py                   # Verified AoA dataset fetcher
-│   └── run_l5_calibration.py          # L5 semantic threshold calibration
-├── src/crack/
-│   ├── config.py                      # Global parameters, thresholds & model configs
-│   ├── enums.py                       # Canonical status and classification enums
-│   ├── l0_scope.py                    # L0 boundary gate logic
-│   ├── l1_surface.py                  # L1 tokenization & genre routing
-│   ├── l2_senses.py                   # L2 WordNet & AoA retrieval
-│   ├── l3_candidates.py               # L3 candidate ranking engine
-│   ├── l4_anchoring.py                # L4 sense anchoring with quote verification
-│   ├── l5_resolution.py               # L5 genre-specific incongruity resolver
-│   ├── l6_distinctness.py             # L6 sense distinctness ablation checker
-│   ├── l7_comprehension.py            # L7 developmental comprehension model
-│   ├── l8_appropriateness.py          # L8 dual-axis appropriateness assessor
-│   ├── providers.py                   # Unified OpenAI, Gemini, Anthropic client layer
-│   ├── runner.py                      # Core execution pipeline & CLI interface
-│   └── schema.py                      # Pydantic v2 data models & trace records
-└── tests/                             # 332 unit & integration tests
+src/crack/       Pipeline, provider clients, schemas, and CLI
+src/crack/prompts/  LLM prompt templates
+corpus/          Blind inputs, gold labels, and annotation guidelines
+data/            AoA data file and local lexical resources
+scripts/         Dataset preparation and analysis utilities
+tests/           Unit and offline integration tests
+runs/            Selected evaluation summaries and records
+docs/            Architecture notes and benchmark audit
 ```
 
----
+## License and citation
 
-## Roadmap & Planned Benchmarks
+CRACK is distributed under the [MIT License](LICENSE).
 
-To further validate CRACK's fine-grained wordplay explanation fidelity and child-directed safety guardrails, two subsequent gold-standard benchmark evaluations are planned:
-
-### 1. ExPUNations Benchmark (EMNLP 2022) — Priority 1
-- **Focus**: Quantitative evaluation of **Pun Explanation Quality** and **Ambiguity Site Keyword Localization**.
-- **Dataset**: EMNLP 2022 crowdsourced benchmark augmenting wordplay corpora with fine-grained keywords, dual-sense descriptions, and human funniness ratings.
-- **Evaluation Target**: Benchmark CRACK's verbatim quote extraction (`sense_a_anchor_quote` / `sense_b_anchor_quote`) against ExPUNations' gold keyword spans and human sense explanations, evaluating explanation fidelity without ungrounded LLM hallucination.
-
-### 2. SemEval-2021 Task 7: HaHackathon — Priority 2
-- **Focus**: Quantitative evaluation of **Humor Detection & Offense Severity Rating**.
-- **Dataset**: 10,000 multi-annotator short texts scored for humor presence, humor rating, and offense score (1–5 scale).
-- **Evaluation Target**: Directly evaluate CRACK's **L8 Two-Axis Safety Review** (Surface Content Safety vs. Inferential Complexity) against human offense annotations, demonstrating empirical child-safety and toxicity moderation guardrails.
-
----
-
-## License & Citation
-
-This project is licensed under the [MIT License](LICENSE).
-
-If you use CRACK in your research, please cite:
-
-```bibtex
-@software{crack2026,
-  author = {CRACK Project Contributors},
-  title = {CRACK: Computational Resolution & Anchoring of Comedy & Knowledge},
-  year = {2026},
-  url = {https://github.com/Jyz922/Crack}
-}
-```
-
-### Academic Benchmark References
+If you use the SemEval-2017 Task 7 data, cite its task paper:
 
 ```bibtex
 @inproceedings{miller-etal-2017-semeval,
   title = "{S}em{E}val-2017 Task 7: Detection and Interpretation of {E}nglish Puns",
   author = "Miller, Tristan and Hempelmann, Christian and Gurevych, Iryna",
-  booktitle = "Proceedings of the 11th International Workshop on Semantic Evaluation (SemEval-2017)",
+  booktitle = "Proceedings of the 11th International Workshop on Semantic Evaluation ({S}em{E}val-2017)",
   year = "2017",
   pages = "58--68",
-  doi = "10.18653/v1/S17-2007"
-}
-
-@inproceedings{zou-lu-2019-joint,
-  title = "Joint Detection and Location of {E}nglish Puns",
-  author = "Zou, Yanyan and Lu, Wei",
-  booktitle = "Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies",
-  year = "2019",
-  pages = "2117--2123",
-  doi = "10.18653/v1/N19-1218"
-}
-
-@inproceedings{su-etal-2026-pungraph,
-  title = "{P}un{G}raph: Retrieval-Enhanced Phonetic-Semantic Graph Reasoning for Pun Understanding",
-  author = "Su, Yuchen and Zhong, Shanshan and Zhu, Yicheng and Wang, Rui and Huang, Zhenghua and Wang, Qi and Zhao, Ning and Benavides-Prado, Diana and Witbrock, Michael",
-  booktitle = "Proceedings of the 2026 Conference on Empirical Methods in Natural Language Processing (EMNLP 2026)",
-  year = "2026",
-  eprint = "2609.16557",
-  archivePrefix = "arXiv",
-  primaryClass = "cs.CL"
-}
-
-@inproceedings{zangari-etal-2025-pun,
-  title = "Pun Unintended: {LLM}s and the Illusion of Humor Understanding",
-  author = "Zangari, Alessandro and Marcuzzo, Matteo and Albarelli, Andrea and Pilehvar, Mohammad Taher and Camacho-Collados, Jose",
-  booktitle = "Proceedings of the 2025 Conference on Empirical Methods in Natural Language Processing (EMNLP 2025)",
-  year = "2025",
-  pages = "27924--27959",
-  eprint = "2410.15852",
-  archivePrefix = "arXiv"
-}
-
-@article{hurst-etal-2024-gpt4o,
-  title = "{GPT}-4o System Card",
-  author = "Hurst, Aaron and Lerer, Adam and Goucher, Adam P. and Perelman, Alec and Ramesh, Aditya and Clark, Aidan and Ostrow, Alex and others",
-  journal = "arXiv preprint arXiv:2410.21276",
-  year = "2024"
+  doi = "10.18653/v1/S17-2005"
 }
 ```

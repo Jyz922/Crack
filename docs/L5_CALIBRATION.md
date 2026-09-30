@@ -1,5 +1,7 @@
 # L5 Calibration Report
 
+This is a small prompt-calibration diagnostic with five repeated runs on a hand-selected fixture set, not an accuracy benchmark. Treat the scores as exploratory observations; they show run-to-run variance and include unresolved failures. The report is a snapshot from 2026-09-24, not a statement of current settings.
+
 Generated: 2026-09-24 20:52 UTC  
 Backend: `gemini`  
 Primary model: `gemini-3.6-flash`  

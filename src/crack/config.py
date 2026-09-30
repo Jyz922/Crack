@@ -1,18 +1,10 @@
-"""Pipeline configuration — single source of truth for all thresholds.
+"""Pipeline configuration and single source of truth for thresholds.
 
-Deliberate deviations from README
-----------------------------------
-1. L3 candidate scoring: "target-age familiarity" has been removed from the
-   feature list.  Including it would make candidate ranking age-dependent,
-   meaning the same text could surface a different pun word at age 6 vs.
-   age 12.  Candidate ranking must be age-independent; per-age effects are
-   handled in L7 (comprehension assessment) instead.
-
-2. L5_RESOLUTION_THRESHOLDS: the README specifies the QA weight formula but
-   names no pass/fail cut-off.  Cut-offs are declared here, one per genre,
-   so they have a single home and can be tuned without touching L5 logic.
-   Per-genre because each branch has a different subscore set and the
-   scores land on different scales (see docs/L5_CALIBRATION.md).
+L3 candidate ranking is intentionally independent of the requested target
+age; age-dependent judgments happen in L7. L5 pass/fail thresholds are
+stored per genre because each branch uses a different set of subscores. The
+thresholds and their calibration limitations are documented in
+docs/L5_CALIBRATION.md.
 """
 
 from __future__ import annotations

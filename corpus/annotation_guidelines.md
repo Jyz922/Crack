@@ -1,49 +1,48 @@
-# DoubleTake Humor & Wordplay Annotation Guidelines
+# Project-Curated Wordplay Corpus: Annotation Notes
 
-## 1. Overview
+## Purpose and files
 
-The DoubleTake evaluation corpus consists of paired JSON Lines files designed for reproducible benchmarking of age-aware homograph humor detection:
+This 60-item corpus is a small, project-curated evaluation set for English wordplay classification and age-comprehension estimates. It is not an official benchmark or a representative sample of English humor.
 
-- `joke_corpus_blind.jsonl`: Inputs available to the pipeline (`id`, `text`, `target_ages`).
-- `joke_corpus_gold.jsonl`: Ground-truth linguistic annotations (`id`, `gold_label`, `genre`, `ambiguous_term`, `sense_a`, `sense_b`, `expected_age_verdict`).
+- `joke_corpus_blind.jsonl` contains the input text and requested target ages.
+- `joke_corpus_gold.jsonl` contains the project's labels, genre, ambiguous term, sense notes, and expected comprehension status by age.
 
-## 2. Corpus Composition (110 items)
+## Composition
 
-| Group | IDs | Count | Description |
+| Group | IDs | Count | Gold label |
 |---|---|---:|---|
-| **Positive Jokes** | `J01`–`J60` | 60 | Valid homograph and compound-split jokes across all 4 genres (riddles, definitions, dialogues, declarative wordplay) |
-| **De-joked Controls** | `D01`–`D40` | 40 | Lexically and syntactically matched negative controls removing the double meaning |
-| **Ordinary Non-Jokes** | `N01`–`N06` | 6 | Everyday sentences containing ambiguous words with only one sense active |
-| **Out-of-Scope Controls** | `O01`–`O04` | 4 | Homophone puns (heterographic) and situational non-lexical jokes |
-| **Total** | | **110** | Benchmark evaluation corpus |
+| Wordplay examples | `J01`–`J25` | 25 | 21 `VALID_HOMOGRAPH_JOKE`; 4 `VALID_COMPOUND_SPLIT_JOKE` |
+| De-joked controls | `D01`–`D25` | 25 | `ONE_SENSE_ONLY` |
+| Ordinary statements | `N01`–`N10` | 10 | `ONE_SENSE_ONLY` |
+| **Total** | | **60** | |
 
-## 3. Classification Taxonomy (`gold_label`)
+## Classification labels
 
-1. `VALID_HOMOGRAPH_JOKE`:
-   - Text creates humor through homographic ambiguity (identical spelling, two distinct active meanings).
-2. `VALID_COMPOUND_SPLIT_JOKE`:
-   - Text creates humor through compound resegmentation (e.g., *autobiography* = *auto + biography*, *mushroom* = *mush + room*).
-3. `ONE_SENSE_ONLY`:
-   - An ambiguous word is present, but context activates only one meaning (e.g., ordinary sentences or de-joked texts).
-4. `RESOLUTION_FAIL`:
-   - Two meanings may be mentioned, but the punchline does not logically contrast or resolve the question/setup.
-5. `OUT_OF_SCOPE_HOMOPHONE`:
-   - Wordplay relying on heterographic homophones (sound alike, spelled differently, e.g., *knight* / *night*, *flour* / *flower*).
-6. `OUT_OF_SCOPE_NONLEXICAL_JOKE`:
-   - Jokes relying on absurd situations, slapstick, or cultural references without lexical ambiguity.
+- `VALID_HOMOGRAPH_JOKE`: the text uses one spelling with two contextually active meanings.
+- `VALID_COMPOUND_SPLIT_JOKE`: the wordplay depends on resegmenting a written compound.
+- `ONE_SENSE_ONLY`: the text does not activate two distinct meanings as wordplay.
 
-## 4. Text Genres (`genre`)
+The current corpus uses these three labels. Other labels in the pipeline schema are not used as gold labels here.
 
-- `QA_RIDDLE`: Setup as question, resolution in answer punchline ("Why do elephants have a trunk? ...").
-- `DEFINITIONAL_ONELINER`: Dictionary-entry or declarative definition style ("Autobiography: when your car...").
-- `DIALOGUE_MISUNDERSTANDING`: Two or more speakers talking with misaligned senses.
-- `DECLARATIVE`: Statement joke in narrative sentence format.
+## Genres
 
-## 5. Age Appropriateness Standards
+- `QA_RIDDLE`: question followed by an answer punchline.
+- `DEFINITIONAL_ONELINER`: a definition-like setup or one-line explanation.
+- `DIALOGUE_MISUNDERSTANDING`: a word or phrase is interpreted differently across speakers.
+- `DECLARATIVE`: wordplay embedded in a statement.
 
-Age ratings follow the Brysbaert Age-of-Acquisition (AoA) norms and cognitive development milestones:
+## Age-comprehension annotations
 
-- `FULLY_AGE_APPROPRIATE`: Child knows both senses and has metalinguistic awareness for the joke structure.
-- `PARTIALLY_COMPREHENSIBLE`: Child knows the primary surface sense but the secondary figurative sense is above their AoA.
-- `VOCABULARY_TOO_ADVANCED`: The ambiguous term or secondary sense requires an older vocabulary level.
-- `WORDPLAY_SKILL_TOO_ADVANCED`: The vocabulary is known, but the metalinguistic resegmentation floor has not been met (e.g., age 6 facing compound split).
+`expected_age_verdict` records the expected **comprehension** status for each age in `target_ages`; it is not the L8 content-safety verdict.
+
+- `FULLY_COMPREHENSIBLE`: both relevant readings and the wordplay structure are expected to be understandable.
+- `PARTIALLY_COMPREHENSIBLE`: the main reading may be understood, while the secondary reading or wordplay may not be.
+- `SENSE_B_TOO_ADVANCED`: the secondary sense is expected to be too advanced.
+- `WORDPLAY_SKILL_TOO_ADVANCED`: the vocabulary may be familiar, but the wordplay operation is expected to be too advanced.
+- `AOA_UNKNOWN`: available AoA information is insufficient for an estimate.
+
+These age labels are project annotations informed by AoA values and judgment. The repository does not contain annotator identities, inter-annotator agreement, or an independent child study; treat age scores as exploratory.
+
+## Evaluation caveat
+
+The committed `runs/course_corpus_records.jsonl` and its summary are not a clean run on the current corpus: four records were copied from another item and eight predictions were generated for text that differs from the current blind file. Do not use the existing 53/60 figure as corpus accuracy. The findings are documented in [`../docs/benchmark_audit.md`](../docs/benchmark_audit.md).

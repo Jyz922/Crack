@@ -1,4 +1,10 @@
 {
+  "audit_status": "INVALID_FOR_CURRENT_FULL_CORPUS",
+  "audit_notes": [
+    "Four records (N07-N10) were copied from N02 rather than produced by a run on those texts.",
+    "Eight saved predictions (J21, J25, D20-D25) refer to text that differs from the current blind corpus.",
+    "Do not report the 53/60 classification accuracy or 125/180 age agreement as current-corpus benchmark results. See docs/benchmark_audit.md."
+  ],
   "total_items": 60,
   "classification_accuracy": 0.8833,
   "correct_classification": 53,

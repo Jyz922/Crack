@@ -3,9 +3,9 @@ Last updated: 2026-09-24 by ant-core existing-layer-fix session (offline, no API
 
 ---
 
-## Current state (VERIFIED)
+## Historical snapshot (verified 2026-09-24; not current)
 
-All items below were confirmed by commands run in this session.
+The checks below were recorded on 2026-09-24. They describe that session only; rerun a check before treating its result as current. The benchmark and corpus audit in [`docs/benchmark_audit.md`](docs/benchmark_audit.md) was added later and takes precedence for evaluation claims.
 
 | Check | Command | Result |
 |---|---|---|
@@ -641,7 +641,6 @@ manage this install).
   - **Evaluation Tooling & CLI:** Implemented `evaluate_run` in `corpus.py` and `--eval <gold_path>` flag in `runner.py`, generating structured `evaluation.json` (confusion matrix, classification accuracy, age accuracy).
   - **Corpus Coverage:** Increased `corpus.py` test coverage to 98%.
 - **Verified this session:** `.venv/bin/python -m pytest --cov=crack -q -m "not live"` -> **332 passed, 10 deselected (82% total coverage)**.
-
 
 
 

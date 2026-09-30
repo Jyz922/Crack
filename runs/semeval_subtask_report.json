@@ -1,4 +1,5 @@
 {
+  "audit_note": "Detection counts and score arithmetic were checked against locally available records; provider-call provenance is not independently established. The location counts are retained as historical reported values but were not reproduced from the saved L3 lists. See docs/benchmark_audit.md.",
   "benchmark": "SemEval-2017 Task 7 (Homographic Puns)",
   "total_items": 2250,
   "subtask_1_detection": {
@@ -12,6 +13,7 @@
     "non_pun_correct": 473
   },
   "subtask_2_location": {
+    "audit_status": "NOT_REPRODUCED_FROM_SAVED_L3_CANDIDATES",
     "total_puns": 1607,
     "top1_exact_match": 1227,
     "top1_accuracy": 0.7635,
