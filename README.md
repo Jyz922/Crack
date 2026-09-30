@@ -6,19 +6,6 @@
 [![Tests: Passing](https://img.shields.io/badge/tests-332%20passed-brightgreen.svg)](tests/)
 [![SemEval-2017 F1: 87.8%](https://img.shields.io/badge/SemEval--2017%20F1-87.8%25%20(SOTA)-blueviolet.svg)](#1-semeval-2017-task-7-full-2250-official-items)
 
-> *"Cracking jokes by cracking the code."*
->
-> - **Sense A (Humor):** *to crack a joke* — to deliver punchlines, wit, and linguistic wordplay.
-> - **Sense B (Computation):** *to crack a code* — to deconstruct, decipher, and resolve complex semantic ambiguity.
-
-**CRACK** is an open-source **neuro-symbolic humor analysis and developmental appropriateness engine**. Designed to overcome the pervasive issues of "humor hallucination" in pure Large Language Models (LLMs), CRACK pairs deterministic lexical ontologies (WordNet 3.0, SemCor sense frequencies, Kuperman Age-of-Acquisition) with schema-constrained LLM inference.
-
-CRACK automatically detects homographic wordplay and compound splits, extracts verbatim context spans anchoring dual meanings, tests form-specific semantic incongruity resolution, and evaluates target-age comprehension and child-safety appropriateness across ages 6 to 12.
-
----
-
-## 🎬 Interactive Web UI Demo (v1.0)
-
 <p align="center">
   <img src="assets/demo.gif" alt="CRACK Interactive Web UI Demo" width="100%">
 </p>
@@ -26,21 +13,9 @@ CRACK automatically detects homographic wordplay and compound splits, extracts v
   <sub>🎥 Prefer high-definition video with controls? <a href="https://github.com/user-attachments/assets/c50578f7-0c83-4516-a4c1-d3e854414c03"><b>Watch the full 1080P video walkthrough</b></a></sub>
 </p>
 
-CRACK v1.0 introduces an **Apple-inspired Bento Intelligence Dashboard** and a real-time SSE streaming radar scanner:
+**CRACK** is an open-source **neuro-symbolic humor analysis and developmental appropriateness engine**. Designed to overcome the pervasive issues of "humor hallucination" in pure Large Language Models (LLMs), CRACK pairs deterministic lexical ontologies (WordNet 3.0, SemCor sense frequencies, Kuperman Age-of-Acquisition) with schema-constrained LLM inference.
 
-- ⚡ **Direction-Aware Radar Laser Scan**: Bidirectional laser sweep with dynamic trailing afterglow matching optical movement physics.
-- 🎯 **Single-Line Continuous Typography**: Fluid subpixel auto-scaling that preserves sentence geometry and eliminates jarring line wrap shifts.
-- 💡 **Punchline Spotlight & In-Place Flight**: Automatically isolates ambiguous double-entendre sites with ambient cyan halos and smooth flight transitions.
-- 📊 **Multi-Age Spectrum & AoA Analysis**: Psycholinguistic Age-of-Acquisition (AoA) distribution curves across developmental brackets (Ages 6, 8, 10, 12).
-- 🛡️ **Distraction-Free English Interface**: Unambiguous verdict cards with human-readable linguistic breakdowns and verbatim anchor quotes.
-
-To launch the web interface locally:
-```bash
-pip install -e ".[web]"
-crack-serve
-# or: python -m crack.serve --port 8000
-```
-Open **[http://localhost:8000](http://localhost:8000)** in your browser.
+CRACK automatically detects homographic wordplay and compound splits, extracts verbatim context spans anchoring dual meanings, tests form-specific semantic incongruity resolution, and evaluates target-age comprehension and child-safety appropriateness across ages 6 to 12.
 
 ---
 
@@ -127,7 +102,6 @@ The repository provides a curated, balanced evaluation set (`corpus/joke_corpus_
 
 ## Table of Contents
 
-- [Interactive Web UI Demo (v1.0)](#-interactive-web-ui-demo-v10)
 - [Benchmark Performance & SOTA Results](#-benchmark-performance--sota-results)
   - [SemEval-2017 Task 7 (Full 2,250 Items)](#1-semeval-2017-task-7-full-2250-official-items)
   - [Child-Directed Humor Corpus (110 Items)](#2-child-directed-humor--developmental-corpus-110-items)
