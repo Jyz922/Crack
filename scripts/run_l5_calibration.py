@@ -24,11 +24,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from doubletake.config import DEFAULT_SETTINGS, Settings
-from doubletake.enums import AnchoringStatus, Genre, ResolutionStatus
-from doubletake.l5_resolution import resolve_l5
-from doubletake.providers import resolve_backend
-from doubletake.schema import AnalysisRecord, L1Result, L4Result
+from crack.config import DEFAULT_SETTINGS, Settings
+from crack.enums import Genre
+from crack.l5_resolution import resolve_l5
+from crack.providers import resolve_backend
+from crack.schema import AnalysisRecord, L1Result, L4Result
 
 _FIXTURES_PATH = Path(__file__).parent.parent / "tests" / "fixtures" / "l5_anchors.jsonl"
 _RUNS_DIR = Path(__file__).parent.parent / "runs"

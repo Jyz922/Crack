@@ -118,6 +118,12 @@ crack --input corpus/semeval_blind.jsonl \
   --backend openai --concurrency 10
 ```
 
+To regenerate the project-curated blind and gold files from their annotation source:
+
+```bash
+python scripts/build_project_corpus.py
+```
+
 To run the full project-curated corpus:
 
 ```bash

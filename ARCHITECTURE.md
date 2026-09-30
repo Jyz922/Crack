@@ -35,6 +35,6 @@ L5 uses genre-specific result schemas. QA riddles use weighted subscores for pol
 
 ## Evaluation notes
 
-The SemEval summary and the project-curated corpus records have different audit limitations. Detection arithmetic for the locally available SemEval run checks out, but its full records are not tracked by Git. The current curated-corpus summary was built from copied and text-mismatched outputs and is not a valid 60-item accuracy result. See [`docs/benchmark_audit.md`](docs/benchmark_audit.md) before quoting either evaluation.
+The README reports the SemEval comparison and a full run on the current 60-item project-curated corpus. The curated-corpus predictions match the current input texts; its item-level records and summary are tracked under `runs/`. The historical SemEval prediction file is not tracked, so its published score is supported by the saved summary and audit. See [`docs/benchmark_audit.md`](docs/benchmark_audit.md) for the verification details and run provenance.
 
 No token-saving rate, hallucination-elimination rate, child-safety guarantee, or state-of-the-art ranking is established by the current evaluation artifacts.
