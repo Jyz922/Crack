@@ -12,53 +12,6 @@ CRACK focuses on homographic wordplay (one spelling with multiple meanings) and 
   <img src="assets/demo.gif" alt="CRACK interactive analysis interface" width="100%">
 </p>
 
-## How the pipeline works
-
-The pipeline is named L0–L8. L0 runs before and after the analysis stages: it validates the input and assigns the final classification.
-
-| Stage | What it does |
-|---|---|
-| L0 | Checks input and supported wordplay scope; assigns the final class. |
-| L1 | Tokenizes the text and selects a genre branch. |
-| L2 | Retrieves WordNet senses, SemCor frequency data, and available AoA values. |
-| L3 | Ranks ambiguous-word and compound-split candidates. |
-| L4 | Uses an LLM to assess whether distinct readings are supported by text spans. |
-| L5 | Assesses whether the setup and punchline form a coherent resolution. |
-| L6 | Checks whether the proposed senses are meaningfully distinct. |
-| L7 | Estimates comprehension for each requested age using AoA data and heuristics. |
-| L8 | Separately estimates surface-content and inference-related appropriateness. |
-
-Stages may stop early when a required condition fails. Typed output schemas make results easier to inspect, but do not guarantee that a model judgment is correct.
-
-See [ARCHITECTURE.md](ARCHITECTURE.md) for implementation details.
-
-## Installation
-
-Use Python 3.11 or later:
-
-```bash
-git clone https://github.com/Jyz922/Crack.git
-cd Crack
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -e .
-```
-
-CRACK needs an API key for the selected LLM provider. Copy `.env.example` to `.env`, then set the provider key and, if needed, `DOUBLETAKE_BACKEND` (`openai`, `gemini`, `anthropic`, or `deepseek`). You can also pass a provider with `--backend`.
-
-Analyze one text:
-
-```bash
-crack --text "Why don't skeletons fight? Because they have no guts." --age 8 --backend openai
-```
-
-The interactive web interface is optional:
-
-```bash
-pip install -e ".[web]"
-crack --serve
-```
-
 ## Evaluation data and reported results
 
 ### SemEval-2017 Task 7
@@ -105,6 +58,41 @@ Further cross-validation scores include Zhou et al. (2020) at 94.9% and Zou & Lu
 `corpus/joke_corpus_blind.jsonl` and `corpus/joke_corpus_gold.jsonl` contain 60 project-curated items: 25 positive wordplay examples and 35 `ONE_SENSE_ONLY` controls (25 de-joked examples and 10 ordinary statements). The labels and age judgments are project annotations; the repository does not include an annotator agreement study.
 
 The existing 53/60 result is **not a valid score for the current 60 texts**: four records were copied from another item's output, and eight saved predictions refer to different text than the current corpus. The README therefore does not report an overall accuracy for this corpus. See [the benchmark audit](docs/benchmark_audit.md) and [annotation guidelines](corpus/annotation_guidelines.md).
+
+## How the pipeline works
+
+CRACK processes each input through lexical analysis, LLM-assisted wordplay checks, and age-specific estimates. L0 validates the input before analysis and assigns the final classification after L1–L8.
+
+![CRACK analysis pipeline from input validation through final classification](assets/crack-pipeline.svg)
+
+Stages can stop or be skipped when required evidence is missing. See [ARCHITECTURE.md](ARCHITECTURE.md) for implementation details.
+
+## Installation
+
+Use Python 3.11 or later:
+
+```bash
+git clone https://github.com/Jyz922/Crack.git
+cd Crack
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .
+```
+
+CRACK needs an API key for the selected LLM provider. Copy `.env.example` to `.env`, then set the provider key and, if needed, `DOUBLETAKE_BACKEND` (`openai`, `gemini`, `anthropic`, or `deepseek`). You can also pass a provider with `--backend`.
+
+Analyze one text:
+
+```bash
+crack --text "Why don't skeletons fight? Because they have no guts." --age 8 --backend openai
+```
+
+The interactive web interface is optional:
+
+```bash
+pip install -e ".[web]"
+crack --serve
+```
 
 ## Reproduce a run
 

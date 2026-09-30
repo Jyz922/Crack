@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="970" viewBox="0 0 1280 970" role="img" aria-labelledby="title description">
+  <title id="title">CRACK analysis pipeline structure</title>
+  <desc id="description">A left-to-right diagram of CRACK. The pipeline validates text in L0-pre, routes the text in L1, retrieves lexical evidence in L2, ranks candidates in L3, uses LLM anchoring in L4, evaluates resolution in L5, checks sense distinctness in L6, estimates comprehension in L7, evaluates appropriateness in L8, and assigns a final classification in L0-post. Stages may stop or skip when prerequisites are missing.</desc>
+  <rect x="10" y="10" width="1260" height="950" rx="18" fill="#ffffff" stroke="#dbe4e9"/>
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-variant-numeric="tabular-nums">
+    <text x="52" y="48" fill="#13836f" font-size="15" font-weight="700" letter-spacing="1.8">CRACK / PIPELINE</text>
+    <text x="52" y="101" fill="#1b2e3d" font-size="42" font-weight="700">How CRACK analyzes wordplay</text>
+    <text x="52" y="137" fill="#657789" font-size="20">From joke text and target ages to evidence-grounded classification</text>
+
+    <!-- Phase 1 -->
+    <rect x="40" y="246" width="378" height="527" rx="16" fill="#f5f8fa" stroke="#dbe4e9"/>
+    <rect x="58" y="266" width="171" height="28" rx="7" fill="#e8f6f2"/>
+    <text x="143.5" y="285" fill="#13836f" font-size="12" font-weight="700" letter-spacing="0.8" text-anchor="middle">01 / PREPARE</text>
+    <text x="58" y="327" fill="#1b2e3d" font-size="22" font-weight="700">Input &amp; lexical analysis</text>
+    <text x="58" y="350" fill="#657789" font-size="14">Prepare and rank candidate readings</text>
+
+    <rect x="54" y="382" width="350" height="64" rx="9" fill="#ffffff" stroke="#dbe4e9"/>
+    <rect x="68" y="400" width="62" height="28" rx="7" fill="#e8f6f2"/>
+    <text x="99" y="419" fill="#13836f" font-size="12" font-weight="700" text-anchor="middle">L0-pre</text>
+    <text x="144" y="407" fill="#1b2e3d" font-size="15" font-weight="700">Input validation</text>
+    <text x="144" y="427" fill="#657789" font-size="13">Normalize and check the text</text>
+
+    <path d="M229 446 V462 M225 458 L229 462 L233 458" fill="none" stroke="#13836f" stroke-width="2"/>
+    <rect x="54" y="464" width="350" height="64" rx="9" fill="#ffffff" stroke="#dbe4e9"/>
+    <rect x="68" y="482" width="62" height="28" rx="7" fill="#e8f6f2"/>
+    <text x="99" y="501" fill="#13836f" font-size="12" font-weight="700" text-anchor="middle">L1</text>
+    <text x="144" y="489" fill="#1b2e3d" font-size="15" font-weight="700">Text &amp; genre routing</text>
+    <text x="144" y="509" fill="#657789" font-size="13">Tokenize and select an analysis branch</text>
+
+    <path d="M229 528 V544 M225 540 L229 544 L233 540" fill="none" stroke="#13836f" stroke-width="2"/>
+    <rect x="54" y="546" width="350" height="64" rx="9" fill="#ffffff" stroke="#dbe4e9"/>
+    <rect x="68" y="564" width="62" height="28" rx="7" fill="#e8f6f2"/>
+    <text x="99" y="583" fill="#13836f" font-size="12" font-weight="700" text-anchor="middle">L2</text>
+    <text x="144" y="571" fill="#1b2e3d" font-size="15" font-weight="700">Lexical evidence</text>
+    <text x="144" y="591" fill="#657789" font-size="13">WordNet senses · SemCor · AoA</text>
+
+    <path d="M229 610 V626 M225 622 L229 626 L233 622" fill="none" stroke="#13836f" stroke-width="2"/>
+    <rect x="54" y="628" width="350" height="64" rx="9" fill="#ffffff" stroke="#dbe4e9"/>
+    <rect x="68" y="646" width="62" height="28" rx="7" fill="#e8f6f2"/>
+    <text x="99" y="665" fill="#13836f" font-size="12" font-weight="700" text-anchor="middle">L3</text>
+    <text x="144" y="653" fill="#1b2e3d" font-size="15" font-weight="700">Candidate ranking</text>
+    <text x="144" y="673" fill="#657789" font-size="13">Ambiguous terms and compound splits</text>
+
+    <!-- Phase 2 -->
+    <rect x="451" y="246" width="378" height="527" rx="16" fill="#f5f8fa" stroke="#dbe4e9"/>
+    <rect x="469" y="266" width="192" height="28" rx="7" fill="#e8f6f2"/>
+    <text x="565" y="285" fill="#13836f" font-size="12" font-weight="700" letter-spacing="0.8" text-anchor="middle">02 / EVALUATE WORDPLAY</text>
+    <text x="469" y="327" fill="#1b2e3d" font-size="22" font-weight="700">LLM-assisted reasoning</text>
+    <text x="469" y="350" fill="#657789" font-size="14">Ground readings and test the resolution</text>
+
+    <rect x="465" y="382" width="350" height="64" rx="9" fill="#ffffff" stroke="#dbe4e9"/>
+    <rect x="479" y="400" width="62" height="28" rx="7" fill="#e8f6f2"/>
+    <text x="510" y="419" fill="#13836f" font-size="12" font-weight="700" text-anchor="middle">L4</text>
+    <text x="555" y="407" fill="#1b2e3d" font-size="15" font-weight="700">LLM anchoring</text>
+    <text x="555" y="427" fill="#657789" font-size="13">Checks readings against text spans</text>
+
+    <path d="M640 446 V462 M636 458 L640 462 L644 458" fill="none" stroke="#13836f" stroke-width="2"/>
+    <rect x="465" y="464" width="350" height="64" rx="9" fill="#ffffff" stroke="#dbe4e9"/>
+    <rect x="479" y="482" width="62" height="28" rx="7" fill="#e8f6f2"/>
+    <text x="510" y="501" fill="#13836f" font-size="12" font-weight="700" text-anchor="middle">L5</text>
+    <text x="555" y="489" fill="#1b2e3d" font-size="15" font-weight="700">Resolution check</text>
+    <text x="555" y="509" fill="#657789" font-size="13">Do setup and punchline fit together?</text>
+
+    <path d="M640 528 V544 M636 540 L640 544 L644 540" fill="none" stroke="#13836f" stroke-width="2"/>
+    <rect x="465" y="546" width="350" height="64" rx="9" fill="#ffffff" stroke="#dbe4e9"/>
+    <rect x="479" y="564" width="62" height="28" rx="7" fill="#e8f6f2"/>
+    <text x="510" y="583" fill="#13836f" font-size="12" font-weight="700" text-anchor="middle">L6</text>
+    <text x="555" y="571" fill="#1b2e3d" font-size="15" font-weight="700">Sense distinctness</text>
+    <text x="555" y="591" fill="#657789" font-size="13">Checks that the readings differ</text>
+
+    <rect x="479" y="638" width="322" height="42" rx="8" fill="#e8f6f2"/>
+    <text x="640" y="656" fill="#13836f" font-size="12" font-weight="700" text-anchor="middle">EVIDENCE-BASED FLOW</text>
+    <text x="640" y="672" fill="#526678" font-size="12" text-anchor="middle">Missing prerequisites can skip later stages</text>
+
+    <!-- Phase 3 -->
+    <rect x="862" y="246" width="378" height="527" rx="16" fill="#f5f8fa" stroke="#dbe4e9"/>
+    <rect x="880" y="266" width="177" height="28" rx="7" fill="#e8f6f2"/>
+    <text x="968.5" y="285" fill="#13836f" font-size="12" font-weight="700" letter-spacing="0.8" text-anchor="middle">03 / ASSESS AUDIENCE</text>
+    <text x="880" y="327" fill="#1b2e3d" font-size="22" font-weight="700">Age &amp; suitability</text>
+    <text x="880" y="350" fill="#657789" font-size="14">Estimate comprehension and appropriateness</text>
+
+    <rect x="876" y="382" width="350" height="64" rx="9" fill="#ffffff" stroke="#dbe4e9"/>
+    <rect x="890" y="400" width="62" height="28" rx="7" fill="#e8f6f2"/>
+    <text x="921" y="419" fill="#13836f" font-size="12" font-weight="700" text-anchor="middle">L7</text>
+    <text x="966" y="407" fill="#1b2e3d" font-size="15" font-weight="700">Comprehension by age</text>
+    <text x="966" y="427" fill="#657789" font-size="13">AoA and heuristics for each target age</text>
+
+    <path d="M1051 446 V462 M1047 458 L1051 462 L1055 458" fill="none" stroke="#13836f" stroke-width="2"/>
+    <rect x="876" y="464" width="350" height="64" rx="9" fill="#ffffff" stroke="#dbe4e9"/>
+    <rect x="890" y="482" width="62" height="28" rx="7" fill="#e8f6f2"/>
+    <text x="921" y="501" fill="#13836f" font-size="12" font-weight="700" text-anchor="middle">L8</text>
+    <text x="966" y="489" fill="#1b2e3d" font-size="15" font-weight="700">Appropriateness</text>
+    <text x="966" y="509" fill="#657789" font-size="13">Surface content and inference depth</text>
+
+    <path d="M1051 528 V544 M1047 540 L1051 544 L1055 540" fill="none" stroke="#13836f" stroke-width="2"/>
+    <rect x="876" y="546" width="350" height="76" rx="9" fill="#e8f6f2" stroke="#c5e8df"/>
+    <rect x="890" y="570" width="62" height="28" rx="7" fill="#13836f"/>
+    <text x="921" y="589" fill="#ffffff" font-size="12" font-weight="700" text-anchor="middle">L0-post</text>
+    <text x="966" y="576" fill="#1b2e3d" font-size="15" font-weight="700">Final classification</text>
+    <text x="966" y="597" fill="#526678" font-size="13">Combines scope and analysis evidence</text>
+
+    <!-- Phase transition arrows -->
+    <path d="M404 660 H432 V414 H465 M459 410 L465 414 L459 418" fill="none" stroke="#13836f" stroke-width="2.5"/>
+    <path d="M815 578 H843 V414 H876 M870 410 L876 414 L870 418" fill="none" stroke="#13836f" stroke-width="2.5"/>
+    <path d="M1051 622 V808 M1047 802 L1051 808 L1055 802" fill="none" stroke="#13836f" stroke-width="2.5"/>
+
+    <!-- Output -->
+    <rect x="40" y="809" width="1200" height="68" rx="12" fill="#e8f6f2"/>
+    <rect x="58" y="829" width="86" height="28" rx="7" fill="#13836f"/>
+    <text x="101" y="848" fill="#ffffff" font-size="12" font-weight="700" letter-spacing="0.8" text-anchor="middle">OUTPUT</text>
+    <text x="166" y="851" fill="#1b2e3d" font-size="17" font-weight="600">Wordplay class · candidate word and anchors · age-specific comprehension and appropriateness</text>
+
+    <line x1="40" y1="908" x2="1240" y2="908" stroke="#e1e8ed"/>
+    <text x="52" y="940" fill="#657789" font-size="14">L0 validates the input before analysis and assigns the final classification after L1–L8.</text>
+  </g>
+</svg>
