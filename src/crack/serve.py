@@ -40,7 +40,7 @@ from crack.enums import (
     ResolutionStatus,
     ScopeLabel,
 )
-from crack.l2_senses import wordnet
+from crack.l2_senses import _aoa_tables, wordnet
 from crack.runner import _LAYER_REGISTRY
 from crack.schema import (
     AgeAppropriatenessVerdict,
@@ -60,6 +60,21 @@ app = FastAPI(
     description="Interactive visual demonstration for CRACK neuro-symbolic humor analysis.",
     version="1.0.0",
 )
+
+
+@app.on_event("startup")
+async def _warm_lexical_resources() -> None:
+    """Build the cached AoA/WordNet index before the first analysis request."""
+    start = time.monotonic()
+    try:
+        await asyncio.to_thread(_aoa_tables)
+    except Exception:
+        # Keep the web app available; L2 will surface the same resource error
+        # in its per-layer trace if lexical data is unavailable.
+        _LOG.exception("L2 lexical resource warm-up failed")
+        return
+    elapsed_ms = (time.monotonic() - start) * 1000
+    _LOG.info("L2 lexical resources warmed in %.1f ms", elapsed_ms)
 
 app.add_middleware(
     CORSMiddleware,

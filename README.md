@@ -8,6 +8,10 @@
 
 The pipeline targets homographic wordplay (one spelling with multiple meanings) and compound resegmentation. Contextual analysis can use any of the supported LLM providers.
 
+### Try CRACK live
+
+Curious how it works? [Try the live demo](https://crack-8s9j.onrender.com): enter an English joke and watch CRACK analyze its possible wordplay, meaning, and age-level comprehension.
+
 <p align="center">
   <img src="assets/demo.gif" alt="CRACK interactive analysis interface" width="100%">
 </p>
