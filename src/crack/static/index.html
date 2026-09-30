@@ -298,7 +298,6 @@
                 <div
                   ref="laserLineRef"
                   class="laser-line"
-                  :style="{ left: laserPosition + '%' }"
                 >
                   <!-- Trailing afterglow when moving right (stretches to the left) -->
                   <div
@@ -969,15 +968,20 @@
             laserPos += laserSpeed * laserDir.value;
             if (laserPos >= 98) {
               laserPos = 98;
+              laserPosition.value = 98;
               laserDir.value = -1;
             } else if (laserPos <= 2) {
               laserPos = 2;
+              laserPosition.value = 2;
               laserDir.value = 1;
             }
             if (laserLineRef.value) {
               laserLineRef.value.style.left = `${laserPos}%`;
             }
             laserAnimationId = requestAnimationFrame(animateLaser);
+          }
+          if (laserLineRef.value) {
+            laserLineRef.value.style.left = '0%';
           }
           laserAnimationId = requestAnimationFrame(animateLaser);
 
@@ -1270,6 +1274,9 @@
           laserActive.value = false;
           laserPosition.value = 0;
           laserDir.value = 1;
+          if (laserLineRef.value) {
+            laserLineRef.value.style.left = '0%';
+          }
           isPunchlineLocked.value = false;
           isCandidateStage.value = false;
           nextTick(() => {
