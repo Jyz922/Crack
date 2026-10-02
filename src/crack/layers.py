@@ -71,7 +71,7 @@ def run_l2(record: AnalysisRecord, settings: Settings) -> AnalysisRecord:
 
 
 def run_l3(record: AnalysisRecord, settings: Settings) -> AnalysisRecord:
-    """L3: Candidate ranking (top-k ambiguity sites). Age-free."""
+    """L3: Age-free candidate ranking, with a top-k queue and retained tail."""
     if record.l2_result is None:
         raise ValueError("L2 must run before L3: l2_result is None")
     start = time.monotonic()
@@ -95,7 +95,8 @@ def run_l3(record: AnalysisRecord, settings: Settings) -> AnalysisRecord:
     record.trace.append(LayerTrace(
         layer="L3",
         status="OK",
-        reason="top=" + ",".join(c.term for c in record.l3_result.candidates),
+        reason="top=" + ",".join(c.term for c in record.l3_result.candidates)
+        + f"; deferred={len(record.l3_result.deferred_candidates)}",
         duration_ms=round((time.monotonic() - start) * 1000, 3),
         hints_used=0,
     ))
@@ -110,10 +111,15 @@ def run_l4(record: AnalysisRecord, settings: Settings) -> AnalysisRecord:
     result = anchor_l4(record, settings)
     duration_ms = round((time.monotonic() - start) * 1000, 3)
     record.l4_result = result
+    search = record.l4_search
+    search_summary = (
+        f" assessed={len(search.findings)}/{search.retrieved_terms} stop={search.stop_reason}"
+        if search else ""
+    )
     record.trace.append(LayerTrace(
         layer="L4",
         status="OK",
-        reason=f"status={result.anchoring_status} rel={result.anchor_relation}",
+        reason=f"status={result.anchoring_status} rel={result.anchor_relation}" + search_summary,
         duration_ms=duration_ms,
         hints_used=0,
     ))

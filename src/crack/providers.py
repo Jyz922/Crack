@@ -25,6 +25,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Literal
 
+from .validation import ModelResponseError, require_completion
+
 _LOG = logging.getLogger(__name__)
 
 # Suppress google-genai SDK internal AFC warning (harmless SDK notice for generate_content)
@@ -414,6 +416,8 @@ def call_openai_compatible(
     required_keys: frozenset[str] | None = None,
     retry_suffix: str = "\n\nRespond with valid JSON only matching the schema.",
     validate_fn: Callable[[dict[str, Any], int], None] | None = None,
+    parse_attempts: int = 2,
+    response_observer: Callable[[str], None] | None = None,
 ) -> tuple[dict[str, Any] | None, int, bool]:
     """Call an OpenAI-compatible model with retry on rate-limits, 5xx, or parse failures.
 
@@ -421,9 +425,11 @@ def call_openai_compatible(
     """
     total_retries = 0
     delays = (2, 4, 8)
+    if parse_attempts not in (1, 2):
+        raise ValueError("parse_attempts must be 1 or 2")
 
-    # Try 2 prompt attempts (initial + retry with retry_suffix)
-    for attempt in range(2):
+    # The caller selects one parse attempt or an initial attempt plus correction.
+    for attempt in range(parse_attempts):
         suffix = "" if attempt == 0 else retry_suffix
         messages = [{"role": "user", "content": prompt_text + suffix}]
 
@@ -475,6 +481,11 @@ def call_openai_compatible(
                         raise
 
                 raw_text = getattr(resp.choices[0].message, "content", "") or ""
+                if response_observer is not None:
+                    response_observer(raw_text)
+                require_completion(getattr(resp.choices[0], "finish_reason", None))
+                if getattr(resp.choices[0].message, "refusal", None):
+                    raise ModelResponseError("Model declined to produce an assessment")
                 break
             except Exception as e:
                 err_str = str(e).lower()
@@ -489,6 +500,8 @@ def call_openai_compatible(
 
         try:
             parsed = _extract_json(raw_text)
+            if not isinstance(parsed, dict):
+                raise ModelResponseError("Expected a JSON object")
             if validate_fn is not None:
                 validate_fn(parsed, attempt)
             elif required_keys:
@@ -497,8 +510,8 @@ def call_openai_compatible(
                     raise ValueError(f"Missing required keys: {sorted(missing)}")
             return parsed, total_retries, False
         except (json.JSONDecodeError, ValueError, IndexError) as parse_err:
-            if attempt == 1:
-                _LOG.warning("Failed to parse JSON on retry: %s", parse_err)
+            if attempt == parse_attempts - 1:
+                _LOG.warning("Failed to parse JSON after %d attempt(s): %s", parse_attempts, parse_err)
                 return None, total_retries, False
 
     return None, total_retries, False

@@ -32,6 +32,7 @@ from .providers import (
     resolve_model,
 )
 from .schema import AnalysisRecord, L6Result
+from .validation import ModelResponseError, validate_l6_response, require_completion
 
 _LOG = logging.getLogger(__name__)
 
@@ -48,11 +49,11 @@ class _L6LLMResponse(BaseModel):
 
     sense_a_paraphrase: str
     sense_b_paraphrase: str
-    suppresses_other: bool = True
-    materially_different: bool = True
-    distinctness_status: str
-    ambiguity_ablation: Optional[str] = "SUPPORTED"
-    explanation: Optional[str] = ""
+    suppresses_other: bool | None
+    materially_different: bool | None
+    distinctness_status: DistinctnessStatus
+    ambiguity_ablation: AmbiguityAblation
+    explanation: str
 
 
 # ---------------------------------------------------------------------------
@@ -125,6 +126,7 @@ def _call_anthropic_l6(
             max_tokens=1024,
             messages=[{"role": "user", "content": prompt_text + suffix}],
         )
+        require_completion(getattr(response, "stop_reason", None))
         raw = response.content[0].text
         try:
             return _extract_json(raw)
@@ -158,6 +160,8 @@ def _call_gemini_l6_single(
                 resp = client.models.generate_content(
                     model=model, contents=prompt_text + suffix, config=config
                 )
+                candidate = resp.candidates[0] if getattr(resp, "candidates", None) else None
+                require_completion(getattr(candidate, "finish_reason", None))
                 raw = resp.text
                 try:
                     return _extract_json(raw), retries, None
@@ -320,16 +324,6 @@ def distinctness_l6(
     if record.l3_result and record.l3_result.candidates:
         term = record.l3_result.candidates[0].term
 
-    # 2. Resegmentation / compound-split items are inherently distinct lexical forms
-    if l4.anchor_relation == AnchorRelation.RESEGMENTATION:
-        return L6Result(
-            distinctness_status=DistinctnessStatus.SENSES_DISTINCT,
-            ambiguity_ablation=AmbiguityAblation.SUPPORTED,
-            sense_a_paraphrase=l4.sense_a,
-            sense_b_paraphrase=l4.sense_b,
-            explanation="Resegmentation/compound split involves distinct lexical units.",
-        )
-
     genre = record.l1_result.genre if record.l1_result else Genre.DECLARATIVE
     prompt = _render_l6_prompt(
         text=record.text,
@@ -343,37 +337,6 @@ def distinctness_l6(
 
     call = _complete_l6(prompt, settings, client)
     if call.parsed is None:
-        _LOG.warning("L6 parse failure for item %s — returning L6_SKIPPED_NO_PARAPHRASE", record.item_id)
-        return L6Result(
-            distinctness_status=DistinctnessStatus.L6_SKIPPED_NO_PARAPHRASE,
-            ambiguity_ablation=AmbiguityAblation.SKIPPED,
-            explanation="Failed to parse LLM response for sense distinctness.",
-        )
-
-    parsed = call.parsed
-
-    # Parse distinctness status
-    raw_status = str(parsed.get("distinctness_status", "")).upper().strip()
-    if "TOO_CLOSE" in raw_status or "CLOSE" in raw_status:
-        status = DistinctnessStatus.SENSES_TOO_CLOSE
-    elif "DISTINCT" in raw_status:
-        status = DistinctnessStatus.SENSES_DISTINCT
-    else:
-        status = DistinctnessStatus.L6_SKIPPED_NO_PARAPHRASE
-
-    # Parse ablation
-    raw_ablation = str(parsed.get("ambiguity_ablation", "")).upper().strip()
-    if "UNSUPPORTED" in raw_ablation:
-        ablation = AmbiguityAblation.UNSUPPORTED
-    elif "SUPPORTED" in raw_ablation:
-        ablation = AmbiguityAblation.SUPPORTED
-    else:
-        ablation = AmbiguityAblation.SKIPPED
-
-    return L6Result(
-        distinctness_status=status,
-        ambiguity_ablation=ablation,
-        sense_a_paraphrase=parsed.get("sense_a_paraphrase"),
-        sense_b_paraphrase=parsed.get("sense_b_paraphrase"),
-        explanation=parsed.get("explanation"),
-    )
+        raise ModelResponseError("L6 did not return a valid JSON response")
+    parsed = validate_l6_response(call.parsed)
+    return L6Result(**parsed)

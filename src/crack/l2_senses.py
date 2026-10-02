@@ -29,8 +29,9 @@ from __future__ import annotations
 import csv
 import re
 from collections import Counter
-from functools import lru_cache
+from functools import lru_cache, wraps
 from pathlib import Path
+from threading import RLock
 
 import nltk
 
@@ -59,7 +60,21 @@ any some few more most other again once because until while don t s
 # Function words in STOPWORDS that can genuinely function as nouns/verbs in pun wordplay
 PUN_POSSIBLE_STOPWORDS = frozenset({"does", "can", "may", "will"})
 
+# NLTK's corpus reader caches file objects and performs seek/read sequences.
+# Serialize lexical access, including lazy initialization. LLM calls take
+# place after retrieval and remain concurrent.
+_WORDNET_LOCK = RLock()
 
+
+def _wordnet_locked(fn):
+    @wraps(fn)
+    def locked(*args, **kwargs):
+        with _WORDNET_LOCK:
+            return fn(*args, **kwargs)
+    return locked
+
+
+@_wordnet_locked
 @lru_cache(maxsize=1)
 def wordnet():
     """WordNet corpus reader; downloads to data/nltk_data on first use."""
@@ -68,11 +83,16 @@ def wordnet():
     try:
         nltk.data.find("corpora/wordnet")
     except LookupError:
-        nltk.download("wordnet", download_dir=str(NLTK_DIR), quiet=True, raise_on_error=True)
+        try:
+            nltk.data.find("corpora/wordnet.zip")
+        except LookupError:
+            nltk.download("wordnet", download_dir=str(NLTK_DIR), quiet=True, raise_on_error=True)
     from nltk.corpus import wordnet as wn
+    wn.ensure_loaded()
     return wn
 
 
+@_wordnet_locked
 @lru_cache(maxsize=1)
 def _lemmatizer():
     from nltk.stem import WordNetLemmatizer
@@ -80,6 +100,7 @@ def _lemmatizer():
     return WordNetLemmatizer()
 
 
+@_wordnet_locked
 @lru_cache(maxsize=1)
 def _aoa_tables() -> tuple[dict[str, float], dict[str, float], dict[str, float]]:
     """(exact, lowercase, lemmatized) AoA indexes built from the Kuperman CSV."""
@@ -104,6 +125,7 @@ def _aoa_tables() -> tuple[dict[str, float], dict[str, float], dict[str, float]]
     return exact, lower, lemma
 
 
+@_wordnet_locked
 def aoa_lookup(lemma: str) -> tuple[float | None, str]:
     """AoA for a WordNet lemma name, plus the fallback stage that matched."""
     aoa, stage = _aoa_direct(lemma)
@@ -125,6 +147,7 @@ def aoa_lookup(lemma: str) -> tuple[float | None, str]:
     return None, "miss"
 
 
+@_wordnet_locked
 def _aoa_direct(lemma: str) -> tuple[float | None, str]:
     """Stages 1-3 only (no part derivation)."""
     exact, lower, lemmatized = _aoa_tables()
@@ -158,12 +181,14 @@ def aoa_coverage(lemmas) -> dict[str, float]:
     return out
 
 
+@_wordnet_locked
 def _base_forms(word: str) -> set[str]:
     wn = wordnet()
     w = word.lower()
     return {w} | {b for p in "nvar" if (b := wn.morphy(w, p))}
 
 
+@_wordnet_locked
 def senses_for(word: str, *, term: str | None = None, source: str = "wordnet") -> list[SenseEntry]:
     """One SenseEntry per WordNet synset of *word* (any POS)."""
     wn = wordnet()
@@ -188,10 +213,13 @@ def senses_for(word: str, *, term: str | None = None, source: str = "wordnet") -
     return out
 
 
-def compound_splits(word: str, min_part: int = 3) -> list[tuple[str, str]]:
+@_wordnet_locked
+def compound_splits(word: str, min_part: int = 2) -> list[tuple[str, str]]:
     """Two-way splits where both halves are WordNet lemmas (autobiography ->
     auto + biography). Exact lemma names only: wn.lemmas() skips morphy, so
-    "lain" (-> lie) doesn't count as a part.
+    "lain" (-> lie) doesn't count as a part. Two-letter standalone dictionary
+    lemmas are allowed; a proposed split does not establish prefix meanings
+    or imply that a sentence is wordplay.
     ponytail: two-way only; recurse if a three-part split ever matters."""
     wn = wordnet()
     w = word.lower()
@@ -209,6 +237,7 @@ _REFLEXIVES = frozenset(
 )
 
 
+@_wordnet_locked
 def mwe_spans(tokens: list[str], max_n: int = 4) -> list[tuple[str, str]]:
     """(surface phrase, WordNet lemma name) for each 2-4 token n-gram that is an
     exact WordNet multiword lemma. Variants tried: first token lemmatized
@@ -237,6 +266,7 @@ def mwe_spans(tokens: list[str], max_n: int = 4) -> list[tuple[str, str]]:
     return list(found.items())
 
 
+@_wordnet_locked
 def retrieve(tokens: list[str]) -> list[SenseEntry]:
     """Senses for every content token, plus part-senses for compound splits,
     plus multiword-expression senses.

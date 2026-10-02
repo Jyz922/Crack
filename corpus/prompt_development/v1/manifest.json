@@ -1,0 +1,27 @@
+{
+  "version": "1",
+  "split": "development",
+  "source": "project-authored synthetic examples",
+  "item_count": 10,
+  "outcome_counts": {
+    "PUN": 4,
+    "NON_PUN": 4,
+    "INSUFFICIENT_EVIDENCE": 1,
+    "OUT_OF_SCOPE": 1
+  },
+  "examples_sha256": "d89aff4f8056265e650f012669a72305c9cdab3b9eebc009acd26c6a0b7108ea",
+  "families": [
+    "bookcase",
+    "cabinet",
+    "cast",
+    "channel",
+    "thyme"
+  ],
+  "production_prompt_loading": false,
+  "evaluation_role": "Fixed development annotations; excluded from independent benchmark scores.",
+  "derived_files_sha256": {
+    "blind.jsonl": "a1ee0e99da2e29cb8d14ef97d16d99765c296736daf8e85f0eb083338accf300",
+    "expected.jsonl": "d4eb5afce73a9f59826d9ccff7c39700b53bce04d845de401efc0303f5461909"
+  },
+  "age_annotations": false
+}

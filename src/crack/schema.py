@@ -9,7 +9,7 @@ Invariant enforced by model_validator on AnalysisRecord:
 
 from __future__ import annotations
 
-from typing import Annotated, Literal, Optional, Union
+from typing import Annotated, Any, Literal, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -20,6 +20,8 @@ from .enums import (
     AnchoringStatus,
     ComprehensionStatus,
     DistinctnessStatus,
+    DetectionStatus,
+    detection_status_for,
     Genre,
     MainClassification,
     ResolutionStatus,
@@ -57,6 +59,9 @@ class CandidateEntry(BaseModel):
     score_components: dict[str, float] = Field(default_factory=dict)
     sense_a_id: Optional[str] = None
     sense_b_id: Optional[str] = None
+    # Keep alternative segmentations even when another reading ranks first.
+    # These are lexical proposals, not positive detection findings.
+    split_options: list[tuple[str, str]] = Field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------
@@ -87,6 +92,52 @@ class L3Result(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     candidates: list[CandidateEntry] = Field(default_factory=list)
+    # Retain the ranked tail for L4 continuation; it is not shown as the initial
+    # top-k list and must not be treated as already assessed evidence.
+    deferred_candidates: list[CandidateEntry] = Field(default_factory=list)
+    total_terms: Optional[int] = None
+
+
+class L4CandidateFinding(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    term: str
+    status: AnchoringStatus
+
+
+class L4Search(BaseModel):
+    """Search accounting separate from the model's candidate-level response."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    mode: Literal["automatic", "target_only"] = "automatic"
+    candidate_budget: int = Field(ge=1)
+    retrieved_terms: int = Field(ge=0)
+    available_terms: int = Field(ge=0)
+    findings: list[L4CandidateFinding] = Field(default_factory=list)
+    untested_terms: int = Field(ge=0)
+    stop_reason: Literal[
+        "IN_PROGRESS", "PASS_FOUND", "ALL_RETRIEVED_ASSESSED",
+        "BUDGET_EXHAUSTED", "CANDIDATES_UNAVAILABLE", "NO_CANDIDATES",
+        "EXECUTION_FAILED", "TARGET_ONLY",
+    ] = "IN_PROGRESS"
+
+
+class L4Attempt(BaseModel):
+    """A locally accepted or rejected response, before selecting a candidate."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    candidate_term: str
+    attempt: int
+    prompt_sha256: str
+    model_used: str = ""
+    provider_retries: int = 0
+    fallback_used: bool = False
+    raw_responses: list[str] = Field(default_factory=list)
+    parsed_response: Optional[dict[str, Any]] = None
+    accepted: bool = False
+    error: str = ""
 
 
 class L4Result(BaseModel):
@@ -113,11 +164,23 @@ class L4Result(BaseModel):
     anchor_relation: Optional[AnchorRelation] = None
     anchoring_status: AnchoringStatus
     resolving_sense: Optional[Literal["sense_a", "sense_b"]] = None
+    reasoning: str = ""
+    target_term: str = ""  # Historical records remain readable.
+    split_parts: list[str] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def _pass_requires_resolving_sense(self) -> "L4Result":
-        if self.anchoring_status == AnchoringStatus.PASS and self.resolving_sense is None:
-            raise ValueError("resolving_sense is required when anchoring_status is PASS")
+        if self.anchoring_status == AnchoringStatus.PASS:
+            if self.resolving_sense is None or self.anchor_relation is None:
+                raise ValueError("PASS requires resolving_sense and anchor_relation")
+            if not all(s.strip() for s in (self.sense_a, self.sense_b, self.sense_a_anchor_quote, self.sense_b_anchor_quote)):
+                raise ValueError("PASS requires two nonempty meanings and anchors")
+            if self.sense_a.strip().casefold() == self.sense_b.strip().casefold():
+                raise ValueError("PASS cannot use identical meaning descriptions")
+            if self.anchor_relation != AnchorRelation.RESEGMENTATION and self.sense_a_anchor_quote.casefold() == self.sense_b_anchor_quote.casefold():
+                raise ValueError("Non-split PASS requires different context anchors")
+        elif self.resolving_sense is not None or self.anchor_relation is not None:
+            raise ValueError("Non-PASS anchoring must not claim a resolving sense or relation")
         return self
 
 
@@ -138,6 +201,7 @@ class L5QAResult(BaseModel):
     model_used: str = ""
     fallback_used: bool = False
     retries: int = 0
+    explanation: str = ""
 
 
 class L5DefinitionalResult(BaseModel):
@@ -158,6 +222,7 @@ class L5DefinitionalResult(BaseModel):
     model_used: str = ""
     fallback_used: bool = False
     retries: int = 0
+    explanation: str = ""
 
 
 class L5DialogueResult(BaseModel):
@@ -176,6 +241,7 @@ class L5DialogueResult(BaseModel):
     model_used: str = ""
     fallback_used: bool = False
     retries: int = 0
+    explanation: str = ""
 
 
 class L5DeclarativeResult(BaseModel):
@@ -195,6 +261,7 @@ class L5DeclarativeResult(BaseModel):
     model_used: str = ""
     fallback_used: bool = False
     retries: int = 0
+    explanation: str = ""
 
 
 L5Result = Annotated[
@@ -211,6 +278,8 @@ class L6Result(BaseModel):
     sense_a_paraphrase: Optional[str] = None
     sense_b_paraphrase: Optional[str] = None
     explanation: Optional[str] = None
+    suppresses_other: Optional[bool] = None
+    materially_different: Optional[bool] = None
 
 
 class L7Result(BaseModel):
@@ -274,6 +343,18 @@ class FinalVerdict(BaseModel):
     main_classification: MainClassification
     scope_label: ScopeLabel
     per_age: dict[int, AgeVerdict] = Field(default_factory=dict)
+    detection_status: Optional[DetectionStatus] = None
+    review_required: bool = False
+    review_reason: str = ""
+
+    @model_validator(mode="after")
+    def _decision_state(self) -> "FinalVerdict":
+        expected = detection_status_for(self.main_classification)
+        if self.detection_status is not None and self.detection_status != expected:
+            raise ValueError("detection_status contradicts main_classification")
+        self.detection_status = expected
+        self.review_required = expected not in {DetectionStatus.PUN, DetectionStatus.NON_PUN}
+        return self
 
 
 # ---------------------------------------------------------------------------
@@ -298,6 +379,7 @@ class AnalysisRecord(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     item_id: str
+    validation_version: Optional[str] = None
     text: str
     target_ages: list[int]
 
@@ -305,6 +387,8 @@ class AnalysisRecord(BaseModel):
     l2_result: Optional[L2Result] = None
     l3_result: Optional[L3Result] = None
     l4_result: Optional[L4Result] = None
+    l4_attempts: list[L4Attempt] = Field(default_factory=list)
+    l4_search: Optional[L4Search] = None
     l5_result: Optional[L5Result] = None
     l6_result: Optional[L6Result] = None
     l7_result: Optional[L7Result] = None

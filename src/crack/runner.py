@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import argparse
 import concurrent.futures
+import hashlib
 import json
 import os
 import re
@@ -56,8 +57,11 @@ if __package__ in (None, ""):
     if str(_src_dir) not in sys.path:
         sys.path.insert(0, str(_src_dir))
     from crack.config import DEFAULT_SETTINGS, Settings
+    from crack.decisions import DETECTION_LAYERS, detection_decision
+    from crack.validation import RESPONSE_CONTRACT_VERSION
     from crack.corpus import evaluate_run, load_blind
     from crack.enums import (
+        AmbiguityAblation,
         AnchorRelation,
         AnchoringStatus,
         DistinctnessStatus,
@@ -85,8 +89,11 @@ if __package__ in (None, ""):
     from crack.schema import AnalysisRecord, FinalVerdict, LayerTrace
 else:
     from .config import DEFAULT_SETTINGS, Settings
+    from .decisions import DETECTION_LAYERS, detection_decision
+    from .validation import RESPONSE_CONTRACT_VERSION
     from .corpus import evaluate_run, load_blind
     from .enums import (
+        AmbiguityAblation,
         AnchorRelation,
         AnchoringStatus,
         DistinctnessStatus,
@@ -135,6 +142,37 @@ def clear_registry() -> None:
     _LAYER_REGISTRY.clear()
 
 
+def execute_layer(
+    name: str, fn: Callable[[AnalysisRecord, Settings], AnalysisRecord],
+    record: AnalysisRecord, settings: Settings,
+) -> AnalysisRecord:
+    """Stop dependent work after failure/abstention; always run the finalizer."""
+    reason = ""
+    if name != "L0-post":
+        if any(t.layer in DETECTION_LAYERS and t.status in {"ERROR", "REJECTED"} for t in record.trace):
+            reason = "An earlier detection stage failed."
+        elif name in {"L5", "L6", "L7", "L8"} and (
+            record.l4_result is None or record.l4_result.anchoring_status != AnchoringStatus.PASS
+        ):
+            reason = "L4 did not confirm two anchored meanings."
+        elif name in {"L6", "L7", "L8"} and (
+            record.l5_result is None or record.l5_result.resolution_status != ResolutionStatus.RESOLUTION_PASS
+        ):
+            reason = "L5 did not confirm semantic resolution."
+        elif name in {"L7", "L8"} and (
+            record.l6_result is None
+            or record.l6_result.distinctness_status != DistinctnessStatus.SENSES_DISTINCT
+            or record.l6_result.ambiguity_ablation != AmbiguityAblation.SUPPORTED
+        ):
+            reason = "L6 did not complete the required distinctness assessment."
+        elif name == "L8" and record.l7_result is None:
+            reason = "Comprehension assessment is unavailable."
+    if reason:
+        record.trace.append(LayerTrace(layer=name, status="SKIPPED", reason=reason, duration_ms=0))
+        return record
+    return fn(record, settings)
+
+
 # ---------------------------------------------------------------------------
 # Built-in L0 layers
 # ---------------------------------------------------------------------------
@@ -142,6 +180,7 @@ def clear_registry() -> None:
 def _l0_pre_layer(record: AnalysisRecord, settings: Settings) -> AnalysisRecord:
     """L0-pre: validate and normalise input text."""
     start = time.monotonic()
+    record.validation_version = RESPONSE_CONTRACT_VERSION
     try:
         record.text = preprocess_input(record.text, settings)
         status, reason = "OK", None
@@ -212,58 +251,25 @@ def _l0_post_layer(record: AnalysisRecord, settings: Settings) -> AnalysisRecord
     )
     scope_label = assign_scope_label(evidence)
 
-    main_class = MainClassification.NO_AMBIGUITY_FOUND
-    if scope_label == ScopeLabel.OUT_OF_SCOPE_HOMOPHONE:
-        main_class = MainClassification.OUT_OF_SCOPE_HOMOPHONE
-    elif scope_label == ScopeLabel.OUT_OF_SCOPE_NONLEXICAL_JOKE:
-        main_class = MainClassification.OUT_OF_SCOPE_NONLEXICAL_JOKE
-    elif record.l4_result is not None and record.l4_result.anchoring_status == AnchoringStatus.ONE_SENSE_ONLY:
-        main_class = MainClassification.ONE_SENSE_ONLY
-    elif record.l4_result is not None and record.l4_result.anchoring_status == AnchoringStatus.FAIL:
-        main_class = MainClassification.ANCHORING_FAIL
-    elif record.l5_result is not None:
-        if record.l5_result.resolution_status == ResolutionStatus.RESOLUTION_PASS:
-            if record.l6_result is not None and record.l6_result.distinctness_status == DistinctnessStatus.SENSES_TOO_CLOSE:
-                main_class = MainClassification.SENSES_TOO_CLOSE
-            else:
-                main_class = (
-                    MainClassification.VALID_COMPOUND_SPLIT_JOKE
-                    if scope_label == ScopeLabel.COMPOUND_SPLIT
-                    else MainClassification.VALID_HOMOGRAPH_JOKE
-                )
-        elif record.l5_result.resolution_status == ResolutionStatus.RESOLUTION_FAIL:
-            main_class = MainClassification.RESOLUTION_FAIL
-
-    # Confidence calculation per README § L6 (lowered when L6 paraphrase is skipped)
-    confidence: float | None = None
-    if record.l5_result is not None and record.l5_result.resolution_score is not None:
-        confidence = float(record.l5_result.resolution_score)
-        if record.l6_result is not None:
-            if record.l6_result.distinctness_status == DistinctnessStatus.L6_SKIPPED_NO_PARAPHRASE:
-                confidence = round(confidence * 0.85, 3)
-            elif record.l6_result.distinctness_status == DistinctnessStatus.SENSES_DISTINCT:
-                confidence = min(1.0, round(confidence, 3))
-    elif record.l3_result is not None and record.l3_result.candidates:
-        confidence = round(record.l3_result.candidates[0].score, 3)
-    record.confidence = confidence
-
+    main_class, review_reason = detection_decision(record, scope_label)
+    decided = main_class in {
+        MainClassification.VALID_HOMOGRAPH_JOKE, MainClassification.VALID_COMPOUND_SPLIT_JOKE,
+        MainClassification.ONE_SENSE_ONLY, MainClassification.RESOLUTION_FAIL, MainClassification.SENSES_TOO_CLOSE,
+    }
+    record.confidence = (
+        record.l5_result.resolution_score if decided and record.l5_result else None
+    )
+    record.final = FinalVerdict(
+        main_classification=main_class, scope_label=scope_label,
+        per_age=record.final.per_age if decided and record.final else {},
+        review_reason=review_reason,
+    )
     duration_ms = round((time.monotonic() - start) * 1000, 3)
-
-    if record.final is None:
-        record.final = FinalVerdict(
-            main_classification=main_class,
-            scope_label=scope_label,
-        )
-    else:
-        record.final = record.final.model_copy(update={
-            "scope_label": scope_label,
-            "main_classification": main_class,
-        })
 
     record.trace.append(LayerTrace(
         layer="L0-post",
         status="OK",
-        reason=f"scope_label={scope_label}",
+        reason=review_reason or f"scope_label={scope_label}",
         duration_ms=duration_ms,
         hints_used=0,
     ))
@@ -299,6 +305,23 @@ def _git_sha() -> str:
         return "unknown"
 
 
+def _run_fingerprint(blind_path: str | Path, settings: Settings) -> dict:
+    """Freeze inputs, source/prompt bytes and nonsecret settings before inference."""
+    package_root = Path(__file__).resolve().parent
+    source_files = sorted([
+        *package_root.glob("*.py"), *package_root.joinpath("prompts").glob("*.md"),
+    ])
+    excluded = {name for name in Settings.model_fields if name.endswith(("_API_KEY", "_BASE_URL"))}
+    return {
+        "blind_sha256": hashlib.sha256(Path(blind_path).read_bytes()).hexdigest(),
+        "source_sha256": {
+            path.relative_to(package_root).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
+            for path in source_files
+        },
+        "config": settings.model_dump(mode="json", exclude=excluded),
+    }
+
+
 def run(
     blind_path: str | Path,
     settings: Settings = DEFAULT_SETTINGS,
@@ -310,6 +333,8 @@ def run(
 
     Returns the path to the output directory created for this run.
     """
+    if concurrency < 1:
+        raise ValueError("concurrency must be positive")
     if settings is DEFAULT_SETTINGS:
         backend_req = os.getenv("CRACK_BACKEND") or os.getenv("DOUBLETAKE_BACKEND") or "auto"
         backend = resolve_backend(backend_req)
@@ -334,14 +359,31 @@ def run(
                         try:
                             rec = AnalysisRecord.model_validate_json(line)
                             # Only resume items that completed cleanly without layer errors
-                            if not any(t.status == "ERROR" for t in rec.trace):
-                                existing_records[rec.item_id] = rec
+                            if (
+                                rec.validation_version == RESPONSE_CONTRACT_VERSION
+                                and rec.final and not rec.final.review_required
+                                and not any(t.status == "ERROR" for t in rec.trace)
+                            ):
+                                verified, _ = detection_decision(rec, rec.final.scope_label)
+                                if verified == rec.final.main_classification:
+                                    existing_records[rec.item_id] = rec
                         except Exception:
                             pass
 
     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     out_dir = Path(output_root) / ts
     out_dir.mkdir(parents=True, exist_ok=True)
+    meta = {
+        "timestamp": ts,
+        "validation_version": RESPONSE_CONTRACT_VERSION,
+        "git_sha": _git_sha(),
+        "blind_path": str(blind_path),
+        **_run_fingerprint(blind_path, settings),
+        "layers": [name for name, _ in _LAYER_REGISTRY],
+        "item_count": len(blind_items),
+        "concurrency": concurrency,
+    }
+    (out_dir / "run_meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
 
     def _process_item(item: BlindItem) -> AnalysisRecord:
         record = AnalysisRecord(
@@ -352,7 +394,7 @@ def run(
         for layer_name, layer_fn in _LAYER_REGISTRY:
             start = time.monotonic()
             try:
-                record = layer_fn(record, settings)
+                record = execute_layer(layer_name, layer_fn, record, settings)
             except Exception as exc:
                 duration_ms = round((time.monotonic() - start) * 1000, 3)
                 record.trace.append(LayerTrace(
@@ -371,7 +413,7 @@ def run(
     with (out_dir / "records.jsonl").open("w", encoding="utf-8") as fout:
         remaining_items: list[BlindItem] = []
         for item in blind_items:
-            if item.id in existing_records:
+            if item.id in existing_records and existing_records[item.id].text == item.text and existing_records[item.id].target_ages == item.target_ages:
                 record = existing_records[item.id]
                 fout.write(record.model_dump_json() + "\n")
                 fout.flush()
@@ -381,6 +423,13 @@ def run(
 
         if completed_count > 0:
             print(f"Resumed {completed_count}/{total_items} items from previous run. Processing remaining {len(remaining_items)} items...", flush=True)
+
+        active_workers = min(concurrency, len(remaining_items))
+        print(
+            f"Starting {len(remaining_items)} items with {active_workers} concurrent worker(s). "
+            f"Records: {out_dir / 'records.jsonl'}",
+            flush=True,
+        )
 
         if concurrency <= 1:
             for item in remaining_items:
@@ -402,30 +451,6 @@ def run(
                         if completed_count % 10 == 0 or completed_count == total_items:
                             print(f"[{datetime.now().strftime('%H:%M:%S')}] Progress: {completed_count}/{total_items} items processed ({completed_count/total_items:.1%})", flush=True)
 
-    meta = {
-        "timestamp": ts,
-        "git_sha": _git_sha(),
-        "blind_path": str(blind_path),
-        "config": {
-            "MAX_INPUT_CHARS": settings.MAX_INPUT_CHARS,
-            "MIN_INPUT_CHARS": settings.MIN_INPUT_CHARS,
-            "MAX_NON_ASCII_RATIO": settings.MAX_NON_ASCII_RATIO,
-            "L3_TOP_K": settings.L3_TOP_K,
-            "L4_BACKEND": settings.L4_BACKEND,
-            "L5_BACKEND": settings.L5_BACKEND,
-            "L6_BACKEND": settings.L6_BACKEND,
-            "L7_BACKEND": settings.L7_BACKEND,
-            "L8_BACKEND": settings.L8_BACKEND,
-            "L5_QA_WEIGHTS": settings.L5_QA_WEIGHTS,
-            "L5_RESOLUTION_THRESHOLDS": dict(settings.L5_RESOLUTION_THRESHOLDS),
-        },
-        "layers": [name for name, _ in _LAYER_REGISTRY],
-        "item_count": len(blind_items),
-    }
-    (out_dir / "run_meta.json").write_text(
-        json.dumps(meta, indent=2), encoding="utf-8"
-    )
-
     return out_dir
 
 
@@ -444,8 +469,12 @@ def format_analysis_report(record: AnalysisRecord, target_age: int) -> str:
         verdict = "🎉 VALID JOKE"
     elif mc in ("OUT_OF_SCOPE_HOMOPHONE", "OUT_OF_SCOPE_NONLEXICAL_JOKE"):
         verdict = "⚠️ OUT OF SCOPE (Potential joke beyond homograph model scope)"
+    elif mc == "EXECUTION_FAILED":
+        verdict = "EXECUTION FAILED — retry or review required"
+    elif mc in ("ONE_SENSE_ONLY", "RESOLUTION_FAIL", "SENSES_TOO_CLOSE"):
+        verdict = "NO PUN DETECTED"
     else:
-        verdict = "❌ NOT A JOKE"
+        verdict = "INSUFFICIENT EVIDENCE — context or review required"
 
     mc_map = {
         "VALID_HOMOGRAPH_JOKE": "VALID_HOMOGRAPH_JOKE (Lexical pun: dual meanings of a single homograph)",
@@ -462,7 +491,9 @@ def format_analysis_report(record: AnalysisRecord, target_age: int) -> str:
 
     lines.append(f"[VERDICT]           {verdict}")
     lines.append(f"[CLASSIFICATION]    {mc_desc}")
-    lines.append(f"[CONFIDENCE]        {conf}")
+    lines.append(f"[RESOLUTION SCORE]  {conf}")
+    if record.final and record.final.review_required:
+        lines.append(f"[REVIEW REQUIRED]   {record.final.review_reason}")
 
     # 2. Text & Genre
     lines.append("-" * 70)
@@ -561,7 +592,11 @@ def _main(argv: list[str] | None = None) -> None:
     )
     parser.add_argument(
         "--concurrency", "-j", type=int, default=1, metavar="N",
-        help="Number of concurrent worker threads (default: 1). Use 8-12 for high-throughput batch evaluation.",
+        help="Number of texts processed concurrently (default: 1). Lexical reader access is synchronized; model requests can overlap.",
+    )
+    parser.add_argument(
+        "--candidate-budget", type=int, default=None, metavar="N",
+        help="Maximum distinct L4 candidates per text (default: 24). Does not change decision thresholds.",
     )
     parser.add_argument(
         "--serve", action="store_true",
@@ -576,6 +611,10 @@ def _main(argv: list[str] | None = None) -> None:
         help="Host for the web UI server (default: 127.0.0.1).",
     )
     args = parser.parse_args(argv)
+    if args.concurrency < 1:
+        parser.error("--concurrency must be positive")
+    if args.candidate_budget is not None and args.candidate_budget < 1:
+        parser.error("--candidate-budget must be positive")
 
     if args.serve:
         import uvicorn
@@ -592,6 +631,7 @@ def _main(argv: list[str] | None = None) -> None:
         "L6_BACKEND": backend,
         "L7_BACKEND": backend,
         "L8_BACKEND": backend,
+        **({"L4_MAX_CANDIDATES": args.candidate_budget} if args.candidate_budget is not None else {}),
     })
 
     if args.text:
@@ -603,7 +643,7 @@ def _main(argv: list[str] | None = None) -> None:
         for layer_name, layer_fn in _LAYER_REGISTRY:
             start = time.monotonic()
             try:
-                record = layer_fn(record, settings)
+                record = execute_layer(layer_name, layer_fn, record, settings)
             except Exception as exc:
                 duration_ms = round((time.monotonic() - start) * 1000, 3)
                 record.trace.append(LayerTrace(
@@ -646,8 +686,18 @@ def _main(argv: list[str] | None = None) -> None:
             eval_target = out_root.parent / f"{out_root.stem}_eval.json"
             shutil.copyfile(eval_file, eval_target)
         print("\nEvaluation summary:")
-        print(f"  Classification accuracy: {eval_res['classification_accuracy']:.1%} ({eval_res['correct_classification']}/{eval_res['total_items']})")
-        print(f"  Age verdict match rate:  {eval_res['age_accuracy']:.1%} ({eval_res['correct_age_evals']}/{eval_res['total_age_evals']})")
+        def percent(value):
+            return f"{value:.1%}" if value is not None else "N/A"
+        print(f"  Classification accuracy (all items): {percent(eval_res['classification_accuracy'])} ({eval_res['correct_classification']}/{eval_res['total_items']})")
+        print(f"  Decision coverage: {percent(eval_res['decision_coverage'])} ({eval_res['decided_items']}/{eval_res['total_items']})")
+        print(f"  Classification accuracy (decided): {percent(eval_res['classification_accuracy_on_decided'])}")
+        binary = eval_res["binary_detection"]
+        print(f"  Binary accuracy (all items): {percent(binary['accuracy_all_items'])}")
+        print(f"  Binary accuracy (decided): {percent(binary['accuracy_on_decided'])}; coverage: {percent(binary['decision_coverage'])}")
+        print(f"  Outcomes: {eval_res['outcome_counts']}")
+        print(f"  Age label agreement (all labels): {percent(eval_res['age_accuracy'])} ({eval_res['correct_age_evals']}/{eval_res['total_age_evals']})")
+        print(f"  Age assessment coverage: {percent(eval_res['age_assessment_coverage'])} ({eval_res['assessed_age_evals']}/{eval_res['total_age_evals']})")
+        print(f"  Age label agreement (assessed): {percent(eval_res['age_accuracy_on_assessed'])}")
         print(f"  Report written to: {eval_file}")
 
 

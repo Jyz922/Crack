@@ -15,7 +15,7 @@ CRACK runs input checks, lexical analysis, model-assisted semantic checks, and a
 | L6 | Check whether the two readings are distinct enough to support wordplay. | `l6_distinctness.py` |
 | L7 | Estimate comprehension by requested age using AoA data and heuristic rules. | `l7_comprehension.py` |
 | L8 | Assess surface-content and inferential appropriateness separately. | `l8_appropriateness.py` |
-| L0-post | Combine evidence into a final class and scope label. | `l0_scope.py` |
+| L0-post | Combine validated evidence into a final class and scope label. | `runner.py`, `decisions.py` |
 
 The runner records a `LayerTrace` for each stage. If a stage's result removes the evidence required downstream, later stages can return a skipped or insufficient-context status. The individual layer functions are also called directly in tests and tools.
 
@@ -25,11 +25,18 @@ L2 uses NLTK WordNet and WordNet lemma counts associated with SemCor. Age estima
 
 L3 ranks candidate terms without using the requested target age. Age-dependent judgments are handled later by L7, so the candidate list is intended to stay the same when only the requested age changes.
 
-L4 prompts for quotes that support each proposed reading. The implementation can verify that a returned quote occurs in the input text. This checks textual grounding, but it does not prove that the interpretation is correct or funny.
+The initial queue contains eight terms. Remaining ranked terms are retained as
+`deferred_candidates`. If L4 finds no pass in the initial queue, it continues in
+the same order up to `L4_MAX_CANDIDATES` (default 24). This is a provider-call
+budget, separate from the scoring thresholds. `l4_search` records validated
+candidate findings, untested terms and the reason the search stopped. A budget
+limit or missing candidate data cannot establish a completed negative finding.
+
+L4 requires quotes that support each proposed reading. `validation.py` rejects nonempty quotes absent from the input, missing fields, unknown states, and contradictory findings. Positive final decisions require completed L4, L5, and L6 evidence; unresolved stages request review. See [response validation and evaluation denominators](docs/response_validation.md).
 
 ## Model-assisted stages
 
-L4–L8 use provider clients from `providers.py`. The configured provider and model can vary by layer; API keys and settings can be supplied through the environment. Model output is parsed into typed Pydantic schemas. Parsing and schema checks constrain output shape, not semantic correctness.
+L4–L6 use provider clients from `providers.py`. The configured provider and model can vary by layer; API keys and settings can be supplied through the environment. Required fields and cross-field constraints are checked locally for every detection backend. L7–L8 use local data and rules in the default runner; their optional LLM paths run only when a client is explicitly supplied. Structural checks do not establish semantic correctness.
 
 L5 uses genre-specific result schemas. QA riddles use weighted subscores for polarity or event direction, answer relevance, causal fit, agent compatibility, and tense/aspect fit. Other genres use their own subscores. Thresholds are stored in `config.py`; their calibration evidence and known weaknesses are described in `docs/L5_CALIBRATION.md`.
 

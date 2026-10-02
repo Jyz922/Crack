@@ -83,6 +83,12 @@ CRACK validates each input, builds lexical evidence, checks candidate readings a
 
 The runner records each layer's evidence and status. See [ARCHITECTURE.md](ARCHITECTURE.md) for implementation details.
 
+Detection responses are checked for source quotes, required fields, valid scores,
+and consistent findings. Results distinguish **pun**, **non-pun**, **insufficient
+evidence**, and **execution failure**, with a separate out-of-scope status. The
+interface shows a review or retry action when no decision can be made. See
+[response validation](docs/response_validation.md) for the enforced rules.
+
 ## Installation
 
 Use Python 3.11 or later:
@@ -138,6 +144,16 @@ crack --input corpus/joke_corpus_blind.jsonl \
 ```
 
 Both commands regenerate predictions and metrics from the benchmark splits. The exact model version for the historical SemEval run was not recorded; a new run uses the provider and model configured at run time. The CLI prints age-label agreement for schema compatibility. SemEval has no human age annotations, so the pun-classification metrics are the benchmark comparison scores.
+
+New evaluations report **decision coverage**, **accuracy over all items**, and
+**accuracy over decided items** together. Unresolved and failed items remain
+separate from negative predictions. The benchmark scores above describe their
+saved runs; results under the current response contract require a fresh run.
+Age-label agreement is reported with assessment coverage. See the
+[response checks](docs/response_validation.md) and
+[repair review and evaluation protocol](docs/repair_review.md).
+Prompt changes can be compared with the
+[controlled comparison procedure](docs/prompt_cleanup_comparison.md).
 
 Run the test suite with:
 

@@ -19,6 +19,7 @@ from pydantic import BaseModel, ConfigDict
 
 from .config import Settings
 from .enums import AnchorRelation, AnchoringStatus, Genre, ResolutionStatus
+from .validation import ModelResponseError, validate_l5_response, require_completion
 from .schema import (
     AnalysisRecord,
     L4Result,
@@ -70,37 +71,43 @@ _GENRE_TO_PROMPT: dict[Genre, str] = {
 # ---------------------------------------------------------------------------
 # Pydantic response models — used as Gemini response_schema.
 # The SDK calls model_json_schema() and handles $defs / field conversion.
-# extra="ignore" so any extra LLM fields (e.g. reasoning) don't fail validation.
+# All fields, including abstention and reasoning, are explicit in the schema.
 # ---------------------------------------------------------------------------
 
-class _QALLMResponse(BaseModel):
-    model_config = ConfigDict(extra="ignore")
-    polarity_or_direction: float
-    answer_relevance: float
-    causal: float
-    agent: float
-    tense_aspect: float
+class _ResolutionResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    evidence_sufficient: bool
+    reasoning: str
 
 
-class _DefinitionalLLMResponse(BaseModel):
-    model_config = ConfigDict(extra="ignore")
-    setup_invites_literal: float
-    punchline_exploits_split: float
-    contrast_strength: float
+class _QALLMResponse(_ResolutionResponse):
+    model_config = ConfigDict(extra="forbid")
+    polarity_or_direction: float | None
+    answer_relevance: float | None
+    causal: float | None
+    agent: float | None
+    tense_aspect: float | None
 
 
-class _DialogueLLMResponse(BaseModel):
-    model_config = ConfigDict(extra="ignore")
-    misunderstanding_plausible: float
-    contrast_clear: float
-    speaker_intention_clear: float
+class _DefinitionalLLMResponse(_ResolutionResponse):
+    model_config = ConfigDict(extra="forbid")
+    setup_invites_literal: float | None
+    punchline_exploits_split: float | None
+    contrast_strength: float | None
 
 
-class _DeclarativeLLMResponse(BaseModel):
-    model_config = ConfigDict(extra="ignore")
-    both_readings_available: float
-    punchline_sense_is_unexpected: float
-    incongruity_present: float
+class _DialogueLLMResponse(_ResolutionResponse):
+    model_config = ConfigDict(extra="forbid")
+    misunderstanding_plausible: float | None
+    contrast_clear: float | None
+    speaker_intention_clear: float | None
+
+
+class _DeclarativeLLMResponse(_ResolutionResponse):
+    model_config = ConfigDict(extra="forbid")
+    both_readings_available: float | None
+    punchline_sense_is_unexpected: float | None
+    incongruity_present: float | None
 
 
 # ---------------------------------------------------------------------------
@@ -150,6 +157,8 @@ def _validate_keys(
     backend: str,
 ) -> None:
     """Raise ValueError and log warnings if any required key is absent."""
+    if not isinstance(parsed, dict):
+        raise ModelResponseError("L5 requires a JSON object")
     missing = required_keys - parsed.keys()
     if missing:
         for field in sorted(missing):
@@ -202,6 +211,7 @@ def _empty_result(
     model_used: str = "",
     fallback_used: bool = False,
     retries: int = 0,
+    explanation: str = "",
 ) -> L5Result:
     """Build an empty (no-subscore) L5 result carrying *status*.
 
@@ -209,7 +219,7 @@ def _empty_result(
     TRUNCATED_OUTPUT (MAX_TOKENS) — resolution_score stays None either way.
     """
     empty: dict[str, float] = {}
-    kw = dict(model_used=model_used, fallback_used=fallback_used, retries=retries)
+    kw = dict(model_used=model_used, fallback_used=fallback_used, retries=retries, explanation=explanation)
     if genre == Genre.QA_RIDDLE:
         return L5QAResult(
             genre=Genre.QA_RIDDLE,
@@ -261,6 +271,7 @@ def _call_llm(
             max_tokens=512,
             messages=[{"role": "user", "content": prompt_text + suffix}],
         )
+        require_completion(getattr(response, "stop_reason", None))
         raw: str = response.content[0].text
         try:
             parsed = _extract_json(raw)
@@ -399,6 +410,7 @@ def _call_gemini_single(
                     # do NOT parse or retry (would just truncate again).
                     return None, retries, None, True, thoughts
 
+                require_completion(_finish)
                 try:
                     parsed = _extract_json(raw)
                     if required_keys:
@@ -636,7 +648,7 @@ def resolve_l5(
         response_model = _DialogueLLMResponse
 
     call = _complete_json(
-        prompt, frozenset(weights), response_model, settings, client, diagnostics
+        prompt, frozenset(weights) | {"evidence_sufficient", "reasoning"}, response_model, settings, client, diagnostics
     )
 
     if call.truncated:
@@ -656,16 +668,18 @@ def resolve_l5(
         )
 
     if call.parsed is None:
+        raise ModelResponseError("L5 did not return a complete valid JSON response")
+    parsed = validate_l5_response(call.parsed, set(weights))
+    if not parsed["evidence_sufficient"]:
         return _empty_result(
-            genre,
-            model_used=call.model_used,
-            fallback_used=call.fallback_used,
-            retries=call.retries,
+            genre, explanation=parsed["reasoning"], model_used=call.model_used,
+            fallback_used=call.fallback_used, retries=call.retries,
         )
 
     subscores = {k: float(call.parsed[k]) for k in weights}
     score = _weighted_score(subscores, weights)
     kw = dict(
+        explanation=parsed["reasoning"],
         resolution_score=round(score, 4),
         subscores=subscores,
         model_used=call.model_used,

@@ -37,11 +37,13 @@ from crack.enums import (
     AnchoringStatus,
     Genre,
     MainClassification,
+    DetectionStatus,
+    detection_status_for,
     ResolutionStatus,
     ScopeLabel,
 )
-from crack.l2_senses import _aoa_tables, wordnet
-from crack.runner import _LAYER_REGISTRY
+from crack.l2_senses import _aoa_tables
+from crack.runner import _LAYER_REGISTRY, execute_layer
 from crack.schema import (
     AgeAppropriatenessVerdict,
     AgeVerdict,
@@ -137,21 +139,26 @@ def _build_final_payload(rec: AnalysisRecord, target_age: int) -> dict[str, Any]
                 "score": round(c.score, 3),
                 "sense_a_id": c.sense_a_id,
                 "sense_b_id": c.sense_b_id,
+                "split_options": c.split_options,
                 "components": c.score_components,
             })
 
     # Only expose a punchline and dual readings after the pipeline confirms a
     # resolved homographic or compound-split joke. L3 candidates alone are
     # hypotheses, not evidence that a text uses both meanings.
-    classification = rec.final.main_classification if rec.final else None
+    classification = rec.final.main_classification if rec.final else MainClassification.EXECUTION_FAILED
+    if any(t.layer == "L0-post" and t.status == "ERROR" for t in rec.trace):
+        classification = MainClassification.EXECUTION_FAILED
+    detection_status = detection_status_for(classification)
+    review_required = detection_status not in {DetectionStatus.PUN, DetectionStatus.NON_PUN}
+    review_reason = (rec.final.review_reason if rec.final else "") if review_required else ""
+    if review_required and not review_reason:
+        review_reason = "Analysis could not reach a validated decision. Review the execution trace and retry."
     has_confirmed_wordplay = classification in {
         MainClassification.VALID_HOMOGRAPH_JOKE,
         MainClassification.VALID_COMPOUND_SPLIT_JOKE,
     }
-    is_joke_result = has_confirmed_wordplay or classification in {
-        MainClassification.OUT_OF_SCOPE_HOMOPHONE,
-        MainClassification.OUT_OF_SCOPE_NONLEXICAL_JOKE,
-    }
+    is_joke_result = has_confirmed_wordplay
 
     # 2. Punchline ambiguity site determination
     punchline = None
@@ -163,63 +170,26 @@ def _build_final_payload(rec: AnalysisRecord, target_age: int) -> dict[str, Any]
     elif has_confirmed_wordplay and candidates:
         punchline = candidates[0]["term"]
 
-    # 3. Dual Senses (from real L4 result if present, else WordNet/L2)
+    # 3. Dual senses from validated L4 evidence only
     sense_a = None
     sense_b = None
     if has_confirmed_wordplay and rec.l4_result and rec.l4_result.anchoring_status == AnchoringStatus.PASS:
         sense_a = {
             "definition": rec.l4_result.sense_a,
             "quote": rec.l4_result.sense_a_anchor_quote,
-            "aoa": getattr(rec.l7_result, "sense_a_aoa", 4.5) or 4.5,
+            "aoa": getattr(rec.l7_result, "sense_a_aoa", None),
             "label": "Sense A (Anchored Meaning)",
         }
         sense_b = {
             "definition": rec.l4_result.sense_b,
             "quote": rec.l4_result.sense_b_anchor_quote,
-            "aoa": getattr(rec.l7_result, "sense_b_aoa", 7.0) or 7.0,
+            "aoa": getattr(rec.l7_result, "sense_b_aoa", None),
             "label": "Sense B (Wordplay Resolution)",
         }
-    elif has_confirmed_wordplay and punchline:
-        # Fallback to WordNet synsets
-        try:
-            wn = wordnet()
-            syns = wn.synsets(punchline)
-            if len(syns) >= 2:
-                sense_a = {
-                    "definition": syns[0].definition(),
-                    "quote": punchline,
-                    "aoa": 4.5,
-                    "label": f"Sense A ({syns[0].name()})",
-                }
-                sense_b = {
-                    "definition": syns[1].definition(),
-                    "quote": punchline,
-                    "aoa": 6.8,
-                    "label": f"Sense B ({syns[1].name()})",
-                }
-        except Exception:
-            pass
-
-    if has_confirmed_wordplay and not sense_a and punchline:
-        sense_a = {
-            "definition": f"Primary lexical meaning of '{punchline}' in context.",
-            "quote": punchline,
-            "aoa": 4.5,
-            "label": "Sense A (Contextual reading)",
-        }
-        sense_b = {
-            "definition": f"Secondary incongruity or wordplay reading of '{punchline}'.",
-            "quote": punchline,
-            "aoa": 7.2,
-            "label": "Sense B (Punchline reading)",
-        }
-
     # 4. Incongruity Resolution explanation
     resolution_explanation = ""
-    if classification == MainClassification.OUT_OF_SCOPE_HOMOPHONE:
-        resolution_explanation = "This joke relies on sound similarity rather than a word with two meanings."
-    elif classification == MainClassification.OUT_OF_SCOPE_NONLEXICAL_JOKE:
-        resolution_explanation = "This joke relies on riddle logic or situational surprise rather than lexical ambiguity."
+    if review_required:
+        resolution_explanation = review_reason
     elif not has_confirmed_wordplay:
         resolution_explanation = "No confirmed humorous wordplay was found in this text."
     elif rec.l5_result:
@@ -259,25 +229,24 @@ def _build_final_payload(rec: AnalysisRecord, target_age: int) -> dict[str, Any]
 
     # 6. Age Spectrum & Target Evaluation (from real L7 and L8)
     age_spectrum = {}
-    if is_joke_result:
-        tested_ages = [4, 6, 8, 10, 12, 14]
+    age_assessment_available = bool(is_joke_result and rec.l7_result and rec.l8_result)
+    if age_assessment_available:
+        tested_ages = sorted({4, 6, 8, 10, 12, 14, target_age})
         for a in tested_ages:
             if rec.l7_result and a in rec.l7_result.per_age_comprehension:
                 comp = rec.l7_result.per_age_comprehension[a].value
             else:
-                comp = "FULLY_COMPREHENSIBLE" if a >= 8 else ("PARTIALLY_COMPREHENSIBLE" if a >= 6 else "INCOMPREHENSIBLE")
+                comp = "NOT_ASSESSED"
 
             if rec.l8_result and a in rec.l8_result.per_age_verdict:
                 appr = rec.l8_result.per_age_verdict[a].value
             else:
-                appr = "FULLY_AGE_APPROPRIATE" if a >= 8 else "CONTENT_OK_INFERENCE_TOO_ADVANCED"
+                appr = "NOT_ASSESSED"
 
-            if a < 7:
-                desc = "Below the metalinguistic humor acquisition floor (Age 7.0); misses abstract double meaning."
-            elif a <= 8:
-                desc = f"Emergent wordplay mastery. Aligned with AoA benchmarks ({getattr(rec.l7_result, 'sense_b_aoa', 6.5) or 6.5} yrs)."
+            if comp == "NOT_ASSESSED" or appr == "NOT_ASSESSED":
+                desc = "Assessment is unavailable for this age."
             else:
-                desc = "Full cognitive competence and vocabulary mastery for this wordplay genre."
+                desc = f"Comprehension: {comp}. Appropriateness: {appr}."
 
             age_spectrum[a] = {
                 "comprehension": comp,
@@ -285,26 +254,30 @@ def _build_final_payload(rec: AnalysisRecord, target_age: int) -> dict[str, Any]
                 "desc": desc,
             }
 
-        target_eval = age_spectrum.get(target_age, age_spectrum[8])
+        target_eval = age_spectrum.get(target_age, {
+            "comprehension": "NOT_ASSESSED", "appropriateness": "NOT_ASSESSED",
+            "desc": "Assessment is unavailable for the requested age.",
+        })
     else:
         target_eval = {
             "comprehension": "NOT_APPLICABLE",
             "appropriateness": "NOT_APPLICABLE",
-            "desc": "Age-specific joke comprehension is not applicable because no joke was detected.",
+            "desc": "Age assessment is unavailable for this result.",
         }
 
     # 7. Safety summary from L8
     content_issues = rec.l8_result.content_issues if rec.l8_result else []
     inference_issues = rec.l8_result.inference_issues if rec.l8_result else []
-    is_safe = len(content_issues) == 0 and len(inference_issues) == 0
+    safety_available = bool(is_joke_result and rec.l8_result)
+    is_safe = (len(content_issues) == 0 and len(inference_issues) == 0) if safety_available else None
 
     safety = {
-        "surface_status": "PASS" if not content_issues else "FAIL",
-        "inferential_status": "PASS" if not inference_issues else "FAIL",
+        "surface_status": ("PASS" if not content_issues else "FAIL") if safety_available else "NOT_ASSESSED",
+        "inferential_status": ("PASS" if not inference_issues else "FAIL") if safety_available else "NOT_ASSESSED",
         "is_safe": is_safe,
         "content_issues": content_issues,
         "inference_issues": inference_issues,
-        "notes": "Passed all child safety and appropriateness guardrails." if is_safe else f"Issues: {content_issues + inference_issues}",
+        "notes": ("Passed content and inference checks." if is_safe else f"Issues: {content_issues + inference_issues}") if safety_available else "Safety has not been assessed.",
     }
 
     # 8. Trace
@@ -322,9 +295,14 @@ def _build_final_payload(rec: AnalysisRecord, target_age: int) -> dict[str, Any]
         "text": rec.text,
         "target_age": target_age,
         "genre": rec.l1_result.genre.value if rec.l1_result else "DECLARATIVE",
-        "scope_label": rec.final.scope_label.value if rec.final else "HOMOGRAPH",
-        "main_classification": classification.value if classification else "NO_AMBIGUITY_FOUND",
-        "confidence": rec.confidence or (candidates[0]["score"] if candidates else 0.5),
+        "scope_label": rec.final.scope_label.value if rec.final else "NO_SCOPE_MECHANISM",
+        "main_classification": classification.value,
+        "detection_status": detection_status.value,
+        "review_required": review_required,
+        "review_reason": review_reason,
+        "suggested_action": "RETRY_ANALYSIS" if detection_status == DetectionStatus.EXECUTION_FAILED else ("REVIEW_OR_ADD_CONTEXT" if review_required else None),
+        "age_assessment_available": age_assessment_available,
+        "confidence": rec.confidence if not review_required else None,
         "punchline": punchline,
         "tokens": annotated_tokens,
         "candidates": candidates,
@@ -364,7 +342,7 @@ async def analyze_joke(req: AnalyzeRequest):
     record = AnalysisRecord(
         item_id=f"WEB_{int(time.time()*1000)}",
         text=clean_text,
-        target_ages=[4, 6, 8, 10, 12, 14],
+        target_ages=sorted({4, 6, 8, 10, 12, 14, req.target_age}),
     )
 
     loop = asyncio.get_event_loop()
@@ -373,7 +351,7 @@ async def analyze_joke(req: AnalyzeRequest):
         for layer_name, layer_fn in _LAYER_REGISTRY:
             start = time.monotonic()
             try:
-                rec = layer_fn(rec, settings)
+                rec = execute_layer(layer_name, layer_fn, rec, settings)
             except Exception as exc:
                 rec.trace.append(LayerTrace(
                     layer=layer_name,
@@ -400,7 +378,7 @@ async def stream_analysis(text: str, target_age: int = 8):
         rec = AnalysisRecord(
             item_id=f"WEB_{int(time.time()*1000)}",
             text=clean_text,
-            target_ages=[4, 6, 8, 10, 12, 14],
+            target_ages=sorted({4, 6, 8, 10, 12, 14, target_age}),
         )
 
         tokens = _tokenize_text(clean_text)
@@ -410,7 +388,7 @@ async def stream_analysis(text: str, target_age: int = 8):
             start = time.monotonic()
             try:
                 # Run the actual layer in thread pool to prevent blocking event loop
-                layer_future = loop.run_in_executor(None, layer_fn, rec, settings)
+                layer_future = loop.run_in_executor(None, execute_layer, layer_name, layer_fn, rec, settings)
                 while not layer_future.done():
                     done, _ = await asyncio.wait((layer_future,), timeout=15)
                     if not done:
@@ -453,10 +431,10 @@ async def stream_analysis(text: str, target_age: int = 8):
                 dist = rec.l6_result.distinctness_status.value if rec.l6_result else "SKIPPED"
                 yield f"event: l6\ndata: {json.dumps({'layer': 'L6', 'distinctness': dist, 'duration_ms': duration_ms, 'message': f'L6 Distinctness Check: {dist}'})}\n\n"
             elif layer_name == "L7":
-                comp = rec.l7_result.per_age_comprehension.get(target_age, "").value if (rec.l7_result and rec.l7_result.per_age_comprehension) else "UNKNOWN"
+                comp = getattr(rec.l7_result.per_age_comprehension.get(target_age), "value", "NOT_ASSESSED") if (rec.l7_result and rec.l7_result.per_age_comprehension) else "UNKNOWN"
                 yield f"event: l7\ndata: {json.dumps({'layer': 'L7', 'comprehension': comp, 'duration_ms': duration_ms, 'message': f'L7 Developmental: Age {target_age} -> {comp}'})}\n\n"
             elif layer_name == "L8":
-                appr = rec.l8_result.per_age_verdict.get(target_age, "").value if (rec.l8_result and rec.l8_result.per_age_verdict) else "UNKNOWN"
+                appr = getattr(rec.l8_result.per_age_verdict.get(target_age), "value", "NOT_ASSESSED") if (rec.l8_result and rec.l8_result.per_age_verdict) else "UNKNOWN"
                 yield f"event: l8\ndata: {json.dumps({'layer': 'L8', 'verdict': appr, 'duration_ms': duration_ms, 'message': f'L8 Child Safety Guardrail: {appr}'})}\n\n"
 
         # Final complete payload
@@ -470,22 +448,27 @@ async def stream_analysis(text: str, target_age: int = 8):
                 "target_age": target_age,
                 "genre": "DECLARATIVE",
                 "scope_label": "NO_SCOPE_MECHANISM",
-                "main_classification": "RESOLUTION_FAIL",
-                "confidence": 0.0,
+                "main_classification": "EXECUTION_FAILED",
+                "detection_status": "EXECUTION_FAILED",
+                "review_required": True,
+                "review_reason": "The analysis could not be completed. Retry or inspect the execution trace.",
+                "suggested_action": "RETRY_ANALYSIS",
+                "age_assessment_available": False,
+                "confidence": None,
                 "punchline": None,
                 "tokens": tokens,
                 "candidates": [],
                 "sense_a": None,
                 "sense_b": None,
-                "resolution_explanation": f"Pipeline analysis completed with warning: {exc}",
+                "resolution_explanation": "Analysis failed before a validated result could be produced.",
                 "target_verdict": {
                     "age": target_age,
                     "comprehension": "UNKNOWN",
-                    "appropriateness": "FULLY_AGE_APPROPRIATE",
-                    "description": "Evaluation incomplete due to internal layer warning.",
+                    "appropriateness": "NOT_ASSESSED",
+                    "description": "Evaluation could not be completed.",
                 },
                 "age_spectrum": {},
-                "safety": {"surface_status": "PASS", "inferential_status": "PASS", "is_safe": True, "notes": "No safety violations detected."},
+                "safety": {"surface_status": "NOT_ASSESSED", "inferential_status": "NOT_ASSESSED", "is_safe": None, "notes": "Safety has not been assessed."},
                 "trace": [
                     {"layer": t.layer, "status": t.status, "duration_ms": t.duration_ms, "reason": t.reason}
                     for t in rec.trace

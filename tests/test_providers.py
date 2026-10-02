@@ -145,6 +145,8 @@ class TestCallOpenAICompatible:
     def test_successful_call_extracts_json(self) -> None:
         client = MagicMock()
         choice = MagicMock()
+        choice.finish_reason = "stop"
+        choice.message.refusal = None
         choice.message.content = '{"score": 0.85, "verdict": "PASS"}'
         client.chat.completions.create.return_value = MagicMock(choices=[choice])
 
@@ -162,8 +164,12 @@ class TestCallOpenAICompatible:
     def test_retry_on_parse_failure_succeeds(self) -> None:
         client = MagicMock()
         bad_choice = MagicMock()
+        bad_choice.finish_reason = "stop"
+        bad_choice.message.refusal = None
         bad_choice.message.content = "Invalid non-json output"
         good_choice = MagicMock()
+        good_choice.finish_reason = "stop"
+        good_choice.message.refusal = None
         good_choice.message.content = '{"score": 0.9}'
 
         client.chat.completions.create.side_effect = [
@@ -210,4 +216,3 @@ class TestLoadDotenv:
         with patch.dict(os.environ, {"EXISTING_KEY": "original_val"}, clear=True):
             load_dotenv(env_file)
             assert os.environ.get("EXISTING_KEY") == "original_val"
-

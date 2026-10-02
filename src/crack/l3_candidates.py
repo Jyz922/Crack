@@ -7,9 +7,10 @@ and hand-tagged: shingles, net-as-income, ex all have count 0).
 
 score = W_CONTRAST * contrast + W_BALANCE * balance
   contrast (strong)  1.0 if two senses carry different WordNet lexname()s, else 0.
-  balance  (weak)    (c2 + 1) / (c1 + 1): c1 = SemCor count of the top sense,
-                     c2 = best count in a DIFFERENT lexname. Add-one smoothing, so
-                     unseen-in-SemCor senses are neutral rather than disqualifying.
+  balance  (weak)    (c2 + 1) / (c1 + 1), the existing smoothed search heuristic.
+                     balance_observed marks whether any counts were observed:
+                     0/0 is unknown, not evidence of balanced usage. Alternative
+                     ranking rules require validation on independent data.
 Contrast outweighs balance, so every contrastive term ranks above every
 non-contrastive one.
 
@@ -50,6 +51,7 @@ def _entry(
     sense_a_id: str | None = None,
     sense_b_id: str | None = None,
 ) -> CandidateEntry:
+    observed = max(c1, c2) > 0
     balance = (c2 + 1) / (c1 + 1) if contrast else 0.0
     return CandidateEntry(
         term=term,
@@ -58,6 +60,7 @@ def _entry(
             "contrast": float(contrast), "balance": round(balance, 4),
             "top_count": float(c1), "contrast_count": float(c2),
             "compound_split": float(split),
+            "balance_observed": float(observed),
         },
         sense_a_id=sense_a_id,
         sense_b_id=sense_b_id,
@@ -92,10 +95,12 @@ def _split(term: str, source: str, whole: list[SenseEntry], parts: list[SenseEnt
     contrast = bool(contrast_parts)
     c1, c2 = sorted((_count(t) for t in tops), reverse=True)
     other_sense_id = contrast_parts[0].sense_id if contrast_parts else tops[0].sense_id
-    return _entry(
+    candidate = _entry(
         term, contrast, c1, c2, split=True,
         sense_a_id=whole_top.sense_id, sense_b_id=other_sense_id,
     )
+    candidate.split_options = [tuple(source.split(":", 1)[1].split("+"))]
+    return candidate
 
 
 def _mwe(phrase: str, mwe: list[SenseEntry], whole: dict[str, list[SenseEntry]]) -> CandidateEntry | None:
@@ -132,14 +137,23 @@ def rank(
     cands += [c for (t, src), ss in splits.items() if (c := _split(t, src, whole[t], ss))]
     cands += [c for t, ss in mwes.items() if (c := _mwe(t, ss, whole))]
     cands.sort(key=lambda c: (-c.score, c.term))
-    # One slot per term: a word can be both a homograph and a split (life ->
-    # li + fe); keep its best-scoring reading so top-k holds k distinct terms.
+    # One slot per term, retaining every supported split proposal. A ranking
+    # score sets search order; it must not erase an alternative mechanism.
     best: dict[str, CandidateEntry] = {}
     for c in cands:
-        best.setdefault(c.term, c)
+        if c.term not in best:
+            best[c.term] = c
+        else:
+            retained = best[c.term]
+            retained.split_options = list(dict.fromkeys(retained.split_options + c.split_options))
+            if c.split_options:
+                retained.score_components["compound_split"] = 1.0
     ranked = list(best.values())
     if preferred_term:
         norm = preferred_term.lower()
         if norm in best:
             ranked = [best[norm]] + [c for c in ranked if c.term != norm]
-    return L3Result(candidates=ranked[:top_k])
+    return L3Result(
+        candidates=ranked[:top_k], deferred_candidates=ranked[top_k:],
+        total_terms=len(ranked),
+    )

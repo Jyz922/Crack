@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .enums import Genre
 from .providers import BackendType, load_dotenv
@@ -48,9 +48,13 @@ class Settings(BaseModel):
     # --- L3 candidate ranking --------------------------------------------
     # NOTE: target-age familiarity is intentionally excluded from the
     # candidate score — see module docstring, deviation 1.
-    L3_TOP_K: int = 8
+    L3_TOP_K: int = Field(default=8, ge=1)
 
     # --- L4 backend ------------------------------------------------------
+    # Operational call budget, separate from ranking/scoring thresholds. Start
+    # with L3's top-k, then continue in the same order if no candidate passes.
+    # Three default top-k batches bound latency and provider cost.
+    L4_MAX_CANDIDATES: int = Field(default=24, ge=1)
     L4_BACKEND: BackendType = "gemini"
     L4_MODEL: str | None = None
     L4_MODEL_GEMINI: str = "gemini-3.6-flash"

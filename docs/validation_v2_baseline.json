@@ -1,0 +1,81 @@
+{
+  "baseline_run": "runs/20261001T151602Z",
+  "response_contract_version": "2",
+  "purpose": "Preserve the pre-repair predictions, labels and metrics; not a version-3 evaluation.",
+  "file_sha256": {
+    "runs/20261001T151602Z/records.jsonl": "d3ab2a06a3f748311e49ddd1a45ff630e00102ff9bae6a7b4a4c3fd9d9a13dde",
+    "runs/20261001T151602Z/evaluation.json": "afdb252fc450f30b321ee3bc80b63f4874ac13ec782eb19500078fef95a964bf",
+    "runs/20261001T151602Z/run_meta.json": "443025ad1b6e3f98907f107ef24b32013589d18cce64ae52996e57744e69f653",
+    "corpus/joke_corpus_blind.jsonl": "2bb32346fb40148bdd73800358935cc7d745af04f0de44880d526528ceed4c70",
+    "corpus/joke_corpus_gold.jsonl": "103769879da029a0f8defe5f2c62674a22cc0142015689ce4ed2eb8efd4607cc"
+  },
+  "original_evaluation": {
+    "total_items": 60,
+    "recorded_items": 60,
+    "missing_items": 0,
+    "unverified_contract_items": 0,
+    "correct_classification": 51,
+    "classification_accuracy": 0.85,
+    "decided_items": 58,
+    "decision_coverage": 0.9667,
+    "classification_accuracy_on_decided": 0.8793,
+    "outcome_counts": {
+      "PUN": 24,
+      "NON_PUN": 34,
+      "INSUFFICIENT_EVIDENCE": 1,
+      "EXECUTION_FAILED": 1,
+      "OUT_OF_SCOPE": 0
+    },
+    "confusion_matrix": {
+      "VALID_HOMOGRAPH_JOKE": {
+        "VALID_HOMOGRAPH_JOKE": 18,
+        "EXECUTION_FAILED": 1,
+        "ONE_SENSE_ONLY": 1,
+        "INSUFFICIENT_EVIDENCE": 1
+      },
+      "VALID_COMPOUND_SPLIT_JOKE": {
+        "VALID_COMPOUND_SPLIT_JOKE": 2,
+        "ONE_SENSE_ONLY": 1,
+        "VALID_HOMOGRAPH_JOKE": 1
+      },
+      "ONE_SENSE_ONLY": {
+        "ONE_SENSE_ONLY": 31,
+        "VALID_HOMOGRAPH_JOKE": 3,
+        "RESOLUTION_FAIL": 1
+      }
+    },
+    "total_age_evals": 180,
+    "correct_age_evals": 51,
+    "age_accuracy": 0.2833,
+    "binary_detection": {
+      "eligible_items": 60,
+      "decided_items": 58,
+      "decision_coverage": 0.9667,
+      "correct": 53,
+      "accuracy_all_items": 0.8833,
+      "accuracy_on_decided": 0.9138,
+      "precision_on_decided": 0.875,
+      "recall_on_decided": 0.913,
+      "f1_on_decided": 0.8936,
+      "tp": 21,
+      "fp": 3,
+      "tn": 32,
+      "fn": 2,
+      "abstentions_by_gold_class": {
+        "positive": 2,
+        "negative": 0
+      }
+    }
+  },
+  "offline_age_rescore": {
+    "report_path": "runs/corpus_validation_v2_age_coverage_eval.json",
+    "report_sha256": "8f8c1e079c9305d76380febeb4675b13e8b02bea15cb8e6892ed09418d0e64f1",
+    "total_age_evals": 180,
+    "correct_age_evals": 51,
+    "assessed_age_evals": 72,
+    "age_assessment_coverage": 0.4,
+    "age_accuracy_on_assessed": 0.7083,
+    "unverified_contract_items": 60,
+    "note": "All 60 records predate version 3; original predictions are unchanged, no model calls were made."
+  }
+}

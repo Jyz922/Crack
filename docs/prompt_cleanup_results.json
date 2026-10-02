@@ -1,0 +1,566 @@
+{
+  "experiment": "prompt_only_cleanup_comparison",
+  "response_contract_version": "3",
+  "paired_runs": 1,
+  "items_per_arm": 60,
+  "concurrency": 4,
+  "changed_prompts": [
+    "l5_declarative.md",
+    "l5_qa.md",
+    "l6_distinctness.md"
+  ],
+  "shared_l4_format_clarification": "resolving_sense is a literal field reference; validation rules are unchanged.",
+  "manifest": {
+    "experiment": "prompt_only_comparison",
+    "validation_version": "3",
+    "blind_path": "corpus/joke_corpus_blind.jsonl",
+    "blind_sha256": "2bb32346fb40148bdd73800358935cc7d745af04f0de44880d526528ceed4c70",
+    "gold_path": "corpus/joke_corpus_gold.jsonl",
+    "gold_sha256": "103769879da029a0f8defe5f2c62674a22cc0142015689ce4ed2eb8efd4607cc",
+    "source_sha256": {
+      "__init__.py": "378d89d4d0c1569f72bae750119b500afd546d662355973009aab2f21b457c59",
+      "config.py": "e00929084063dbdc9872974d51913796c05b42a38c32ce58efceb36b7ba8c8a6",
+      "corpus.py": "a6fbfebfa33f9b54d145650ef5f629a1853b75aeed110c46c777799616d20cf0",
+      "decisions.py": "c72d552df6025457703bd96f6841ff47da1dc9c2d5a8dd77c4de028c827ad100",
+      "enums.py": "edca30abd1f6d2ba167e0dd83d186a66962482c43ac06da1017cf6bd26571ec1",
+      "l0_scope.py": "74e9b72e229e1367182ec23ecbe0e34a88dcb0ed3d653508094b98041260a6f6",
+      "l1_surface.py": "0a14f175623e3023213ab6484dd8ecc5ad1e2b15c67b462ddee7b2ceed704917",
+      "l2_senses.py": "801b7c2bbcd8dd3a970061bf2a989aa3f054fdfd06156582d289d459924f4053",
+      "l3_candidates.py": "4ad518ae298e664135c612b752f6c73ab9d5fffdbbd31f373a78fc2ee8e3e593",
+      "l4_anchoring.py": "b94d6855fe215ae49e1b5eaf491074b04ae5bd233f72f41a1a3e6157d59cbc79",
+      "l5_resolution.py": "95e1d4391cedfd09415a3b1addada314f94dbbf72a3ba397d693e40ddd778e70",
+      "l6_distinctness.py": "a7d8466521bc2e2b8016b3545cfb4b9376c6db593e37b6c093422da98d1d08fd",
+      "l7_comprehension.py": "580c45cc9fc37a3d32b77b7dfc52041fed76eb3374271c5e2bb27fc0d48bda4e",
+      "l8_appropriateness.py": "0fd0f6217207797dbdac2e2c4e7d85e07bee34e860a840b95d0d383e29846652",
+      "layers.py": "4fdb6ced1b32274eba55d6cd25aa3db0971a8b0544950c750006df69f9d6c9ec",
+      "providers.py": "e307978c4bd5c3ac12e6f063de31ae82660847bd7dd00e34f75b8923197efe52",
+      "runner.py": "bb48a6e1774aacbed7da2710b7864ad9718f44f975a0e1b3603bb8db64d2f3ec",
+      "schema.py": "3a058e514a6784f3163bd39e1d734dfd9fcfe5d748947ad22029bad8ab47bdd7",
+      "serve.py": "26fc34f652a2802c617c92ceb3c7be99eb687cfbc05d129cfbf28f95d92ac0ac",
+      "validation.py": "d92043e6bd16440c5a0f8d0fe265a1ab1b8e5b81ca4165c5bd5c3805a3f5f240"
+    },
+    "prompt_sha256": {
+      "before": {
+        "l4_anchoring.md": "c50eb5e422d77ac66de1f188b0b84d0607fffd8aa3c79b19112f26ab373f17ba",
+        "l5_declarative.md": "61a5fbc30c04511f779bc058f9926b9c1b0a59dd61fa80020e278a48631f97a6",
+        "l5_definitional.md": "15787760d29a076f89958ada3c9a294a0fbcd82e791afe6ac8c43aaddace7411",
+        "l5_dialogue.md": "fbd150e24393324f0aecc2f0c6192795f4dd4b7e8eb2c427ebacfe237ef41e8b",
+        "l5_qa.md": "1229f4c72cc951eaa159374305071b0820f7f1cc498127b14d2d2acf10d218f4",
+        "l6_distinctness.md": "7326a8e301d390368a2c5f1f701105cfc20228fe909eeeb1a7156b5bb8855c90",
+        "l7_comprehension.md": "1a8cc6b95941667a3de324b87b2c44b2ccc84165194147894ac6d2e953c46717",
+        "l8_appropriateness.md": "48f8cb68c013d29b14715accfbcca116fd83cd25db52dbc7528bfc519c08c41c"
+      },
+      "after": {
+        "l4_anchoring.md": "c50eb5e422d77ac66de1f188b0b84d0607fffd8aa3c79b19112f26ab373f17ba",
+        "l5_declarative.md": "f34f37aceb34d894873e410347085b3d48211a23f0ee9c5cd376673b40770451",
+        "l5_definitional.md": "15787760d29a076f89958ada3c9a294a0fbcd82e791afe6ac8c43aaddace7411",
+        "l5_dialogue.md": "fbd150e24393324f0aecc2f0c6192795f4dd4b7e8eb2c427ebacfe237ef41e8b",
+        "l5_qa.md": "d0bf90a851cbbcb1066ef97a600323fdba1ddcaa47685d8d177fe41296dc5d78",
+        "l6_distinctness.md": "aec2324106f98fa3a800c6dbaa7ec38dcf889cd58e82d9138ca1cc39a33a5ac6",
+        "l7_comprehension.md": "1a8cc6b95941667a3de324b87b2c44b2ccc84165194147894ac6d2e953c46717",
+        "l8_appropriateness.md": "48f8cb68c013d29b14715accfbcca116fd83cd25db52dbc7528bfc519c08c41c"
+      }
+    },
+    "lexical_sha256": {
+      "data/aoa_kuperman.csv": "45db20f3083b2f38904751d498fa5a60e19e89f59ed4b44c8a0b791de31b87d8",
+      "data/nltk_data/corpora/wordnet/LICENSE": "7731175a77952e259390b496fab905e57118b8d19ad3a8383c67eee724ff443f",
+      "data/nltk_data/corpora/wordnet/README": "adad8d28ddea1db05b67ba1ac23506b025d29e0bcbf23bb35dde346089d8808d",
+      "data/nltk_data/corpora/wordnet/adj.exc": "8824cc24bbedd797b9702316b27f07cd4c2b76b629539f0a1276f03926758016",
+      "data/nltk_data/corpora/wordnet/adv.exc": "e7291461b629abfe63301bbe1998cee09fd575ed7107abd7ea9763adb05bf0a8",
+      "data/nltk_data/corpora/wordnet/citation.bib": "cd931cfe73536463c1decce60005a55d6b0c605fc7c5f89aaff7a38b5aedfa79",
+      "data/nltk_data/corpora/wordnet/cntlist.rev": "a198580b8f705fa02797bba8b13e5cbe4a9f9f40cb1697e774c7fc6a5865b035",
+      "data/nltk_data/corpora/wordnet/data.adj": "f24b635368be441501c9b8001e9271fd3b30b203f00d91e332979e6f8fe35646",
+      "data/nltk_data/corpora/wordnet/data.adv": "e66dbbda0e0359e41b7f225bff71dd0c263dc7c66c1b61abc9ba334973d92979",
+      "data/nltk_data/corpora/wordnet/data.noun": "489f145e0f68877c0be5bd0eb4117adaaac52f38f6204eb8d85dbe2158b614cc",
+      "data/nltk_data/corpora/wordnet/data.verb": "29cc96ed80c9f47d94fe75e332a9df80f4b1c737205f92d2f433d63c6da2ab51",
+      "data/nltk_data/corpora/wordnet/index.adj": "42f58dda2c7cff66eb8fa55ba62e0a873a9b3f43c878e8201108f5dab6dcff28",
+      "data/nltk_data/corpora/wordnet/index.adv": "6f5465ed5758fe9c8a2f7ec17b1300f3aa875756c70ff7cba162f7e71bcf88ea",
+      "data/nltk_data/corpora/wordnet/index.noun": "a490d99d93d017bf4822fe2f0ffa51fd73911ce271dc7535fade21f8814b5a04",
+      "data/nltk_data/corpora/wordnet/index.sense": "68b3a468cddfd8e92134b9b0624339a02a1b837159243c297c5f138a3d618392",
+      "data/nltk_data/corpora/wordnet/index.verb": "c7c79b558d787f1e31c6f8b3eeadb8fcbb26a64545ecc1241e21d9b61f95ee8e",
+      "data/nltk_data/corpora/wordnet/lexnames": "4767e2a1c6e68c1a93aa6b7c4ef7ebe9a815b50d7d5aac2788696f2cf3633bf1",
+      "data/nltk_data/corpora/wordnet/noun.exc": "2b5d675c380b39ecf595af9fa9d4e7feb1d58c643b0bff08c40ed5bfe41fab7a",
+      "data/nltk_data/corpora/wordnet/verb.exc": "dbbcf9a601b2d77e934e413b91d90e88ec7f933a8b77cfc00602a923b891b42c",
+      "data/nltk_data/corpora/wordnet.zip": "cbda5ea6eef7f36a97a43d4a75f85e07fccbb4f23657d27b4ccbc93e2646ab59"
+    },
+    "config": {
+      "ACCEPTED_MECHANISMS": [
+        "compound_split",
+        "homographic_ambiguity",
+        "idiomatic_expression_with_homograph",
+        "resegmentation"
+      ],
+      "EXCLUDED_MECHANISMS": [
+        "absurdist_situation",
+        "cultural_reference",
+        "heterographic_homophone",
+        "rhyming_joke",
+        "sarcasm",
+        "social_context_only"
+      ],
+      "MAX_INPUT_CHARS": 500,
+      "MIN_INPUT_CHARS": 3,
+      "MAX_NON_ASCII_RATIO": 0.15,
+      "L3_TOP_K": 8,
+      "L4_BACKEND": "openai",
+      "L4_MODEL": null,
+      "L4_MODEL_GEMINI": "gemini-3.6-flash",
+      "L4_MODEL_GEMINI_CHAIN": [
+        "gemini-3.8-flash"
+      ],
+      "L4_MODEL_ANTHROPIC": "claude-sonnet-5",
+      "L4_MODEL_OPENAI": "gpt-6-luna",
+      "L4_MODEL_DEEPSEEK": "deepseek-chat",
+      "L4_MAX_OUTPUT_TOKENS": 4096,
+      "L4_CALL_PAUSE_SECONDS": 6.0,
+      "L5_BACKEND": "openai",
+      "L5_MODEL": null,
+      "L5_MODEL_GEMINI": "gemini-3.6-flash",
+      "L5_MODEL_GEMINI_CHAIN": [
+        "gemini-3.8-flash"
+      ],
+      "L5_MODEL_ANTHROPIC": "claude-sonnet-5",
+      "L5_MODEL_OPENAI": "gpt-6-luna",
+      "L5_MODEL_DEEPSEEK": "deepseek-chat",
+      "L5_MAX_OUTPUT_TOKENS": 8192,
+      "L5_CALL_PAUSE_SECONDS": 6.0,
+      "L6_BACKEND": "openai",
+      "L6_MODEL": null,
+      "L6_MODEL_GEMINI": "gemini-3.6-flash",
+      "L6_MODEL_GEMINI_CHAIN": [
+        "gemini-3.8-flash"
+      ],
+      "L6_MODEL_ANTHROPIC": "claude-sonnet-5",
+      "L6_MODEL_OPENAI": "gpt-6-luna",
+      "L6_MODEL_DEEPSEEK": "deepseek-chat",
+      "L6_MAX_OUTPUT_TOKENS": 4096,
+      "L6_CALL_PAUSE_SECONDS": 6.0,
+      "L7_BACKEND": "openai",
+      "L7_MODEL": null,
+      "L7_MODEL_GEMINI": "gemini-3.6-flash",
+      "L7_MODEL_GEMINI_CHAIN": [
+        "gemini-3.8-flash"
+      ],
+      "L7_MODEL_ANTHROPIC": "claude-sonnet-5",
+      "L7_MODEL_OPENAI": "gpt-6-luna",
+      "L7_MODEL_DEEPSEEK": "deepseek-chat",
+      "L7_MAX_OUTPUT_TOKENS": 4096,
+      "L7_CALL_PAUSE_SECONDS": 6.0,
+      "L7_METALINGUISTIC_FLOOR_HOMOGRAPH": 6.0,
+      "L7_METALINGUISTIC_FLOOR_DEFINITIONAL": 7.0,
+      "L7_METALINGUISTIC_FLOOR_DIALOGUE": 7.5,
+      "L7_METALINGUISTIC_FLOOR_RESEGMENTATION": 8.0,
+      "L7_SECONDARY_SENSE_AOA_OFFSET": 2.0,
+      "L7_AOA_TOLERANCE": 0.5,
+      "L8_BACKEND": "openai",
+      "L8_MODEL": null,
+      "L8_MODEL_GEMINI": "gemini-3.6-flash",
+      "L8_MODEL_GEMINI_CHAIN": [
+        "gemini-3.8-flash"
+      ],
+      "L8_MODEL_ANTHROPIC": "claude-sonnet-5",
+      "L8_MODEL_OPENAI": "gpt-6-luna",
+      "L8_MODEL_DEEPSEEK": "deepseek-chat",
+      "L8_MAX_OUTPUT_TOKENS": 4096,
+      "L8_CALL_PAUSE_SECONDS": 6.0,
+      "L5_QA_WEIGHTS": {
+        "polarity_or_direction": 0.45,
+        "answer_relevance": 0.25,
+        "causal": 0.15,
+        "agent": 0.1,
+        "tense_aspect": 0.05
+      },
+      "L5_QA_MIN_POLARITY": 0.05,
+      "L5_RESOLUTION_THRESHOLDS": {
+        "QA_RIDDLE": 0.46,
+        "DEFINITIONAL_ONELINER": 0.6,
+        "DIALOGUE_MISUNDERSTANDING": 0.6,
+        "DECLARATIVE": 0.25
+      }
+    },
+    "concurrency": 4,
+    "repeats": 1,
+    "changed_prompts": [
+      "l5_declarative.md",
+      "l5_qa.md",
+      "l6_distinctness.md"
+    ],
+    "note": "Fresh model calls in both arms. One paired run is descriptive, not a causal or significance guarantee."
+  },
+  "arms": {
+    "before": {
+      "run_dir": "runs/prompt_cleanup_ablation/paired_enum_guidance/pair_01/before/runs/20261002T045321Z",
+      "evaluation": {
+        "total_items": 60,
+        "recorded_items": 60,
+        "missing_items": 0,
+        "unverified_contract_items": 0,
+        "correct_classification": 31,
+        "classification_accuracy": 0.5167,
+        "decided_items": 39,
+        "decision_coverage": 0.65,
+        "classification_accuracy_on_decided": 0.7949,
+        "outcome_counts": {
+          "PUN": 21,
+          "NON_PUN": 18,
+          "INSUFFICIENT_EVIDENCE": 20,
+          "EXECUTION_FAILED": 1,
+          "OUT_OF_SCOPE": 0
+        },
+        "confusion_matrix": {
+          "VALID_HOMOGRAPH_JOKE": {
+            "VALID_HOMOGRAPH_JOKE": 17,
+            "INSUFFICIENT_EVIDENCE": 1,
+            "ONE_SENSE_ONLY": 3
+          },
+          "VALID_COMPOUND_SPLIT_JOKE": {
+            "EXECUTION_FAILED": 1,
+            "ONE_SENSE_ONLY": 1,
+            "SENSES_TOO_CLOSE": 1,
+            "VALID_COMPOUND_SPLIT_JOKE": 1
+          },
+          "ONE_SENSE_ONLY": {
+            "ONE_SENSE_ONLY": 13,
+            "INSUFFICIENT_EVIDENCE": 19,
+            "VALID_HOMOGRAPH_JOKE": 3
+          }
+        },
+        "total_age_evals": 180,
+        "correct_age_evals": 46,
+        "age_accuracy": 0.2556,
+        "assessed_age_evals": 63,
+        "age_assessment_coverage": 0.35,
+        "age_accuracy_on_assessed": 0.7302,
+        "binary_detection": {
+          "eligible_items": 60,
+          "decided_items": 39,
+          "decision_coverage": 0.65,
+          "correct": 31,
+          "accuracy_all_items": 0.5167,
+          "accuracy_on_decided": 0.7949,
+          "precision_on_decided": 0.8571,
+          "recall_on_decided": 0.7826,
+          "f1_on_decided": 0.8182,
+          "tp": 18,
+          "fp": 3,
+          "tn": 13,
+          "fn": 5,
+          "abstentions_by_gold_class": {
+            "positive": 2,
+            "negative": 19
+          }
+        }
+      },
+      "records_sha256": "eacd500a1600b9b2115c37988a64d20c0617996c271501eea83c9b91ac50e676",
+      "evaluation_sha256": "b580d6872d5314d19a8a7d1f47b680d705872effa4dfa54e81bdb72697ba3010",
+      "l5_assessed_items": 22,
+      "l6_assessed_items": 22,
+      "uncertainty_reasons": {
+        "untested_candidates": 18,
+        "other_uncertainty": 2
+      },
+      "execution_errors": [
+        {
+          "id": "J02",
+          "reason": "ModelResponseError: L4 contract rejected two responses for 'autobiography': Split anchors must name a detected compound-split candidate"
+        }
+      ]
+    },
+    "after": {
+      "run_dir": "runs/prompt_cleanup_ablation/paired_enum_guidance/pair_01/after/runs/20261002T050014Z",
+      "evaluation": {
+        "total_items": 60,
+        "recorded_items": 60,
+        "missing_items": 0,
+        "unverified_contract_items": 0,
+        "correct_classification": 29,
+        "classification_accuracy": 0.4833,
+        "decided_items": 37,
+        "decision_coverage": 0.6167,
+        "classification_accuracy_on_decided": 0.7838,
+        "outcome_counts": {
+          "PUN": 18,
+          "NON_PUN": 19,
+          "INSUFFICIENT_EVIDENCE": 22,
+          "EXECUTION_FAILED": 1,
+          "OUT_OF_SCOPE": 0
+        },
+        "confusion_matrix": {
+          "VALID_HOMOGRAPH_JOKE": {
+            "VALID_HOMOGRAPH_JOKE": 15,
+            "ONE_SENSE_ONLY": 5,
+            "INSUFFICIENT_EVIDENCE": 1
+          },
+          "VALID_COMPOUND_SPLIT_JOKE": {
+            "VALID_COMPOUND_SPLIT_JOKE": 1,
+            "INSUFFICIENT_EVIDENCE": 2,
+            "VALID_HOMOGRAPH_JOKE": 1
+          },
+          "ONE_SENSE_ONLY": {
+            "ONE_SENSE_ONLY": 13,
+            "INSUFFICIENT_EVIDENCE": 19,
+            "VALID_HOMOGRAPH_JOKE": 1,
+            "EXECUTION_FAILED": 1,
+            "RESOLUTION_FAIL": 1
+          }
+        },
+        "total_age_evals": 180,
+        "correct_age_evals": 38,
+        "age_accuracy": 0.2111,
+        "assessed_age_evals": 54,
+        "age_assessment_coverage": 0.3,
+        "age_accuracy_on_assessed": 0.7037,
+        "binary_detection": {
+          "eligible_items": 60,
+          "decided_items": 37,
+          "decision_coverage": 0.6167,
+          "correct": 31,
+          "accuracy_all_items": 0.5167,
+          "accuracy_on_decided": 0.8378,
+          "precision_on_decided": 0.9444,
+          "recall_on_decided": 0.7727,
+          "f1_on_decided": 0.85,
+          "tp": 17,
+          "fp": 1,
+          "tn": 14,
+          "fn": 5,
+          "abstentions_by_gold_class": {
+            "positive": 3,
+            "negative": 20
+          }
+        }
+      },
+      "records_sha256": "f488e673b63a890b9e4187343e4d7b3cfca9b68a7e6968f5cf6f8de5c49ceb0b",
+      "evaluation_sha256": "17dec07225589c19921d09e8fc45b93579907a0b2a2febc76651688fa132820e",
+      "l5_assessed_items": 19,
+      "l6_assessed_items": 18,
+      "uncertainty_reasons": {
+        "other_uncertainty": 3,
+        "untested_candidates": 19
+      },
+      "execution_errors": [
+        {
+          "id": "D08",
+          "reason": "ModelResponseError: L4 contract rejected two responses for 'rough': sense_a_anchor_quote is not a nonblank verbatim substring of the input"
+        }
+      ]
+    }
+  },
+  "changed_predictions": [
+    {
+      "id": "D08",
+      "before": "INSUFFICIENT_EVIDENCE",
+      "after": "EXECUTION_FAILED",
+      "before_reason": "Only 8 of 11 lexical candidate terms were assessed. The tested candidates have one grounded reading each; untested candidates remain unresolved.",
+      "after_reason": "L4: ModelResponseError: L4 contract rejected two responses for 'rough': sense_a_anchor_quote is not a nonblank verbatim substring of the input",
+      "gold_label": "ONE_SENSE_ONLY",
+      "l4_status_before": "INSUFFICIENT_EVIDENCE",
+      "l4_status_after": null
+    },
+    {
+      "id": "D09",
+      "before": "INSUFFICIENT_EVIDENCE",
+      "after": "RESOLUTION_FAIL",
+      "before_reason": "The sentence supports both the sport reading in “baseball hitters” and the ball reading in “to the baseball.” However, the answer is a straightforward explanation involving a bat and the ball; the text does not establish that the ordinary shift between the sport and its equipment is being used to create wordplay. The readings are clear, but evidence of a wordplay interaction is missing.",
+      "after_reason": "",
+      "gold_label": "ONE_SENSE_ONLY",
+      "l4_status_before": "INSUFFICIENT_EVIDENCE",
+      "l4_status_after": "PASS"
+    },
+    {
+      "id": "D17",
+      "before": "VALID_HOMOGRAPH_JOKE",
+      "after": "INSUFFICIENT_EVIDENCE",
+      "before_reason": "",
+      "after_reason": "Only 8 of 12 lexical candidate terms were assessed. The tested candidates have one grounded reading each; untested candidates remain unresolved.",
+      "gold_label": "ONE_SENSE_ONLY",
+      "l4_status_before": "PASS",
+      "l4_status_after": "INSUFFICIENT_EVIDENCE"
+    },
+    {
+      "id": "D24",
+      "before": "VALID_HOMOGRAPH_JOKE",
+      "after": "ONE_SENSE_ONLY",
+      "before_reason": "",
+      "after_reason": "",
+      "gold_label": "ONE_SENSE_ONLY",
+      "l4_status_before": "PASS",
+      "l4_status_after": "ONE_SENSE_ONLY"
+    },
+    {
+      "id": "J02",
+      "before": "EXECUTION_FAILED",
+      "after": "VALID_COMPOUND_SPLIT_JOKE",
+      "before_reason": "L4: ModelResponseError: L4 contract rejected two responses for 'autobiography': Split anchors must name a detected compound-split candidate",
+      "after_reason": "",
+      "gold_label": "VALID_COMPOUND_SPLIT_JOKE",
+      "l4_status_before": null,
+      "l4_status_after": "PASS"
+    },
+    {
+      "id": "J06",
+      "before": "ONE_SENSE_ONLY",
+      "after": "INSUFFICIENT_EVIDENCE",
+      "before_reason": "",
+      "after_reason": "The definition-style wording hints at “ex + plain,” but it does not clearly establish a second contextual meaning of explain: “the plain exit” can be read in more than one way, and the text does not identify an ex or clearly show plain itself exiting. The proposed split therefore does not resolve into a supported alternative reading.",
+      "gold_label": "VALID_COMPOUND_SPLIT_JOKE",
+      "l4_status_before": "ONE_SENSE_ONLY",
+      "l4_status_after": "INSUFFICIENT_EVIDENCE"
+    },
+    {
+      "id": "J09",
+      "before": "VALID_HOMOGRAPH_JOKE",
+      "after": "ONE_SENSE_ONLY",
+      "before_reason": "",
+      "after_reason": "",
+      "gold_label": "VALID_HOMOGRAPH_JOKE",
+      "l4_status_before": "PASS",
+      "l4_status_after": "ONE_SENSE_ONLY"
+    },
+    {
+      "id": "J13",
+      "before": "SENSES_TOO_CLOSE",
+      "after": "VALID_HOMOGRAPH_JOKE",
+      "before_reason": "",
+      "after_reason": "",
+      "gold_label": "VALID_COMPOUND_SPLIT_JOKE",
+      "l4_status_before": "PASS",
+      "l4_status_after": "PASS"
+    },
+    {
+      "id": "J14",
+      "before": "INSUFFICIENT_EVIDENCE",
+      "after": "VALID_HOMOGRAPH_JOKE",
+      "before_reason": "Only 8 of 10 lexical candidate terms were assessed. The tested candidates have one grounded reading each; untested candidates remain unresolved.",
+      "after_reason": "",
+      "gold_label": "VALID_HOMOGRAPH_JOKE",
+      "l4_status_before": "INSUFFICIENT_EVIDENCE",
+      "l4_status_after": "PASS"
+    },
+    {
+      "id": "J18",
+      "before": "VALID_COMPOUND_SPLIT_JOKE",
+      "after": "INSUFFICIENT_EVIDENCE",
+      "before_reason": "",
+      "after_reason": "Only 8 of 10 lexical candidate terms were assessed. The tested candidates have one grounded reading each; untested candidates remain unresolved.",
+      "gold_label": "VALID_COMPOUND_SPLIT_JOKE",
+      "l4_status_before": "PASS",
+      "l4_status_after": "INSUFFICIENT_EVIDENCE"
+    },
+    {
+      "id": "J20",
+      "before": "VALID_HOMOGRAPH_JOKE",
+      "after": "INSUFFICIENT_EVIDENCE",
+      "before_reason": "",
+      "after_reason": "Only 8 of 9 lexical candidate terms were assessed. The tested candidates have one grounded reading each; untested candidates remain unresolved.",
+      "gold_label": "VALID_HOMOGRAPH_JOKE",
+      "l4_status_before": "PASS",
+      "l4_status_after": "INSUFFICIENT_EVIDENCE"
+    },
+    {
+      "id": "J24",
+      "before": "VALID_HOMOGRAPH_JOKE",
+      "after": "ONE_SENSE_ONLY",
+      "before_reason": "",
+      "after_reason": "",
+      "gold_label": "VALID_HOMOGRAPH_JOKE",
+      "l4_status_before": "PASS",
+      "l4_status_after": "ONE_SENSE_ONLY"
+    },
+    {
+      "id": "N04",
+      "before": "ONE_SENSE_ONLY",
+      "after": "INSUFFICIENT_EVIDENCE",
+      "before_reason": "",
+      "after_reason": "The sentence establishes a letter-and-envelope mailing context in “slipped it into the postage envelope,” but it does not establish whether “postage” refers to the charge for mailing or to an adhesive token showing that the charge was paid. Neither a fee nor a stamp is mentioned, and no second reading interacts with the first to create wordplay.",
+      "gold_label": "ONE_SENSE_ONLY",
+      "l4_status_before": "ONE_SENSE_ONLY",
+      "l4_status_after": "INSUFFICIENT_EVIDENCE"
+    }
+  ],
+  "delta_percentage_points": {
+    "classification_accuracy": -3.33,
+    "decision_coverage": -3.33,
+    "classification_accuracy_on_decided": -1.11,
+    "binary_accuracy_all_items": 0.0,
+    "binary_accuracy_on_decided": 4.3,
+    "binary_f1_on_decided": 3.18,
+    "age_assessment_coverage": -5.0,
+    "age_accuracy_on_assessed": -2.65
+  },
+  "conclusion": "All-item binary accuracy is unchanged. Exact-label accuracy and decision coverage decreased. One paired run does not establish overall performance improvement or causal attribution.",
+  "upstream_output_identity": {
+    "l1_result": 60,
+    "l2_result": 60
+  },
+  "original_interrupted_experiment": {
+    "status": "interrupted",
+    "reason": "The completed before arm had no L5 or L6 assessments; systematic resolving_sense description values were rejected by the L4 contract.",
+    "before_evaluation_path": "runs/prompt_cleanup_ablation/paired/pair_01/before/runs/20261002T043821Z/evaluation.json",
+    "before_evaluation": {
+      "total_items": 60,
+      "recorded_items": 60,
+      "missing_items": 0,
+      "unverified_contract_items": 0,
+      "correct_classification": 14,
+      "classification_accuracy": 0.2333,
+      "decided_items": 19,
+      "decision_coverage": 0.3167,
+      "classification_accuracy_on_decided": 0.7368,
+      "outcome_counts": {
+        "PUN": 0,
+        "NON_PUN": 19,
+        "INSUFFICIENT_EVIDENCE": 21,
+        "EXECUTION_FAILED": 20,
+        "OUT_OF_SCOPE": 0
+      },
+      "confusion_matrix": {
+        "VALID_HOMOGRAPH_JOKE": {
+          "EXECUTION_FAILED": 14,
+          "ONE_SENSE_ONLY": 5,
+          "INSUFFICIENT_EVIDENCE": 2
+        },
+        "VALID_COMPOUND_SPLIT_JOKE": {
+          "EXECUTION_FAILED": 3,
+          "INSUFFICIENT_EVIDENCE": 1
+        },
+        "ONE_SENSE_ONLY": {
+          "ONE_SENSE_ONLY": 14,
+          "INSUFFICIENT_EVIDENCE": 18,
+          "EXECUTION_FAILED": 3
+        }
+      },
+      "total_age_evals": 180,
+      "correct_age_evals": 0,
+      "age_accuracy": 0.0,
+      "assessed_age_evals": 0,
+      "age_assessment_coverage": 0.0,
+      "age_accuracy_on_assessed": null,
+      "binary_detection": {
+        "eligible_items": 60,
+        "decided_items": 19,
+        "decision_coverage": 0.3167,
+        "correct": 14,
+        "accuracy_all_items": 0.2333,
+        "accuracy_on_decided": 0.7368,
+        "precision_on_decided": null,
+        "recall_on_decided": 0.0,
+        "f1_on_decided": 0.0,
+        "tp": 0,
+        "fp": 0,
+        "tn": 14,
+        "fn": 5,
+        "abstentions_by_gold_class": {
+          "positive": 20,
+          "negative": 21
+        }
+      }
+    },
+    "partial_after_records": 38,
+    "use_for_prompt_cleanup_effect": false,
+    "next_step": "Clarify the same existing enum requirement in L4 for both arms, verify it on independent development examples, and freeze a new comparison."
+  },
+  "requested_model": "gpt-6-luna",
+  "configured_backend": "openai",
+  "changed_l4_status_count": 12
+}

@@ -358,16 +358,18 @@ def _deterministic_l7(
     is_split = False
     if record.l4_result and record.l4_result.anchor_relation == AnchorRelation.RESEGMENTATION:
         is_split = True
-    elif top_cand and top_cand.score_components.get("compound_split", 0.0) == 1.0:
+    elif record.l4_result is None and top_cand and top_cand.score_components.get("compound_split", 0.0) == 1.0:
         is_split = True
 
     if is_split:
         parts: list[str] = []
-        if record.l1_result and record.l1_result.compound_splits:
+        if record.l4_result and record.l4_result.split_parts:
+            parts = record.l4_result.split_parts
+        elif record.l1_result and record.l1_result.compound_splits:
             parts = record.l1_result.compound_splits
         elif record.l2_result:
             for s in record.l2_result.senses:
-                if s.source.startswith("wordnet_split:"):
+                if s.term == term and s.source.startswith("wordnet_split:"):
                     parts = s.source.replace("wordnet_split:", "").split("+")
                     break
         if parts:

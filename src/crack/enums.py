@@ -27,6 +27,7 @@ class AnchoringStatus(StrEnum):
     PASS = "PASS"
     FAIL = "FAIL"
     ONE_SENSE_ONLY = "ONE_SENSE_ONLY"
+    INSUFFICIENT_EVIDENCE = "INSUFFICIENT_EVIDENCE"
 
 
 class AnchorRelation(StrEnum):
@@ -44,6 +45,7 @@ class ResolutionStatus(StrEnum):
     # distinctly so it can never be mistaken for RESOLUTION_FAIL or
     # INSUFFICIENT_CONTEXT.
     TRUNCATED_OUTPUT = "TRUNCATED_OUTPUT"
+    EXECUTION_FAILED = "EXECUTION_FAILED"
 
 
 class DistinctnessStatus(StrEnum):
@@ -83,3 +85,26 @@ class MainClassification(StrEnum):
     SENSES_TOO_CLOSE = "SENSES_TOO_CLOSE"
     OUT_OF_SCOPE_HOMOPHONE = "OUT_OF_SCOPE_HOMOPHONE"
     OUT_OF_SCOPE_NONLEXICAL_JOKE = "OUT_OF_SCOPE_NONLEXICAL_JOKE"
+    INSUFFICIENT_EVIDENCE = "INSUFFICIENT_EVIDENCE"
+    EXECUTION_FAILED = "EXECUTION_FAILED"
+
+
+class DetectionStatus(StrEnum):
+    PUN = "PUN"
+    NON_PUN = "NON_PUN"
+    INSUFFICIENT_EVIDENCE = "INSUFFICIENT_EVIDENCE"
+    EXECUTION_FAILED = "EXECUTION_FAILED"
+    OUT_OF_SCOPE = "OUT_OF_SCOPE"
+
+
+def detection_status_for(label: str | MainClassification | None) -> DetectionStatus:
+    """Map explicit decisions only; missing/legacy ambiguous labels abstain."""
+    if label in {MainClassification.VALID_HOMOGRAPH_JOKE, MainClassification.VALID_COMPOUND_SPLIT_JOKE}:
+        return DetectionStatus.PUN
+    if label in {MainClassification.ONE_SENSE_ONLY, MainClassification.RESOLUTION_FAIL, MainClassification.SENSES_TOO_CLOSE}:
+        return DetectionStatus.NON_PUN
+    if label == MainClassification.EXECUTION_FAILED:
+        return DetectionStatus.EXECUTION_FAILED
+    if label in {MainClassification.OUT_OF_SCOPE_HOMOPHONE, MainClassification.OUT_OF_SCOPE_NONLEXICAL_JOKE}:
+        return DetectionStatus.OUT_OF_SCOPE
+    return DetectionStatus.INSUFFICIENT_EVIDENCE
