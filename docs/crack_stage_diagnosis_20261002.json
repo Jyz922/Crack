@@ -1,0 +1,3498 @@
+{
+  "method": "Offline recorded gate-prefix replay; no new inference, prompt, threshold, or gold change. Unresolved positives count as misses in full-gold F1. No explanations/ages are fabricated for prefix positives.",
+  "limitations": [
+    "Not a randomized causal ablation or an independent rerun.",
+    "Removing L5 while retaining L6 cannot be evaluated for L5-rejected cases without new L6 inference.",
+    "Detection gains from accepting weak targets do not establish full-task quality.",
+    "Trace seconds are summed across concurrent items, not batch wall time."
+  ],
+  "snapshot_alignment": {
+    "source_files_identical": 29,
+    "effective_config_differences": {},
+    "full_manifest_sha256": "4a1dae694796fbc2e89646ba57efb359c73f8ec53e7f34e581d25e6e2494369f",
+    "semeval_manifest_sha256": "3aa97e0e0dbb716715396ad6ca0553ec7f8588ee990470ba36f6c0b6efc16e07"
+  },
+  "full_assignment_60": {
+    "records_path": "runs/full_assignment_comparison/20261003T021452.992281Z/corrected_validation/crack/records.jsonl",
+    "records_sha256": "e1767ff1d5de520522b4de040b2c722a95029071d0fd9ddf3aba3a3bee8ec38f",
+    "gold_sha256": "103769879da029a0f8defe5f2c62674a22cc0142015689ce4ed2eb8efd4607cc",
+    "metrics": {
+      "L4_prefix": {
+        "tp": 24,
+        "fp": 5,
+        "tn": 30,
+        "fn_decided": 1,
+        "unresolved_positive": 0,
+        "unresolved_negative": 0,
+        "items": 60,
+        "correct": 54,
+        "accuracy_all": 0.9,
+        "precision": 0.8275862068965517,
+        "recall_full_gold": 0.96,
+        "f1_full_gold": 0.8888888888888888,
+        "coverage": 1.0,
+        "outcomes": {
+          "PUN": 29,
+          "NON_PUN": 31
+        },
+        "paired_success": {
+          "correct": 19,
+          "pairs": 25,
+          "rate": 0.76
+        }
+      },
+      "L4_L5_prefix": {
+        "tp": 23,
+        "fp": 4,
+        "tn": 31,
+        "fn_decided": 1,
+        "unresolved_positive": 1,
+        "unresolved_negative": 0,
+        "items": 60,
+        "correct": 54,
+        "accuracy_all": 0.9,
+        "precision": 0.8518518518518519,
+        "recall_full_gold": 0.92,
+        "f1_full_gold": 0.8846153846153846,
+        "coverage": 0.9833333333333333,
+        "outcomes": {
+          "PUN": 27,
+          "NON_PUN": 32,
+          "INSUFFICIENT_EVIDENCE": 1
+        },
+        "paired_success": {
+          "correct": 20,
+          "pairs": 25,
+          "rate": 0.8
+        }
+      },
+      "full_detection": {
+        "tp": 23,
+        "fp": 2,
+        "tn": 32,
+        "fn_decided": 1,
+        "unresolved_positive": 1,
+        "unresolved_negative": 1,
+        "items": 60,
+        "correct": 55,
+        "accuracy_all": 0.9166666666666666,
+        "precision": 0.92,
+        "recall_full_gold": 0.92,
+        "f1_full_gold": 0.92,
+        "coverage": 0.9666666666666667,
+        "outcomes": {
+          "PUN": 25,
+          "NON_PUN": 33,
+          "INSUFFICIENT_EVIDENCE": 2
+        },
+        "paired_success": {
+          "correct": 21,
+          "pairs": 25,
+          "rate": 0.84
+        }
+      }
+    },
+    "gate_transitions": {
+      "L5": {
+        "counts": {
+          "positive_changed": 1,
+          "true_positive_to_unresolved": 1,
+          "negative_changed": 1,
+          "false_positive_to_true_negative": 1
+        },
+        "changes": [
+          {
+            "item_id": "J24",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "D09",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          }
+        ]
+      },
+      "L6_and_final": {
+        "counts": {
+          "negative_changed": 2,
+          "false_positive_to_true_negative": 1,
+          "false_positive_to_unresolved": 1
+        },
+        "changes": [
+          {
+            "item_id": "D01",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "D17",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          }
+        ]
+      }
+    },
+    "downstream_rejections": [
+      {
+        "item_id": "J24",
+        "text": "How many stories were in the library building?",
+        "gold": "PUN",
+        "target": "stories",
+        "stage": "L5",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 1,
+        "l5_status": "INSUFFICIENT_CONTEXT",
+        "l6_status": null,
+        "reason": "The text gives only the question and anchored readings, not a punchline or answer, so answer relevance, causal linkage, agent identity, and tense/aspect alignment cannot all be assessed."
+      },
+      {
+        "item_id": "D09",
+        "text": "Why do baseball hitters grip a bat? Because the wooden bat transfers kinetic power to the baseball.",
+        "gold": "NON_PUN",
+        "target": "baseball",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 7,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "The punchline shifts from the game to the ball, but mainly gives a straightforward mechanics explanation rather than exploiting a strong contrast between the readings."
+      },
+      {
+        "item_id": "D01",
+        "text": "Why don't skeletons fight? Because they are dead bone structures lacking muscles.",
+        "gold": "NON_PUN",
+        "target": "muscles",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 0,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The tissue reading and the strength reading are distinguishable, but in this context lacking muscle tissue directly implies lacking the strength to fight, so the interpretations are not mutually exclusive. Replacing “muscles” with “muscle tissue” makes the anatomical reading explicit, though the strength implication remains."
+      },
+      {
+        "item_id": "D17",
+        "text": "Why was the metal mail carrier sack packed? Because the postal worker collected eighty paper letters.",
+        "gold": "NON_PUN",
+        "target": "postal",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 5,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "L6_SKIPPED_NO_PARAPHRASE",
+        "reason": "Sense A is clear, but splitting “postal” into “post” and “Al” supplies word parts, not a coherent alternate meaning for “postal worker.” Without a distinct paraphrase for Sense B, the contrast and its ablation cannot be assessed."
+      }
+    ],
+    "remaining_candidates": {
+      "L5_with_untested_candidates": 2,
+      "L6_without_untested_candidates": 1,
+      "L6_with_untested_candidates": 1
+    },
+    "remaining_candidates_by_gold": {
+      "L5_positive_with_untested": 1,
+      "L5_negative_with_untested": 1,
+      "L6_negative_without_untested": 1,
+      "L6_negative_with_untested": 1
+    },
+    "target_checks_exact_normalized": {
+      "L4_negative_gold_positives": 1,
+      "L4_negative_gold_target_retrieved": 1,
+      "L4_negative_gold_target_tested": 1,
+      "downstream_rejected_gold_positives": 1,
+      "downstream_selected_target_exact_matches_gold": 1,
+      "downstream_gold_target_retrieved_but_untested": 0,
+      "downstream_rejected_positive_with_untested_candidates": 1
+    },
+    "summed_trace_seconds": {
+      "L0-pre": 0.0012440000000000005,
+      "L1": 0.0017229999999999997,
+      "L2": 1.1850070000000004,
+      "L3": 0.011742,
+      "L4": 1841.1130530000005,
+      "L5": 128.227862,
+      "L6": 145.02905700000002,
+      "L7": 0.010244,
+      "L8": 0.003947,
+      "L0-post": 0.007761999999999999
+    },
+    "candidate_search": {
+      "records": 60,
+      "mean_terms_assessed": 5.7,
+      "total_terms_assessed": 342,
+      "stop_reasons": {
+        "PASS_FOUND": 29,
+        "ALL_RETRIEVED_ASSESSED": 31
+      }
+    },
+    "observed_api_usage": {
+      "L4": {
+        "calls": 342,
+        "prompt_tokens": 486903,
+        "completion_tokens": 156474,
+        "total_tokens": 643377,
+        "max_prompt_tokens": 3155,
+        "message_counts": {
+          "1": 342
+        },
+        "finish_reasons": {
+          "stop": 342
+        },
+        "token_share": 0.9016653516326276
+      },
+      "L5": {
+        "calls": 29,
+        "prompt_tokens": 22023,
+        "completion_tokens": 10205,
+        "total_tokens": 32228,
+        "max_prompt_tokens": 832,
+        "message_counts": {
+          "1": 29
+        },
+        "finish_reasons": {
+          "stop": 29
+        },
+        "token_share": 0.045166163777095425
+      },
+      "L6": {
+        "calls": 27,
+        "prompt_tokens": 25720,
+        "completion_tokens": 12218,
+        "total_tokens": 37938,
+        "max_prompt_tokens": 974,
+        "message_counts": {
+          "1": 27
+        },
+        "finish_reasons": {
+          "stop": 27
+        },
+        "token_share": 0.05316848459027697
+      }
+    }
+  },
+  "semeval_2250": {
+    "records_path": "runs/semeval_benchmark/20261002T201740.595224Z/detection/20261002T201740Z/records.jsonl",
+    "records_sha256": "2cb8b3cbdb9db917cb745da3579cfd20ef519726c3da9e74eb392828a54b6590",
+    "gold_sha256": "2cb6cff67ecbf59d02e90d1e1fb3016c623aa94c9bacd027bc463b5111070094",
+    "metrics": {
+      "L4_prefix": {
+        "tp": 1500,
+        "fp": 229,
+        "tn": 403,
+        "fn_decided": 99,
+        "unresolved_positive": 8,
+        "unresolved_negative": 11,
+        "items": 2250,
+        "correct": 1903,
+        "accuracy_all": 0.8457777777777777,
+        "precision": 0.8675534991324465,
+        "recall_full_gold": 0.9334163036714375,
+        "f1_full_gold": 0.8992805755395683,
+        "coverage": 0.9915555555555555,
+        "outcomes": {
+          "PUN": 1729,
+          "NON_PUN": 502,
+          "INSUFFICIENT_EVIDENCE": 13,
+          "EXECUTION_FAILED": 6
+        }
+      },
+      "L4_L5_prefix": {
+        "tp": 1460,
+        "fp": 222,
+        "tn": 410,
+        "fn_decided": 139,
+        "unresolved_positive": 8,
+        "unresolved_negative": 11,
+        "items": 2250,
+        "correct": 1870,
+        "accuracy_all": 0.8311111111111111,
+        "precision": 0.8680142687277052,
+        "recall_full_gold": 0.9085252022401992,
+        "f1_full_gold": 0.8878078443295835,
+        "coverage": 0.9915555555555555,
+        "outcomes": {
+          "PUN": 1682,
+          "NON_PUN": 549,
+          "INSUFFICIENT_EVIDENCE": 13,
+          "EXECUTION_FAILED": 6
+        }
+      },
+      "full_detection": {
+        "tp": 1381,
+        "fp": 177,
+        "tn": 449,
+        "fn_decided": 188,
+        "unresolved_positive": 38,
+        "unresolved_negative": 17,
+        "items": 2250,
+        "correct": 1830,
+        "accuracy_all": 0.8133333333333334,
+        "precision": 0.886392811296534,
+        "recall_full_gold": 0.8593652769135034,
+        "f1_full_gold": 0.8726698262243286,
+        "coverage": 0.9755555555555555,
+        "outcomes": {
+          "PUN": 1558,
+          "NON_PUN": 637,
+          "INSUFFICIENT_EVIDENCE": 49,
+          "EXECUTION_FAILED": 6
+        }
+      }
+    },
+    "gate_transitions": {
+      "L5": {
+        "counts": {
+          "positive_changed": 40,
+          "true_positive_to_negative": 40,
+          "negative_changed": 7,
+          "false_positive_to_true_negative": 7
+        },
+        "changes": [
+          {
+            "item_id": "hom_33",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_69",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_144",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_199",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_204",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_229",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_233",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_270",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_355",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_500",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_516",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_662",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_667",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_712",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_748",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_782",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_896",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_936",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_963",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_978",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1012",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1067",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1078",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1088",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1122",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1118",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1251",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1296",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1298",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1369",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1375",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1383",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1412",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1585",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1715",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1781",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1791",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1888",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1985",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_2067",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_2098",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_2143",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_2167",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_2170",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_2184",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_2197",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_2231",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          }
+        ]
+      },
+      "L6_and_final": {
+        "counts": {
+          "negative_changed": 45,
+          "false_positive_to_true_negative": 39,
+          "positive_changed": 79,
+          "true_positive_to_unresolved": 30,
+          "true_positive_to_negative": 49,
+          "false_positive_to_unresolved": 6
+        },
+        "changes": [
+          {
+            "item_id": "hom_13",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_10",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_12",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_77",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_95",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_112",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_140",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_164",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_269",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_293",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_300",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_302",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_306",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_342",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_348",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_369",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_379",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_386",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_396",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_414",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_417",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_496",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_519",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_526",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_641",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_655",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_657",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_681",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_682",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_703",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_708",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_714",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_722",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_735",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_768",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_797",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_813",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_817",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_831",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_860",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_870",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_880",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_895",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_898",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_902",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_927",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_945",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_948",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_996",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_1007",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1023",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1040",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1099",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1108",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1120",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1115",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1127",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1155",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1160",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_1252",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1279",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1283",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1288",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1301",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_1342",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1349",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1368",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1370",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1364",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1426",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_1446",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1468",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1474",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1476",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_1518",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1537",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_1548",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_1570",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1572",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_1591",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_1597",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1612",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1643",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_1642",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1659",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1671",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1679",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1686",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_1684",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1710",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1734",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1762",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_1786",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1798",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_1793",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1836",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1847",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1855",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1867",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1861",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1885",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_1890",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1896",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1904",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1908",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1926",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1939",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_1948",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1977",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_1983",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_1996",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_2012",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_2032",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_2042",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_2049",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_2069",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_2110",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_2128",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_2137",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_2142",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_2182",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_2198",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "INSUFFICIENT_EVIDENCE"
+          },
+          {
+            "item_id": "hom_2226",
+            "gold": "NON_PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          },
+          {
+            "item_id": "hom_2241",
+            "gold": "PUN",
+            "before": "PUN",
+            "after": "NON_PUN"
+          }
+        ]
+      }
+    },
+    "downstream_rejections": [
+      {
+        "item_id": "hom_13",
+        "text": "Diligent youth makes easy age.",
+        "gold": "NON_PUN",
+        "target": "youth",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 1,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "Replacing “youth” with “young person” removes the life-stage reading, but the two readings express nearly the same causal idea: diligence while young makes later life easier. They do not create a materially different contrast, and the person and life-stage readings can coexist."
+      },
+      {
+        "item_id": "hom_10",
+        "text": "She was suspected of stealing a brooch but they couldn't pin it on her.",
+        "gold": "PUN",
+        "target": "brooch",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "L6_SKIPPED_NO_PARAPHRASE",
+        "reason": "The descriptions can be paraphrased, but the sentence’s “pin it on her” normally means “blame her for it,” not fasten something to her. The supplied Sense B therefore is not clearly active in the text, so the claimed pair cannot be reliably assessed."
+      },
+      {
+        "item_id": "hom_12",
+        "text": "Precepts teach, examples move.",
+        "gold": "NON_PUN",
+        "target": "examples",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 1,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The paraphrases differ, but conduct offered as a model can also function as an illustrative instance, so the readings are not mutually exclusive here. Replacing “examples” with “illustrative instances” leaves room for those instances to inspire or move someone, rather than cleanly removing the claimed contrast."
+      },
+      {
+        "item_id": "hom_33",
+        "text": "My name is John. I'm a plumber",
+        "gold": "PUN",
+        "target": "john",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 1,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "John is clearly used as a personal name, while being a plumber only indirectly evokes a toilet and does not make that second sense active in the statement."
+      },
+      {
+        "item_id": "hom_69",
+        "text": "Baseball players are expected to perform well right off the bat.",
+        "gold": "PUN",
+        "target": "right",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 5,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "“Right off the bat” conventionally means immediately, while “right” does not naturally modify “perform well” here, so the sentence reads as a straightforward idiom rather than a deliberate double meaning."
+      },
+      {
+        "item_id": "hom_77",
+        "text": "The phone call interrupted my nap, and I never did get the rest.",
+        "gold": "PUN",
+        "target": "rest",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 4,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The remaining portion of the nap is itself sleep or repose, so the readings overlap and do not exclude one another. Replacing “the rest” with “any more sleep” makes the sleep reading explicit but retains the same interrupted-sleep situation rather than establishing a material contrast."
+      },
+      {
+        "item_id": "hom_95",
+        "text": "I'm NOT \" white,\" I'm \" melanin-challenged.\"",
+        "gold": "NON_PUN",
+        "target": "white",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 2,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "Racial identity and skin pigmentation are different dimensions, but neither excludes the other: someone may reject a white racial identity while having very pale skin. Replacing “white” with “racially white” removes the word’s color reading, yet the contrast between racial identity and pale pigmentation remains."
+      },
+      {
+        "item_id": "hom_112",
+        "text": "A thief who stole a calendar got twelve months.",
+        "gold": "PUN",
+        "target": "calendar",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 5,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The chart and the timekeeping system are distinguishable, but they are closely related and can be evoked together; the phrase “twelve months” does not exclude the physical calendar reading. Replacing “calendar” with “printed date chart” would leave the months reference—and the joke about a twelve-month prison sentence—intact, so the claimed contrast is not cleanly ablated."
+      },
+      {
+        "item_id": "hom_140",
+        "text": "Some commands given by the army are specific, others are General.",
+        "gold": "PUN",
+        "target": "general",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "L6_SKIPPED_NO_PARAPHRASE",
+        "reason": "Sense A fits the contrast with “specific,” but Sense B cannot be assigned a clear reading here: “others” refers to commands, not people, so it does not naturally mean that the others are high-ranking officers. Reading it as commands issued by a General would require adding meaning not expressed in the text."
+      },
+      {
+        "item_id": "hom_144",
+        "text": "OLD LOCOMOTIVE ENGINEERS, never die, they just get derailed",
+        "gold": "PUN",
+        "target": "derailed",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 6,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "The railway sense of “derailed” fits the locomotive engineers, but the sentence does not meaningfully cue the ED reading, so the supplied senses do not form an active double meaning."
+      },
+      {
+        "item_id": "hom_164",
+        "text": "He and his partner made knives, and they shared a cut.",
+        "gold": "PUN",
+        "target": "made",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 4,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "L6_SKIPPED_NO_PARAPHRASE",
+        "reason": "The meanings can be distinguished in isolation, but the text only uses “made” in “made knives”; “they shared a cut” may suggest shared proceeds without establishing that “made” also means earned money here. Thus there is insufficient evidence to assess two active readings of the ambiguous term."
+      },
+      {
+        "item_id": "hom_199",
+        "text": "' ' I couldn't believe there were 527, 986 bees in the swarm!' ' Tom recounted.",
+        "gold": "PUN",
+        "target": "recounted",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 2,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "The bee count weakly evokes counting again, but the quotation-attribution structure strongly favors “recounted” meaning narrated, so the alternate reading creates little deliberate contrast."
+      },
+      {
+        "item_id": "hom_204",
+        "text": "' ' I have to check the score on this exam again,' ' Tom remarked.",
+        "gold": "PUN",
+        "target": "remarked",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 0,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "The exam and “again” weakly evoke re-grading, but “Tom remarked” naturally functions as a speech tag and does not clearly support the transitive grading sense."
+      },
+      {
+        "item_id": "hom_229",
+        "text": "What it boils down to is this: eggs taste good.",
+        "gold": "PUN",
+        "target": "boils",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "The idiom is clear, but “eggs taste good” does not establish that the eggs are boiled, so the literal cooking sense and a deliberate semantic clash are barely activated."
+      },
+      {
+        "item_id": "hom_233",
+        "text": "There was a massive outcry against the plan to build a power line across a nature preserve. The public couldn't bear the tension.",
+        "gold": "PUN",
+        "target": "bear",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 10,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "The preserve evokes wildlife and may weakly prime the animal sense, but “couldn’t bear the tension” reads conventionally as tolerate, so the animal meaning is not strongly activated or exploited."
+      },
+      {
+        "item_id": "hom_270",
+        "text": "He took a nail to the volleyball game because he wanted to spike it.",
+        "gold": "PUN",
+        "target": "nail",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 5,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "The sentence uses “nail” only as a fastener; “spike” means to hit the ball, so the supplied punchline sense is not activated for the ambiguous term."
+      },
+      {
+        "item_id": "hom_269",
+        "text": "He bought a rope factory to tie into his empire.",
+        "gold": "PUN",
+        "target": "rope",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 4,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_DISTINCT",
+        "reason": "The product reading and the fastening action are conceptually distinct, with “rope factory” cueing the product and “tie into” inviting a literal-versus-figurative connection. Replacing “rope” with a near-synonym such as “cord” leaves that tie contrast available, so a controlled substitution does not cleanly remove the wordplay."
+      },
+      {
+        "item_id": "hom_293",
+        "text": "If you go for a job interview at a rubber stamp company try to make a good impression.",
+        "gold": "PUN",
+        "target": "stamp",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 12,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_DISTINCT",
+        "reason": "The device and the imprint it produces are distinct entities, and the company phrase favors the device reading while “impression” evokes its output. Replacing “stamp” with “marking device” removes the lexical ambiguity, but the tool–imprint association with “make a good impression” remains."
+      },
+      {
+        "item_id": "hom_300",
+        "text": "A gambling gardener usually hedges his bets.",
+        "gold": "PUN",
+        "target": "gambling",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 4,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The paraphrases describe different activities, but the readings do not mutually exclude each other: playing games for money is itself risk-taking, and “hedges his bets” reinforces that overlap. Replacing “gambling” with “plays games of chance for money” removes its broader risk-taking reading, but the surrounding phrase still evokes risk and betting, so the contrast is not cleanly ablated."
+      },
+      {
+        "item_id": "hom_302",
+        "text": "Copper wire was invented by lawyers arguing over a penny.",
+        "gold": "NON_PUN",
+        "target": "copper",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The penny evokes a copper coin, but it does not create an alternative reading of “copper wire”: the wire can be copper while the penny is also copper. Replacing “Copper” with “Metal” removes the association with a copper penny, but the text supports a shared-material connection rather than two mutually exclusive readings."
+      },
+      {
+        "item_id": "hom_306",
+        "text": "I was talking during sex and my girlfriend hung up.",
+        "gold": "NON_PUN",
+        "target": "hung",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "L6_SKIPPED_NO_PARAPHRASE",
+        "reason": "“Hung up” conventionally means ended the call, but the slang sense “well-endowed” does not form a grammatical alternative reading of the phrase with “my girlfriend” as its subject. The mention of sex alone does not establish that second reading in this sentence."
+      },
+      {
+        "item_id": "hom_342",
+        "text": "When entering a funeral home, remember to stay alert and always look alive!",
+        "gold": "PUN",
+        "target": "alert",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 9,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "Watchfulness and liveliness can coexist, and the sentence uses “alert” only in the watchfulness sense; “look alive” supplies the liveliness wording. Replacing “stay alert” with “stay watchful” leaves the funeral-home irony of “look alive” intact, so the specific joke does not depend on alert having both readings."
+      },
+      {
+        "item_id": "hom_355",
+        "text": "I went to the store to buy some soup but they were out of stock.",
+        "gold": "PUN",
+        "target": "stock",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "Soup loosely evokes broth, but “out of stock” conventionally means unavailable merchandise, so the sentence reads as a mundane shopping statement rather than deliberately exploiting the two senses."
+      },
+      {
+        "item_id": "hom_348",
+        "text": "My boyfriend and I started to date after he backed his car into mine. We met by accident.",
+        "gold": "PUN",
+        "target": "met",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 6,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The paraphrases describe different events, but the readings are compatible here: the collision can lead to the couple becoming acquainted. Replacing “met” with “got acquainted” still leaves the “by accident” contrast between an unplanned meeting and a car crash."
+      },
+      {
+        "item_id": "hom_369",
+        "text": "Before he was hired as a short order cook they grilled him.",
+        "gold": "PUN",
+        "target": "cook",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 5,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_DISTINCT",
+        "reason": "The job title names a person, while the literal reading of “grilled him” evokes cooking as an action; those are distinct readings, though the action is only indirectly activated. Replacing “cook” with “chef” removes its noun/verb contrast, but the idiomatic-versus-literal contrast in “they grilled him” remains."
+      },
+      {
+        "item_id": "hom_379",
+        "text": "Procrastination Day Has Been Postponed!",
+        "gold": "NON_PUN",
+        "target": "postponed",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 0,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "Both readings describe the same basic postponement; Sense B adds a cause rather than a distinct meaning, and both can apply at once. Replacing “postponed” with “rescheduled for a later time” removes that word’s possible causal reading, but the procrastination-and-delay echo remains in the surrounding wording."
+      },
+      {
+        "item_id": "hom_386",
+        "text": "Two florists got married. It was an arranged marriage.",
+        "gold": "PUN",
+        "target": "arranged",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "L6_SKIPPED_NO_PARAPHRASE",
+        "reason": "The conventional reading is clear, but “arranged” does not naturally mean that a marriage was attractively decorated or that its flowers were arranged. The florist context suggests a wordplay association, but it does not establish a distinct paraphrase of the phrase “arranged marriage.”"
+      },
+      {
+        "item_id": "hom_396",
+        "text": "An undertaker can be one of your best friends, he is always the last one to let you down.",
+        "gold": "PUN",
+        "target": "undertaker",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "These are overlapping functions of the same funeral professional, not mutually exclusive readings of “undertaker”; the wordplay instead contrasts emotional and physical meanings of “let you down.” Replacing “undertaker” with “funeral director” leaves that contrast available, so the claimed ambiguity is not ablated."
+      },
+      {
+        "item_id": "hom_414",
+        "text": "I tried to pack myself in a suitcase. I could hardly contain myself.",
+        "gold": "PUN",
+        "target": "pack",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 4,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "Filling the suitcase is an outcome or degree of putting something inside, not a mutually exclusive reading here; the capacity idea is only suggested by “contain.” Replacing “pack” with “put” leaves the “contain myself” wordplay intact, so that contrast is not created by the two claimed senses of “pack.”"
+      },
+      {
+        "item_id": "hom_417",
+        "text": "When video arcades switched to a system of tokens, there was no quarter asked or given.",
+        "gold": "PUN",
+        "target": "switched",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 6,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "Replacing quarters with tokens is the concrete change involved in adopting the token system, so the readings overlap rather than exclude one another. Replacing “switched” with “changed over” removes the alleged exchange reading of that verb, but the quarter idiom/coin wordplay remains and is not dependent on two distinct readings of “switched.”"
+      },
+      {
+        "item_id": "hom_496",
+        "text": "She's a composer who has scores of works to her credit.",
+        "gold": "PUN",
+        "target": "credit",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The readings describe different functions—praise for accomplishments versus attribution of authorship—but they can both apply to the same body of work, so neither suppresses the other here. Replacing “to her credit” with “attributed to her” foregrounds authorship, but does not establish a mutually exclusive wordplay contrast in the original."
+      },
+      {
+        "item_id": "hom_500",
+        "text": "There was a report of shots fired in a local bar. The police don't know what triggered the commotion.",
+        "gold": "PUN",
+        "target": "report",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 5,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "“Report” clearly means an account or notification here, while the later phrase does not activate its sense of a gunshot sound or create a deliberate contrast."
+      },
+      {
+        "item_id": "hom_516",
+        "text": "When buying a battery you should never have to charge it.",
+        "gold": "PUN",
+        "target": "charge",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "The ordinary recharging sense is clear, but the credit sense is only weakly suggested because “charge it” refers grammatically to the battery rather than explicitly to its purchase."
+      },
+      {
+        "item_id": "hom_519",
+        "text": "Fretting cares make grey hairs.",
+        "gold": "NON_PUN",
+        "target": "grey",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 1,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The age-related reading and the color reading describe overlapping facets of the same gray hair, so neither excludes the other or creates a materially different picture. Replacing “grey” with “age-marked” preserves the age-related gray-hair idea, but does not reveal a distinct contrast between the readings."
+      },
+      {
+        "item_id": "hom_526",
+        "text": "The frog went unnoticed in the milkshake because it blended so well.",
+        "gold": "PUN",
+        "target": "blended",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 1,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The readings describe different things—physical mixing versus visual camouflage—but they can both be true of the frog at once, so neither excludes the other in this context. Replacing “blended” with “matched its surroundings” removes the mixing reading, but the sentence’s two-meaning contrast is therefore not mutually suppressing as required for distinctness."
+      },
+      {
+        "item_id": "hom_641",
+        "text": "A half truth is a whole lie.",
+        "gold": "NON_PUN",
+        "target": "half",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "An exactly half-true statement is also incomplete, so the readings overlap rather than mutually exclude each other. Replacing “half” with “partial” removes the exact-fraction reading, but the partial-versus-whole contrast in the aphorism remains."
+      },
+      {
+        "item_id": "hom_655",
+        "text": "I was going to buy a book on phobias, but I was afraid it wouldn't help me.",
+        "gold": "PUN",
+        "target": "afraid",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 1,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The second reading is a context-specific form of fear or apprehension, not a mutually exclusive meaning. Replacing “afraid” with “worried” makes the sentence grammatical, but there is no distinct two-sense contrast for that substitution to remove."
+      },
+      {
+        "item_id": "hom_657",
+        "text": "She was only a Waitress's daughter but she sure could dish it out.",
+        "gold": "PUN",
+        "target": "waitress",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "L6_SKIPPED_NO_PARAPHRASE",
+        "reason": "“Waitress’s daughter” uses waitress as a noun, while “dish it out” does not use or clearly imply the verb waitress; it can mean serving food, but also idiomatically giving criticism. The text therefore does not provide enough evidence to assess the two claimed waitress readings as active interpretations."
+      },
+      {
+        "item_id": "hom_662",
+        "text": "He bent over to pick up a sieve and strained himself.",
+        "gold": "PUN",
+        "target": "strained",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "The sieve hints at filtering, but “strained himself” strongly selects the physical-effort sense and does not naturally support the setup reading."
+      },
+      {
+        "item_id": "hom_667",
+        "text": "During his lifetime, the composer Bach was a noted success.",
+        "gold": "PUN",
+        "target": "bach",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 4,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "The sentence plainly refers to Bach the composer, while reading Bach as his music is only a weak metonymic possibility and creates no deliberate shift or clash."
+      },
+      {
+        "item_id": "hom_681",
+        "text": "Molecules boiling points vary to some degree.",
+        "gold": "PUN",
+        "target": "degree",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The paraphrases describe distinct concepts, but the phrase “to some degree” conventionally means “to some extent”; a temperature-unit reading would normally require wording such as “by some degrees.” Replacing “degree” with “extent” preserves the sentence’s ordinary meaning, but there is no well-supported unit-reading contrast in the original to ablate."
+      },
+      {
+        "item_id": "hom_682",
+        "text": "A girl a day keeps the wife away.",
+        "gold": "NON_PUN",
+        "target": "girl",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 0,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The romantic reading is a narrower possibility within the general meaning: a girlfriend can also be described as a young woman, so the interpretations do not exclude each other. Replacing “girl” with “young woman” removes the specific lexical ambiguity but leaves the romantic implication and joke available from the context."
+      },
+      {
+        "item_id": "hom_703",
+        "text": "Boyle said he was under too much pressure.",
+        "gold": "PUN",
+        "target": "boyle",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 0,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The literal reading and the chemist allusion can refer to the same person, so they do not mutually exclude one another; the pressure association is an allusion rather than a distinct meaning of “Boyle.” Replacing the name with “the speaker” removes the name-based association, but leaves the pressure wording and its possible allusion in place."
+      },
+      {
+        "item_id": "hom_712",
+        "text": "What's the deal with negotiations?",
+        "gold": "PUN",
+        "target": "deal",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 1,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "The readings of “deal” are distinct, but the text offers no answer that resolves the question through the ambiguity; its present-tense phrasing is compatible with both readings."
+      },
+      {
+        "item_id": "hom_708",
+        "text": "If you're looking for oranges on an apple tree you will have a fruitless search.",
+        "gold": "PUN",
+        "target": "apple",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 5,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The fruit and tree are different entities, but “apple” in “apple tree” describes the kind of fruit the tree bears; it does not independently mean the tree. Replacing it with “fruit-bearing” preserves the sentence’s fruit-versus-tree setup, so the text does not establish a mutually exclusive two-reading contrast for “apple.”"
+      },
+      {
+        "item_id": "hom_714",
+        "text": "A skier who loses a race on a cold day will have a frosty disposition.",
+        "gold": "PUN",
+        "target": "cold",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_DISTINCT",
+        "reason": "The literal weather reading and the figurative temperament reading describe materially different things and exclude one another as meanings of “cold.” Replacing it with “low-temperature” removes the ambiguity of that word, but the contrast still operates through “frosty disposition,” so the specific wordplay remains."
+      },
+      {
+        "item_id": "hom_722",
+        "text": "Money is the Root of All Evil. For more info, send $10.",
+        "gold": "NON_PUN",
+        "target": "money",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "Wealth and spendable currency can be distinguished, but they overlap here: currency can constitute wealth, so neither reading excludes the other. Replacing “Money” with “Wealth” leaves the contrast between condemning wealth and requesting $10—and its irony—intact."
+      },
+      {
+        "item_id": "hom_735",
+        "text": "De Broglie waved aside the invitation.",
+        "gold": "PUN",
+        "target": "de broglie",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 5,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "L6_SKIPPED_NO_PARAPHRASE",
+        "reason": "The sentence clearly supports the physicist reading, but the de Broglie wave is not a coherent alternative subject that could wave aside an invitation. “Waved” evokes the scientific term, but that association alone does not establish a second paraphrasable reading."
+      },
+      {
+        "item_id": "hom_748",
+        "text": "Priests can't marry without prior approval.",
+        "gold": "PUN",
+        "target": "prior",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 2,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "Only the temporal adjective “prior” is grammatically active in “prior approval”; the religious-office sense is not invoked by the sentence."
+      },
+      {
+        "item_id": "hom_768",
+        "text": "It's quiet in a bowling alley because you can hear a pin drop.",
+        "gold": "PUN",
+        "target": "bowling alley",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 4,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The venue and lane can both be described by “in a bowling alley,” since a lane is part of the venue, so they do not mutually exclude one another here. Replacing it with “bowling center” leaves the pin-drop joke intact; that joke turns on the phrase “hear a pin drop,” not a venue-versus-lane contrast."
+      },
+      {
+        "item_id": "hom_782",
+        "text": "PRESS To test. <click> RELEASE to detonate.",
+        "gold": "NON_PUN",
+        "target": "release",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "The text reads as ordinary press-and-release instructions, while nothing in it activates the press-release-announcement sense or creates a meaningful contrast."
+      },
+      {
+        "item_id": "hom_797",
+        "text": "The boughs that bear most hang lowest.",
+        "gold": "NON_PUN",
+        "target": "bear",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 2,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The paraphrases describe different functions, but they are compatible here: boughs that produce more fruit also carry more of its weight, so the readings do not suppress one another or create materially separate situations. Replacing “bear” with “produce” removes the alternate lexical wording, but the carrying idea remains closely implied by the fruit weighing the boughs down."
+      },
+      {
+        "item_id": "hom_813",
+        "text": "The best place for criticism is in front of your mirror.",
+        "gold": "NON_PUN",
+        "target": "mirror",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 1,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The physical mirror and the self-image it produces are closely linked and can be present in the same ordinary scene, rather than excluding each other. Replacing “mirror” with “reflective surface” would retain the implication of looking at and criticizing yourself, so it would not cleanly remove the contrast."
+      },
+      {
+        "item_id": "hom_817",
+        "text": "This is the best guy I've met to date.",
+        "gold": "PUN",
+        "target": "met",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The dating reading adds a purpose to meeting someone, but that meeting can also be an encounter, so the readings are not mutually exclusive and differ mainly in context. Replacing “met” with “encountered” leaves “to date” in place, where its romantic-versus-temporal interpretation can still carry the contrast."
+      },
+      {
+        "item_id": "hom_831",
+        "text": "Life is a game. Money is how we keep score.",
+        "gold": "NON_PUN",
+        "target": "score",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 1,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "Replacing “keep score” with “measure success” preserves the central idea of using money to quantify success; the game-score image and the success-measure reading are closely connected facets of that same scoring concept, not mutually exclusive readings."
+      },
+      {
+        "item_id": "hom_860",
+        "text": "Diabetics should not be allowed to have sweet dreams.",
+        "gold": "PUN",
+        "target": "allowed",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "L6_SKIPPED_NO_PARAPHRASE",
+        "reason": "The permission reading has a clear paraphrase, but resegmenting “allowed” as “allow” + “ED” only evokes erectile dysfunction; it does not yield a coherent, distinct reading of the sentence to paraphrase."
+      },
+      {
+        "item_id": "hom_870",
+        "text": "Dutch shoes used to be made in a factory machine, until it got clogged up.",
+        "gold": "PUN",
+        "target": "clogged",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 6,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The shoe-based reading merely specifies what caused the machine to become obstructed, so it is compatible with Sense A rather than a mutually exclusive interpretation. Replacing “clogged up” with “blocked up” removes the shoe-word echo, but the proposed readings do not amount to two distinct senses."
+      },
+      {
+        "item_id": "hom_880",
+        "text": "Eavesdroppers hear no good of themselves.",
+        "gold": "NON_PUN",
+        "target": "hear",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 2,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "In this sentence, learning what is said about oneself can happen through hearing it, so the two readings overlap rather than establish mutually exclusive situations. Replacing “hear” with “learn” retains the same informational point; the wording does not clearly set up a separate acoustic-versus-informational contrast to ablate."
+      },
+      {
+        "item_id": "hom_895",
+        "text": "I had some back trouble, but it's all behind me now.",
+        "gold": "PUN",
+        "target": "trouble",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The back ailment can itself be the problem that is now over, so the readings do not exclude one another or establish distinct meanings of “trouble.” Replacing it with “back pain” leaves the wordplay in “all behind me now,” which turns on “back/behind,” not a contrast between senses of “trouble.”"
+      },
+      {
+        "item_id": "hom_898",
+        "text": "Badminton players are for the birds.",
+        "gold": "PUN",
+        "target": "birds",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 2,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "L6_SKIPPED_NO_PARAPHRASE",
+        "reason": "The idiomatic reading is clear, but the badminton context only associates the sentence with shuttlecocks; it does not yield a clear paraphrase for what it means that the players are “for” shuttlecocks. Without a coherent second reading, the contrast and its ablation cannot be assessed."
+      },
+      {
+        "item_id": "hom_896",
+        "text": "Daddy, how come my magnet won't pick up these disks?",
+        "gold": "NON_PUN",
+        "target": "daddy",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 0,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "“Daddy” clearly addresses a father, but the magnet reference does not meaningfully establish the resegmented “dad” + “Dy” reading or create a deliberate clash."
+      },
+      {
+        "item_id": "hom_902",
+        "text": "My name is Sue. I'm also a lawyer.",
+        "gold": "PUN",
+        "target": "sue",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 1,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "L6_SKIPPED_NO_PARAPHRASE",
+        "reason": "The meanings can be paraphrased distinctly, but the text uses “Sue” only as a given name; being a lawyer merely evokes suing and does not establish that verb reading as active. Without both readings present in the text, their suppression and the specific wordplay cannot be assessed."
+      },
+      {
+        "item_id": "hom_927",
+        "text": "Lead me not into temptation, I can find my own way",
+        "gold": "NON_PUN",
+        "target": "find",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The second reading mainly specifies the destination and outcome of the same self-directed route-finding described by Sense A, rather than invoking a clearly separate meaning of “find.” Replacing “find” with “navigate” would retain the route-to-temptation implication, so it would not cleanly ablate the claimed contrast."
+      },
+      {
+        "item_id": "hom_936",
+        "text": "This just in: Research causes cancer in rats!",
+        "gold": "NON_PUN",
+        "target": "causes",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "The news framing strongly favors the verb reading rather than the clipped imperative noun reading, while the verb interpretation is clear and contrasts moderately with the related noun sense of reasons for cancer."
+      },
+      {
+        "item_id": "hom_945",
+        "text": "She was only a Bricklayer's daughter, but she was certainly stacked.",
+        "gold": "PUN",
+        "target": "bricklayer",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "L6_SKIPPED_NO_PARAPHRASE",
+        "reason": "“Bricklayer’s daughter” coherently means the daughter of a craft worker, but the split reading (“brick layer’s daughter,” meaning the daughter of a brick course) does not form a clear interpretation in this sentence. Since Sense B cannot be paraphrased as a viable reading here, the contrast cannot be assessed."
+      },
+      {
+        "item_id": "hom_948",
+        "text": "My name is Dean A college chancellor",
+        "gold": "PUN",
+        "target": "dean",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "In this wording, “Dean” is naturally the speaker’s name, while “A college chancellor” describes the speaker; it does not clearly establish a competing reading of Dean as an office. The person could also be both named Dean and an academic administrator, so the two readings do not exclude one another."
+      },
+      {
+        "item_id": "hom_963",
+        "text": "Failure is the stepping stone for success.",
+        "gold": "NON_PUN",
+        "target": "stepping",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 0,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "The phrase uses the familiar figurative meaning of “stepping stone,” while a literal foothold is only faintly evoked and is not exploited as a surprising contrast."
+      },
+      {
+        "item_id": "hom_978",
+        "text": "My name is Pat. I am a masseur",
+        "gold": "PUN",
+        "target": "pat",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 0,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "Pat is clearly a name, but the masseur context only loosely suggests patting and does not actually activate the verb sense or create a deliberate double-take."
+      },
+      {
+        "item_id": "hom_996",
+        "text": "The intelligent entrepreneur's idea for designing catapults meant that his boss was completely thrown.",
+        "gold": "PUN",
+        "target": "catapults",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 5,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "L6_SKIPPED_NO_PARAPHRASE",
+        "reason": "“Catapults” is used only as a plural noun for launching devices. “Thrown” describes the boss as bewildered or surprised; it does not express the claimed verb sense of catapulting, so the second reading cannot be paraphrased as an active interpretation of the ambiguous term."
+      },
+      {
+        "item_id": "hom_1007",
+        "text": "A hole has been found in the nudist camp wall. The police are looking into it.",
+        "gold": "PUN",
+        "target": "hole",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 6,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The alleged flaw can be the very same physical aperture, so the readings do not exclude each other or create a material contrast. Replacing “hole” with “opening” leaves that opening available to be treated as a defect under investigation; the contrast is mainly contextual framing, not two clearly distinct senses."
+      },
+      {
+        "item_id": "hom_1012",
+        "text": "A dentist with a toothache could have a bad impact on his patients.",
+        "gold": "PUN",
+        "target": "bad",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 2,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "The toothache suggests physical discomfort, but that sense is only implied rather than attached to an occurrence of “bad,” while “bad impact” straightforwardly means harmful effect and creates little deliberate wordplay."
+      },
+      {
+        "item_id": "hom_1023",
+        "text": "Hell’s the pits",
+        "gold": "PUN",
+        "target": "pits",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 2,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The idiom gives an evaluation of Hell, while the infernal-pits reading adds an associated image that can coexist with that evaluation rather than suppressing it; both reinforce the same basic idea of Hell as unpleasant. Replacing “the pits” with “awful” (“Hell’s awful”) removes the pits image, but the text does not establish it as a separate, mutually exclusive interpretation."
+      },
+      {
+        "item_id": "hom_1040",
+        "text": "OLD PHOTOGRAPHERS never die they just stop developing.",
+        "gold": "PUN",
+        "target": "stop",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 5,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "Both uses of “stop” mean cease; the contrasting readings mainly come from the two meanings of “developing,” not from distinct senses of “stop.” Replacing “stop” with “cease” leaves the photograph-development and aging contrast intact."
+      },
+      {
+        "item_id": "hom_1067",
+        "text": "When there's a sale on tennis balls it's first come first serve.",
+        "gold": "PUN",
+        "target": "come",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 4,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "The arrival sense is the ordinary meaning of the familiar phrase, while the orgasm sense is not meaningfully activated by the tennis-sale context and would require extra assumptions."
+      },
+      {
+        "item_id": "hom_1078",
+        "text": "The unveiling of the statue was a monumental occasion.",
+        "gold": "PUN",
+        "target": "monumental",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "The statue context weakly evokes the monument-related sense, but “monumental occasion” conventionally means an important occasion, so there is little deliberate shift or clash."
+      },
+      {
+        "item_id": "hom_1088",
+        "text": "My name is Mark. I price items at the supermarket.",
+        "gold": "PUN",
+        "target": "mark",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 4,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "Mark is clearly a given name, while pricing items only indirectly suggests marking goods, so the sentence reads as a mundane fact rather than a deliberate semantic shift."
+      },
+      {
+        "item_id": "hom_1099",
+        "text": "A chain is only as strong as its weakest link.",
+        "gold": "NON_PUN",
+        "target": "chain",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 2,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The physical image and figurative lesson are distinguishable, but they are compatible and jointly evoked by this conventional proverb rather than mutually suppressing readings. Replacing “chain” with “system” does not remove the physical-chain imagery or figurative force carried by “weakest link.”"
+      },
+      {
+        "item_id": "hom_1108",
+        "text": "It is not what you say, it is the way you say it.",
+        "gold": "NON_PUN",
+        "target": "say",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 1,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The phrase contrasts message with delivery, but both are aspects of the same utterance and neither excludes the other. Replacing “say” with “express” (“what you express” versus “the way you express it”) preserves that contrast, so the wording does not establish mutually exclusive lexical senses."
+      },
+      {
+        "item_id": "hom_1122",
+        "text": "My coach got stung by a bee. The next day he had hives.",
+        "gold": "PUN",
+        "target": "hives",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 6,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "The bee mention weakly evokes beehives, but “had hives” naturally means a rash after a sting, making the punchline predictable rather than a deliberate clash."
+      },
+      {
+        "item_id": "hom_1120",
+        "text": "The state police highway officer worked tirelessly in the heavy rain to assist a lady whose car was stuck in a ditch. He was a real trooper.",
+        "gold": "PUN",
+        "target": "real",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 14,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The literal claim that he is a trooper and the praise of his perseverance can both be true, so neither reading excludes the other. Replacing “real” with “actual” would favor the literal reading, but “trooper” can still suggest a steadfast person, so the contrast is not reliably removed."
+      },
+      {
+        "item_id": "hom_1115",
+        "text": "It said \" Insert disk #3 \", but only 2 will fit!",
+        "gold": "NON_PUN",
+        "target": "disk",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 0,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "A computer storage disk is also a physical object that can fit somewhere, so the readings are not mutually exclusive and the text does not establish a material sense contrast. Replacing “disk” with “storage medium” leaves the odd claim that only two will fit, but that is a fit/count mismatch rather than a contrast between distinct meanings."
+      },
+      {
+        "item_id": "hom_1118",
+        "text": "Limit Congress to 2 terms: one in office, one in jail!",
+        "gold": "NON_PUN",
+        "target": "office",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "“Office” is strongly read as elected service because of “Congress” and “terms”; the jail contrast supplies the joke, but the workplace reading is not meaningfully activated."
+      },
+      {
+        "item_id": "hom_1127",
+        "text": "The math professor liked even numbers, but only the odd one.",
+        "gold": "PUN",
+        "target": "one",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "Both readings pick out the same number: 1 is the sole odd item, so the interpretations overlap rather than exclude one another. Replacing “one” with “integer 1” preserves the odd-versus-even setup, but there is no materially distinct two-reading contrast here to ablate."
+      },
+      {
+        "item_id": "hom_1155",
+        "text": "Darwin said he'd have to see what evolved.",
+        "gold": "PUN",
+        "target": "evolved",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "Biological evolution is a specific kind of development over time, so the broad reading does not exclude the biological one, even though it can suggest a different focus. Replacing “evolved” with “developed” retains the broad meaning but can still describe evolutionary outcomes, so it does not cleanly remove the overlap."
+      },
+      {
+        "item_id": "hom_1160",
+        "text": "Overheard in med school -' I learned about the colon through the process of elimination.'",
+        "gold": "PUN",
+        "target": "through",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 7,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "L6_SKIPPED_NO_PARAPHRASE",
+        "reason": "The phrase supports “through” as meaning by means of, while the bodily joke comes from “process of elimination.” A spatial reading of “through” (as material passes through the colon) is not clearly licensed by the sentence’s grammar, so a distinct paraphrase for Sense B cannot be established."
+      },
+      {
+        "item_id": "hom_1252",
+        "text": "Do not merely believe in miracles, rely on them.",
+        "gold": "NON_PUN",
+        "target": "rely on",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 4,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "Confidence in miracles and depending on them are compatible, overlapping facets of trust rather than mutually exclusive readings. Replacing “rely on them” with “depend on them for help” leaves the contrast between belief and practical dependence intact; it does not remove a distinct double meaning of “rely on.”"
+      },
+      {
+        "item_id": "hom_1251",
+        "text": "Did you hear about these new reversible jackets? I'm excited to see how they turn out.",
+        "gold": "PUN",
+        "target": "see",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 4,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "“See how they turn out” naturally means find out the outcome, while visually seeing the jackets is only weakly suggested by their mention and does not create a deliberate contrast."
+      },
+      {
+        "item_id": "hom_1279",
+        "text": "I'm going to be discussing global warming next week, it's quite a heated topic.",
+        "gold": "PUN",
+        "target": "global warming",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 7,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The climate phenomenon and its status as a controversial discussion topic can both apply at once; they are not mutually exclusive readings of “global warming.” Replacing it with “a rise in the Earth's average temperature” leaves “heated topic” and its thermal-versus-idiomatic association in place, so the claimed contrast is not ablated."
+      },
+      {
+        "item_id": "hom_1283",
+        "text": "He was hit on the head during a hail storm and was knocked out cold.",
+        "gold": "PUN",
+        "target": "hail",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 6,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "In this context, the barrage can simply be the same ice pellets falling in the hailstorm, so the readings overlap rather than creating mutually exclusive interpretations. Replacing “hail” with “ice-pellet storm” leaves the idea of objects striking his head intact, so it does not remove a distinct two-sense contrast."
+      },
+      {
+        "item_id": "hom_1296",
+        "text": "Students who accent their textbooks with color markers add a real highlight to their day.",
+        "gold": "PUN",
+        "target": "color",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 8,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "The wording mainly plays on “highlight” as both a marked passage and a notable moment, while “color” itself is only clearly used in the visual sense."
+      },
+      {
+        "item_id": "hom_1288",
+        "text": "A woman cries before the wedding, a man after.",
+        "gold": "NON_PUN",
+        "target": "man",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 2,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "A husband is also an adult male, so the readings overlap and do not create a material contrast. Replacing “a man” with “her husband” retains the adult-male interpretation rather than removing a distinct wordplay contrast."
+      },
+      {
+        "item_id": "hom_1298",
+        "text": "Pasteur was boiling about not being invited.",
+        "gold": "PUN",
+        "target": "boiling",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 1,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "The phrase “about not being invited” clearly cues anger, while the literal liquid-heating sense has no meaningful fit with Pasteur as the subject, so the intended contrast is weak."
+      },
+      {
+        "item_id": "hom_1301",
+        "text": "Have you heard the joke about the bomb? It had no impact.",
+        "gold": "PUN",
+        "target": "bomb",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 2,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "L6_SKIPPED_NO_PARAPHRASE",
+        "reason": "The wording identifies the bomb as the subject of the joke, not as a joke or event that failed; the punchline instead plays on the meanings of “impact.” The proposed Sense B therefore cannot be established as an active reading of “bomb” in this text."
+      },
+      {
+        "item_id": "hom_1342",
+        "text": "They argued about their vacation and finally stayed at the last resort.",
+        "gold": "PUN",
+        "target": "finally",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 5,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "Both readings convey that staying was what happened in the end; neither excludes the other or creates a materially different interpretation. Replacing “finally” with “eventually” preserves that same meaning and the phrase “last resort,” so there is no distinct contrast to ablate."
+      },
+      {
+        "item_id": "hom_1349",
+        "text": "A teacher used his index finger to ask a lot of pointed questions.",
+        "gold": "PUN",
+        "target": "index finger",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 5,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The pointing interpretation describes a function of the same anatomical finger, not a mutually exclusive meaning. Replacing “index finger” with “finger next to the thumb” leaves “pointed questions” intact, but the claimed readings do not form a material contrast."
+      },
+      {
+        "item_id": "hom_1368",
+        "text": "The boy swallowed a pillow, the hospital described his condition as comfortable.",
+        "gold": "PUN",
+        "target": "condition",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 5,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "These readings overlap: a patient's medical condition can describe their current health state, including how comfortable they are, so neither excludes the other here. Replacing “condition” with “state” gives “the hospital described his state as comfortable” but does not reveal a clear, materially distinct medical-problem-versus-general-state contrast to ablate."
+      },
+      {
+        "item_id": "hom_1370",
+        "text": "Captain we're at 1700 CPS. The UARTs canna take much more",
+        "gold": "NON_PUN",
+        "target": "take",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 4,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "In this context, processing a higher data rate and withstanding more strain describe overlapping aspects of the UARTs' capacity under load, not mutually exclusive readings. Replacing “take” with “process” foregrounds throughput, but the overload context still supports the same general capacity limit rather than a clearly separate contrast."
+      },
+      {
+        "item_id": "hom_1369",
+        "text": "I nailed my wood-shop test.",
+        "gold": "PUN",
+        "target": "shop",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "The phrase most naturally means a test for woodworking class, while the workplace sense is weakly available and creates little deliberate contrast."
+      },
+      {
+        "item_id": "hom_1364",
+        "text": "I've got to fix the automobile, said Tom mechanically.",
+        "gold": "PUN",
+        "target": "mechanically",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 1,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The machine-associated manner in Sense A overlaps substantially with the machine-like, automatic manner in Sense B; the automobile context cues that association but does not establish a separate reading of the spoken adverb. Replacing “mechanically” with “in a rote, emotionless way” removes the word’s car-related association, but the text does not support a materially distinct two-sense contrast to ablate."
+      },
+      {
+        "item_id": "hom_1375",
+        "text": "My name is Woody. A Forester",
+        "gold": "PUN",
+        "target": "woody",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 1,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "The name Woody is clear and the forester reference weakly evokes woods, but it does not directly establish the adjective sense or create a deliberate clash."
+      },
+      {
+        "item_id": "hom_1383",
+        "text": "After that poisonous snake struck at me in the Arizona Desert I was really rattled.",
+        "gold": "PUN",
+        "target": "struck",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 7,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "“Struck” naturally means attacked here, while “rattled” describes the resulting emotional state rather than activating a second sense of “struck.”"
+      },
+      {
+        "item_id": "hom_1412",
+        "text": "Wally wasn't sure in which branch of the Army he wanted to serve, but he gravitated toward the paratroops.",
+        "gold": "PUN",
+        "target": "gravitated",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 7,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "The sentence naturally uses “gravitated” to mean felt attracted to, while literal gravitational movement is not meaningfully supported in this choice-of-Army context."
+      },
+      {
+        "item_id": "hom_1426",
+        "text": "Hangmen always keep their customers in the loop.",
+        "gold": "PUN",
+        "target": "hangmen",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 4,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "L6_SKIPPED_NO_PARAPHRASE",
+        "reason": "The conventional agent-noun reading is clear, but the resegmented verb phrase “hang men” does not form a grammatical reading of this sentence as written. Without a contextual paraphrase for Sense B, the claimed contrast and its ablation cannot be assessed."
+      },
+      {
+        "item_id": "hom_1446",
+        "text": "Give a dog a bad name and hang him.",
+        "gold": "NON_PUN",
+        "target": "name",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The label and the reputation are distinguishable, but they are not mutually exclusive here: calling the dog an insulting name can itself give it a bad reputation. Replacing “a bad name” with “an insulting label” removes the lexical double reading, but the label-to-reputation connection remains rather than yielding a clean, contrastive ablation."
+      },
+      {
+        "item_id": "hom_1468",
+        "text": "Success is a journey not a destination.",
+        "gold": "NON_PUN",
+        "target": "destination",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 2,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The readings differ as a physical versus abstract endpoint, but the text relies on their shared idea of an endpoint rather than a material contrast between them. Replacing “destination” with “ultimate goal” removes the place reading, yet preserves the journey-versus-endpoint contrast."
+      },
+      {
+        "item_id": "hom_1474",
+        "text": "Always smile. It makes people wonder what you're up to.",
+        "gold": "NON_PUN",
+        "target": "wonder",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The suspicious reading is a possible coloring of the curiosity expressed by “wonder what you're up to,” not a mutually exclusive meaning in this context. Replacing “wonder” with “be curious” removes no clear wordplay contrast, since the suspicion can still be inferred from the surrounding phrase."
+      },
+      {
+        "item_id": "hom_1476",
+        "text": "He didn't want to volunteer for the rodeo but he got roped into it.",
+        "gold": "PUN",
+        "target": "got",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 2,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_DISTINCT",
+        "reason": "The readings describe different events: social persuasion versus physical capture by a rope. Replacing “got” with “was” leaves “was roped into it,” where the idiomatic and literal readings of “roped” can still contrast, so the specific wordplay is not removed by a controlled substitution of “got.”"
+      },
+      {
+        "item_id": "hom_1518",
+        "text": "My cavity wasn't fixed by my regular dentist, but by a guy who was filling in.",
+        "gold": "PUN",
+        "target": "cavity",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 5,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "These descriptions are closely overlapping aspects of the same dental problem: decay can create the hollow that is filled. Replacing “cavity” with “decay-damaged area” leaves the joke about a dental filling and a substitute worker (“filling in”) intact, so that contrast does not depend on two distinct readings of “cavity.”"
+      },
+      {
+        "item_id": "hom_1537",
+        "text": "Two mathematicians arguing about even numbers were at odds.",
+        "gold": "PUN",
+        "target": "at odds",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 6,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "L6_SKIPPED_NO_PARAPHRASE",
+        "reason": "The conventional meaning is clear, but the reference to odd numbers is only an evocation of “odds,” not a clear alternate meaning of “at odds” in this sentence. Without a distinct paraphrase for Sense B, the claimed contrast cannot be assessed."
+      },
+      {
+        "item_id": "hom_1548",
+        "text": "The members of the oldest profession are not really lost women; they are just mislaid.",
+        "gold": "PUN",
+        "target": "mislaid",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 5,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_DISTINCT",
+        "reason": "The moral judgment and the literal situation of being misplaced are distinct and exclude one another as readings of the women. Replacing “mislaid” with “temporarily misplaced” removes its possible ambiguity, but the contrast with “lost women” and the associated wordplay still remain."
+      },
+      {
+        "item_id": "hom_1570",
+        "text": "The man who fell into an upholstery machine is fully recovered.",
+        "gold": "PUN",
+        "target": "upholstery",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 5,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The material and craft readings are closely related facets: an upholstery machine can work with the material as part of the craft, so the readings do not strongly exclude each other. Replacing “upholstery” with “furniture-covering” still leaves the “fully recovered” healing/covering joke, which is not a contrast between the two claimed senses."
+      },
+      {
+        "item_id": "hom_1572",
+        "text": "The longest mile is the last mile home.",
+        "gold": "NON_PUN",
+        "target": "last mile",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 1,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_DISTINCT",
+        "reason": "These readings describe different journeys and situations, and choosing either meaning for “last mile” excludes the other. Replacing “last mile home” with “final stretch of the journey home” still leaves “the longest mile” to evoke the condemned person's walk, so the contrast is not fully removed."
+      },
+      {
+        "item_id": "hom_1585",
+        "text": "The defendant in a coffee theft trial refused to testify on the grounds that could incriminate him.",
+        "gold": "PUN",
+        "target": "grounds",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "“Grounds” clearly means reasons in the sentence, while the coffee-trial context only weakly evokes coffee grounds without making the residue sense meaningful or creating a deliberate double-take."
+      },
+      {
+        "item_id": "hom_1591",
+        "text": "I didn't have the faintest idea as to why I passed out.",
+        "gold": "PUN",
+        "target": "faintest",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 1,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "L6_SKIPPED_NO_PARAPHRASE",
+        "reason": "Sense A is a clear idiomatic reading, but the fainting reference in “why I passed out” only echoes “faint”; it does not yield a distinct, coherent fainting-related interpretation of “faintest idea.” Since Sense B cannot be paraphrased as a reading of the phrase, distinctness cannot be assessed."
+      },
+      {
+        "item_id": "hom_1597",
+        "text": "Enjoy the present day, trusting little to what tomorrow may bring.",
+        "gold": "NON_PUN",
+        "target": "tomorrow",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 2,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The broader future reading includes the next calendar day, so the interpretations overlap rather than exclude one another or create a material contrast. Replacing “tomorrow” with “the next day” or “the future” shifts the scope but does not establish a distinct two-reading wordplay contrast."
+      },
+      {
+        "item_id": "hom_1612",
+        "text": "Procrastination is the thief of time.",
+        "gold": "NON_PUN",
+        "target": "thief",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 0,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The sentence uses the familiar thief image metaphorically for something that wastes time; the criminal sense is the metaphor’s source, not a mutually exclusive second reading. Replacing “the thief of time” with “something that wastes time” removes the image, but that alone does not establish a separate wordplay contrast."
+      },
+      {
+        "item_id": "hom_1643",
+        "text": "A seminar on Time Travel will be held 2 weeks ago....",
+        "gold": "NON_PUN",
+        "target": "time",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 5,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "L6_SKIPPED_NO_PARAPHRASE",
+        "reason": "“Time” appears only in the conventional compound “Time Travel,” where it refers to the traversable continuum. The phrase “will be held 2 weeks ago” creates a tense/date contradiction but does not use “time” to mean an occasion, so the claimed second reading is not supported in the text."
+      },
+      {
+        "item_id": "hom_1642",
+        "text": "The earless defendant waived his hearing.",
+        "gold": "PUN",
+        "target": "earless",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The readings describe different things—external anatomy versus hearing ability—but neither excludes the other, so they do not form mutually suppressing interpretations here. Replacing “earless” with “having no external ears” removes the proposed reduced-hearing reading, but the sentence’s separate hearing-related wordplay remains."
+      },
+      {
+        "item_id": "hom_1659",
+        "text": "When Irish boys carry their little brothers, they get a Pat on the back.",
+        "gold": "PUN",
+        "target": "little",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "Age and physical size are different properties, but they are compatible: a younger brother may also be small, so neither reading excludes the other here. Replacing “little” with “younger” removes the age/size lexical contrast, though the carrying context can still suggest that the brothers are small."
+      },
+      {
+        "item_id": "hom_1671",
+        "text": "When crazy glue was invented lots of people became attached to it.",
+        "gold": "PUN",
+        "target": "glue",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 6,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The substance and sticking action are related facets of the same adhesive concept, and the sentence does not use “glue” itself with mutually exclusive noun and verb readings. Replacing “crazy glue” with “crazy adhesive” leaves the joke in “became attached to it” (physically stuck versus fond of it), so that contrast remains."
+      },
+      {
+        "item_id": "hom_1679",
+        "text": "Long absent, soon forgotten.",
+        "gold": "NON_PUN",
+        "target": "absent",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The text uses “absent” for being away; “soon forgotten” is a separate consequence, not a second use of “absent,” and physical absence can coexist with being forgotten. Replacing “absent” with “away” would clarify the physical reading, but the text does not establish a wordplay contrast for the rewrite to remove."
+      },
+      {
+        "item_id": "hom_1686",
+        "text": "The best way to stop a charging bull is to take away his credit card.",
+        "gold": "PUN",
+        "target": "stop",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 9,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_DISTINCT",
+        "reason": "These readings describe distinct outcomes: halting a physical charge versus blocking financial transactions. Replacing “stop” with “halt” removes its financial reading, but the joke still works through the double meaning of “charging” in the unchanged sentence."
+      },
+      {
+        "item_id": "hom_1684",
+        "text": "Hell hath no fury like the lawyer of woman scorned!",
+        "gold": "NON_PUN",
+        "target": "woman",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 1,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "A scorned romantic partner could also be the lawyer’s client, so the readings overlap rather than exclude one another. Replacing “woman” with “client” removes the explicit wording, but “scorned” can still suggest romantic rejection; the proposed contrast is not a robust distinction between senses."
+      },
+      {
+        "item_id": "hom_1710",
+        "text": "Home is where the heart is.",
+        "gold": "NON_PUN",
+        "target": "home",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 1,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "A dwelling and an emotionally meaningful home can be the same place, and the proverb links rather than excludes these ideas. Replacing “Home” with “The dwelling” removes the word’s emotional sense, but the contrast between a physical residence and the heart’s emotional locus still operates."
+      },
+      {
+        "item_id": "hom_1715",
+        "text": "The police auction was a complete bust.",
+        "gold": "PUN",
+        "target": "bust",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 1,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "“Complete bust” clearly means a failure, while “The police auction” does not meaningfully establish a raid or surprise-attack reading, so the intended contrast is not developed."
+      },
+      {
+        "item_id": "hom_1734",
+        "text": "I once had insomnia so bad I was awake until it dawned on me.",
+        "gold": "PUN",
+        "target": "awake",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "A person can be physically awake and mentally alert at the same time, so these readings do not exclude one another; the joke’s contrast is carried by “dawned” (sunrise versus realization), not by a material ambiguity in “awake.” Replacing “awake” with “not sleeping” leaves that dawned wordplay intact."
+      },
+      {
+        "item_id": "hom_1762",
+        "text": "Two clock makers argued and got ticked off.",
+        "gold": "PUN",
+        "target": "ticked",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 5,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "L6_SKIPPED_NO_PARAPHRASE",
+        "reason": "The idiomatic reading is clear, but “got ticked off” does not naturally mean that the clock makers began making ticking sounds. The clock context suggests that association, but it does not provide a distinct, well-formed Sense B reading to assess."
+      },
+      {
+        "item_id": "hom_1781",
+        "text": "I've always pictured myself taking selfies.",
+        "gold": "PUN",
+        "target": "pictured",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 1,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "The sentence strongly favors “imagined,” while the graphic sense is only weakly suggested by “taking selfies” and does not produce a clear deliberate shift or clash."
+      },
+      {
+        "item_id": "hom_1786",
+        "text": "He made a slow start in the sport of weightlifting but he picked it up eventually.",
+        "gold": "PUN",
+        "target": "weightlifting",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 6,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The sport and the physical activity overlap: weightlifting as a sport is carried out through the same activity, so the two readings are not mutually exclusive or materially different here. Replacing “weightlifting” with a single-sense phrase would not establish a distinct sport-versus-activity wordplay contrast in this sentence."
+      },
+      {
+        "item_id": "hom_1791",
+        "text": "Banning the bra was a big flop.",
+        "gold": "PUN",
+        "target": "big",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 1,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "“Big” naturally means significant in “a big flop”; the bra may weakly evoke physical size, but that reading is not clearly activated, so the line mostly reads as an ordinary statement."
+      },
+      {
+        "item_id": "hom_1798",
+        "text": "Noteworthy musicians are very composed.",
+        "gold": "PUN",
+        "target": "composed",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 2,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "L6_SKIPPED_NO_PARAPHRASE",
+        "reason": "Sense B fits “are very composed,” but Sense A (“having written or created music”) does not fit this construction: musicians would normally have composed music, rather than be very composed. Since the claimed Sense A reading is not supported in the text, a controlled ablation of the two-reading contrast cannot be assessed."
+      },
+      {
+        "item_id": "hom_1793",
+        "text": "It is better to die on one's feet than live on one's knees.",
+        "gold": "NON_PUN",
+        "target": "knees",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The submission reading is a conventional metaphor grounded in the physical posture of kneeling, and the two can apply at once rather than excluding each other. Replacing “on one's knees” with “in submission” preserves the central submissive meaning, so the phrase does not establish a distinct double-reading contrast."
+      },
+      {
+        "item_id": "hom_1836",
+        "text": "He folded and straightened the money because he wanted a tidy sum.",
+        "gold": "PUN",
+        "target": "money",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 6,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The senses can be paraphrased separately, but physical cash can itself constitute a monetary sum, so the readings coexist rather than exclude one another. Replacing “money” with “cash” leaves the link between handling cash and wanting a tidy sum intact; the contrast is a related facet, not a distinct double meaning."
+      },
+      {
+        "item_id": "hom_1847",
+        "text": "Don't open the darkroom door; it lets all the dark out.",
+        "gold": "NON_PUN",
+        "target": "darkroom",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The readings differ in function versus a compositional description, but a photographic darkroom is itself ordinarily dark, so the readings do not exclude each other or establish materially separate situations. Replacing “darkroom” with “photography-development room” weakens the wordplay, but the darkness remains an ordinary facet of the same room rather than a clearly separate interpretation."
+      },
+      {
+        "item_id": "hom_1855",
+        "text": "Freud could barely repress his excitement.",
+        "gold": "PUN",
+        "target": "excitement",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The readings can overlap: enthusiasm and arousal are both forms of being excited, and the wording does not make them mutually exclusive. Replacing “excitement” with “enthusiasm” narrows the wording, but the Freud/repress association can still suggest arousal, so the specific contrast is not cleanly ablated."
+      },
+      {
+        "item_id": "hom_1867",
+        "text": "A true friend does sometime venture to be offensive.",
+        "gold": "NON_PUN",
+        "target": "true",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 1,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "Loyalty and candor are compatible traits, so adopting one reading does not exclude the other; moreover, being offensive only suggests candor and does not establish truthfulness. Replacing “true” with “loyal” leaves the possibility of offensive candor in the sentence, so the claimed contrast is not clearly ablated as wordplay."
+      },
+      {
+        "item_id": "hom_1861",
+        "text": "At first I hated my haircut, but now it's growing on me.",
+        "gold": "PUN",
+        "target": "haircut",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The style and the cutting action can be paraphrased separately, but the action is only inferred here; the sentence does not clearly switch between those two readings. The wordplay chiefly comes from “growing on me” meaning both becoming appealing and hair growing back, and replacing “haircut” with “hairstyle” leaves that contrast largely intact."
+      },
+      {
+        "item_id": "hom_1885",
+        "text": "When the artist tried to draw a cube he had a mental block.",
+        "gold": "PUN",
+        "target": "cube",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 5,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "L6_SKIPPED_NO_PARAPHRASE",
+        "reason": "The text uses “cube” in the sense of a geometric figure. “Mental block” conventionally means a psychological impediment, not a solid cube-shaped object, so the supplied Sense B is not supported as a reading of “cube” here."
+      },
+      {
+        "item_id": "hom_1888",
+        "text": "The runaway beer truck barrelled down the freeway after its driver was mugged.",
+        "gold": "PUN",
+        "target": "freeway",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 4,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "The standard highway meaning is clear, while the “free from restraint” reading is only weakly suggested by “runaway” and does not create a strong or deliberate semantic double-take."
+      },
+      {
+        "item_id": "hom_1890",
+        "text": "If it's too good to be true, then it probably is.",
+        "gold": "NON_PUN",
+        "target": "true",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 1,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The paraphrases distinguish credibility from factual truth, but those notions do not exclude each other, and the conventional reading of “it probably is” repeats the idiom’s predicate rather than clearly switching to factual truth. Replacing “true” with “believable” leaves that idiomatic continuation intact, so the text does not establish a material two-sense contrast."
+      },
+      {
+        "item_id": "hom_1896",
+        "text": "Mason-Dixon Line n. Separates y'all from youse guys",
+        "gold": "NON_PUN",
+        "target": "line",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 4,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The geographic boundary can itself mark the dialect distinction, so the readings overlap rather than exclude one another. Replacing “line” with “geographic boundary” leaves the dialect-dividing joke intact rather than showing a distinct two-sense contrast."
+      },
+      {
+        "item_id": "hom_1904",
+        "text": "We're all sitting in the same boat: I fish, you row.",
+        "gold": "NON_PUN",
+        "target": "sitting",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The paraphrases describe different things, but they can both be true here: everyone may be seated in a boat while sharing a predicament. Replacing “sitting” with “seated” leaves the idiomatic and literal readings of “in the same boat” available, so the wordplay is not specifically carried by two readings of “sitting.”"
+      },
+      {
+        "item_id": "hom_1908",
+        "text": "Admiration is the daughter of ignorance.",
+        "gold": "NON_PUN",
+        "target": "admiration",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 2,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The meanings can be paraphrased separately, but the line naturally points to wonder arising from ignorance; it does not clearly activate a contrasting approval reading. Replacing “admiration” with “delighted approval” leaves the aphorism’s claim intact but does not demonstrate that a two-reading contrast was operating."
+      },
+      {
+        "item_id": "hom_1926",
+        "text": "A pair of loud twins were stereo speakers.",
+        "gold": "PUN",
+        "target": "pair",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 4,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "Both readings use the same basic meaning of “pair” as two things considered together; the difference is whether the members are people or devices. Replacing “pair” with “two” leaves the twins’ connection to stereo speakers intact, so it does not cleanly isolate a distinct pair-based wordplay contrast."
+      },
+      {
+        "item_id": "hom_1939",
+        "text": "He's not dead, he's electroencephalographically challenged",
+        "gold": "NON_PUN",
+        "target": "dead",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 1,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_DISTINCT",
+        "reason": "The readings contrast ordinary death with brain death, which can describe a person who is not physically deceased. Replacing “dead” with “deceased” removes the ambiguous word but leaves the contrast between not being deceased and being brain-dead intact."
+      },
+      {
+        "item_id": "hom_1948",
+        "text": "Upon discovering her children playing with matches their mother was flaming mad.",
+        "gold": "PUN",
+        "target": "matches",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 5,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The second reading is only a burning state of the same kind of match, not a distinct interpretation; moreover, “flaming mad” describes the mother’s anger and does not establish that “matches” means burning pieces. Replacing “matches” with “fire-starting sticks” leaves the fire-related association in “flaming mad,” rather than isolating a genuine two-sense contrast."
+      },
+      {
+        "item_id": "hom_1985",
+        "text": "There is a growing body of obesity research.",
+        "gold": "PUN",
+        "target": "body",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "“Body of research” conventionally means a collection of studies, while the physical-body sense is only loosely evoked by obesity and does not create a deliberate shift or clash."
+      },
+      {
+        "item_id": "hom_1977",
+        "text": "Those who work on reducing auto emissions go home exhausted.",
+        "gold": "PUN",
+        "target": "exhausted",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 6,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "L6_SKIPPED_NO_PARAPHRASE",
+        "reason": "“Exhausted” has a clear tiredness reading, but the automotive-exhaust reading is only evoked by the stem and cannot be paraphrased as a coherent meaning of the sentence. There is therefore no second reading to compare through controlled ablation."
+      },
+      {
+        "item_id": "hom_1983",
+        "text": "The groundskeeper at a large cemetery was important because he had 5000 people under him.",
+        "gold": "PUN",
+        "target": "groundskeeper",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The paraphrases suggest different pictures, but the joke mainly turns on “under him” meaning either subordinate to him or physically beneath him, not on two mutually exclusive senses of “groundskeeper.” Replacing it with “cemetery grounds maintainer” leaves that contrast intact."
+      },
+      {
+        "item_id": "hom_1996",
+        "text": "Being a fire-fighter ignited my interest heavily.",
+        "gold": "PUN",
+        "target": "fire",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 5,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The literal fire in “fire-fighter” and the figurative ignition of interest are different ideas, but they occur together rather than suppressing one another as competing readings of “fire.” Replacing “fire-fighter” would leave the metaphor in “ignited my interest,” so the wording does not establish a controlled ambiguity of the term itself."
+      },
+      {
+        "item_id": "hom_2012",
+        "text": "Love can be a touchy subject.",
+        "gold": "PUN",
+        "target": "love",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 2,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The paraphrases are distinguishable, but affection and sexual attraction can coexist as facets of love, and the sentence does not clearly establish mutually exclusive readings. Replacing “love” with “affection” removes the sexual reading of that word, but the physical-touch implication of “touchy” remains, so the specific contrast is not cleanly ablated."
+      },
+      {
+        "item_id": "hom_2032",
+        "text": "Building a cul-de - sac would be a bit of a dead-end job.",
+        "gold": "PUN",
+        "target": "cul de sac",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 10,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_DISTINCT",
+        "reason": "The literal street and figurative impasse are distinct readings. Replacing “cul-de-sac” with “a street accessible from only one end” removes its lexical ambiguity, but the parallel between the literal dead-end street and the figurative “dead-end job” still carries the wordplay."
+      },
+      {
+        "item_id": "hom_2042",
+        "text": "My name is Mike. I'm an announcer",
+        "gold": "PUN",
+        "target": "mike",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 0,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The person and device are different concepts, but “My name is Mike” unambiguously uses Mike as a name; being an announcer only associates the speaker with microphones and does not activate the device reading of the word. Replacing “Mike” with “Michael” would remove the sound association, but the text does not establish a two-reading contrast to ablate."
+      },
+      {
+        "item_id": "hom_2049",
+        "text": "Objects in taglines are closer than they appear.",
+        "gold": "NON_PUN",
+        "target": "objects",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 1,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "L6_SKIPPED_NO_PARAPHRASE",
+        "reason": "The grammatical sense of “objects” is identifiable, but the text gives no clear grammatical or other reference point for how those constituents are “closer than they appear.” Without a coherent paraphrase of that reading, the proposed contrast cannot be assessed."
+      },
+      {
+        "item_id": "hom_2067",
+        "text": "' ' I won't buy a circuit breaker,' ' Tom refused.",
+        "gold": "PUN",
+        "target": "refused",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "The circuit-breaker context evokes electrical equipment, but “re-fused” does not fit Tom as the subject of the reporting clause, so the refusal sense dominates and the alternate reading feels forced."
+      },
+      {
+        "item_id": "hom_2069",
+        "text": "This is where I keep my arrows, said Tom, quivering.",
+        "gold": "PUN",
+        "target": "quivering",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 0,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "L6_SKIPPED_NO_PARAPHRASE",
+        "reason": "“Quivering” means shaking here; the arrow-container sense belongs to the noun “quiver,” which is echoed by the arrow context but is not a paraphrase or alternate reading of “quivering” in this sentence. Since Sense B cannot be formulated as a reading of the ambiguous term, the comparison is skipped."
+      },
+      {
+        "item_id": "hom_2098",
+        "text": "She said she had nothing to wear. I smiled.",
+        "gold": "NON_PUN",
+        "target": "wear",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 1,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "“I smiled” may loosely evoke wearing a smile, but the text never uses “wear” in that sense, so the proposed shift and contrast are not actually realized."
+      },
+      {
+        "item_id": "hom_2110",
+        "text": "My friend lives by a cliff he's always telling me to drop over.",
+        "gold": "PUN",
+        "target": "lives",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 5,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The alive reading is not independently supported by “he's always telling me to drop over,” and being alive near a cliff does not exclude residing there. Replacing “lives” with “resides” removes the possible alternate wording, but the text does not establish a specific two-meaning contrast to ablate."
+      },
+      {
+        "item_id": "hom_2128",
+        "text": "The cobbler's wife is the worst shod.",
+        "gold": "NON_PUN",
+        "target": "shod",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 1,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "Being equipped with shoes does not exclude wearing them, so these are overlapping facets rather than mutually exclusive readings. Replacing “shod” with “wearing shoes” preserves the basic meaning, but there is no substantial two-sense contrast for the rewrite to remove."
+      },
+      {
+        "item_id": "hom_2137",
+        "text": "Men talk only to conceal the mind.",
+        "gold": "NON_PUN",
+        "target": "talk",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 2,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "Sense B describes a possible communicative effect of speaking, not a clearly separate reading of “talk”; speaking can both disclose and conceal thoughts. Replacing “talk” with “speak” leaves the same concealment-versus-disclosure irony, so the claimed contrast does not depend on a distinct lexical sense."
+      },
+      {
+        "item_id": "hom_2143",
+        "text": "Home improvement. Take your family to church.",
+        "gold": "PUN",
+        "target": "home",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 4,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "“Home” clearly means a dwelling in “Home improvement,” while the family reference only indirectly suggests the household sense and does not create a deliberate semantic shift."
+      },
+      {
+        "item_id": "hom_2142",
+        "text": "Employers like their mechanics to be geared up.",
+        "gold": "PUN",
+        "target": "mechanics",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 4,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "L6_SKIPPED_NO_PARAPHRASE",
+        "reason": "The senses can be paraphrased distinctly, but the sentence supports only the employee reading: the technical field does not coherently fit “their mechanics to be geared up.” With no clear second reading in context, the claimed contrast cannot be assessed."
+      },
+      {
+        "item_id": "hom_2167",
+        "text": "Sushi: known to the rest of the world as'Bait'",
+        "gold": "NON_PUN",
+        "target": "sushi",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "The definition first invites the ordinary food reading, but calling sushi “bait” is a loose reclassification rather than a clear compound split, and both readings remain related to food."
+      },
+      {
+        "item_id": "hom_2170",
+        "text": "The guitarist passed out on stage, he must have rocked himself to sleep.",
+        "gold": "PUN",
+        "target": "stage",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 4,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "The performance-stage sense is explicit, but the sleep-stage sense is only indirectly suggested by “sleep,” so the sentence’s main joke is rocking/rock music rather than a clear resolution of “stage.”"
+      },
+      {
+        "item_id": "hom_2184",
+        "text": "My name is Ira. I'm an investment advisor.",
+        "gold": "PUN",
+        "target": "ira",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 4,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "Ira is explicitly a personal name, while the advisor context only weakly evokes retirement accounts and does not turn the name into a deliberate second reading."
+      },
+      {
+        "item_id": "hom_2182",
+        "text": "All's well that ends well.",
+        "gold": "NON_PUN",
+        "target": "well",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 1,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The paraphrases distinguish a current state from an outcome, but both express a compatible positive evaluation; neither excludes the other, and the text does not depend on a material contrast between them. Replacing the two instances with “satisfactory” and “favorably” removes the repeated word “well,” but the related positive-evaluation relation remains rather than establishing a distinct double meaning."
+      },
+      {
+        "item_id": "hom_2197",
+        "text": "My name is Nick. I was a barber but I'm looking for a new job.",
+        "gold": "PUN",
+        "target": "nick",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 4,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "Nick is clearly a personal name, while barbering only indirectly evokes nicking with a razor, so the sentence reads as a mundane job statement rather than a deliberate semantic shift."
+      },
+      {
+        "item_id": "hom_2198",
+        "text": "Don't marry for money; you can borrow it cheaper.",
+        "gold": "NON_PUN",
+        "target": "money",
+        "stage": "L6",
+        "outcome": "INSUFFICIENT_EVIDENCE",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_DISTINCT",
+        "reason": "The first use presents money as an attribute one might seek in a spouse; the second presents it as borrowable funds, a materially different role that prompts the joke’s reframe. A controlled replacement such as “funds” still works in both clauses and preserves that contrast, so a single-sense substitution does not cleanly ablate the wordplay."
+      },
+      {
+        "item_id": "hom_2226",
+        "text": "He's dead Jim. Grab his tricorder. I'll get his wallet.",
+        "gold": "NON_PUN",
+        "target": "grab",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 2,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The physical act of taking hold of the tricorder can also be the means of stealing it, so the readings do not exclude one another here. Replacing “Grab” with “Take hold of” removes the lexical theft sense, but the wallet line still supports the broader implication that the possessions are being appropriated."
+      },
+      {
+        "item_id": "hom_2231",
+        "text": "Becoming a yoga instructor offers the possibilities of a unique teaching position.",
+        "gold": "PUN",
+        "target": "position",
+        "stage": "L5",
+        "outcome": "NON_PUN",
+        "untested_terms": 5,
+        "l5_status": "RESOLUTION_FAIL",
+        "l6_status": null,
+        "reason": "“Position” clearly means a job, while yoga only weakly evokes body postures, so the sentence reads as a straightforward career statement rather than deliberate wordplay."
+      },
+      {
+        "item_id": "hom_2241",
+        "text": "She was only a Watchman's daughter, but any time suited her.",
+        "gold": "PUN",
+        "target": "time",
+        "stage": "L6",
+        "outcome": "NON_PUN",
+        "untested_terms": 3,
+        "l5_status": "RESOLUTION_PASS",
+        "l6_status": "SENSES_TOO_CLOSE",
+        "reason": "The clock-hour reading is a more specific way of describing a suitable moment, so the readings overlap rather than exclude one another. Rewriting this as “any occasion suited her” weakens the watch/time association, but the overlap means it does not cleanly establish a distinct contrast being ablated."
+      }
+    ],
+    "remaining_candidates": {
+      "L6_with_untested_candidates": 117,
+      "L5_with_untested_candidates": 43,
+      "L5_without_untested_candidates": 4,
+      "L6_without_untested_candidates": 7
+    },
+    "remaining_candidates_by_gold": {
+      "L6_negative_with_untested": 41,
+      "L6_positive_with_untested": 76,
+      "L5_positive_with_untested": 38,
+      "L5_positive_without_untested": 2,
+      "L6_negative_without_untested": 4,
+      "L6_positive_without_untested": 3,
+      "L5_negative_with_untested": 5,
+      "L5_negative_without_untested": 2
+    },
+    "target_checks_exact_normalized": {
+      "L4_negative_gold_positives": 99,
+      "L4_negative_gold_target_retrieved": 79,
+      "L4_negative_gold_target_tested": 79,
+      "downstream_rejected_gold_positives": 119,
+      "downstream_selected_target_exact_matches_gold": 47,
+      "downstream_gold_target_retrieved_but_untested": 66,
+      "downstream_rejected_positive_with_untested_candidates": 114
+    },
+    "summed_trace_seconds": {
+      "L0-pre": 0.08034900000000009,
+      "L1": 0.10253999999999967,
+      "L2": 46.092888000000016,
+      "L3": 0.49575100000000116,
+      "L4": 45525.97934799999,
+      "L5": 6190.881864999996,
+      "L6": 10790.275681999983,
+      "L7": 1.2592539999999963,
+      "L8": 0.25440200000000057,
+      "L0-post": 0.3665389999999999
+    },
+    "candidate_search": {
+      "records": 2246,
+      "mean_terms_assessed": 2.7853962600178095,
+      "total_terms_assessed": 6256,
+      "stop_reasons": {
+        "PASS_FOUND": 1729,
+        "ALL_RETRIEVED_ASSESSED": 513,
+        "EXECUTION_FAILED": 2,
+        "NO_CANDIDATES": 2
+      }
+    }
+  }
+}

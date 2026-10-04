@@ -1,7 +1,7 @@
 """Pipeline configuration and single source of truth for thresholds.
 
 L3 candidate ranking is intentionally independent of the requested target
-age; age-dependent judgments happen in L7. L5 pass/fail thresholds are
+age; age judgments reuse L6 and are validated locally in L7/L8. L5 thresholds are
 stored per genre because each branch uses a different set of subscores. The
 thresholds and their calibration limitations are documented in
 docs/L5_CALIBRATION.md.
@@ -51,10 +51,11 @@ class Settings(BaseModel):
     L3_TOP_K: int = Field(default=8, ge=1)
 
     # --- L4 backend ------------------------------------------------------
-    # Operational call budget, separate from ranking/scoring thresholds. Start
-    # with L3's top-k, then continue in the same order if no candidate passes.
-    # Three default top-k batches bound latency and provider cost.
-    L4_MAX_CANDIDATES: int = Field(default=24, ge=1)
+    # Compare the original L3 shortlist in one L4 request. Unknown/error
+    # terminates L4; L5/L6 never restart candidate search.
+    L4_MAX_CANDIDATES: int = Field(default=8, ge=1)
+    # Historical manifests remain readable; the runner no longer uses this.
+    CONTINUE_AFTER_CANDIDATE_REJECTION: bool = False
     L4_BACKEND: BackendType = "gemini"
     L4_MODEL: str | None = None
     L4_MODEL_GEMINI: str = "gemini-3.6-flash"
@@ -95,7 +96,7 @@ class Settings(BaseModel):
     L6_MAX_OUTPUT_TOKENS: int = 4096
     L6_CALL_PAUSE_SECONDS: float = 6.0
 
-    # --- L7 Comprehension backend & thresholds ---------------------------
+    # --- Legacy L7 settings: retained for saved manifests; unused at runtime ---
     L7_BACKEND: BackendType = "gemini"
     L7_MODEL: str | None = None
     L7_MODEL_GEMINI: str = "gemini-3.6-flash"
@@ -103,9 +104,10 @@ class Settings(BaseModel):
     L7_MODEL_ANTHROPIC: str = "claude-sonnet-5"
     L7_MODEL_OPENAI: str = "gpt-6-luna"
     L7_MODEL_DEEPSEEK: str = "deepseek-chat"
-    L7_MAX_OUTPUT_TOKENS: int = 4096
+    L7_MAX_OUTPUT_TOKENS: int = 8192
     L7_CALL_PAUSE_SECONDS: float = 6.0
 
+    # Legacy configuration keys retained for old run manifests; L7 no longer uses these heuristics.
     L7_METALINGUISTIC_FLOOR_HOMOGRAPH: float = 6.0
     L7_METALINGUISTIC_FLOOR_DEFINITIONAL: float = 7.0
     L7_METALINGUISTIC_FLOOR_DIALOGUE: float = 7.5
@@ -113,7 +115,7 @@ class Settings(BaseModel):
     L7_SECONDARY_SENSE_AOA_OFFSET: float = 2.0
     L7_AOA_TOLERANCE: float = 0.5
 
-    # --- L8 Appropriateness backend & models ----------------------------
+    # --- Legacy L8 settings: retained for saved manifests; unused at runtime ---
     L8_BACKEND: BackendType = "gemini"
     L8_MODEL: str | None = None
     L8_MODEL_GEMINI: str = "gemini-3.6-flash"
@@ -121,7 +123,7 @@ class Settings(BaseModel):
     L8_MODEL_ANTHROPIC: str = "claude-sonnet-5"
     L8_MODEL_OPENAI: str = "gpt-6-luna"
     L8_MODEL_DEEPSEEK: str = "deepseek-chat"
-    L8_MAX_OUTPUT_TOKENS: int = 4096
+    L8_MAX_OUTPUT_TOKENS: int = 8192
     L8_CALL_PAUSE_SECONDS: float = 6.0
 
     # --- Provider API keys & custom base URLs ----------------------------

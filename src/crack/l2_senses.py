@@ -267,7 +267,7 @@ def mwe_spans(tokens: list[str], max_n: int = 4) -> list[tuple[str, str]]:
 
 
 @_wordnet_locked
-def retrieve(tokens: list[str]) -> list[SenseEntry]:
+def retrieve(tokens: list[str], *, text: str | None = None) -> list[SenseEntry]:
     """Senses for every content token, plus part-senses for compound splits,
     plus multiword-expression senses.
 
@@ -277,6 +277,10 @@ def retrieve(tokens: list[str]) -> list[SenseEntry]:
     token_counts = Counter(re.sub(r"['’]s?$", "", tok.lower()) for tok in tokens if tok.isalpha())
     out: list[SenseEntry] = []
     for phrase, key in mwe_spans(tokens):
+        # Tokenization removes punctuation. Do not join separate sentences or
+        # clauses into an expression that never occurs in the supplied text.
+        if text is not None and phrase.casefold() not in text.casefold():
+            continue
         out += senses_for(key, term=phrase.lower(), source=f"wordnet_mwe:{key}")
     seen: set[str] = set()
     for tok in tokens:

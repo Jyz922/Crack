@@ -1,0 +1,364 @@
+{
+  "run_path": "/Users/yizhengjiang/Desktop/Git/Joke_identification/runs/contextual_wordplay/20261003T034408.133350Z",
+  "model": "gpt-6-luna",
+  "stage": {
+    "baseline": {
+      "development": {
+        "counts": {
+          "tp": 6,
+          "fp": 6
+        },
+        "correct": 6,
+        "total": 12
+      },
+      "confirmation": {
+        "counts": {
+          "tp": 6,
+          "fp": 6
+        },
+        "correct": 6,
+        "total": 12
+      },
+      "api_usage": {
+        "observed_calls": 24,
+        "prompt_tokens": 22697,
+        "completion_tokens": 9762,
+        "total_tokens": 32459,
+        "reasoning_tokens": 6206,
+        "error_counts": {},
+        "response_model_ids": {
+          "gpt-6-luna": 24
+        }
+      },
+      "records_sha256": "1d0f4c0a672e43b2ab3ac88660b56b10850d5362e7d27167feb03750cf7cf35b"
+    },
+    "contextual": {
+      "development": {
+        "counts": {
+          "tp": 6,
+          "tn": 4,
+          "fp": 2
+        },
+        "correct": 10,
+        "total": 12
+      },
+      "confirmation": {
+        "counts": {
+          "tp": 4,
+          "tn": 6,
+          "fn": 2
+        },
+        "correct": 10,
+        "total": 12
+      },
+      "api_usage": {
+        "observed_calls": 24,
+        "prompt_tokens": 28889,
+        "completion_tokens": 19425,
+        "total_tokens": 48314,
+        "reasoning_tokens": 15557,
+        "error_counts": {},
+        "response_model_ids": {
+          "gpt-6-luna": 24
+        }
+      },
+      "records_sha256": "7d71e9b3b0ab70adec3cf48d7d2750fa730aa92bf7f0b3a0f7e6e392b112d12d"
+    }
+  },
+  "course": {
+    "arms": {
+      "baseline": {
+        "counts": {
+          "tp": 23,
+          "fn": 1,
+          "unresolved_positive": 1,
+          "tn": 32,
+          "fp": 3
+        },
+        "correct": 55,
+        "accuracy_all": 0.9166666666666666,
+        "accuracy_decided": 0.9322033898305084,
+        "precision": 0.8846153846153846,
+        "recall_full_gold": 0.92,
+        "f1_full_gold": 0.9019607843137255,
+        "coverage": 0.9833333333333333,
+        "outcomes": {
+          "PUN": 26,
+          "NON_PUN": 33,
+          "INSUFFICIENT_EVIDENCE": 1
+        },
+        "pair_success_count": 21,
+        "pair_count": 25,
+        "target_matches": 15,
+        "target_denominator": 25,
+        "age_gold_positive_labels": {
+          "total": 75,
+          "assessed": 69,
+          "matches": 49,
+          "agreement_all": 0.6533333333333333,
+          "coverage": 0.92,
+          "agreement_assessed": 0.7101449275362319,
+          "ages_with_verified_vocabulary_citations": 0,
+          "vocabulary_citation_coverage": 0.0
+        },
+        "common_contract_failures": 0,
+        "records_sha256": "e54467a814471d49e9d42eaea281a89d525b2c5430f70e8dbcbc3bda402282d1",
+        "api_usage": {
+          "cached": {
+            "observed_calls": 409,
+            "prompt_tokens": 548572,
+            "completion_tokens": 184624,
+            "total_tokens": 733196,
+            "reasoning_tokens": 112471,
+            "error_counts": {},
+            "response_model_ids": {
+              "gpt-6-luna": 409
+            }
+          },
+          "new": {
+            "error_counts": {},
+            "response_model_ids": {}
+          }
+        }
+      },
+      "contextual": {
+        "counts": {
+          "tp": 22,
+          "unresolved_positive": 2,
+          "fn": 1,
+          "unresolved_negative": 1,
+          "tn": 31,
+          "fp": 3
+        },
+        "correct": 53,
+        "accuracy_all": 0.8833333333333333,
+        "accuracy_decided": 0.9298245614035088,
+        "precision": 0.88,
+        "recall_full_gold": 0.88,
+        "f1_full_gold": 0.88,
+        "coverage": 0.95,
+        "outcomes": {
+          "PUN": 25,
+          "NON_PUN": 32,
+          "INSUFFICIENT_EVIDENCE": 3
+        },
+        "pair_success_count": 19,
+        "pair_count": 25,
+        "target_matches": 15,
+        "target_denominator": 25,
+        "age_gold_positive_labels": {
+          "total": 75,
+          "assessed": 66,
+          "matches": 47,
+          "agreement_all": 0.6266666666666667,
+          "coverage": 0.88,
+          "agreement_assessed": 0.7121212121212122,
+          "ages_with_verified_vocabulary_citations": 0,
+          "vocabulary_citation_coverage": 0.0
+        },
+        "common_contract_failures": 0,
+        "records_sha256": "62d0e14c8422a3aead9731c87f1c3174536820b111ee569abbd2c5f80c11a6cd",
+        "api_usage": {
+          "cached": {
+            "observed_calls": 381,
+            "prompt_tokens": 521897,
+            "completion_tokens": 171747,
+            "total_tokens": 693644,
+            "reasoning_tokens": 103814,
+            "error_counts": {},
+            "response_model_ids": {
+              "gpt-6-luna": 381
+            }
+          },
+          "new": {
+            "observed_calls": 44,
+            "prompt_tokens": 53237,
+            "completion_tokens": 34149,
+            "total_tokens": 87386,
+            "reasoning_tokens": 26922,
+            "error_counts": {},
+            "response_model_ids": {
+              "gpt-6-luna": 44
+            }
+          }
+        }
+      }
+    },
+    "run_path": "/Users/yizhengjiang/Desktop/Git/Joke_identification/runs/contextual_wordplay/20261003T034408.133350Z",
+    "model": "gpt-6-luna",
+    "changed_output_count": 27,
+    "timing_policy": "Identical requests are replayed; no fresh full-run latency claim.",
+    "human_review": "pending"
+  },
+  "llm_changed_output_review": {
+    "reviewer_model": "gpt-6-luna",
+    "case_count": 27,
+    "selection": "All changed assignment outputs; both orders. No gold/performance-based selection.",
+    "planned_requests": 54,
+    "completed_requests": 54,
+    "stable_case_preferences": {
+      "TIE": 6,
+      "ORDER_UNSTABLE": 11,
+      "baseline": 2,
+      "contextual": 8
+    },
+    "mean_scores": {
+      "baseline": {
+        "detection_reasoning": {
+          "mean": 1.8148148148148149,
+          "judgments": 54
+        },
+        "meanings_and_evidence": {
+          "mean": 1.7222222222222223,
+          "judgments": 54
+        },
+        "humor_explanation": {
+          "mean": 1.7222222222222223,
+          "judgments": 54
+        },
+        "age_evidence": {
+          "mean": 0.037037037037037035,
+          "judgments": 54
+        },
+        "appropriateness_reasoning": {
+          "mean": 0.3333333333333333,
+          "judgments": 54
+        }
+      },
+      "contextual": {
+        "detection_reasoning": {
+          "mean": 1.7962962962962963,
+          "judgments": 54
+        },
+        "meanings_and_evidence": {
+          "mean": 1.7592592592592593,
+          "judgments": 54
+        },
+        "humor_explanation": {
+          "mean": 1.8518518518518519,
+          "judgments": 54
+        },
+        "age_evidence": {
+          "mean": 0.037037037037037035,
+          "judgments": 54
+        },
+        "appropriateness_reasoning": {
+          "mean": 0.3333333333333333,
+          "judgments": 54
+        }
+      }
+    },
+    "reviewer_error_flags": {
+      "baseline": {
+        "unsupported_age_precision": 52,
+        "missing_age_assessment": 6,
+        "wrong_target_or_senses": 9,
+        "content_reasoning_error": 19,
+        "unsupported_context": 1,
+        "wrong_detection": 2
+      },
+      "contextual": {
+        "unsupported_age_precision": 50,
+        "missing_age_assessment": 8,
+        "wrong_detection": 4,
+        "content_reasoning_error": 20,
+        "wrong_target_or_senses": 8,
+        "unsupported_context": 1
+      }
+    },
+    "api_usage": {
+      "observed_calls": 54,
+      "prompt_tokens": 143803,
+      "completion_tokens": 104368,
+      "total_tokens": 248171,
+      "reasoning_tokens": 73624,
+      "error_counts": {},
+      "response_model_ids": {
+        "gpt-6-luna": 54
+      }
+    },
+    "human_review": "pending; automated judgments do not adjudicate gold or child comprehension"
+  },
+  "adoption_checks": {
+    "no_new_contract_failures": true,
+    "development_positive_passes_preserved": true,
+    "confirmation_positive_passes_preserved": false,
+    "negative_false_passes_not_increased": true,
+    "negative_false_passes_reduced": true,
+    "course_accuracy_preserved": false,
+    "course_f1_preserved": false,
+    "course_pairs_preserved": false,
+    "course_coverage_at_least_58_of_60": false,
+    "stage_no_execution_errors": true
+  },
+  "passes_numeric_acceptance": false,
+  "production_action": "Retain baseline; contextual draft fails frozen numeric acceptance",
+  "manifest_sha256": "07a25250ca5e416f462ff5a72465bbc670a759ec9656e8e69ad4e006d511f5e6",
+  "summary_script_sha256": "404a6fb49260bfa34e9f70fba3c6dddb95bd3367b9750244207a4104313f0a84",
+  "artifact_sha256": {
+    "stage_evaluation.json": "7dec204c8c060be7eadda3e905f94a202f07689b84bce993982d454ba165b3cc",
+    "evaluation.json": "c7b8088b01ddff908650962105345cde8ff40c6600eb5c232f2bc0663acaae59",
+    "changes.jsonl": "d6c2d44199b4a8367aba197ee643421c418e11a17cf68e9f6e9bf9f52d3ddc10",
+    "blind_review/llm_reviews.jsonl": "1eca3750f2a0ff52db1d3ca2cb9b8093f79bef2aaf4cd23c9818bca872579b39",
+    "blind_review/packets.jsonl": "8fa2e510f27ae0903d8bf9c01a816585f8e7ba7301e7ce3c4e85b60cd43c0a32"
+  },
+  "production_source_unchanged": true,
+  "production_prompt_sha256": "52a434fb9c1c866603b7bfe7cee75c087935490109e5ff574a4e71a39d4a78e1",
+  "prompt_variants_sha256": {
+    "baseline": "52a434fb9c1c866603b7bfe7cee75c087935490109e5ff574a4e71a39d4a78e1",
+    "contextual": "d8e54dab0467ed6d4b5e95ca358d24cde9b1b1060350b6e5478e0fcfd3cf928a"
+  },
+  "stage_dataset_manifest": {
+    "version": "contextual-v1",
+    "source": "new project-authored synthetic cases",
+    "stage": "L6 given target and proposed readings; not an end-to-end benchmark",
+    "families_by_split": {
+      "development": [
+        "draft",
+        "pitch",
+        "seal",
+        "charge",
+        "strike",
+        "plot"
+      ],
+      "confirmation": [
+        "weigh",
+        "branch",
+        "beam",
+        "resolution",
+        "cell",
+        "organ"
+      ]
+    },
+    "items_by_split": {
+      "development": 12,
+      "confirmation": 12
+    },
+    "production_prompt_loading": false,
+    "age_annotations": false,
+    "human_annotation_review": "pending",
+    "selection": "families and labels frozen before inference; confirmation outcomes must not guide revisions in this experiment",
+    "sha256": {
+      "development_annotations.jsonl": "b31c3c6f16eedceb522903d9a91227487c498cdc26c8ae9c04fe2d788fde9c02",
+      "development_inputs.jsonl": "dd6481a9dee638f3199e3189a7e2ff9b27e8b13a9e38b3038c50494bab765b9c",
+      "confirmation_annotations.jsonl": "4f1c57721b7448a5b2c34513f240c76eb870da99ba16656055e520eb03d19dcd",
+      "confirmation_inputs.jsonl": "15ec020fb8b8aeb7ed7860e97c2de370fca3df86c7ef7defb1b28cffc765c7b6"
+    }
+  },
+  "overlap_audit": {
+    "development": {
+      "evaluation_rows": 4760,
+      "subjects": 20,
+      "failures": 0,
+      "review_hints": 0,
+      "findings": []
+    },
+    "confirmation": {
+      "evaluation_rows": 4760,
+      "subjects": 14,
+      "failures": 0,
+      "review_hints": 0,
+      "findings": []
+    }
+  }
+}

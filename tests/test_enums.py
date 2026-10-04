@@ -1,4 +1,4 @@
-"""Verify every status string from the README appears in enums.py."""
+"""Verify compatible status values and their linked technical reference."""
 
 import pytest
 
@@ -98,11 +98,13 @@ def test_readme_status_string_in_enum(status_string: str) -> None:
     )
 
 
-def test_readme_contains_all_status_strings() -> None:
-    """Detect README drift: assert every expected status string appears in README.md."""
+def test_readme_links_complete_status_reference() -> None:
+    """The README links the detailed reference instead of duplicating every enum."""
     from pathlib import Path
     readme_path = Path(__file__).resolve().parents[1] / "README.md"
     assert readme_path.exists()
     content = readme_path.read_text(encoding="utf-8")
+    assert "docs/response_validation.md" in content
+    reference = (readme_path.parent / "docs/response_validation.md").read_text(encoding="utf-8")
     for s in _README_STATUS_STRINGS:
-        assert s in content, f"Status string '{s}' expected in README.md but missing"
+        assert s in reference, f"Compatible status '{s}' missing from the technical reference"

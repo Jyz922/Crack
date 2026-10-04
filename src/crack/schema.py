@@ -92,8 +92,8 @@ class L3Result(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     candidates: list[CandidateEntry] = Field(default_factory=list)
-    # Retain the ranked tail for L4 continuation; it is not shown as the initial
-    # top-k list and must not be treated as already assessed evidence.
+    # Historical search metadata only; the runtime never promotes this tail
+    # or treats unassessed terms as evidence.
     deferred_candidates: list[CandidateEntry] = Field(default_factory=list)
     total_terms: Optional[int] = None
 
@@ -115,11 +115,13 @@ class L4Search(BaseModel):
     retrieved_terms: int = Field(ge=0)
     available_terms: int = Field(ge=0)
     findings: list[L4CandidateFinding] = Field(default_factory=list)
+    considered_terms: list[str] = Field(default_factory=list)
     untested_terms: int = Field(ge=0)
     stop_reason: Literal[
         "IN_PROGRESS", "PASS_FOUND", "ALL_RETRIEVED_ASSESSED",
         "BUDGET_EXHAUSTED", "CANDIDATES_UNAVAILABLE", "NO_CANDIDATES",
         "EXECUTION_FAILED", "TARGET_ONLY",
+        "INSUFFICIENT_EVIDENCE", "CANDIDATES_REJECTED",
     ] = "IN_PROGRESS"
 
 
@@ -129,6 +131,7 @@ class L4Attempt(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     candidate_term: str
+    candidate_terms: list[str] = Field(default_factory=list)
     attempt: int
     prompt_sha256: str
     model_used: str = ""
@@ -196,6 +199,8 @@ class L5QAResult(BaseModel):
 
     genre: Literal[Genre.QA_RIDDLE]
     resolution_status: ResolutionStatus
+    # None keeps historical records readable; new assessed responses provide a boolean.
+    context_consistent: Optional[bool] = None
     resolution_score: Optional[float] = None
     subscores: dict[str, float]
     model_used: str = ""
@@ -217,6 +222,8 @@ class L5DefinitionalResult(BaseModel):
 
     genre: Literal[Genre.DEFINITIONAL_ONELINER]
     resolution_status: ResolutionStatus
+    # None keeps historical records readable; new assessed responses provide a boolean.
+    context_consistent: Optional[bool] = None
     resolution_score: Optional[float] = None
     subscores: dict[str, float]
     model_used: str = ""
@@ -236,6 +243,8 @@ class L5DialogueResult(BaseModel):
 
     genre: Literal[Genre.DIALOGUE_MISUNDERSTANDING]
     resolution_status: ResolutionStatus
+    # None keeps historical records readable; new assessed responses provide a boolean.
+    context_consistent: Optional[bool] = None
     resolution_score: Optional[float] = None
     subscores: dict[str, float]
     model_used: str = ""
@@ -256,6 +265,8 @@ class L5DeclarativeResult(BaseModel):
 
     genre: Literal[Genre.DECLARATIVE]
     resolution_status: ResolutionStatus
+    # None keeps historical records readable; new assessed responses provide a boolean.
+    context_consistent: Optional[bool] = None
     resolution_score: Optional[float] = None
     subscores: dict[str, float]
     model_used: str = ""
@@ -280,6 +291,88 @@ class L6Result(BaseModel):
     explanation: Optional[str] = None
     suppresses_other: Optional[bool] = None
     materially_different: Optional[bool] = None
+    # Kept raw so a malformed age answer cannot invalidate detection. L7/L8
+    # validate their own dependent outputs without making additional calls.
+    age_assessment: Any = None
+
+
+class CandidateAssessment(BaseModel):
+    """Preserved candidate findings; a later candidate never overwrites these."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    term: str
+    l4_result: Optional[L4Result] = None
+    l5_result: Optional[L5Result] = None
+    l6_result: Optional[L6Result] = None
+    outcome: Optional[DetectionStatus] = None
+    reason: str = ""
+
+
+class AoAEvidence(BaseModel):
+    """A verbatim citation from the supplied word-level ratings table."""
+
+    model_config = ConfigDict(extra="forbid")
+    word: str
+    aoa: Optional[float]
+    match: str
+    source: str
+
+
+class AgeComprehensionEvidence(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    vocabulary: Literal["LIKELY", "UNLIKELY", "UNKNOWN"]
+    sense_a: Literal["LIKELY", "UNLIKELY", "UNKNOWN"]
+    sense_b: Literal["LIKELY", "UNLIKELY", "UNKNOWN"]
+    wordplay: Literal["LIKELY", "UNLIKELY", "UNKNOWN"]
+    background_knowledge: Literal["LIKELY", "UNLIKELY", "UNKNOWN"]
+    prerequisites: list[str]
+    reason: str
+
+
+class AgeEstimate(BaseModel):
+    """Compact contextual judgments from the existing L6 model response."""
+
+    model_config = ConfigDict(extra="forbid", strict=True)
+    understanding: Literal["LIKELY", "UNLIKELY", "UNKNOWN"]
+    barrier: Literal["vocabulary", "sense_a", "sense_b", "wordplay", "background_knowledge"] | None
+    content_appropriate: bool | None
+    inference_appropriate: bool | None
+    reason: str
+    content_quote: str
+    prerequisite: str
+
+
+AgeDimension = Literal["vocabulary", "sense_a", "sense_b", "wordplay", "background_knowledge", "understanding"]
+
+
+class AgeComprehensionSummary(BaseModel):
+    """Program-derived decision; unresolved axes stay explicit."""
+
+    model_config = ConfigDict(extra="forbid")
+    status: ComprehensionStatus
+    barrier_dimensions: list[AgeDimension]
+    unknown_dimensions: list[AgeDimension]
+    fully_assessed: bool
+
+
+class ContentEvidence(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    quote: str
+    concern: str
+
+
+class AgeModelAttempt(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    layer: Literal["L7", "L8"]
+    attempt: int
+    backend: str
+    model: str
+    prompt_sha256: str
+    raw_responses: list[str] = Field(default_factory=list)
+    parsed_response: Optional[dict[str, Any]] = None
+    accepted: bool = False
+    error: Optional[str] = None
 
 
 class L7Result(BaseModel):
@@ -288,6 +381,15 @@ class L7Result(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     per_age_comprehension: dict[int, ComprehensionStatus] = Field(default_factory=dict)
+    required_vocabulary: list[str] = Field(default_factory=list)
+    aoa_evidence: list[AoAEvidence] = Field(default_factory=list)
+    per_age_details: dict[int, AgeComprehensionEvidence] = Field(default_factory=dict)
+    per_age_estimates: dict[int, AgeEstimate] = Field(default_factory=dict)
+    per_age_summaries: dict[int, AgeComprehensionSummary] = Field(default_factory=dict)
+    aggregation_version: Optional[str] = None
+    assessment_basis: Optional[str] = None
+    aoa_resource_sha256: Optional[str] = None
+    # Legacy fields remain readable; new assessments never invent sense ages.
     sense_a_aoa: Optional[float] = None
     sense_b_aoa: Optional[float] = None
     compound_split_aoa: Optional[float] = None
@@ -301,6 +403,11 @@ class L8Result(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     per_age_verdict: dict[int, AgeAppropriatenessVerdict] = Field(default_factory=dict)
+    content_appropriate: dict[int, Optional[bool]] = Field(default_factory=dict)
+    inference_appropriate: dict[int, Optional[bool]] = Field(default_factory=dict)
+    per_age_reasons: dict[int, str] = Field(default_factory=dict)
+    content_evidence: list[ContentEvidence] = Field(default_factory=list)
+    assessment_basis: Optional[str] = None
     content_issues: list[str] = Field(default_factory=list)
     inference_issues: list[str] = Field(default_factory=list)
     explanation: Optional[str] = None
@@ -318,6 +425,7 @@ class LayerTrace(BaseModel):
     reason: Optional[str] = None
     duration_ms: float
     hints_used: int = 0
+    candidate_term: Optional[str] = None
 
 
 class AgeVerdict(BaseModel):
@@ -380,6 +488,9 @@ class AnalysisRecord(BaseModel):
 
     item_id: str
     validation_version: Optional[str] = None
+    candidate_search_version: Optional[str] = None
+    age_validation_version: Optional[str] = None
+    age_aggregation_version: Optional[str] = None
     text: str
     target_ages: list[int]
 
@@ -389,10 +500,13 @@ class AnalysisRecord(BaseModel):
     l4_result: Optional[L4Result] = None
     l4_attempts: list[L4Attempt] = Field(default_factory=list)
     l4_search: Optional[L4Search] = None
+    candidate_assessments: list[CandidateAssessment] = Field(default_factory=list)
     l5_result: Optional[L5Result] = None
     l6_result: Optional[L6Result] = None
     l7_result: Optional[L7Result] = None
     l8_result: Optional[L8Result] = None
+    age_attempts: list[AgeModelAttempt] = Field(default_factory=list)
+    age_preparation_error: Optional[str] = None
 
     trace: list[LayerTrace] = Field(default_factory=list)
     final: Optional[FinalVerdict] = None

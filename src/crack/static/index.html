@@ -493,8 +493,8 @@
                 <i data-lucide="users" class="w-4 h-4"></i>
               </div>
               <div>
-                <div class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">Best Audience</div>
-                <div class="text-xs font-bold text-violet-300">Ages {{ recommendedAge }}+</div>
+                <div class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">Age Assessment</div>
+                <div class="text-xs font-bold text-violet-300">{{ recommendedAge === null ? 'Assessment Pending' : 'Assessed at Age ' + recommendedAge }}</div>
               </div>
             </div>
 
@@ -583,7 +583,7 @@
                   <span>Meaning 1 (Everyday Sense)</span>
                 </span>
                 <span class="text-[11px] font-mono text-slate-400 bg-slate-800 px-2 py-0.5 rounded">
-                  Learned {{ formatAoA(analysisData.sense_a.aoa) }}
+                  {{ formatAoA(analysisData.sense_a.aoa) }}
                 </span>
               </div>
               <p class="text-sm text-slate-200 mb-3 leading-relaxed font-medium">
@@ -607,7 +607,7 @@
                   <span>Meaning 2 (Wordplay Twist)</span>
                 </span>
                 <span class="text-[11px] font-mono text-slate-400 bg-slate-800 px-2 py-0.5 rounded">
-                  Learned {{ formatAoA(analysisData.sense_b.aoa) }}
+                  {{ formatAoA(analysisData.sense_b.aoa) }}
                 </span>
               </div>
               <p class="text-sm text-slate-200 mb-3 leading-relaxed font-medium">
@@ -644,7 +644,7 @@
                   <i data-lucide="brain" class="w-4 h-4 text-cyan-400"></i>
                   <span>Who Can Understand This Joke?</span>
                 </h3>
-                <p class="text-xs text-slate-400">Click any age to see how children at that developmental stage perceive this humor</p>
+                <p class="text-xs text-slate-400">Comprehension estimate at the requested age</p>
               </div>
               <span class="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 font-mono">
                 Viewing: Age {{ activeDisplayAge }}
@@ -654,7 +654,7 @@
             <!-- Interactive Age Slider / Buttons -->
             <div class="grid grid-cols-6 gap-2 my-4">
               <button
-                v-for="age in [4, 6, 8, 10, 12, 14]"
+                v-for="age in Object.keys(analysisData.age_spectrum).map(Number)"
                 :key="age"
                 @click="activeDisplayAge = age"
                 :class="[
@@ -677,20 +677,34 @@
                 </span>
                 <span :class="[
                   'font-semibold px-2.5 py-0.5 rounded-full text-xs',
-                  friendlyComprehension(currentAgeAssessment.comprehension).tagClass
+                  friendlyComprehension(currentAgeAssessment.comprehension, currentAgeAssessment.comprehension_summary).tagClass
                 ]">
-                  {{ friendlyComprehension(currentAgeAssessment.comprehension).label }}
+                  {{ friendlyComprehension(currentAgeAssessment.comprehension, currentAgeAssessment.comprehension_summary).label }}
                 </span>
+              </div>
+              <div v-if="currentAgeAssessment.comprehension_summary" class="my-2 space-y-1 leading-relaxed">
+                <p v-if="currentAgeAssessment.comprehension_summary.barrier_dimensions.length" class="text-amber-300">
+                  Estimated barriers: {{ currentAgeAssessment.comprehension_summary.barrier_dimensions.map(friendlyAgeDimension).join(', ') }}
+                </p>
+                <p v-if="currentAgeAssessment.comprehension_summary.unknown_dimensions.length" class="text-slate-400">
+                  Still unknown: {{ currentAgeAssessment.comprehension_summary.unknown_dimensions.map(friendlyAgeDimension).join(', ') }}
+                </p>
               </div>
               <p class="text-slate-300 leading-relaxed text-xs sm:text-sm">
                 {{ currentAgeAssessment.desc }}
               </p>
+              <div v-if="currentAgeAssessment.aoa_evidence?.length" class="mt-3 text-xs text-slate-400">
+                <span class="font-semibold">Word-level AoA · Kuperman et al.:</span>
+                <span v-for="entry in currentAgeAssessment.aoa_evidence" :key="entry.word" class="inline-block mr-3 mt-1">
+                  {{ entry.word }}: {{ entry.aoa === null ? 'unrated' : entry.aoa.toFixed(1) + ' yrs' }} ({{ entry.match }})
+                </span>
+              </div>
             </div>
           </div>
 
           <!-- Metalinguistic Acquisition Floor Notice in plain English -->
           <div class="mt-4 pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
-            <span>💡 <strong>Developmental Floor:</strong> Children typically begin grasping puns and double meanings around <strong>Age 7 to 8</strong>.</span>
+            <span>💡 <strong>Assessment basis:</strong> Word-level AoA ratings plus estimates of meaning, wordplay and background knowledge.</span>
           </div>
         </div>
 
@@ -700,35 +714,35 @@
             <div class="flex items-center justify-between mb-1">
               <h3 class="text-sm font-bold text-slate-100 uppercase tracking-wider flex items-center gap-2">
                 <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
-                <span>Child Safety Check</span>
+                <span>Audience Appropriateness</span>
               </h3>
               <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 font-bold">
-                {{ analysisData.safety.is_safe ? 'SAFE' : 'CAUTION' }}
+                {{ analysisData.safety.is_safe === null ? 'UNKNOWN' : analysisData.safety.is_safe ? 'SUITABLE' : 'REVIEW' }}
               </span>
             </div>
-            <p class="text-xs text-slate-400 mb-4">Dual-axis moderation audit ensuring family friendliness</p>
+            <p class="text-xs text-slate-400 mb-4">Content and background knowledge assessed for the target age</p>
 
             <div class="space-y-3">
               <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-3">
                 <div class="flex items-center justify-between mb-1">
                   <span class="text-xs font-semibold text-slate-200">Surface Language</span>
-                  <span class="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">CLEAN</span>
+                  <span class="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">{{ analysisData.safety.surface_status === 'PASS' ? 'SUITABLE' : analysisData.safety.surface_status === 'FAIL' ? 'REVIEW' : 'UNKNOWN' }}</span>
                 </div>
-                <div class="text-[11px] text-slate-400">Zero profanity, violence, or sensitive keywords.</div>
+                <div class="text-[11px] text-slate-400">{{ analysisData.safety.content_issues.join('; ') || 'See the age-specific content assessment below.' }}</div>
               </div>
 
               <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-3">
                 <div class="flex items-center justify-between mb-1">
-                  <span class="text-xs font-semibold text-slate-200">Secondary Innuendo</span>
-                  <span class="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">SAFE</span>
+                  <span class="text-xs font-semibold text-slate-200">Background Knowledge</span>
+                  <span class="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">{{ analysisData.safety.inferential_status === 'PASS' ? 'ACCESSIBLE' : analysisData.safety.inferential_status === 'FAIL' ? 'ADVANCED' : 'UNKNOWN' }}</span>
                 </div>
-                <div class="text-[11px] text-slate-400">No inappropriate double entendre or harmful hidden senses.</div>
+                <div class="text-[11px] text-slate-400">{{ analysisData.safety.inference_issues.join('; ') || 'See the age-specific reasoning assessment below.' }}</div>
               </div>
             </div>
           </div>
 
           <div class="mt-4 pt-3 border-t border-slate-800/80 text-xs text-slate-400">
-            <span>Safety Verdict: </span>
+            <span>Assessment: </span>
             <strong class="text-emerald-400 font-semibold">{{ analysisData.safety.notes }}</strong>
           </div>
         </div>
@@ -770,7 +784,7 @@
                   <td class="py-2">
                     <span :class="[
                       'px-1.5 py-0.5 rounded text-[10px]',
-                      t.status === 'OK' ? 'bg-emerald-500/20 text-emerald-300' : (t.status === 'ERROR' ? 'bg-rose-500/20 text-rose-300' : 'bg-amber-500/20 text-amber-300')
+                      ['OK', 'PASS'].includes(t.status) ? 'bg-emerald-500/20 text-emerald-300' : (t.status === 'ERROR' ? 'bg-rose-500/20 text-rose-300' : 'bg-amber-500/20 text-amber-300')
                     ]">
                       {{ t.status }}
                     </span>
@@ -1317,7 +1331,7 @@
               summary: 'This text needs review beyond the current homographic and compound-split checks.',
             };
           }
-          const decidedLabels = ['VALID_HOMOGRAPH_JOKE', 'VALID_COMPOUND_SPLIT_JOKE', 'ONE_SENSE_ONLY', 'RESOLUTION_FAIL', 'SENSES_TOO_CLOSE'];
+          const decidedLabels = ['VALID_HOMOGRAPH_JOKE', 'VALID_COMPOUND_SPLIT_JOKE', 'ONE_SENSE_ONLY', 'ANCHORING_FAIL', 'RESOLUTION_FAIL', 'SENSES_TOO_CLOSE'];
           if (analysisData.value.review_required || !decidedLabels.includes(cls)) {
             return {
               isJoke: false, headline: 'More Context or Review Needed',
@@ -1373,56 +1387,48 @@
         });
 
         const recommendedAge = computed(() => {
-          if (!analysisData.value || !analysisData.value.age_spectrum) return 8;
-          for (const a of [4, 6, 8, 10, 12, 14]) {
+          if (!analysisData.value || !analysisData.value.age_spectrum) return null;
+          for (const a of Object.keys(analysisData.value.age_spectrum).map(Number).sort((a, b) => a - b)) {
             const item = analysisData.value.age_spectrum[a];
-            if (item && item.comprehension === 'FULLY_COMPREHENSIBLE') {
+            if (item && item.comprehension === 'FULLY_COMPREHENSIBLE' && item.appropriateness === 'FULLY_AGE_APPROPRIATE') {
               return a;
             }
           }
-          return 8;
+          return null;
         });
 
         const humanExplanation = computed(() => {
           if (!analysisData.value) return '';
           const d = analysisData.value;
-          const punch = d.punchline;
-          const sA = d.sense_a;
-          const sB = d.sense_b;
-
           if (d.resolution_explanation) return d.resolution_explanation;
-
-          if (punch && sA && sB) {
-            const qA = sA.quote && sA.quote !== punch ? ` (anchored by "${sA.quote}")` : '';
-            const qB = sB.quote && sB.quote !== punch ? ` (anchored by "${sB.quote}")` : '';
-            return `The setup primes the listener for Sense 1: ${sA.definition.replace(/\.$/, '')}${qA}. However, the context ${qB} triggers a surprise shift to Sense 2: ${sB.definition.replace(/\.$/, '')}. This sudden contrast between two unrelated interpretations of "${punch}" resolves the incongruity and creates the punchline.`;
-          }
-
-          if (d.resolution_explanation) {
-            return d.resolution_explanation
-              .replace(/Resolved with status \w+ \(score: [0-9.]+\)\.\s*/i, '')
-              .replace(/The punchline exploits lexical ambiguity on '([^']+)'\./i, 'The punchline pivots on the double meaning of "$1".');
-          }
-
-          if (punch) {
-            return `The sentence creates a humorous double interpretation centered on the word "${punch}".`;
-          }
-
-          return 'This sentence functions as a straightforward, literal communication without underlying wordplay or humorous incongruity.';
+          return 'An explanation was not returned for this assessment.';
         });
 
         function formatAoA(val) {
-          if (!val) return '~5 yrs';
+          if (val === null || val === undefined) return 'Sense AoA not measured';
           const num = typeof val === 'number' ? val : parseFloat(val);
-          if (isNaN(num)) return '~5 yrs';
+          if (isNaN(num)) return 'Sense AoA not measured';
           return `${num.toFixed(1)} yrs`;
         }
 
-        function friendlyComprehension(comp) {
+        function friendlyAgeDimension(dimension) {
+          return {
+            vocabulary: 'vocabulary', sense_a: 'meaning 1', sense_b: 'meaning 2',
+            wordplay: 'wordplay', background_knowledge: 'background knowledge', understanding: 'understanding'
+          }[dimension] || dimension;
+        }
+
+        function friendlyComprehension(comp, summary = null) {
+          if (summary?.barrier_dimensions?.length && summary?.unknown_dimensions?.length) {
+            return { label: 'Estimated Barrier · Some Unknown', tagClass: 'bg-amber-500/20 text-amber-300 border border-amber-500/30' };
+          }
           if (!comp) return { label: 'Unknown', tagClass: 'bg-slate-800 text-slate-400' };
           switch (comp) {
+            case 'AOA_UNKNOWN':
+            case 'UNKNOWN':
+              return { label: 'More Evidence Needed', tagClass: 'bg-slate-800 text-slate-300' };
             case 'FULLY_COMPREHENSIBLE':
-              return { label: 'Easily Understood', tagClass: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' };
+              return { label: 'Likely Understood', tagClass: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' };
             case 'PARTIALLY_COMPREHENSIBLE':
               return { label: 'Partially Understood', tagClass: 'bg-amber-500/20 text-amber-300 border border-amber-500/30' };
             case 'SENSE_B_TOO_ADVANCED':
@@ -1488,6 +1494,7 @@
           recommendedAge,
           humanExplanation,
           formatAoA,
+          friendlyAgeDimension,
           friendlyComprehension,
           currentAgeAssessment,
           showTrace,

@@ -21,6 +21,7 @@ from crack.enums import (
     ScopeLabel,
 )
 from crack.l6_distinctness import distinctness_l6
+from crack.validation import ModelResponseError
 from crack.layers import run_l1, run_l6
 from crack.runner import _l0_post_layer
 from crack.schema import (
@@ -43,7 +44,7 @@ def _make_record(
     sense_b: str = "courage",
     term: str = "guts",
 ) -> AnalysisRecord:
-    rec = AnalysisRecord(item_id="test_l6", text=text, target_ages=[8])
+    rec = AnalysisRecord(item_id="test_l6", text=text, target_ages=[])
     rec.l1_result = L1Result(
         genre=Genre.QA_RIDDLE,
         tokens=text.split(),
@@ -52,11 +53,12 @@ def _make_record(
     )
     rec.l3_result = L3Result(candidates=[CandidateEntry(term=term, score=0.8)])
     rec.l4_result = L4Result(
+        target_term=term, reasoning="The source cues support the proposed readings.",
         sense_a=sense_a,
         sense_a_anchor_quote="skeletons" if relation != AnchorRelation.RESEGMENTATION else term,
         sense_b=sense_b,
         sense_b_anchor_quote="no guts" if relation != AnchorRelation.RESEGMENTATION else term,
-        anchor_relation=relation,
+        anchor_relation=relation if anchoring_status == AnchoringStatus.PASS else None,
         anchoring_status=anchoring_status,
         resolving_sense="sense_b" if anchoring_status == AnchoringStatus.PASS else None,
     )
@@ -67,6 +69,7 @@ def _mock_gemini_client(payload: str) -> MagicMock:
     client = MagicMock()
     resp = MagicMock()
     resp.text = payload
+    resp.candidates = [MagicMock(finish_reason="STOP")]
     client.models.generate_content.return_value = resp
     return client
 
@@ -75,6 +78,8 @@ def _mock_openai_client(payload: str) -> MagicMock:
     client = MagicMock()
     choice = MagicMock()
     choice.message.content = payload
+    choice.finish_reason = "stop"
+    choice.message.refusal = None
     client.chat.completions.create.return_value = MagicMock(choices=[choice])
     return client
 
@@ -87,6 +92,7 @@ def _mock_anthropic_client(payload: str) -> MagicMock:
     class AnthropicMockResponse:
         def __init__(self, text: str):
             self.content = [AnthropicMockMessage(text)]
+            self.stop_reason = "end_turn"
 
     client = MagicMock()
     client.messages.create.return_value = AnthropicMockResponse(payload)
@@ -128,12 +134,20 @@ class TestL6ShortCircuits:
         assert res.distinctness_status == DistinctnessStatus.L6_SKIPPED_NO_PARAPHRASE
         assert res.ambiguity_ablation == AmbiguityAblation.SKIPPED
 
-    def test_short_circuit_resegmentation_is_distinct(self) -> None:
-        rec = _make_record(relation=AnchorRelation.RESEGMENTATION, sense_a="frozen dessert", sense_b="shout")
-        res = distinctness_l6(rec, client=None)  # No LLM client needed!
-        assert res.distinctness_status == DistinctnessStatus.SENSES_DISTINCT
-        assert res.ambiguity_ablation == AmbiguityAblation.SUPPORTED
-        assert "Resegmentation" in (res.explanation or "")
+    def test_resegmentation_is_not_automatically_accepted(self, monkeypatch) -> None:
+        rec = _make_record(relation=AnchorRelation.RESEGMENTATION)
+        calls = []
+        def complete(*args):
+            from crack.l6_distinctness import _L6Call
+            calls.append(args)
+            return _L6Call(dict(sense_a_paraphrase="one shade", sense_b_paraphrase="another shade",
+                               suppresses_other=False, materially_different=False,
+                               distinctness_status="SENSES_TOO_CLOSE", ambiguity_ablation="UNSUPPORTED",
+                               explanation="The proposed split does not create different meanings."), "mock", False, 0)
+        monkeypatch.setattr("crack.l6_distinctness._complete_l6", complete)
+        result = distinctness_l6(rec)
+        assert result.distinctness_status == DistinctnessStatus.SENSES_TOO_CLOSE
+        assert len(calls) == 1
 
 
 class TestL6MockRuns:
@@ -217,16 +231,12 @@ class TestL6MockRuns:
         parsed = _extract_json(raw)
         assert parsed["distinctness_status"] == "SENSES_DISTINCT"
 
-    def test_unrecognized_status_defaults_to_skipped(self) -> None:
-        payload = json.dumps({
-            "distinctness_status": "UNKNOWN_CUSTOM_STATUS",
-            "ambiguity_ablation": "UNKNOWN_ABLATION",
-        })
-        client = _mock_gemini_client(payload)
-        rec = _make_record()
-        res = distinctness_l6(rec, client=client)
-        assert res.distinctness_status == DistinctnessStatus.L6_SKIPPED_NO_PARAPHRASE
-        assert res.ambiguity_ablation == AmbiguityAblation.SKIPPED
+    def test_unrecognized_status_is_rejected_without_a_default(self) -> None:
+        client = _mock_gemini_client(json.dumps({"distinctness_status": "UNKNOWN_CUSTOM_STATUS",
+                                               "ambiguity_ablation": "UNKNOWN_ABLATION"}))
+        with pytest.raises(ModelResponseError):
+            distinctness_l6(_make_record(), client=client)
+        client.models.generate_content.assert_called_once()
 
     def test_unknown_l6_backend_raises(self) -> None:
         from crack.l6_distinctness import _complete_l6
@@ -257,7 +267,7 @@ class TestRunL6Pipeline:
         assert rec.l6_result is not None
         assert rec.l6_result.distinctness_status == DistinctnessStatus.SENSES_DISTINCT
         assert rec.trace[-1].layer == "L6"
-        assert rec.trace[-1].status == "OK"
+        assert rec.trace[-1].status == "PASS"
 
 
 class TestL6RunnerIntegration:
@@ -272,6 +282,8 @@ class TestL6RunnerIntegration:
         rec.l6_result = L6Result(
             distinctness_status=DistinctnessStatus.SENSES_TOO_CLOSE,
             ambiguity_ablation=AmbiguityAblation.UNSUPPORTED,
+            sense_a_paraphrase="running on foot", sense_b_paraphrase="jogging on foot",
+            suppresses_other=False, materially_different=False,
             explanation="Senses overlap too closely.",
         )
         rec = _l0_post_layer(rec, DEFAULT_SETTINGS)
@@ -289,6 +301,8 @@ class TestL6RunnerIntegration:
         rec.l6_result = L6Result(
             distinctness_status=DistinctnessStatus.SENSES_DISTINCT,
             ambiguity_ablation=AmbiguityAblation.SUPPORTED,
+            sense_a_paraphrase="internal organs", sense_b_paraphrase="courage",
+            suppresses_other=False, materially_different=True,
             explanation="Genuinely distinct.",
         )
         rec = _l0_post_layer(rec, DEFAULT_SETTINGS)

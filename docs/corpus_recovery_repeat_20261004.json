@@ -1,0 +1,351 @@
+{
+  "directory": "runs/corpus_reliability/20261004T222826Z",
+  "evaluation": {
+    "total_items": 60,
+    "recorded_items": 60,
+    "missing_items": 0,
+    "unverified_contract_items": 0,
+    "correct_classification": 55,
+    "classification_accuracy": 0.9167,
+    "decided_items": 60,
+    "decision_coverage": 1.0,
+    "classification_accuracy_on_decided": 0.9167,
+    "outcome_counts": {
+      "PUN": 27,
+      "NON_PUN": 33,
+      "INSUFFICIENT_EVIDENCE": 0,
+      "EXECUTION_FAILED": 0,
+      "OUT_OF_SCOPE": 0
+    },
+    "confusion_matrix": {
+      "VALID_HOMOGRAPH_JOKE": {
+        "VALID_HOMOGRAPH_JOKE": 21
+      },
+      "VALID_COMPOUND_SPLIT_JOKE": {
+        "VALID_COMPOUND_SPLIT_JOKE": 3,
+        "RESOLUTION_FAIL": 1
+      },
+      "ONE_SENSE_ONLY": {
+        "ONE_SENSE_ONLY": 31,
+        "VALID_HOMOGRAPH_JOKE": 3,
+        "RESOLUTION_FAIL": 1
+      }
+    },
+    "total_age_evals": 180,
+    "correct_age_evals": 53,
+    "age_accuracy": 0.2944,
+    "assessed_age_evals": 74,
+    "age_assessment_coverage": 0.4111,
+    "age_accuracy_on_assessed": 0.7162,
+    "age_gold_puns": {
+      "total_labels": 75,
+      "assessed_labels": 67,
+      "correct_labels": 48,
+      "accuracy_all_labels": 0.64,
+      "assessment_coverage": 0.8933,
+      "accuracy_on_assessed": 0.7164
+    },
+    "binary_detection": {
+      "eligible_items": 60,
+      "decided_items": 60,
+      "decision_coverage": 1.0,
+      "correct": 56,
+      "accuracy_all_items": 0.9333,
+      "accuracy_on_decided": 0.9333,
+      "precision_on_decided": 0.8889,
+      "recall_on_decided": 0.96,
+      "f1_on_decided": 0.9231,
+      "tp": 24,
+      "fp": 3,
+      "tn": 32,
+      "fn": 1,
+      "abstentions_by_gold_class": {
+        "positive": 0,
+        "negative": 0
+      }
+    }
+  },
+  "records_sha256": "9dec58e5a1b6cd4daf45cc881698d71180e17ddbfc836cac4708830018e87e58",
+  "evaluation_sha256": "7fbd3241a37798d7101069856ec04995e034ba33ebc58595f8b90653d1638ddd",
+  "blind_sha256": "2bb32346fb40148bdd73800358935cc7d745af04f0de44880d526528ceed4c70",
+  "same_texts_and_ages": true,
+  "config_changes_non_list_fields": {},
+  "concurrency": 8,
+  "inferred_normal_calls": {
+    "total": 116,
+    "by_layer": {
+      "L4": 60,
+      "L5": 29,
+      "L6": 27
+    }
+  },
+  "logged_l4_l5_provider_retries": 0,
+  "summed_trace_duration_seconds": {
+    "mean": 15.164786333333334,
+    "median": 11.5629385
+  },
+  "classification_changes": [
+    {
+      "id": "J06",
+      "before": "RESOLUTION_FAIL",
+      "after": "VALID_COMPOUND_SPLIT_JOKE",
+      "gold": "VALID_COMPOUND_SPLIT_JOKE"
+    },
+    {
+      "id": "J13",
+      "before": "VALID_HOMOGRAPH_JOKE",
+      "after": "RESOLUTION_FAIL",
+      "gold": "VALID_COMPOUND_SPLIT_JOKE"
+    },
+    {
+      "id": "D12",
+      "before": "ONE_SENSE_ONLY",
+      "after": "RESOLUTION_FAIL",
+      "gold": "ONE_SENSE_ONLY"
+    }
+  ],
+  "remaining_exact_label_mismatches": [
+    {
+      "id": "J13",
+      "gold": "VALID_COMPOUND_SPLIT_JOKE",
+      "prediction": "RESOLUTION_FAIL",
+      "selected_target": "room",
+      "binary_correct": false
+    },
+    {
+      "id": "D03",
+      "gold": "ONE_SENSE_ONLY",
+      "prediction": "VALID_HOMOGRAPH_JOKE",
+      "selected_target": "trunk",
+      "binary_correct": false
+    },
+    {
+      "id": "D12",
+      "gold": "ONE_SENSE_ONLY",
+      "prediction": "RESOLUTION_FAIL",
+      "selected_target": "represent",
+      "binary_correct": true
+    },
+    {
+      "id": "D17",
+      "gold": "ONE_SENSE_ONLY",
+      "prediction": "VALID_HOMOGRAPH_JOKE",
+      "selected_target": "mail",
+      "binary_correct": false
+    },
+    {
+      "id": "D24",
+      "gold": "ONE_SENSE_ONLY",
+      "prediction": "VALID_HOMOGRAPH_JOKE",
+      "selected_target": "stories",
+      "binary_correct": false
+    }
+  ],
+  "age_label_changes": [
+    {
+      "id": "J01",
+      "age": "6",
+      "gold": "PARTIALLY_COMPREHENSIBLE",
+      "before": "SENSE_B_TOO_ADVANCED",
+      "after": "AOA_UNKNOWN"
+    },
+    {
+      "id": "J03",
+      "age": "8",
+      "gold": "FULLY_COMPREHENSIBLE",
+      "before": "AOA_UNKNOWN",
+      "after": "FULLY_COMPREHENSIBLE"
+    },
+    {
+      "id": "J06",
+      "age": "8",
+      "gold": "PARTIALLY_COMPREHENSIBLE",
+      "before": null,
+      "after": "WORDPLAY_SKILL_TOO_ADVANCED"
+    },
+    {
+      "id": "J06",
+      "age": "10",
+      "gold": "FULLY_COMPREHENSIBLE",
+      "before": null,
+      "after": "FULLY_COMPREHENSIBLE"
+    },
+    {
+      "id": "J06",
+      "age": "12",
+      "gold": "FULLY_COMPREHENSIBLE",
+      "before": null,
+      "after": "FULLY_COMPREHENSIBLE"
+    },
+    {
+      "id": "J07",
+      "age": "6",
+      "gold": "PARTIALLY_COMPREHENSIBLE",
+      "before": "SENSE_B_TOO_ADVANCED",
+      "after": "PARTIALLY_COMPREHENSIBLE"
+    },
+    {
+      "id": "J07",
+      "age": "8",
+      "gold": "FULLY_COMPREHENSIBLE",
+      "before": "FULLY_COMPREHENSIBLE",
+      "after": "AOA_UNKNOWN"
+    },
+    {
+      "id": "J10",
+      "age": "6",
+      "gold": "PARTIALLY_COMPREHENSIBLE",
+      "before": "FULLY_COMPREHENSIBLE",
+      "after": "AOA_UNKNOWN"
+    },
+    {
+      "id": "J11",
+      "age": "8",
+      "gold": "PARTIALLY_COMPREHENSIBLE",
+      "before": "AOA_UNKNOWN",
+      "after": "FULLY_COMPREHENSIBLE"
+    },
+    {
+      "id": "J13",
+      "age": "8",
+      "gold": "PARTIALLY_COMPREHENSIBLE",
+      "before": "FULLY_COMPREHENSIBLE",
+      "after": null
+    },
+    {
+      "id": "J13",
+      "age": "10",
+      "gold": "FULLY_COMPREHENSIBLE",
+      "before": "FULLY_COMPREHENSIBLE",
+      "after": null
+    },
+    {
+      "id": "J13",
+      "age": "12",
+      "gold": "FULLY_COMPREHENSIBLE",
+      "before": "FULLY_COMPREHENSIBLE",
+      "after": null
+    },
+    {
+      "id": "J14",
+      "age": "8",
+      "gold": "PARTIALLY_COMPREHENSIBLE",
+      "before": "FULLY_COMPREHENSIBLE",
+      "after": "AOA_UNKNOWN"
+    },
+    {
+      "id": "J15",
+      "age": "6",
+      "gold": "FULLY_COMPREHENSIBLE",
+      "before": "PARTIALLY_COMPREHENSIBLE",
+      "after": "AOA_UNKNOWN"
+    },
+    {
+      "id": "J17",
+      "age": "8",
+      "gold": "FULLY_COMPREHENSIBLE",
+      "before": "AOA_UNKNOWN",
+      "after": "PARTIALLY_COMPREHENSIBLE"
+    },
+    {
+      "id": "J22",
+      "age": "6",
+      "gold": "PARTIALLY_COMPREHENSIBLE",
+      "before": "PARTIALLY_COMPREHENSIBLE",
+      "after": "FULLY_COMPREHENSIBLE"
+    },
+    {
+      "id": "J22",
+      "age": "8",
+      "gold": "FULLY_COMPREHENSIBLE",
+      "before": "AOA_UNKNOWN",
+      "after": "FULLY_COMPREHENSIBLE"
+    },
+    {
+      "id": "J23",
+      "age": "8",
+      "gold": "SENSE_B_TOO_ADVANCED",
+      "before": "PARTIALLY_COMPREHENSIBLE",
+      "after": "SENSE_B_TOO_ADVANCED"
+    },
+    {
+      "id": "J24",
+      "age": "6",
+      "gold": "PARTIALLY_COMPREHENSIBLE",
+      "before": "AOA_UNKNOWN",
+      "after": "FULLY_COMPREHENSIBLE"
+    },
+    {
+      "id": "D03",
+      "age": "6",
+      "gold": "FULLY_COMPREHENSIBLE",
+      "before": "AOA_UNKNOWN",
+      "after": "SENSE_B_TOO_ADVANCED"
+    },
+    {
+      "id": "D17",
+      "age": "10",
+      "gold": "FULLY_COMPREHENSIBLE",
+      "before": "FULLY_COMPREHENSIBLE",
+      "after": "AOA_UNKNOWN"
+    },
+    {
+      "id": "D24",
+      "age": "6",
+      "gold": "FULLY_COMPREHENSIBLE",
+      "before": "AOA_UNKNOWN",
+      "after": "FULLY_COMPREHENSIBLE"
+    }
+  ],
+  "limitations": [
+    "Fresh repeat on the same inspected regression corpus; this does not establish unseen-data generalization.",
+    "The SDK was not instrumented for this run; normal call count is inferred and excludes unrecorded service retries.",
+    "Same aggregate classification scores do not imply identical per-item predictions."
+  ],
+  "same_effective_configuration": true,
+  "gold_sha256": "103769879da029a0f8defe5f2c62674a22cc0142015689ce4ed2eb8efd4607cc",
+  "source_sha256": {
+    "__init__.py": "378d89d4d0c1569f72bae750119b500afd546d662355973009aab2f21b457c59",
+    "age_evidence.py": "f0782bbf634690f41224d9579a90baa098567d41bebfcc79b2fa4cd6770f9ea6",
+    "candidate_search.py": "c5239310629d2d866f9306c50d9eb18e1679c3f613a491bfd0ebbd82ed24697c",
+    "config.py": "6767770f0107873ae9bac94fbabee30a19f98577fbba523bb352af1af89aaaef",
+    "corpus.py": "b45ca2904f79305a491417e5d1d638211d156d89de9cec9c33c19f7a37538b96",
+    "decisions.py": "83601e7ae3612212217eed4cf8cbaf1dba9800e0f0c1ace3a4ba2681ead92996",
+    "enums.py": "585e0160fe41648ad04af49fc8646ebc29f92343efe12c4e43cdc6bf06399d86",
+    "l0_scope.py": "74e9b72e229e1367182ec23ecbe0e34a88dcb0ed3d653508094b98041260a6f6",
+    "l1_surface.py": "0a14f175623e3023213ab6484dd8ecc5ad1e2b15c67b462ddee7b2ceed704917",
+    "l2_senses.py": "091c5e8fccfe6545649c27fd1a523dce01f245db50b7a40dcdd62dc9500c849c",
+    "l3_candidates.py": "4156434dac437a7425393d446a1aee0024cf36ddeb8c5535b1baaf56940664cc",
+    "l4_anchoring.py": "732c09932447c928c8f1346efe8739a6f9076e7ff45746755faede3a07eec76c",
+    "l5_resolution.py": "c35aef56191fb43b31e444e7facdde9da50d0877ea65958370faa7d5db0ff7df",
+    "l6_distinctness.py": "693f50e9ff1458d4df9402127a8acccd38895e4f438ffe4727768ebc0d492b9c",
+    "l7_comprehension.py": "75a1d3b66ae59089e8885ac0f307f29a8f32ae0b3143dd255195d757e3e05330",
+    "l8_appropriateness.py": "5913cd17914fb92a50bf9b61b467ab31a545d8160ea5c83186be8e24ad0319cd",
+    "layers.py": "83fd23d107edd126210f42cbb31c6e973f42bb54e14bd33c97ccc900d689a6ed",
+    "prompts/l4_anchoring.md": "b9c7feb4803ed15f1a071c050769261204b3283fea2833d60dbace274520b632",
+    "prompts/l5_declarative.md": "70e94b70841d4d8d106d48506cebbdda90436bb18b1b7b56b13873ea43e7904a",
+    "prompts/l5_definitional.md": "ee4fc228b2c8a32d2adac1f9126b5f35f0646814378622f54c3d37d3625b9102",
+    "prompts/l5_dialogue.md": "cef766e735c5a21f30270f54a81cc73cf6e8a0ba5aabe1fd7e49889f72783add",
+    "prompts/l5_qa.md": "a69395d14caef6f0aeb4f4c0f548dfd14e91f178b59ad5f58fd6928564cbc1d3",
+    "prompts/l6_distinctness.md": "54ead222e766d7e6b546a23a7e1351751c58e4aeebc0fbf62738e6b366fc7398",
+    "prompts/l7_comprehension.md": "6f53a896dd00a95a2c6db530b4e459f20fb9142f94fb0dc8ded745804b03a859",
+    "prompts/l8_appropriateness.md": "3b4db415e43310a1edb5e77f61d5c856420c1d59fae4917c433829d653100dd1",
+    "providers.py": "e307978c4bd5c3ac12e6f063de31ae82660847bd7dd00e34f75b8923197efe52",
+    "runner.py": "d794711961e23df8a54180e9a83f22f93783207a57698b7f7946c714660576fa",
+    "schema.py": "94fe8acbed2f7555709f914a19b4662ea6fdd85e1509697aedb55980f2bd6049",
+    "semeval_benchmark.py": "9650f53563a97c7ba68a7a24cc0f72201b2e087a1736e4c1cb85726984ae207e",
+    "serve.py": "13b0cc922d94f8fe7e0a0efb43056296f2bc62a2bc07db42050b52ff2d50b43f",
+    "validation.py": "7b16fd42af21cc0291fead6f7c819cd1c7ae4cbe8247abc9b0ead4423934e9cb"
+  },
+  "reference_run": "runs/corpus_recovery/20261004T215939.455019Z/results/20261004T220004Z",
+  "published_evidence": {
+    "reliability_baseline_20261004": "docs/evaluations/reliability_baseline_20261004",
+    "recovery_20261004": "docs/evaluations/recovery_20261004",
+    "repeat_20261004": "docs/evaluations/repeat_20261004"
+  },
+  "publication_source_differences": [
+    "semeval_benchmark.py"
+  ],
+  "publication_source_note": "After both live passes, only the inactive SemEval report/evaluator output removed external comparison fields. Detection/age pipeline code and prompts match the evaluated source. Documentation and SVG were updated.",
+  "source_matched_first_recovery_and_checkout_at_repeat_audit": true
+}

@@ -18,76 +18,260 @@ Curious how it works? [Try the live demo](https://crack-8s9j.onrender.com): ente
 
 ## Evaluation data and reported results
 
-### SemEval-2017 Task 7
+This version has two fresh project-corpus regression runs, reported below.
+Earlier benchmark results belong to earlier designs and are archived separately.
+Use [the fresh corpus command](#test-the-current-project-corpus) to repeat the
+current evaluation.
 
-The repository includes the homographic test split: 2,250 items, comprising 1,607 annotated puns and 643 non-puns. The conversion script downloads the official task archive and creates separate blind-input and gold-label files. See the [task paper](https://aclanthology.org/S17-2005/) and the [official results and data page](https://alt.qcri.org/semeval2017/task7/index.php?id=results).
+### Current pipeline regression — October 4, 2026
 
-On the full 2,250-item homographic test split, CRACK's reference run achieved **82.84% accuracy** and **87.82% F1**, with 89.11% precision and 86.56% recall. It correctly detected 1,391 of 1,607 puns and rejected 473 of 643 non-puns.
+A complete recovery pass and a fresh user rerun used the same source, 60 texts,
+gold labels, requested ages and OpenAI `gpt-6-luna`. Strict response checks,
+fail/unknown stopping and service retry/fallback remain enabled.
 
-CRACK combines WordNet and SemCor lexical evidence with LLM-assisted checks of candidate readings, textual support, and joke resolution. The [pipeline overview](#how-the-pipeline-works) shows how these stages lead to the final classification. The data preparation and evaluation command below let readers run the same benchmark split with their own provider configuration.
+| Metric | Before recovery | Recovery pass | User rerun |
+|---|---:|---:|---:|
+| Exact classification, all items | 47/60 (78.3%) | **55/60 (91.7%)** | **55/60 (91.7%)** |
+| Binary accuracy, all items | 49/60 (81.7%) | **56/60 (93.3%)** | **56/60 (93.3%)** |
+| Decision coverage | 54/60 (90.0%) | **60/60 (100.0%)** | **60/60 (100.0%)** |
+| Age agreement, all original labels | 42/180 (23.3%) | 51/180 (28.3%) | 53/180 (29.4%) |
+| Age agreement, all gold-pun labels | 37/75 (49.3%) | 46/75 (61.3%) | 48/75 (64.0%) |
+| Age assessment coverage, gold-pun labels | 53/75 (70.7%) | 67/75 (89.3%) | 67/75 (89.3%) |
+| Age agreement, assessed gold-pun labels | 37/53 (69.8%) | 46/67 (68.7%) | 48/67 (71.6%) |
 
-The metrics below summarize the reference run:
+The recovery pass made **115 observed SDK calls** across the whole corpus
+(60 L4, 28 L5, 27 L6); the user rerun's records imply 116 normal requests
+(60 L4, 29 L5, 27 L6). Age estimates share L6; completed positive items use
+three normal requests. Earlier records imply 358 normal requests. Inferred
+counts exclude unrecorded transport retries. Average summed per-item trace
+time was 16.12 seconds in recovery and 15.16 seconds in the rerun, versus
+29.79 seconds before; these runs at different times do not constitute a
+controlled latency benchmark.
 
-| Metric | Reported value | Count |
-|---|---:|---:|
-| Accuracy | 82.84% | 1,864 / 2,250 |
-| Precision | 89.11% | 1,391 / 1,561 predicted puns |
-| Recall | 86.56% | 1,391 / 1,607 annotated puns |
-| F1 | 87.82% | Derived from the precision and recall above |
-| Correctly rejected non-puns (`ONE_SENSE_ONLY`) | 73.56% | 473 / 643 |
+This is an inspected regression corpus, not an unseen benchmark. Equal
+aggregate classification scores do not mean identical predictions: three
+items changed classification between the two recovery runs. Age agreement
+improved mainly through recovered detection coverage; assessed gold-pun age
+agreement ranged from 68.7% to 71.6% and remains a weakness. The original
+all-age metric includes literal controls that this wordplay-age pipeline
+does not assess. Both passes are retained in the
+[complete comparison, remaining errors and audit](docs/corpus_recovery_20261004.md).
 
-Use the reproduction command below to run inference and scoring on this same official split with your chosen provider configuration.
+### Evaluation datasets and historical results
 
-The comparison below covers binary homographic-pun detection; pun-sense interpretation scores measure a different task.
+The project-curated corpus contains 60 items: 25 wordplay examples and 35
+`ONE_SENSE_ONLY` controls. Its 180 age labels are curator annotations, not
+observed child-comprehension measurements. See the
+[annotation guidelines](corpus/annotation_guidelines.md).
 
-### SemEval-2017 Task 7 detection comparison
+The repository also includes the 2,250-item homographic SemEval-2017 Task 7
+split. It has no human age annotations. The [task paper](https://aclanthology.org/S17-2005/)
+describes its detection, location and interpretation tasks. This revision has
+not been rerun on that full split. Earlier SemEval and September corpus scores
+retain their original source versions in the [historical audit](docs/benchmark_audit.md);
+they do not measure the current pipeline.
 
-Ranked by reported F1, the table includes the task-paper systems and later SemEval evaluations. It focuses on full-set results; Fermi's 675-item partial-set result is not included. CRACK ranks **1st of 11 results**.
-
-![SemEval-2017 Task 7 homographic pun detection ranking by reported F1](assets/semeval-detection-ranking.svg)
-
-**Sources and settings:** Original task results are from [Miller et al. (2017), Table 2](https://aclanthology.org/S17-2005.pdf). N-Hance was out of competition, and ECNU reported 2,237 items. Feng et al.'s second setting trains on self-collected data; Diao et al. train on Pun of the Day and test on SemEval. The linked papers describe each evaluation setup.
-
-### Other reported results
-
-[Diao et al. (2018), Table 3](https://aclanthology.org/D18-1272.pdf) reports these additional scores:
-
-| Model | Paper-reported F1 |
-|---|---:|
-| WECA | 89.21%* |
-| LSTM | 82.43%* |
-
-The values above are quoted from Table 3. The paper reports different WECA figures in its discussion; Table 4 evaluates WECA on a 675-item subset.
-
-Other evaluation settings report Zhou et al. (2020) at 94.9% and Zou & Lu (2019) at 92.2% using 10-fold cross-validation, and Feng et al.'s first setting at 93.0% using 5-fold cross-validation. These results use cross-validation protocols; see [Feng et al. (2020), Table 1 and notes](https://ceur-ws.org/Vol-2624/paper3.pdf).
-
-### Project-curated corpus
-
-The project-curated corpus contains 60 items: 25 wordplay examples and 35 `ONE_SENSE_ONLY` controls (25 de-joked examples and 10 ordinary statements). The gold file also includes genre, target-word, sense, and age-comprehension annotations. See the [annotation guidelines](corpus/annotation_guidelines.md) for the dataset structure and labels.
-
-A full run on the current corpus (OpenAI, `gpt-6-luna`; September 30, 2026) achieved **93.33% exact-label accuracy** (56/60). For binary pun detection, the two `VALID_*_JOKE` labels count as positive and all other outputs as negative: precision **89.29%**, recall **100.00%**, and F1 **94.34%**. Age-comprehension outputs matched 142/180 project annotations (78.89%). All 60 predictions match the current input texts, and no pipeline stage reported an error.
-
-| Gold / predicted | `ONE_SENSE_ONLY` | `VALID_HOMOGRAPH_JOKE` | `VALID_COMPOUND_SPLIT_JOKE` | `RESOLUTION_FAIL` |
-|---|---:|---:|---:|---:|
-| `ONE_SENSE_ONLY` | 31 | 3 | 0 | 1 |
-| `VALID_HOMOGRAPH_JOKE` | 0 | 21 | 0 | 0 |
-| `VALID_COMPOUND_SPLIT_JOKE` | 0 | 0 | 4 | 0 |
-
-The [per-item run records](runs/course_corpus_records.jsonl) and [evaluation summary](runs/course_corpus_eval.json) include the complete results and run configuration.
+The [published October 4 evaluation records](docs/evaluations/README.md) retain
+both current passes and the preceding regression. Their scores can be recomputed
+without provider calls. Fresh-inference commands are below.
 
 ## How the pipeline works
 
-CRACK validates each input, builds lexical evidence, checks candidate readings and joke resolution with LLM-assisted stages, then combines the evidence into a final classification and age-specific assessments.
+The current design prioritizes a reliable, bounded pipeline: every required
+stage must complete with usable evidence, uncertainty stays explicit, and
+failure stops dependent work. Detection and age outputs are separate. The
+historical benchmark results above predate this design. The October 4
+regression run evaluates the current source; fresh corpus runs are needed
+to assess subsequent changes and performance variation.
+
+```text
+Text + explicitly requested ages
+  -> L0-pre: validate and normalize
+  -> L1: tokenize and route genre
+  -> L2: retrieve lexical evidence
+  -> L3: rank the original candidate shortlist
+  -> L4: choose target + anchor readings in context   [LLM, one shortlist request]
+  -> L5: assess semantic resolution                 [LLM]
+  -> L6: assess distinctness + compact age estimates [LLM, same request]
+  -> L7: validate cached understanding estimates     [local, ages only]
+  -> L8: derive content/inference verdicts           [local, passed ages only]
+  -> L0-post: report detection, scope and age outcomes
+
+FAIL / UNKNOWN / ERROR -> skip dependent work -> L0-post
+Age failure            -> retain detection, leave affected age outputs unknown
+```
 
 ![CRACK analysis pipeline from input validation through final classification](assets/crack-pipeline.svg)
 
-The runner records each layer's evidence and status. See [ARCHITECTURE.md](ARCHITECTURE.md) for implementation details.
+### Layer responsibilities
 
-Detection responses are checked for source quotes, required fields, valid scores,
-and consistent findings. Results distinguish **pun**, **non-pun**, **insufficient
-evidence**, and **execution failure**, with a separate out-of-scope status. The
-interface shows a review or retry action when no decision can be made. See
-[response validation](docs/response_validation.md) for the enforced rules.
+| Layer | Input and responsibility | Result and stopping behavior | Model requests |
+|---|---|---|---:|
+| **L0-pre — input** | Normalize Unicode and whitespace; check length and character content. Defaults: 3–500 characters, non-ASCII ratio at most 0.15. | Valid normalized text, or ERROR; invalid input stops analysis. No joke judgment here. | 0 |
+| **L1 — surface** | Use regex to tokenize and select dialogue, definitional, QA or declarative analysis. Record question, negation and speaker-turn flags. | `L1Result`; no invented lemmas or POS tags. | 0 |
+| **L2 — lexical evidence** | Retrieve WordNet senses, multiword expressions and compound-split proposals; attach available SemCor counts and local AoA values with lookup methods. | `L2Result`; empty retrieval is UNKNOWN. A missing individual word rating remains null. Dictionary senses are proposals, not proof of contextual wordplay. | 0 |
+| **L3 — ranking** | Rank terms using lexical contrast and frequency balance; preserve supported split options. Requested age does not affect ranking. | `L3Result`, default top 8 candidates; no candidates is UNKNOWN. The ranked tail is metadata only. | 0 |
+| **L4 — selection and anchoring** | Compare the original shortlist against the whole text in one request; choose the target that best explains the wordplay and return two meanings, exact source anchors, relation and resolving sense. | PASS selects the target. Rejection, UNKNOWN or invalid output stops; no request for another candidate. The selected target must belong to the supplied shortlist. | At most 1 |
+| **L5 — resolution** | Check that the selected readings form coherent wordplay in the supplied context using the genre-specific scoring branch. | RESOLUTION_PASS continues. RESOLUTION_FAIL, insufficient context or execution failure stops; no return to L4. | At most 1 |
+| **L6 — distinctness** | Check materially different meanings and separate paraphrases. When ages are requested, include compact age estimates in this same response. | SENSES_DISTINCT continues; senses too close rejects; an unassessed result remains UNKNOWN. Age preparation/validation failures do not replace valid detection findings. | At most 1 |
+| **L7 — comprehension** | Locally validate L6's cached age keys and estimate fields; attach AoA citations directly from lookup. Consider vocabulary, both readings, wordplay and necessary background knowledge. | Per-age comprehension, reason and estimated barrier. Only ages with FULLY_COMPREHENSIBLE proceed to L8. Missing/malformed age data fails age assessment. | 0 |
+| **L8 — appropriateness** | Locally consume the same cached estimate for ages that passed L7. Keep surface content and inferential accessibility as separate true/false/null axes. | Derive per-age appropriateness; content rejection needs a source quote, inference rejection a named prerequisite. Unknown axes never become automatic passes. | 0 |
+| **L0-post — finalization** | Combine completed detection evidence and available age results. Run even when earlier stages stop. | Final detection status, detailed classification, scope, review reason and per-age verdicts. | 0 |
+
+The default L3 ranking score is `0.7 * contrast + 0.3 * balance`. Contrast
+uses WordNet lexical categories; balance uses smoothed SemCor counts. Missing
+counts do not establish observed balanced usage. The score orders proposals;
+it is not a probability that a term is a pun. Definitional heads and repeated
+eligible terms can receive priority in the shortlist.
+
+### L5 resolution branches
+
+Each branch uses its existing weighted subscores; this reliability revision
+preserves those weights and thresholds.
+
+| Branch | Assessed relationship | Pass threshold |
+|---|---|---:|
+| QA riddle | Polarity/event direction, answer relevance, causal fit, agent fit and tense/aspect fit | 0.46, with polarity/direction at least 0.05 |
+| Definitional one-liner | Literal setup, exploitation of the split and contrast strength | 0.60 |
+| Dialogue misunderstanding | Plausible misunderstanding, clear contrast and speaker intention | 0.60 |
+| Declarative | Availability of both readings, unexpected resolving sense and incongruity | 0.25 |
+
+A self-contained question without an answer turn uses the existing declarative
+branch. An explicit contradiction in a relationship necessary for the claimed
+wordplay rejects resolution regardless of the average score. Required scores
+must be finite numbers in [0, 1]; inadequate evidence uses null scores and a
+reason. The resulting resolution score is not calibrated confidence. See
+[L5 calibration and its limitations](docs/L5_CALIBRATION.md).
+
+L6 checks lexical granularity and paraphrases the meanings themselves. A
+conventional reading can be evoked by context without a second event actually
+happening or a second literal sentence being true. This does not permit invented
+meanings or unsupported topic associations. L6 requires materially different
+readings; it does not require them to exclude each other in the real world. `suppresses_other` and the historical
+`ambiguity_ablation` field are diagnostics, not positive gates. No controlled
+rewrite or separate rewritten-text request is required.
+
+### Failure, uncertainty and final decisions
+
+**Service recovery and semantic stopping are separate.** A service retry repeats
+the same assessment after a provider error; model fallback means advancing a
+configured Gemini model chain after exhausted server errors. A negative,
+uncertain or invalid answer does not trigger either mechanism to obtain a pass.
+
+| Layer state | Meaning | Action |
+|---|---|---|
+| PASS | Required positive assessment completed | Continue |
+| FAIL | A completed assessment rejected the proposal | Stop dependent layers |
+| UNKNOWN | A required fact or assessment is unavailable | Stop dependent layers; preserve uncertainty |
+| ERROR | Execution failed, output was incomplete, or response validation rejected it | Stop dependent layers; record the error |
+| SKIPPED | A dependency did not pass or the task was not requested | No judgment is claimed |
+
+L0-post retains the compatibility trace status `OK` when finalization succeeds.
+This means the verdict was produced; the verdict's `detection_status` determines
+whether detection passed, rejected the proposal, stayed unknown or failed.
+
+| Stage/backend | Retry or fallback definition |
+|---|---|
+| L0–L3 | Local work only. Empty evidence/candidates is UNKNOWN; execution errors stop. Missing individual AoA ratings stay null. No model fills missing lexical facts. |
+| L4–L6, OpenAI-compatible | Same-model service retries: up to four application backoff iterations with 2/4/8-second waits for the helper's recognized rate-limit/server-error messages. No model/provider fallback. |
+| L4/L6, Gemini | Four attempts per configured model after ServerError, with 2/4/8-second waits; then the layer's Gemini model chain. ClientError, including 429, stops here. |
+| L5, Gemini | Five attempts per model for 500/502/503/504, with 2/4/8/16-second waits; then the configured chain. A transient 429 with a positive retry delay may retry once; quota failure, invalid JSON and truncation stop. |
+| L4–L6, Anthropic | One application call; installed SDK retries may apply. No pipeline model fallback. |
+| L7/L8 | No requests or fallback. Malformed shared age data fails the age stage; valid per-age uncertainty stays unknown. Completed detection survives age failures. |
+| L0-post | Finalize available evidence even after stopping. A finalization error produces EXECUTION_FAILED. No replacement semantic assessment. |
+
+The default Gemini chains use `gemini-3.6-flash` then `gemini-3.8-flash`;
+settings can change them. OpenAI-compatible error recognition currently uses
+message text, rather than a uniform typed HTTP policy. SDK-internal retries and
+request-parameter compatibility retries can add calls beyond application
+counters. There is no enforced whole-item wall-clock deadline. See the
+[exact failure/retry/fallback policy and accounting limits](docs/provider_failure_policy.md)
+for each trigger, stop condition and recording limitation.
+
+L4 compares the default shortlist of up to eight terms in one response. It
+locates the lexical interaction in the whole text before choosing a target;
+it does not accept the first plausible dictionary contrast. The target must
+explain the wordplay itself, not a contrast that belongs to a different word.
+Deferred terms are never promoted, and L5/L6 rejection never resumes L4.
+`--candidate-budget` limits terms offered in this one request; raising it above
+8 does not expand the default L3 shortlist. `considered_terms` records the
+supplied list, while `findings` contains only the chosen validated finding.
+Other candidates do not receive fabricated individual verdicts. The old
+`--no-candidate-continuation` flag is a compatibility no-op.
+
+Missing fields, invented source quotes, invalid states, non-finite scores and
+truncated/refused responses cannot become successful evidence. Invalid output
+fails without corrective model requests. Failed/skipped stages discard partial
+and downstream results. Required resolving senses, scores, acquisition ages
+and appropriateness passes are not filled with defaults. Validation checks
+structure and source substrings; semantic correctness still depends on the
+model and requires corpus evaluation.
+
+| Final detection status | Meaning |
+|---|---|
+| `PUN` | Valid L4 PASS + L5 RESOLUTION_PASS + L6 SENSES_DISTINCT |
+| `NON_PUN` | A completed check rejected the wordplay in the bounded detector search |
+| `INSUFFICIENT_EVIDENCE` | Required context or a completed assessment is missing |
+| `EXECUTION_FAILED` | Execution or response validation failed |
+| `OUT_OF_SCOPE` | An assessed mechanism falls outside the supported detector |
+
+A negative result is the detector's finding, not proof that every dictionary
+reading was exhausted. Unknown/error outputs remain separate from negatives.
+Only a confirmed pun exposes dual readings and joke analysis in the interface.
+The scope field describes the mechanism and is not itself proof of a pun; the
+occurrence of soundalike spellings alone does not establish homophone wordplay.
+
+### Age design and call budget
+
+The age task is part of **L6's existing request**. Each requested age receives
+one compact understanding judgment (`LIKELY`, `UNLIKELY` or `UNKNOWN`), an
+estimated barrier when unlikely, separate content/inference findings
+(`true`, `false` or `null`), a short reason and any required negative evidence.
+L7/L8 validate and aggregate the cached answer locally, without new requests.
+
+| Understanding estimate | L7 result |
+|---|---|
+| LIKELY | FULLY_COMPREHENSIBLE |
+| UNLIKELY, sentence vocabulary or sense A barrier | PARTIALLY_COMPREHENSIBLE |
+| UNLIKELY, sense B barrier | SENSE_B_TOO_ADVANCED |
+| UNLIKELY, wordplay or background barrier | WORDPLAY_SKILL_TOO_ADVANCED; the summary names the actual barrier |
+| UNKNOWN | AOA_UNKNOWN |
+
+AoA citations describe word-level ratings and retain their lookup methods;
+derived values are marked and missing values remain null. They are not measured
+acquisition ages of each sense or individual child comprehension. New records
+leave numeric sense/floor fields null: no default AoA of five, secondary-sense
+plus-two rule or fixed genre age floor. A model can estimate contextual
+familiarity without a word rating, but inadequate evidence must remain unknown.
+
+L8 checks only ages that passed comprehension. Other ages retain unknown
+appropriateness. In a multi-age batch, one age's uncertain understanding does
+not stop local processing for other ages that passed. Missing/malformed shared
+age data or age-resource preparation failure leaves age results unknown while
+preserving completed detection. No requested ages means detection-only mode:
+L6 omits age estimates and L7/L8 are skipped. The web interface requests only
+the selected age; corpus runs retain each item's explicit age list.
+
+With the default shortlist and successful provider responses:
+
+- Completed positive: **3 requests total** — one L4 shortlist request, one L5
+  request and one L6 request, including ages.
+- Detection plus age assessment: **at most 3 requests** per item.
+- L0–L3 and L7/L8: **0 model requests**. Rejection/uncertainty can stop earlier.
+
+These bounds exclude transport/SDK retries, request-parameter compatibility
+and configured Gemini model fallback for service errors. There are no retries to obtain a more favorable
+semantic answer or repair invalid output. Adding ages adds tokens to L6 even
+though it adds no request. The October 4 comparison reports observed call
+counts, trace durations and age agreement; age discrimination remains limited.
+`--concurrency` changes how many corpus items run together, not per-item call
+budgets. Lexical-reader access is synchronized; provider requests can overlap.
+
+Implementation details: [ARCHITECTURE.md](ARCHITECTURE.md),
+[response validation](docs/response_validation.md) and
+[failure recovery policy](docs/provider_failure_policy.md) and
+[age evidence](docs/age_evidence.md). Current record versions are detection
+contract `6`, candidate selection `4`, age contract `3` and age aggregation `4`.
 
 ## Installation
 
@@ -125,8 +309,11 @@ python scripts/prepare_semeval.py
 crack --input corpus/semeval_blind.jsonl \
   --eval corpus/semeval_gold.jsonl \
   --output runs/semeval_results.jsonl \
-  --backend openai --concurrency 10
+  --backend openai --concurrency 8 --candidate-budget 8
 ```
+
+Optional meaning-interpretation evaluation has its own
+[tasks, metrics and commands](docs/semeval_pungraph_evaluation.md).
 
 To regenerate the project-curated blind and gold files from their annotation source:
 
@@ -134,16 +321,53 @@ To regenerate the project-curated blind and gold files from their annotation sou
 python scripts/build_project_corpus.py
 ```
 
-To run the full project-curated corpus:
+### Test the current project corpus
+
+From the repository root, with the virtual environment installed and the
+chosen provider key configured, run fresh inference on the 60-item corpus:
 
 ```bash
-crack --input corpus/joke_corpus_blind.jsonl \
+.venv/bin/python -m crack.runner \
+  --input corpus/joke_corpus_blind.jsonl \
   --eval corpus/joke_corpus_gold.jsonl \
-  --output runs/project_corpus_records.jsonl \
-  --backend openai --concurrency 1
+  --output runs/corpus_reliability \
+  --backend openai --concurrency 8 --candidate-budget 8
 ```
 
-Both commands regenerate predictions and metrics from the benchmark splits. The exact model version for the historical SemEval run was not recorded; a new run uses the provider and model configured at run time. The CLI prints age-label agreement for schema compatibility. SemEval has no human age annotations, so the pun-classification metrics are the benchmark comparison scores.
+Replace `openai` with your chosen backend. The input file supplies each item's
+requested ages (the current corpus uses ages 6, 8, 10 and 12 across its items);
+`--age` applies only to `--text`, not batch input. Gold labels are read for
+scoring after inference and are not supplied to model prompts.
+
+Each invocation creates a timestamped directory without overwriting the saved
+benchmark records:
+
+```text
+runs/corpus_reliability/<UTC-timestamp>/
+  records.jsonl    Per-item results, source evidence, stage states and durations
+  evaluation.json Detection metrics, outcome counts and age-label agreement
+  run_meta.json   Source/prompt/input hashes, nonsecret settings and run metadata
+```
+
+Compare detection **all-item accuracy**, **decision coverage**, decided-item
+accuracy, binary precision/recall/F1 and outcome counts together. UNKNOWN and
+ERROR must remain visible; improved decided-item accuracy alone can result
+from more abstentions. `binary_detection` stores precision, recall and F1 as
+`precision_on_decided`, `recall_on_decided` and `f1_on_decided`, with abstentions
+reported separately. For age results, compare annotation agreement alongside
+assessment coverage. `age_gold_puns` separately reports all 75 age labels for
+the 25 annotated puns, keeping missed puns in that denominator. The original
+180-label metrics remain unchanged and include literal-text controls that the
+current wordplay-age pipeline does not assess. Inspect failing traces and L4 attempts before attributing
+an error to detection quality; stage durations provide runtime evidence.
+
+Use a fresh run for this revision. `--resume` reuses only compatible,
+current-version decided records with matching text, ages, source/prompt hashes
+and settings, and no ERROR/UNKNOWN traces. Older pipeline outputs cannot be
+silently resumed as current results. The corpus command makes real provider
+requests; offline tests below do not run the corpus or establish live accuracy.
+
+These commands regenerate predictions and metrics from the selected corpus. New runs record their configured provider, model and source/prompt hashes. The CLI also prints age-label agreement; SemEval has no human age annotations, so its reported benchmark scores evaluate pun detection.
 
 New evaluations report **decision coverage**, **accuracy over all items**, and
 **accuracy over decided items** together. Unresolved and failed items remain
@@ -155,7 +379,7 @@ Age-label agreement is reported with assessment coverage. See the
 Prompt changes can be compared with the
 [controlled comparison procedure](docs/prompt_cleanup_comparison.md).
 
-Run the test suite with:
+Run the current offline contract and pipeline regressions with:
 
 ```bash
 pip install -e ".[test]"

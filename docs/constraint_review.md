@@ -1,5 +1,10 @@
 # Review of the proposed constraint relaxations
 
+Historical review of the earlier continuation/ablation implementation. Current
+runtime behavior is specified in [response validation](response_validation.md)
+and [the failure policy](provider_failure_policy.md); no continuation or
+controlled-rewrite gate remains in the October 4 design.
+
 ## Decision
 
 Adopt bounded formatting tolerance for the candidate identifier and clarify the

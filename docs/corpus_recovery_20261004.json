@@ -1,0 +1,288 @@
+{
+  "protocol": {
+    "baseline": "runs/corpus_reliability/20261004T214044Z",
+    "changes": [
+      "L4: single-request selection from the same shortlist with exact quote and candidate validation",
+      "L6: paraphrase meanings including conventionally evoked readings, without requiring invented real-world events",
+      "Age: restore explicit sense-specific barriers within the same L6 request"
+    ],
+    "preserved": [
+      "gold labels and corpus texts",
+      "L5 weights and thresholds",
+      "strict fields and exact quotations",
+      "UNKNOWN/ERROR stop, no semantic retries",
+      "existing transport retry/fallback",
+      "no deferred candidate search",
+      "no added runtime model calls"
+    ],
+    "evaluation": "One complete fresh pass on all 60 items with unchanged requested model and ages; report all outcomes, full-sample accuracy, age subset coverage and request counts. Do not select responses or tune thresholds after scoring.",
+    "limitations": "Previously inspected regression corpus; this cannot establish unseen-data generalization. Historical baseline was run at a different time."
+  },
+  "input_sha256": "2bb32346fb40148bdd73800358935cc7d745af04f0de44880d526528ceed4c70",
+  "gold_sha256": "103769879da029a0f8defe5f2c62674a22cc0142015689ce4ed2eb8efd4607cc",
+  "requested_model": "gpt-6-luna",
+  "corpus_size": 60,
+  "concurrency": 8,
+  "original_shortlist_size": 8,
+  "configured_candidate_caps": {
+    "baseline": 24,
+    "recovery": 8
+  },
+  "baseline": {
+    "directory": "runs/corpus_reliability/20261004T214044Z",
+    "records_sha256": "d9466d48131025fcd55b7bcfd2903765772a94b55d6be08bf97ba74b9ac69b6a",
+    "evaluation_sha256": "b7691645e61951d7c6c19974e6ccd86b6dfa84643d580c9531d3046a8ba0d01a",
+    "evaluation": {
+      "total_items": 60,
+      "recorded_items": 60,
+      "missing_items": 0,
+      "unverified_contract_items": 0,
+      "correct_classification": 47,
+      "classification_accuracy": 0.7833,
+      "decided_items": 54,
+      "decision_coverage": 0.9,
+      "classification_accuracy_on_decided": 0.8704,
+      "outcome_counts": {
+        "PUN": 20,
+        "NON_PUN": 34,
+        "INSUFFICIENT_EVIDENCE": 5,
+        "EXECUTION_FAILED": 1,
+        "OUT_OF_SCOPE": 0
+      },
+      "confusion_matrix": {
+        "VALID_HOMOGRAPH_JOKE": {
+          "VALID_HOMOGRAPH_JOKE": 15,
+          "EXECUTION_FAILED": 1,
+          "RESOLUTION_FAIL": 2,
+          "INSUFFICIENT_EVIDENCE": 2,
+          "ONE_SENSE_ONLY": 1
+        },
+        "VALID_COMPOUND_SPLIT_JOKE": {
+          "VALID_COMPOUND_SPLIT_JOKE": 2,
+          "VALID_HOMOGRAPH_JOKE": 1,
+          "INSUFFICIENT_EVIDENCE": 1
+        },
+        "ONE_SENSE_ONLY": {
+          "INSUFFICIENT_EVIDENCE": 2,
+          "ONE_SENSE_ONLY": 30,
+          "VALID_HOMOGRAPH_JOKE": 2,
+          "RESOLUTION_FAIL": 1
+        }
+      },
+      "total_age_evals": 180,
+      "correct_age_evals": 42,
+      "age_accuracy": 0.2333,
+      "assessed_age_evals": 59,
+      "age_assessment_coverage": 0.3278,
+      "age_accuracy_on_assessed": 0.7119,
+      "binary_detection": {
+        "eligible_items": 60,
+        "decided_items": 54,
+        "decision_coverage": 0.9,
+        "correct": 49,
+        "accuracy_all_items": 0.8167,
+        "accuracy_on_decided": 0.9074,
+        "precision_on_decided": 0.9,
+        "recall_on_decided": 0.8571,
+        "f1_on_decided": 0.878,
+        "tp": 18,
+        "fp": 2,
+        "tn": 31,
+        "fn": 3,
+        "abstentions_by_gold_class": {
+          "positive": 4,
+          "negative": 2
+        }
+      },
+      "age_gold_puns": {
+        "total_labels": 75,
+        "assessed_labels": 53,
+        "correct_labels": 37,
+        "accuracy_all_labels": 0.4933,
+        "assessment_coverage": 0.7067,
+        "accuracy_on_assessed": 0.6981
+      }
+    },
+    "summed_trace_duration_seconds": {
+      "mean": 29.78814685,
+      "median": 28.4130335
+    },
+    "inferred_normal_calls": {
+      "total": 358,
+      "by_layer": {
+        "L4": 305,
+        "L5": 28,
+        "L6": 25
+      }
+    }
+  },
+  "recovery": {
+    "directory": "runs/corpus_recovery/20261004T215939.455019Z/results/20261004T220004Z",
+    "records_sha256": "83b944f1855867e4cf933edc3ab6feb78f508ed98aaf408d3d178e0063351b95",
+    "evaluation_sha256": "b99e185f36a3797d0367e5956e0c0cfffdaad46325236cb6b325281b88c4b9e4",
+    "evaluation": {
+      "total_items": 60,
+      "recorded_items": 60,
+      "missing_items": 0,
+      "unverified_contract_items": 0,
+      "correct_classification": 55,
+      "classification_accuracy": 0.9167,
+      "decided_items": 60,
+      "decision_coverage": 1.0,
+      "classification_accuracy_on_decided": 0.9167,
+      "outcome_counts": {
+        "PUN": 27,
+        "NON_PUN": 33,
+        "INSUFFICIENT_EVIDENCE": 0,
+        "EXECUTION_FAILED": 0,
+        "OUT_OF_SCOPE": 0
+      },
+      "confusion_matrix": {
+        "VALID_HOMOGRAPH_JOKE": {
+          "VALID_HOMOGRAPH_JOKE": 21
+        },
+        "VALID_COMPOUND_SPLIT_JOKE": {
+          "VALID_COMPOUND_SPLIT_JOKE": 2,
+          "RESOLUTION_FAIL": 1,
+          "VALID_HOMOGRAPH_JOKE": 1
+        },
+        "ONE_SENSE_ONLY": {
+          "ONE_SENSE_ONLY": 32,
+          "VALID_HOMOGRAPH_JOKE": 3
+        }
+      },
+      "total_age_evals": 180,
+      "correct_age_evals": 51,
+      "age_accuracy": 0.2833,
+      "assessed_age_evals": 73,
+      "age_assessment_coverage": 0.4056,
+      "age_accuracy_on_assessed": 0.6986,
+      "age_gold_puns": {
+        "total_labels": 75,
+        "assessed_labels": 67,
+        "correct_labels": 46,
+        "accuracy_all_labels": 0.6133,
+        "assessment_coverage": 0.8933,
+        "accuracy_on_assessed": 0.6866
+      },
+      "binary_detection": {
+        "eligible_items": 60,
+        "decided_items": 60,
+        "decision_coverage": 1.0,
+        "correct": 56,
+        "accuracy_all_items": 0.9333,
+        "accuracy_on_decided": 0.9333,
+        "precision_on_decided": 0.8889,
+        "recall_on_decided": 0.96,
+        "f1_on_decided": 0.9231,
+        "tp": 24,
+        "fp": 3,
+        "tn": 32,
+        "fn": 1,
+        "abstentions_by_gold_class": {
+          "positive": 0,
+          "negative": 0
+        }
+      }
+    },
+    "summed_trace_duration_seconds": {
+      "mean": 16.120127266666668,
+      "median": 12.6696135
+    },
+    "observed_sdk_calls": {
+      "total": 115,
+      "by_layer": {
+        "L4": 60,
+        "L5": 28,
+        "L6": 27
+      }
+    },
+    "api_calls_sha256": "43df748a633effd7915a9d7d69bf54e3c8a0e309921c54a59ea6309a9ef78077",
+    "source_sha256": {
+      "__init__.py": "378d89d4d0c1569f72bae750119b500afd546d662355973009aab2f21b457c59",
+      "age_evidence.py": "f0782bbf634690f41224d9579a90baa098567d41bebfcc79b2fa4cd6770f9ea6",
+      "candidate_search.py": "c5239310629d2d866f9306c50d9eb18e1679c3f613a491bfd0ebbd82ed24697c",
+      "config.py": "6767770f0107873ae9bac94fbabee30a19f98577fbba523bb352af1af89aaaef",
+      "corpus.py": "b45ca2904f79305a491417e5d1d638211d156d89de9cec9c33c19f7a37538b96",
+      "decisions.py": "83601e7ae3612212217eed4cf8cbaf1dba9800e0f0c1ace3a4ba2681ead92996",
+      "enums.py": "585e0160fe41648ad04af49fc8646ebc29f92343efe12c4e43cdc6bf06399d86",
+      "l0_scope.py": "74e9b72e229e1367182ec23ecbe0e34a88dcb0ed3d653508094b98041260a6f6",
+      "l1_surface.py": "0a14f175623e3023213ab6484dd8ecc5ad1e2b15c67b462ddee7b2ceed704917",
+      "l2_senses.py": "091c5e8fccfe6545649c27fd1a523dce01f245db50b7a40dcdd62dc9500c849c",
+      "l3_candidates.py": "4156434dac437a7425393d446a1aee0024cf36ddeb8c5535b1baaf56940664cc",
+      "l4_anchoring.py": "732c09932447c928c8f1346efe8739a6f9076e7ff45746755faede3a07eec76c",
+      "l5_resolution.py": "c35aef56191fb43b31e444e7facdde9da50d0877ea65958370faa7d5db0ff7df",
+      "l6_distinctness.py": "693f50e9ff1458d4df9402127a8acccd38895e4f438ffe4727768ebc0d492b9c",
+      "l7_comprehension.py": "75a1d3b66ae59089e8885ac0f307f29a8f32ae0b3143dd255195d757e3e05330",
+      "l8_appropriateness.py": "5913cd17914fb92a50bf9b61b467ab31a545d8160ea5c83186be8e24ad0319cd",
+      "layers.py": "83fd23d107edd126210f42cbb31c6e973f42bb54e14bd33c97ccc900d689a6ed",
+      "prompts/l4_anchoring.md": "b9c7feb4803ed15f1a071c050769261204b3283fea2833d60dbace274520b632",
+      "prompts/l5_declarative.md": "70e94b70841d4d8d106d48506cebbdda90436bb18b1b7b56b13873ea43e7904a",
+      "prompts/l5_definitional.md": "ee4fc228b2c8a32d2adac1f9126b5f35f0646814378622f54c3d37d3625b9102",
+      "prompts/l5_dialogue.md": "cef766e735c5a21f30270f54a81cc73cf6e8a0ba5aabe1fd7e49889f72783add",
+      "prompts/l5_qa.md": "a69395d14caef6f0aeb4f4c0f548dfd14e91f178b59ad5f58fd6928564cbc1d3",
+      "prompts/l6_distinctness.md": "54ead222e766d7e6b546a23a7e1351751c58e4aeebc0fbf62738e6b366fc7398",
+      "prompts/l7_comprehension.md": "6f53a896dd00a95a2c6db530b4e459f20fb9142f94fb0dc8ded745804b03a859",
+      "prompts/l8_appropriateness.md": "3b4db415e43310a1edb5e77f61d5c856420c1d59fae4917c433829d653100dd1",
+      "providers.py": "e307978c4bd5c3ac12e6f063de31ae82660847bd7dd00e34f75b8923197efe52",
+      "runner.py": "d794711961e23df8a54180e9a83f22f93783207a57698b7f7946c714660576fa",
+      "schema.py": "94fe8acbed2f7555709f914a19b4662ea6fdd85e1509697aedb55980f2bd6049",
+      "semeval_benchmark.py": "9650f53563a97c7ba68a7a24cc0f72201b2e087a1736e4c1cb85726984ae207e",
+      "serve.py": "13b0cc922d94f8fe7e0a0efb43056296f2bc62a2bc07db42050b52ff2d50b43f",
+      "validation.py": "7b16fd42af21cc0291fead6f7c819cd1c7ae4cbe8247abc9b0ead4423934e9cb"
+    },
+    "provider_retries_logged": 0
+  },
+  "remaining_exact_label_mismatches": [
+    {
+      "id": "J06",
+      "gold": "VALID_COMPOUND_SPLIT_JOKE",
+      "prediction": "RESOLUTION_FAIL",
+      "selected_target": "exit",
+      "binary_correct": false
+    },
+    {
+      "id": "J13",
+      "gold": "VALID_COMPOUND_SPLIT_JOKE",
+      "prediction": "VALID_HOMOGRAPH_JOKE",
+      "selected_target": "room",
+      "binary_correct": true
+    },
+    {
+      "id": "D03",
+      "gold": "ONE_SENSE_ONLY",
+      "prediction": "VALID_HOMOGRAPH_JOKE",
+      "selected_target": "trunk",
+      "binary_correct": false
+    },
+    {
+      "id": "D17",
+      "gold": "ONE_SENSE_ONLY",
+      "prediction": "VALID_HOMOGRAPH_JOKE",
+      "selected_target": "mail",
+      "binary_correct": false
+    },
+    {
+      "id": "D24",
+      "gold": "ONE_SENSE_ONLY",
+      "prediction": "VALID_HOMOGRAPH_JOKE",
+      "selected_target": "stories",
+      "binary_correct": false
+    }
+  ],
+  "limitations": [
+    "One fresh complete recovery pass on an inspected regression corpus; no unseen-data generalization claim.",
+    "Baseline was run earlier; summed per-item trace times are descriptive, not a controlled latency benchmark.",
+    "Baseline request count is inferred from records and excludes unrecorded service retries; recovery count observes SDK invocations.",
+    "Gold-pun age agreement rose with detection coverage; conditional age agreement did not improve."
+  ],
+  "published_evidence": {
+    "reliability_baseline_20261004": "docs/evaluations/reliability_baseline_20261004",
+    "recovery_20261004": "docs/evaluations/recovery_20261004",
+    "repeat_20261004": "docs/evaluations/repeat_20261004"
+  },
+  "publication_source_differences": [
+    "semeval_benchmark.py"
+  ],
+  "publication_source_note": "After both live passes, only the inactive SemEval report/evaluator output removed external comparison fields. Detection/age pipeline code and prompts match the evaluated source. Documentation and SVG were updated."
+}

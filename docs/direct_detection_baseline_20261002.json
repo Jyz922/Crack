@@ -1,0 +1,120 @@
+{
+  "baseline": {
+    "items": 2250,
+    "correct": 2041,
+    "accuracy_all_items": 0.9071111111111111,
+    "accuracy_on_decided": 0.9071111111111111,
+    "precision": 0.8949152542372881,
+    "recall_full_gold": 0.985687616677038,
+    "f1_full_gold": 0.9381107491856677,
+    "decision_coverage": 1.0,
+    "tp": 1584,
+    "fp": 186,
+    "tn": 457,
+    "fn_decided": 23,
+    "unresolved_by_gold_class": {
+      "positive": 0,
+      "negative": 0
+    },
+    "outcomes": {
+      "PUN": 1770,
+      "NON_PUN": 480
+    }
+  },
+  "crack": {
+    "items": 2250,
+    "correct": 1830,
+    "accuracy_all_items": 0.8133333333333334,
+    "accuracy_on_decided": 0.8337129840546698,
+    "precision": 0.886392811296534,
+    "recall_full_gold": 0.8593652769135034,
+    "f1_full_gold": 0.8726698262243286,
+    "decision_coverage": 0.9755555555555555,
+    "tp": 1381,
+    "fp": 177,
+    "tn": 449,
+    "fn_decided": 188,
+    "unresolved_by_gold_class": {
+      "positive": 38,
+      "negative": 17
+    },
+    "outcomes": {
+      "PUN": 1558,
+      "NON_PUN": 637,
+      "INSUFFICIENT_EVIDENCE": 49,
+      "EXECUTION_FAILED": 6
+    }
+  },
+  "always_pun": {
+    "items": 2250,
+    "correct": 1607,
+    "accuracy_all_items": 0.7142222222222222,
+    "accuracy_on_decided": 0.7142222222222222,
+    "precision": 0.7142222222222222,
+    "recall_full_gold": 1.0,
+    "f1_full_gold": 0.8332901218563651,
+    "decision_coverage": 1.0,
+    "tp": 1607,
+    "fp": 643,
+    "tn": 0,
+    "fn_decided": 0,
+    "unresolved_by_gold_class": {
+      "positive": 0,
+      "negative": 0
+    },
+    "outcomes": {
+      "PUN": 2250
+    }
+  },
+  "paired_correctness_all_items": {
+    "both_correct": 1739,
+    "baseline_only_correct": 302,
+    "crack_only_correct": 91,
+    "neither_correct": 118
+  },
+  "disagreement_count": 399,
+  "baseline_timing": {
+    "mean_seconds": 2.4360631692076242,
+    "median_seconds": 1.871195459003502,
+    "p95_seconds": 5.645226665990776
+  },
+  "crack_detection_trace_timing": {
+    "mean_seconds": 27.80189998311111,
+    "median_seconds": 25.716228,
+    "p95_seconds": 51.204388
+  },
+  "baseline_usage": {
+    "prompt_tokens": 303235,
+    "completion_tokens": 298391,
+    "total_tokens": 601626,
+    "reasoning_tokens": 257147
+  },
+  "api_attempts": 2250,
+  "attempt_errors": {},
+  "records_sha256": "8d8b194ab66b5a0d816677f8588147670767adb3a90ff3df6f4ef47bd4cd3267",
+  "metric_policy": "All 2250 items remain in accuracy and recall denominators. Unresolved positives count as misses for full-gold F1; unresolved negatives remain separate.",
+  "timing_policy": "Baseline item duration includes retries; CRACK item duration sums saved detection layer traces (excludes L7/L8). Calls were made at different times; CRACK token usage and precise batch wall time were not recorded.",
+  "experiment": {
+    "run_id": "20261002T231314.834548Z",
+    "requested_model": "gpt-6-luna",
+    "baseline_prompt_sha256": "4fa7df1f420b870bb4391d17734e5e724c10305672edcb2246c83a5d31feb4a7",
+    "blind_sha256": "7a9fcfcd5a6936c162be31b652529e2a656d170642b61847d8e5cd83296a93fb",
+    "gold_sha256": "2cb6cff67ecbf59d02e90d1e1fb3016c623aa94c9bacd027bc463b5111070094",
+    "crack_records_sha256": "2cb8b3cbdb9db917cb745da3579cfd20ef519726c3da9e74eb392828a54b6590",
+    "baseline_wall_seconds": 689.7138037910045,
+    "concurrency": 8,
+    "independent_count_check": "2041 correct; TP=1584, FP=186, TN=457, FN=23"
+  },
+  "common_decided": {
+    "items": 2195,
+    "baseline_correct": 1992,
+    "crack_correct": 1830,
+    "baseline_accuracy": 0.9075170842824601,
+    "crack_accuracy": 0.8337129840546698
+  },
+  "recovered_crack_false_negatives_by_rejection_stage": {
+    "L4": 91,
+    "L5": 37,
+    "L6_or_final": 47
+  }
+}

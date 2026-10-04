@@ -16,3 +16,4 @@ spike/out/
 scratch/
 data/*
 !data/aoa_kuperman.csv
+crack-animation/

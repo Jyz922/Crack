@@ -200,20 +200,14 @@ class TestL0PostEvidenceHandling:
         assert rec.final is not None
         assert rec.final.scope_label == ScopeLabel.HOMOGRAPH
 
-    def test_l0_post_assigns_confidence_score(self) -> None:
-        rec = AnalysisRecord(item_id="conf_test", text="test text", target_ages=[8])
-        rec.l5_result = L5QAResult(
-            genre=Genre.QA_RIDDLE,
-            resolution_status=ResolutionStatus.RESOLUTION_PASS,
-            resolution_score=0.90,
-            subscores={"polarity_or_direction": 0.9},
-        )
-        rec.l6_result = L6Result(
-            distinctness_status=DistinctnessStatus.L6_SKIPPED_NO_PARAPHRASE,
-        )
-        rec = _l0_post_layer(rec, DEFAULT_SETTINGS)
-        assert rec.confidence is not None
-        assert rec.confidence == round(0.90 * 0.85, 3)
+    def test_incomplete_detection_does_not_invent_confidence(self) -> None:
+        rec = AnalysisRecord(item_id="conf_test", text="test text", target_ages=[])
+        rec.l5_result = L5QAResult(genre=Genre.QA_RIDDLE, resolution_status="RESOLUTION_PASS",
+                                  resolution_score=.9, subscores={"polarity_or_direction": .9})
+        rec.l6_result = L6Result(distinctness_status="L6_SKIPPED_NO_PARAPHRASE")
+        _l0_post_layer(rec, DEFAULT_SETTINGS)
+        assert rec.confidence is None
+        assert rec.final.detection_status.value == "INSUFFICIENT_EVIDENCE"
 
     def test_l0_post_handles_out_of_scope(self) -> None:
         from crack.l0_scope import LayerEvidence, assign_scope_label

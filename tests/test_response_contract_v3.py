@@ -56,30 +56,27 @@ def responses(monkeypatch, values):
     return calls
 
 
-def test_bad_quote_gets_one_correction_and_remains_auditable(monkeypatch):
+def test_bad_quote_fails_immediately_and_remains_auditable(monkeypatch):
     r = record()
     bad = payload(sense_a_anchor_quote="Lifted a crate")
     calls = responses(monkeypatch, [bad, payload()])
-    result = l4.anchor_l4(r)
-    assert result.anchoring_status == AnchoringStatus.PASS
-    assert len(calls) == 2
-    assert [a.accepted for a in r.l4_attempts] == [False, True]
+    with pytest.raises(ModelResponseError, match="verbatim"):
+        l4.anchor_l4(r)
+    assert len(calls) == 1
+    assert len(r.l4_attempts) == 1 and not r.l4_attempts[0].accepted
     assert r.l4_attempts[0].parsed_response == bad
-    assert "verbatim" in r.l4_attempts[0].error
     assert json.loads(r.l4_attempts[0].raw_responses[0]) == bad
-    assert r.l4_attempts[0].prompt_sha256 != r.l4_attempts[1].prompt_sha256
-    assert "Local response validation rejected" in calls[1]
 
 
-def test_persistent_target_drift_is_rejected_not_repaired(monkeypatch):
+def test_target_drift_is_rejected_without_repair_or_another_candidate(monkeypatch):
     r = record()
     bad = payload(target_term="crate", reasoning="crane appears in this explanation")
-    calls = responses(monkeypatch, [bad, bad])
-    with pytest.raises(ModelResponseError, match="two responses"):
+    calls = responses(monkeypatch, [bad, payload()])
+    with pytest.raises(ModelResponseError, match="target_term"):
         l4.anchor_l4(r)
-    assert len(calls) == 2
+    assert len(calls) == 1
     assert not any(a.accepted for a in r.l4_attempts)
-    assert all(a.parsed_response["target_term"] == "crate" for a in r.l4_attempts)
+    assert r.l4_attempts[0].parsed_response["target_term"] == "crate"
 
 
 def test_completion_failure_is_logged_without_contract_retry(monkeypatch):
@@ -108,16 +105,18 @@ def test_uncertainty_is_accepted_without_retrying_until_pass(monkeypatch):
 
 def test_later_candidate_pass_is_used_and_rotated(monkeypatch):
     r = record(("crate", "crane"), total=2)
-    responses(monkeypatch, [payload("crate", "ONE_SENSE_ONLY"), payload()])
+    calls = responses(monkeypatch, [payload()])
     result = l4.anchor_l4(r)
     assert result.target_term == "crane"
     assert r.l3_result.candidates[0].term == "crane"
-    assert [a.candidate_term for a in r.l4_attempts] == ["crate", "crane"]
+    assert [a.candidate_term for a in r.l4_attempts] == ["crane"]
+    assert len(calls) == 1
+    assert r.l4_attempts[0].candidate_terms == ["crate", "crane"]
 
 
 def test_selected_uncertain_candidate_remains_aligned(monkeypatch):
     r = record(("crate", "crane"), total=2)
-    responses(monkeypatch, [payload("crate", "ONE_SENSE_ONLY"), payload(status="INSUFFICIENT_EVIDENCE")])
+    responses(monkeypatch, [payload(status="INSUFFICIENT_EVIDENCE")])
     r.l4_result = l4.anchor_l4(r)
     assert r.l3_result.candidates[0].term == r.l4_result.target_term == "crane"
     assert detection_decision(r, ScopeLabel.HOMOGRAPH)[0].value == "INSUFFICIENT_EVIDENCE"
@@ -139,10 +138,11 @@ def test_selected_candidate_survives_final_decision_and_serialization(monkeypatc
 
     r = record(("crate", "crane"), total=2)
     r.validation_version = RESPONSE_CONTRACT_VERSION
-    responses(monkeypatch, [payload("crate", "ONE_SENSE_ONLY"), payload()])
+    responses(monkeypatch, [payload()])
     r.l4_result = l4.anchor_l4(r)
     r.l5_result = L5DeclarativeResult(
         genre=Genre.DECLARATIVE, resolution_status="RESOLUTION_PASS", resolution_score=0.9,
+        context_consistent=True,
         subscores={"both_readings_available": 0.9, "punchline_sense_is_unexpected": 0.9,
                    "incongruity_present": 0.9}, explanation="Synthetic completed assessment.",
     )
@@ -156,7 +156,7 @@ def test_selected_candidate_survives_final_decision_and_serialization(monkeypatc
     assert restored.final.main_classification.value == "VALID_HOMOGRAPH_JOKE"
     assert detection_decision(restored, restored.final.scope_label)[0] == restored.final.main_classification
     assert restored.l3_result.candidates[0].term == restored.l4_result.target_term == "crane"
-    assert [a.accepted for a in restored.l4_attempts] == [True, True]
+    assert [a.accepted for a in restored.l4_attempts] == [True]
 
 
 def test_run_fingerprint_records_sources_and_excludes_secrets(tmp_path):
@@ -177,12 +177,14 @@ def test_run_fingerprint_records_sources_and_excludes_secrets(tmp_path):
     assert _run_fingerprint(blind, settings) == frozen
 
 
-def test_incomplete_search_cannot_establish_text_level_negative(monkeypatch):
+def test_shortlist_rejection_does_not_force_an_exhaustive_search(monkeypatch):
     r = record(total=3)
-    responses(monkeypatch, [payload(status="ONE_SENSE_ONLY")])
-    result = l4.anchor_l4(r)
-    assert result.anchoring_status == AnchoringStatus.INSUFFICIENT_EVIDENCE
-    assert "1 of 3" in result.reasoning
+    calls = responses(monkeypatch, [payload(status="ONE_SENSE_ONLY")])
+    r.l4_result = l4.anchor_l4(r)
+    assert r.l4_result.anchoring_status == AnchoringStatus.ONE_SENSE_ONLY
+    assert r.l4_search.untested_terms == 2
+    assert detection_decision(r, ScopeLabel.HOMOGRAPH)[0].value == "ONE_SENSE_ONLY"
+    assert len(calls) == 1
 
 
 def test_complete_supplied_search_can_return_negative(monkeypatch):

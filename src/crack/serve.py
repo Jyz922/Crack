@@ -160,15 +160,10 @@ def _build_final_payload(rec: AnalysisRecord, target_age: int) -> dict[str, Any]
     }
     is_joke_result = has_confirmed_wordplay
 
-    # 2. Punchline ambiguity site determination
-    punchline = None
-    if has_confirmed_wordplay and rec.l4_result and rec.l4_result.anchoring_status == AnchoringStatus.PASS:
-        if getattr(rec.l4_result, "ambiguous_term", None):
-            punchline = rec.l4_result.ambiguous_term
-        elif candidates:
-            punchline = candidates[0]["term"]
-    elif has_confirmed_wordplay and candidates:
-        punchline = candidates[0]["term"]
+    # 2. Use the assessed target; lexical ranking is only a proposal.
+    punchline = (rec.l4_result.target_term
+                 if has_confirmed_wordplay and rec.l4_result
+                 and rec.l4_result.anchoring_status == AnchoringStatus.PASS else None)
 
     # 3. Dual senses from validated L4 evidence only
     sense_a = None
@@ -184,7 +179,7 @@ def _build_final_payload(rec: AnalysisRecord, target_age: int) -> dict[str, Any]
             "definition": rec.l4_result.sense_b,
             "quote": rec.l4_result.sense_b_anchor_quote,
             "aoa": getattr(rec.l7_result, "sense_b_aoa", None),
-            "label": "Sense B (Wordplay Resolution)",
+            "label": "Sense B (Anchored Meaning)",
         }
     # 4. Incongruity Resolution explanation
     resolution_explanation = ""
@@ -196,21 +191,8 @@ def _build_final_payload(rec: AnalysisRecord, target_age: int) -> dict[str, Any]
         expl = getattr(rec.l5_result, "explanation", "")
         if expl:
             resolution_explanation = expl
-        else:
-            status = rec.l5_result.resolution_status.value
-            score = rec.l5_result.resolution_score
-            resolution_explanation = (
-                f"Resolved with status {status} (score: {score}). "
-                f"The punchline exploits lexical ambiguity on '{punchline}'."
-            )
     if not resolution_explanation:
-        if punchline:
-            resolution_explanation = (
-                f"Linguistic incongruity detected around '{punchline}'. "
-                "The setup creates expectation for Sense A, while the punchline triggers Sense B."
-            )
-        else:
-            resolution_explanation = "No significant incongruity or double meaning found in text."
+        resolution_explanation = "An explanation was not returned for this assessment."
 
     # 5. Token annotation
     annotated_tokens = []
@@ -227,57 +209,47 @@ def _build_final_payload(rec: AnalysisRecord, target_age: int) -> dict[str, Any]
             "candidate_term": cand_info["term"] if cand_info else None,
         })
 
-    # 6. Age Spectrum & Target Evaluation (from real L7 and L8)
+    # 6. Age evidence remains separate from the detection result.
     age_spectrum = {}
-    age_assessment_available = bool(is_joke_result and rec.l7_result and rec.l8_result)
-    if age_assessment_available:
-        tested_ages = sorted({4, 6, 8, 10, 12, 14, target_age})
-        for a in tested_ages:
-            if rec.l7_result and a in rec.l7_result.per_age_comprehension:
-                comp = rec.l7_result.per_age_comprehension[a].value
-            else:
-                comp = "NOT_ASSESSED"
-
-            if rec.l8_result and a in rec.l8_result.per_age_verdict:
-                appr = rec.l8_result.per_age_verdict[a].value
-            else:
-                appr = "NOT_ASSESSED"
-
-            if comp == "NOT_ASSESSED" or appr == "NOT_ASSESSED":
-                desc = "Assessment is unavailable for this age."
-            else:
-                desc = f"Comprehension: {comp}. Appropriateness: {appr}."
-
+    age_assessment_available = bool(is_joke_result)
+    age_errors = "; ".join(t.reason or "" for t in rec.trace if t.layer in {"L7", "L8"} and t.status == "ERROR")
+    if is_joke_result:
+        for a in sorted(set(rec.target_ages) | {target_age}):
+            comp = rec.l7_result.per_age_comprehension.get(a) if rec.l7_result else None
+            appr = rec.l8_result.per_age_verdict.get(a) if rec.l8_result else None
+            detail = rec.l7_result.per_age_details.get(a) if rec.l7_result else None
+            summary = rec.l7_result.per_age_summaries.get(a) if rec.l7_result else None
+            estimate = rec.l7_result.per_age_estimates.get(a) if rec.l7_result else None
+            reason7 = (estimate.reason if estimate else detail.reason if detail else
+                       rec.l7_result.explanation if rec.l7_result else "")
+            reason8 = rec.l8_result.per_age_reasons.get(a, rec.l8_result.explanation or "") if rec.l8_result else ""
+            citations = [e.model_dump(mode="json") for e in rec.l7_result.aoa_evidence] if rec.l7_result else []
             age_spectrum[a] = {
-                "comprehension": comp,
-                "appropriateness": appr,
-                "desc": desc,
+                "comprehension": comp.value if comp else "AOA_UNKNOWN",
+                "appropriateness": appr.value if appr else "UNKNOWN",
+                "desc": " ".join(x for x in (reason7, reason8, age_errors) if x) or "Age evidence is unavailable. Retry the assessment.",
+                "dimensions": detail.model_dump(mode="json") if detail else {},
+                "estimate": estimate.model_dump(mode="json") if estimate else None,
+                "comprehension_summary": summary.model_dump(mode="json") if summary else None,
+                "aoa_evidence": citations,
+                "assessment_basis": rec.l7_result.assessment_basis if rec.l7_result else None,
             }
-
-        target_eval = age_spectrum.get(target_age, {
-            "comprehension": "NOT_ASSESSED", "appropriateness": "NOT_ASSESSED",
-            "desc": "Assessment is unavailable for the requested age.",
-        })
+        target_eval = age_spectrum[target_age]
     else:
-        target_eval = {
-            "comprehension": "NOT_APPLICABLE",
-            "appropriateness": "NOT_APPLICABLE",
-            "desc": "Age assessment is unavailable for this result.",
-        }
+        target_eval = {"comprehension": "NOT_APPLICABLE", "appropriateness": "NOT_APPLICABLE",
+                       "desc": "Age assessment applies to confirmed wordplay."}
 
-    # 7. Safety summary from L8
+    # 7. Empty issue lists cannot turn an unassessed axis into a pass.
     content_issues = rec.l8_result.content_issues if rec.l8_result else []
     inference_issues = rec.l8_result.inference_issues if rec.l8_result else []
-    safety_available = bool(is_joke_result and rec.l8_result)
-    is_safe = (len(content_issues) == 0 and len(inference_issues) == 0) if safety_available else None
-
+    content = rec.l8_result.content_appropriate.get(target_age) if is_joke_result and rec.l8_result else None
+    inference = rec.l8_result.inference_appropriate.get(target_age) if is_joke_result and rec.l8_result else None
+    is_safe = False if content is False or inference is False else True if content is True and inference is True else None
     safety = {
-        "surface_status": ("PASS" if not content_issues else "FAIL") if safety_available else "NOT_ASSESSED",
-        "inferential_status": ("PASS" if not inference_issues else "FAIL") if safety_available else "NOT_ASSESSED",
-        "is_safe": is_safe,
-        "content_issues": content_issues,
-        "inference_issues": inference_issues,
-        "notes": ("Passed content and inference checks." if is_safe else f"Issues: {content_issues + inference_issues}") if safety_available else "Safety has not been assessed.",
+        "surface_status": "PASS" if content is True else "FAIL" if content is False else "NOT_ASSESSED",
+        "inferential_status": "PASS" if inference is True else "FAIL" if inference is False else "NOT_ASSESSED",
+        "is_safe": is_safe, "content_issues": content_issues, "inference_issues": inference_issues,
+        "notes": (rec.l8_result.per_age_reasons.get(target_age) if rec.l8_result else None) or "Appropriateness evidence is unavailable.",
     }
 
     # 8. Trace
@@ -314,6 +286,9 @@ def _build_final_payload(rec: AnalysisRecord, target_age: int) -> dict[str, Any]
             "comprehension": target_eval["comprehension"],
             "appropriateness": target_eval["appropriateness"],
             "description": target_eval["desc"],
+            "aoa_evidence": target_eval.get("aoa_evidence", []),
+            "dimensions": target_eval.get("dimensions", {}),
+            "comprehension_summary": target_eval.get("comprehension_summary"),
         },
         "age_spectrum": age_spectrum,
         "safety": safety,
@@ -342,7 +317,7 @@ async def analyze_joke(req: AnalyzeRequest):
     record = AnalysisRecord(
         item_id=f"WEB_{int(time.time()*1000)}",
         text=clean_text,
-        target_ages=sorted({4, 6, 8, 10, 12, 14, req.target_age}),
+        target_ages=[req.target_age],
     )
 
     loop = asyncio.get_event_loop()
@@ -378,7 +353,7 @@ async def stream_analysis(text: str, target_age: int = 8):
         rec = AnalysisRecord(
             item_id=f"WEB_{int(time.time()*1000)}",
             text=clean_text,
-            target_ages=sorted({4, 6, 8, 10, 12, 14, target_age}),
+            target_ages=[target_age],
         )
 
         tokens = _tokenize_text(clean_text)

@@ -1,0 +1,565 @@
+{
+  "experiment": "full_assignment_comparison",
+  "date_local": "2026-10-02",
+  "result": {
+    "run_path": "/Users/yizhengjiang/Desktop/Git/Joke_identification/runs/full_assignment_comparison/20261003T021452.992281Z/corrected_validation",
+    "model": "gpt-6-luna",
+    "arms": {
+      "crack": {
+        "counts": {
+          "tp": 23,
+          "fn": 1,
+          "unresolved_positive": 1,
+          "tn": 32,
+          "fp": 2,
+          "unresolved_negative": 1
+        },
+        "correct": 55,
+        "accuracy_all": 0.9166666666666666,
+        "accuracy_decided": 0.9482758620689655,
+        "precision": 0.92,
+        "recall_full_gold": 0.92,
+        "f1_full_gold": 0.92,
+        "coverage": 0.9666666666666667,
+        "outcomes": {
+          "PUN": 25,
+          "NON_PUN": 33,
+          "INSUFFICIENT_EVIDENCE": 2
+        },
+        "pair_success_count": 21,
+        "pair_success_rate": 0.84,
+        "subgroups": {
+          "J": {
+            "correct": 23,
+            "total": 25
+          },
+          "D": {
+            "correct": 22,
+            "total": 25
+          },
+          "N": {
+            "correct": 10,
+            "total": 10
+          }
+        },
+        "target_localization": {
+          "matches": 15,
+          "all_positive_items": 25,
+          "recall_all_positive": 0.6,
+          "agreement_true_positives": 0.6521739130434783
+        },
+        "age_all_labels": {
+          "total": 180,
+          "assessed": 75,
+          "matches": 54,
+          "agreement_all": 0.3,
+          "coverage": 0.4166666666666667,
+          "agreement_assessed": 0.72,
+          "ages_with_verified_vocabulary_citations": 0,
+          "vocabulary_citation_coverage": 0.0
+        },
+        "age_gold_positive_labels": {
+          "total": 75,
+          "assessed": 69,
+          "matches": 49,
+          "agreement_all": 0.6533333333333333,
+          "coverage": 0.92,
+          "agreement_assessed": 0.7101449275362319,
+          "ages_with_verified_vocabulary_citations": 0,
+          "vocabulary_citation_coverage": 0.0
+        },
+        "age_common_true_positive_labels": {
+          "total": 66,
+          "assessed": 66,
+          "matches": 47,
+          "agreement_all": 0.7121212121212122,
+          "coverage": 1.0,
+          "agreement_assessed": 0.7121212121212122,
+          "ages_with_verified_vocabulary_citations": 0,
+          "vocabulary_citation_coverage": 0.0
+        },
+        "exact_label_matches": 52,
+        "timing": {
+          "batch_wall_seconds": 278.4244082500081,
+          "finished_at": "2026-10-03T02:21:53.174142+00:00",
+          "concurrency": 8,
+          "mean_item_seconds": 35.26125625833399,
+          "median_item_seconds": 32.25025791650114,
+          "p95_item_seconds": 60.198698749998584
+        },
+        "api_usage": {
+          "observed_calls": 398,
+          "prompt_tokens": 534646,
+          "completion_tokens": 178897,
+          "total_tokens": 713543,
+          "reasoning_tokens": 108651,
+          "error_counts": {},
+          "response_model_ids": {
+            "gpt-6-luna": 398
+          }
+        },
+        "common_contract_failures": 0,
+        "records_sha256": "e1767ff1d5de520522b4de040b2c722a95029071d0fd9ddf3aba3a3bee8ec38f"
+      },
+      "direct": {
+        "counts": {
+          "tp": 24,
+          "unresolved_positive": 1,
+          "tn": 32,
+          "fp": 3
+        },
+        "correct": 56,
+        "accuracy_all": 0.9333333333333333,
+        "accuracy_decided": 0.9491525423728814,
+        "precision": 0.8888888888888888,
+        "recall_full_gold": 0.96,
+        "f1_full_gold": 0.9230769230769231,
+        "coverage": 0.9833333333333333,
+        "outcomes": {
+          "PUN": 27,
+          "OUT_OF_SCOPE": 1,
+          "NON_PUN": 32
+        },
+        "pair_success_count": 21,
+        "pair_success_rate": 0.84,
+        "subgroups": {
+          "J": {
+            "correct": 24,
+            "total": 25
+          },
+          "D": {
+            "correct": 22,
+            "total": 25
+          },
+          "N": {
+            "correct": 10,
+            "total": 10
+          }
+        },
+        "target_localization": {
+          "matches": 21,
+          "all_positive_items": 25,
+          "recall_all_positive": 0.84,
+          "agreement_true_positives": 0.875
+        },
+        "age_all_labels": {
+          "total": 180,
+          "assessed": 180,
+          "matches": 111,
+          "agreement_all": 0.6166666666666667,
+          "coverage": 1.0,
+          "agreement_assessed": 0.6166666666666667,
+          "ages_with_verified_vocabulary_citations": 179,
+          "vocabulary_citation_coverage": 0.9944444444444445
+        },
+        "age_gold_positive_labels": {
+          "total": 75,
+          "assessed": 75,
+          "matches": 61,
+          "agreement_all": 0.8133333333333334,
+          "coverage": 1.0,
+          "agreement_assessed": 0.8133333333333334,
+          "ages_with_verified_vocabulary_citations": 75,
+          "vocabulary_citation_coverage": 1.0
+        },
+        "age_common_true_positive_labels": {
+          "total": 66,
+          "assessed": 66,
+          "matches": 53,
+          "agreement_all": 0.803030303030303,
+          "coverage": 1.0,
+          "agreement_assessed": 0.803030303030303,
+          "ages_with_verified_vocabulary_citations": 66,
+          "vocabulary_citation_coverage": 1.0
+        },
+        "exact_label_matches": 56,
+        "timing": {
+          "batch_wall_seconds": 136.69664916700276,
+          "finished_at": "2026-10-03T02:17:12.658459+00:00",
+          "concurrency": 8,
+          "mean_item_seconds": 17.32360585761732,
+          "median_item_seconds": 15.838648250006372,
+          "p95_item_seconds": 30.26426658401033
+        },
+        "api_usage": {
+          "observed_calls": 64,
+          "prompt_tokens": 109142,
+          "completion_tokens": 120746,
+          "total_tokens": 229888,
+          "reasoning_tokens": 49924,
+          "error_counts": {},
+          "response_model_ids": {
+            "gpt-6-luna": 64
+          }
+        },
+        "common_contract_failures": 0,
+        "records_sha256": "14d184c8b4611b45ffdef6f76ae1d4705c8e0215da6d32c1f1fbb9add53d82bd"
+      }
+    },
+    "common_true_positive_items": [
+      "J01",
+      "J02",
+      "J03",
+      "J04",
+      "J05",
+      "J06",
+      "J07",
+      "J08",
+      "J09",
+      "J10",
+      "J11",
+      "J12",
+      "J14",
+      "J15",
+      "J16",
+      "J17",
+      "J18",
+      "J19",
+      "J20",
+      "J21",
+      "J23",
+      "J25"
+    ],
+    "paired_detection_correctness": {
+      "both_correct": 54,
+      "crack_only_correct": 1,
+      "direct_only_correct": 2,
+      "neither_correct": 3
+    },
+    "llm_blind_review": {
+      "reviewer_model": "gpt-6-luna",
+      "completed_requests": 120,
+      "planned_requests": 120,
+      "stable_case_preferences": {
+        "direct": 34,
+        "ORDER_UNSTABLE": 19,
+        "TIE": 4,
+        "crack": 3
+      },
+      "mean_scores": {
+        "crack": {
+          "detection_reasoning": {
+            "mean": 1.75,
+            "judgments": 120
+          },
+          "meanings_and_evidence": {
+            "mean": 1.6583333333333334,
+            "judgments": 120
+          },
+          "humor_explanation": {
+            "mean": 1.5789473684210527,
+            "judgments": 57
+          },
+          "age_evidence": {
+            "mean": 0,
+            "judgments": 57
+          },
+          "appropriateness_reasoning": {
+            "mean": 0.17543859649122806,
+            "judgments": 57
+          }
+        },
+        "direct": {
+          "detection_reasoning": {
+            "mean": 1.9416666666666667,
+            "judgments": 120
+          },
+          "meanings_and_evidence": {
+            "mean": 1.8833333333333333,
+            "judgments": 120
+          },
+          "humor_explanation": {
+            "mean": 1.8771929824561404,
+            "judgments": 57
+          },
+          "age_evidence": {
+            "mean": 1.9649122807017543,
+            "judgments": 57
+          },
+          "appropriateness_reasoning": {
+            "mean": 1.9649122807017543,
+            "judgments": 57
+          }
+        }
+      },
+      "reviewer_flag_counts_across_both_orders": {
+        "crack": {
+          "missing_age_assessment": 31,
+          "unsupported_context": 5,
+          "content_reasoning_error": 39,
+          "unsupported_age_precision": 50,
+          "wrong_detection": 12,
+          "wrong_target_or_senses": 21,
+          "fabricated_source": 1
+        },
+        "direct": {
+          "wrong_target_or_senses": 4,
+          "wrong_detection": 3,
+          "missing_age_assessment": 1
+        }
+      },
+      "api_usage": {
+        "observed_calls": 123,
+        "prompt_tokens": 343431,
+        "completion_tokens": 181831,
+        "total_tokens": 525262,
+        "reasoning_tokens": 130232,
+        "error_counts": {},
+        "response_model_ids": {
+          "gpt-6-luna": 123
+        }
+      },
+      "human_review_status": "Pending independent review of anonymous packets and CSV"
+    }
+  },
+  "diagnostics": {
+    "posthoc_diagnostic": true,
+    "does_not_replace_frozen_metrics": true,
+    "morphology_aware_target_agreement": {
+      "crack": {
+        "matches": 18,
+        "denominator": 25
+      },
+      "direct": {
+        "matches": 24,
+        "denominator": 25
+      }
+    },
+    "target_policy": "Equal token counts, each corresponding word has intersecting WordNet lemmatizations across n/v/a/r. Alternate valid targets are not automatically deemed wrong by this metric.",
+    "paired_binary_detection": {
+      "crack_only_correct": 1,
+      "direct_only_correct": 2,
+      "mcnemar_exact_two_sided_p": 1
+    },
+    "environment_at_analysis": {
+      "python": "3.12.13 (main, Mar  3 2026, 12:39:30) [Clang 21.0.0 (clang-2100.0.123.102)]",
+      "openai": "3.19.2",
+      "pydantic": "2.13.5",
+      "nltk": "3.10.3"
+    }
+  },
+  "validation_audit": {
+    "original_strict_results": {
+      "crack": {
+        "accuracy_all": 0.9166666666666666,
+        "f1_full_gold": 0.92,
+        "pair_success_count": 21
+      },
+      "direct": {
+        "accuracy_all": 0.9,
+        "f1_full_gold": 0.9019607843137255,
+        "pair_success_count": 19
+      }
+    },
+    "changes": [
+      {
+        "arm": "direct",
+        "item_id": "J21",
+        "before": "EXECUTION_FAILED",
+        "after": "PUN",
+        "reason": "First source-faithful response accepted; explicit missing AoA remains null."
+      },
+      {
+        "arm": "direct",
+        "item_id": "D11",
+        "before": "EXECUTION_FAILED",
+        "after": "NON_PUN",
+        "reason": "First source-faithful response accepted; explicit missing AoA remains null."
+      },
+      {
+        "arm": "direct",
+        "item_id": "D21",
+        "before": "NON_PUN",
+        "after": "NON_PUN",
+        "reason": "First source-faithful response accepted; explicit missing AoA remains null."
+      },
+      {
+        "arm": "direct",
+        "item_id": "D18",
+        "before": "NON_PUN",
+        "after": "NON_PUN",
+        "reason": "First source-faithful response accepted; explicit missing AoA remains null."
+      }
+    ],
+    "correction": {
+      "recorded_at": "2026-10-03T02:26:49.631912+00:00",
+      "original_run": "/Users/yizhengjiang/Desktop/Git/Joke_identification/runs/full_assignment_comparison/20261003T021452.992281Z",
+      "original_manifest_sha256": "92de242c474f560c195611c880005c529bc3dabad2964dcc18b70563eb59b86a",
+      "reason": "Faithful citations of null/miss entries describe missing data, not fabricated numeric AoA. Accept exact table references, retain null, credit numeric support only for nonnull values.",
+      "selection_rule": "Revalidate every response in chronological order; accept first valid response. No choice based on prediction, gold, reviewer preference or metric improvement.",
+      "original_inference_retained": true,
+      "runtime_policy": "Original measured latencies, attempts and usage retained, including retries caused by the validator bug; no faster counterfactual timing claimed."
+    }
+  },
+  "frozen": {
+    "model": "gpt-6-luna",
+    "concurrency": 8,
+    "arm_order": [
+      "direct",
+      "crack"
+    ],
+    "artifact_sha256": {
+      "blind.jsonl": "2bb32346fb40148bdd73800358935cc7d745af04f0de44880d526528ceed4c70",
+      "gold.jsonl": "103769879da029a0f8defe5f2c62674a22cc0142015689ce4ed2eb8efd4607cc",
+      "runner.py": "519b73107a1718973ad98f2d27333c93a866ec14a9f2d15d5a93f668993482f1",
+      "direct_prompt.md": "204634cf8f9a4d63afd77690e6b38a3ec4bc65032d78c80a276c279a69e4ed51",
+      "judge_prompt.md": "2541ce1b4f0fb437feb2554b0d42c6f4def3c1386af9365801c689c8b323f6d4",
+      "protocol.md": "21f3ad2c2a4984d3ac0f90095ce194c782e8e875ea0171794d955e62c665d5d8",
+      "shared_inputs.jsonl": "7744681a16a6fea0422d017f1f8c9578c269565a855b1382707e3f43dab60e86",
+      "inference_runner.py": "13916795a85227c45cd87c06dc102628b11215f8ac9b308f699dd91af37711eb",
+      "presentation_patch.diff": "c2be5a3ccbf5c5e4f45aeb754478a7b79798d6ce6806311c122cbbddaaa68456",
+      "revalidation_runner.py": "c6e61d46fd6d3fa785df88b8cb97b7787ad8f7fd58f66b533aabfebce0de3eca",
+      "validator_patch.diff": "8816c7dd6b6ef8a4a6a1c5bb50bf8f4615d15d99ebf76d815fd84b11cca22ced"
+    },
+    "source_and_resource_sha256": {
+      "workspace/data/aoa_kuperman.csv": "45db20f3083b2f38904751d498fa5a60e19e89f59ed4b44c8a0b791de31b87d8",
+      "workspace/data/nltk_data/corpora/wordnet/LICENSE": "7731175a77952e259390b496fab905e57118b8d19ad3a8383c67eee724ff443f",
+      "workspace/data/nltk_data/corpora/wordnet/README": "adad8d28ddea1db05b67ba1ac23506b025d29e0bcbf23bb35dde346089d8808d",
+      "workspace/data/nltk_data/corpora/wordnet/adj.exc": "8824cc24bbedd797b9702316b27f07cd4c2b76b629539f0a1276f03926758016",
+      "workspace/data/nltk_data/corpora/wordnet/adv.exc": "e7291461b629abfe63301bbe1998cee09fd575ed7107abd7ea9763adb05bf0a8",
+      "workspace/data/nltk_data/corpora/wordnet/citation.bib": "cd931cfe73536463c1decce60005a55d6b0c605fc7c5f89aaff7a38b5aedfa79",
+      "workspace/data/nltk_data/corpora/wordnet/cntlist.rev": "a198580b8f705fa02797bba8b13e5cbe4a9f9f40cb1697e774c7fc6a5865b035",
+      "workspace/data/nltk_data/corpora/wordnet/data.adj": "f24b635368be441501c9b8001e9271fd3b30b203f00d91e332979e6f8fe35646",
+      "workspace/data/nltk_data/corpora/wordnet/data.adv": "e66dbbda0e0359e41b7f225bff71dd0c263dc7c66c1b61abc9ba334973d92979",
+      "workspace/data/nltk_data/corpora/wordnet/data.noun": "489f145e0f68877c0be5bd0eb4117adaaac52f38f6204eb8d85dbe2158b614cc",
+      "workspace/data/nltk_data/corpora/wordnet/data.verb": "29cc96ed80c9f47d94fe75e332a9df80f4b1c737205f92d2f433d63c6da2ab51",
+      "workspace/data/nltk_data/corpora/wordnet/index.adj": "42f58dda2c7cff66eb8fa55ba62e0a873a9b3f43c878e8201108f5dab6dcff28",
+      "workspace/data/nltk_data/corpora/wordnet/index.adv": "6f5465ed5758fe9c8a2f7ec17b1300f3aa875756c70ff7cba162f7e71bcf88ea",
+      "workspace/data/nltk_data/corpora/wordnet/index.noun": "a490d99d93d017bf4822fe2f0ffa51fd73911ce271dc7535fade21f8814b5a04",
+      "workspace/data/nltk_data/corpora/wordnet/index.sense": "68b3a468cddfd8e92134b9b0624339a02a1b837159243c297c5f138a3d618392",
+      "workspace/data/nltk_data/corpora/wordnet/index.verb": "c7c79b558d787f1e31c6f8b3eeadb8fcbb26a64545ecc1241e21d9b61f95ee8e",
+      "workspace/data/nltk_data/corpora/wordnet/lexnames": "4767e2a1c6e68c1a93aa6b7c4ef7ebe9a815b50d7d5aac2788696f2cf3633bf1",
+      "workspace/data/nltk_data/corpora/wordnet/noun.exc": "2b5d675c380b39ecf595af9fa9d4e7feb1d58c643b0bff08c40ed5bfe41fab7a",
+      "workspace/data/nltk_data/corpora/wordnet/verb.exc": "dbbcf9a601b2d77e934e413b91d90e88ec7f933a8b77cfc00602a923b891b42c",
+      "workspace/data/nltk_data/corpora/wordnet.zip": "cbda5ea6eef7f36a97a43d4a75f85e07fccbb4f23657d27b4ccbc93e2646ab59",
+      "workspace/src/crack/__init__.py": "378d89d4d0c1569f72bae750119b500afd546d662355973009aab2f21b457c59",
+      "workspace/src/crack/config.py": "598a3cd5f7313b22d32374d4b256e7f703da59719ed689f069fa3b54169fe2cf",
+      "workspace/src/crack/corpus.py": "a6fbfebfa33f9b54d145650ef5f629a1853b75aeed110c46c777799616d20cf0",
+      "workspace/src/crack/decisions.py": "56e9801ad0d006d0e3a53b3d60a8a62e381eee1c8efc68d9eec48701586106bd",
+      "workspace/src/crack/enums.py": "edca30abd1f6d2ba167e0dd83d186a66962482c43ac06da1017cf6bd26571ec1",
+      "workspace/src/crack/l0_scope.py": "74e9b72e229e1367182ec23ecbe0e34a88dcb0ed3d653508094b98041260a6f6",
+      "workspace/src/crack/l1_surface.py": "0a14f175623e3023213ab6484dd8ecc5ad1e2b15c67b462ddee7b2ceed704917",
+      "workspace/src/crack/l2_senses.py": "23d5105e92090c726428e9d1651f438c96c15950be5f38e8ec89ff2a994ff590",
+      "workspace/src/crack/l3_candidates.py": "7162e04e5bc52b4cbef75ae9e63c4e845bf831cd6f84005dc67b280568267a61",
+      "workspace/src/crack/l4_anchoring.py": "875d3a8322476e89f2ee5898fb57de688fc1d5f936f01bd23b34d3845eb52fc6",
+      "workspace/src/crack/l5_resolution.py": "95e1d4391cedfd09415a3b1addada314f94dbbf72a3ba397d693e40ddd778e70",
+      "workspace/src/crack/l6_distinctness.py": "a7d8466521bc2e2b8016b3545cfb4b9376c6db593e37b6c093422da98d1d08fd",
+      "workspace/src/crack/l7_comprehension.py": "580c45cc9fc37a3d32b77b7dfc52041fed76eb3374271c5e2bb27fc0d48bda4e",
+      "workspace/src/crack/l8_appropriateness.py": "0fd0f6217207797dbdac2e2c4e7d85e07bee34e860a840b95d0d383e29846652",
+      "workspace/src/crack/layers.py": "32fb4c0ba30283f1f454de94265ffdcc827eee13030332f174de786ad02a3af2",
+      "workspace/src/crack/prompts/l4_anchoring.md": "5f74d961b3b9fdc9a65528c724432d70572a1392de9cfb02ea5b96265c17b011",
+      "workspace/src/crack/prompts/l5_declarative.md": "f34f37aceb34d894873e410347085b3d48211a23f0ee9c5cd376673b40770451",
+      "workspace/src/crack/prompts/l5_definitional.md": "15787760d29a076f89958ada3c9a294a0fbcd82e791afe6ac8c43aaddace7411",
+      "workspace/src/crack/prompts/l5_dialogue.md": "fbd150e24393324f0aecc2f0c6192795f4dd4b7e8eb2c427ebacfe237ef41e8b",
+      "workspace/src/crack/prompts/l5_qa.md": "d0bf90a851cbbcb1066ef97a600323fdba1ddcaa47685d8d177fe41296dc5d78",
+      "workspace/src/crack/prompts/l6_distinctness.md": "52a434fb9c1c866603b7bfe7cee75c087935490109e5ff574a4e71a39d4a78e1",
+      "workspace/src/crack/prompts/l7_comprehension.md": "1a8cc6b95941667a3de324b87b2c44b2ccc84165194147894ac6d2e953c46717",
+      "workspace/src/crack/prompts/l8_appropriateness.md": "48f8cb68c013d29b14715accfbcca116fd83cd25db52dbc7528bfc519c08c41c",
+      "workspace/src/crack/providers.py": "e307978c4bd5c3ac12e6f063de31ae82660847bd7dd00e34f75b8923197efe52",
+      "workspace/src/crack/runner.py": "1d675706b956228a7a20b81c4dbd646bd8a15d881931c5a5b87f26432094c941",
+      "workspace/src/crack/schema.py": "9e31295951a0851faa04951512d0b99aaabc64e1754ac9973cce45ad366105af",
+      "workspace/src/crack/semeval_benchmark.py": "5852900b19c671a3a4bb5557c4e70ffd01fc514c744b8ff385e58571f001ecc9",
+      "workspace/src/crack/serve.py": "26fc34f652a2802c617c92ceb3c7be99eb687cfbc05d129cfbf28f95d92ac0ac",
+      "workspace/src/crack/static/index.html": "b27f426cf761f77851ee60301b66d1b0a4334ae5fa61465f97652e1facfbd5fa",
+      "workspace/src/crack/validation.py": "511258768f95336e13478406ca8436d1ba6b506e6f1d5a1786e3457947e44a03"
+    },
+    "crack_config": {
+      "ACCEPTED_MECHANISMS": [
+        "compound_split",
+        "homographic_ambiguity",
+        "idiomatic_expression_with_homograph",
+        "resegmentation"
+      ],
+      "EXCLUDED_MECHANISMS": [
+        "absurdist_situation",
+        "cultural_reference",
+        "heterographic_homophone",
+        "rhyming_joke",
+        "sarcasm",
+        "social_context_only"
+      ],
+      "MAX_INPUT_CHARS": 500,
+      "MIN_INPUT_CHARS": 3,
+      "MAX_NON_ASCII_RATIO": 0.15,
+      "L3_TOP_K": 8,
+      "L4_MAX_CANDIDATES": 24,
+      "L4_BACKEND": "openai",
+      "L4_MODEL": "gpt-6-luna",
+      "L4_MODEL_GEMINI": "gemini-3.6-flash",
+      "L4_MODEL_GEMINI_CHAIN": [
+        "gemini-3.8-flash"
+      ],
+      "L4_MODEL_ANTHROPIC": "claude-sonnet-5",
+      "L4_MODEL_OPENAI": "gpt-6-luna",
+      "L4_MODEL_DEEPSEEK": "deepseek-chat",
+      "L4_MAX_OUTPUT_TOKENS": 4096,
+      "L4_CALL_PAUSE_SECONDS": 6.0,
+      "L5_BACKEND": "openai",
+      "L5_MODEL": "gpt-6-luna",
+      "L5_MODEL_GEMINI": "gemini-3.6-flash",
+      "L5_MODEL_GEMINI_CHAIN": [
+        "gemini-3.8-flash"
+      ],
+      "L5_MODEL_ANTHROPIC": "claude-sonnet-5",
+      "L5_MODEL_OPENAI": "gpt-6-luna",
+      "L5_MODEL_DEEPSEEK": "deepseek-chat",
+      "L5_MAX_OUTPUT_TOKENS": 8192,
+      "L5_CALL_PAUSE_SECONDS": 6.0,
+      "L6_BACKEND": "openai",
+      "L6_MODEL": "gpt-6-luna",
+      "L6_MODEL_GEMINI": "gemini-3.6-flash",
+      "L6_MODEL_GEMINI_CHAIN": [
+        "gemini-3.8-flash"
+      ],
+      "L6_MODEL_ANTHROPIC": "claude-sonnet-5",
+      "L6_MODEL_OPENAI": "gpt-6-luna",
+      "L6_MODEL_DEEPSEEK": "deepseek-chat",
+      "L6_MAX_OUTPUT_TOKENS": 4096,
+      "L6_CALL_PAUSE_SECONDS": 6.0,
+      "L7_BACKEND": "openai",
+      "L7_MODEL": "gpt-6-luna",
+      "L7_MODEL_GEMINI": "gemini-3.6-flash",
+      "L7_MODEL_GEMINI_CHAIN": [
+        "gemini-3.8-flash"
+      ],
+      "L7_MODEL_ANTHROPIC": "claude-sonnet-5",
+      "L7_MODEL_OPENAI": "gpt-6-luna",
+      "L7_MODEL_DEEPSEEK": "deepseek-chat",
+      "L7_MAX_OUTPUT_TOKENS": 4096,
+      "L7_CALL_PAUSE_SECONDS": 6.0,
+      "L7_METALINGUISTIC_FLOOR_HOMOGRAPH": 6.0,
+      "L7_METALINGUISTIC_FLOOR_DEFINITIONAL": 7.0,
+      "L7_METALINGUISTIC_FLOOR_DIALOGUE": 7.5,
+      "L7_METALINGUISTIC_FLOOR_RESEGMENTATION": 8.0,
+      "L7_SECONDARY_SENSE_AOA_OFFSET": 2.0,
+      "L7_AOA_TOLERANCE": 0.5,
+      "L8_BACKEND": "openai",
+      "L8_MODEL": "gpt-6-luna",
+      "L8_MODEL_GEMINI": "gemini-3.6-flash",
+      "L8_MODEL_GEMINI_CHAIN": [
+        "gemini-3.8-flash"
+      ],
+      "L8_MODEL_ANTHROPIC": "claude-sonnet-5",
+      "L8_MODEL_OPENAI": "gpt-6-luna",
+      "L8_MODEL_DEEPSEEK": "deepseek-chat",
+      "L8_MAX_OUTPUT_TOKENS": 4096,
+      "L8_CALL_PAUSE_SECONDS": 6.0,
+      "L5_QA_WEIGHTS": {
+        "polarity_or_direction": 0.45,
+        "answer_relevance": 0.25,
+        "causal": 0.15,
+        "agent": 0.1,
+        "tense_aspect": 0.05
+      },
+      "L5_QA_MIN_POLARITY": 0.05,
+      "L5_RESOLUTION_THRESHOLDS": {
+        "QA_RIDDLE": 0.46,
+        "DEFINITIONAL_ONELINER": 0.6,
+        "DIALOGUE_MISUNDERSTANDING": 0.6,
+        "DECLARATIVE": 0.25
+      }
+    }
+  },
+  "human_review": "Pending; anonymous packets and blank rating sheet retained",
+  "summary_policy": "No changes to gold, native thresholds or production prompts. No best-run selection. Generic source-validation bug repair retains unknown AoA as null, uses earliest valid raw replies, and re-reviews all affected cards. Automated reviewer flags are not independently verified factual errors."
+}

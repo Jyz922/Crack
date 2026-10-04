@@ -69,6 +69,7 @@ class ComprehensionStatus(StrEnum):
 
 
 class AgeAppropriatenessVerdict(StrEnum):
+    UNKNOWN = "UNKNOWN"
     FULLY_AGE_APPROPRIATE = "FULLY_AGE_APPROPRIATE"
     CONTENT_OK_INFERENCE_TOO_ADVANCED = "CONTENT_OK_INFERENCE_TOO_ADVANCED"
     VOCABULARY_TOO_ADVANCED = "VOCABULARY_TOO_ADVANCED"
@@ -101,7 +102,8 @@ def detection_status_for(label: str | MainClassification | None) -> DetectionSta
     """Map explicit decisions only; missing/legacy ambiguous labels abstain."""
     if label in {MainClassification.VALID_HOMOGRAPH_JOKE, MainClassification.VALID_COMPOUND_SPLIT_JOKE}:
         return DetectionStatus.PUN
-    if label in {MainClassification.ONE_SENSE_ONLY, MainClassification.RESOLUTION_FAIL, MainClassification.SENSES_TOO_CLOSE}:
+    if label in {MainClassification.ONE_SENSE_ONLY, MainClassification.ANCHORING_FAIL,
+                 MainClassification.RESOLUTION_FAIL, MainClassification.SENSES_TOO_CLOSE}:
         return DetectionStatus.NON_PUN
     if label == MainClassification.EXECUTION_FAILED:
         return DetectionStatus.EXECUTION_FAILED

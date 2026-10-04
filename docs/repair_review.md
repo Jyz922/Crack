@@ -1,5 +1,10 @@
 # Corpus repair review
 
+Historical repair review. Candidate continuation described below is retired;
+current behavior stops after failed/unknown semantic stages. See
+[response validation](response_validation.md) and
+[the failure/retry/fallback policy](provider_failure_policy.md).
+
 The proposed repair plan is partly supported by the saved version-2 run.
 The changes below address reusable failure modes. No corpus text, label, item ID,
 QA threshold or scoring weight was added to the production decision rules.

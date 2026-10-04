@@ -78,7 +78,8 @@ def test_snapshots_change_only_prompts_and_reject_configuration_drift(tmp_path):
         package = output / "workspaces" / arm / "src/crack"
         assert all(hashlib.sha256((package / name).read_bytes()).hexdigest() == value
                    for name, value in manifest["source_sha256"].items())
-        meta = {"blind_sha256": manifest["blind_sha256"], "config": manifest["config"],
+        meta = {"validation_version": manifest["validation_version"],
+                "blind_sha256": manifest["blind_sha256"], "config": manifest["config"],
                 "source_sha256": {**manifest["source_sha256"],
                     **{f"prompts/{name}": value for name, value in manifest["prompt_sha256"][arm].items()}}}
         module["check_run"](meta, manifest, arm)

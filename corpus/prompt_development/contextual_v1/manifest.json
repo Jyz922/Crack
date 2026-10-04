@@ -1,0 +1,37 @@
+{
+  "version": "contextual-v1",
+  "source": "new project-authored synthetic cases",
+  "stage": "L6 given target and proposed readings; not an end-to-end benchmark",
+  "families_by_split": {
+    "development": [
+      "draft",
+      "pitch",
+      "seal",
+      "charge",
+      "strike",
+      "plot"
+    ],
+    "confirmation": [
+      "weigh",
+      "branch",
+      "beam",
+      "resolution",
+      "cell",
+      "organ"
+    ]
+  },
+  "items_by_split": {
+    "development": 12,
+    "confirmation": 12
+  },
+  "production_prompt_loading": false,
+  "age_annotations": false,
+  "human_annotation_review": "pending",
+  "selection": "families and labels frozen before inference; confirmation outcomes must not guide revisions in this experiment",
+  "sha256": {
+    "development_annotations.jsonl": "b31c3c6f16eedceb522903d9a91227487c498cdc26c8ae9c04fe2d788fde9c02",
+    "development_inputs.jsonl": "dd6481a9dee638f3199e3189a7e2ff9b27e8b13a9e38b3038c50494bab765b9c",
+    "confirmation_annotations.jsonl": "4f1c57721b7448a5b2c34513f240c76eb870da99ba16656055e520eb03d19dcd",
+    "confirmation_inputs.jsonl": "15ec020fb8b8aeb7ed7860e97c2de370fca3df86c7ef7defb1b28cffc765c7b6"
+  }
+}

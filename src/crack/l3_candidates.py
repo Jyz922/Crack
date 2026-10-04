@@ -2,8 +2,8 @@
 
 aoa_estimate is never read here (README deviation 1: age effects live in L7).
 
-Every WordNet sense is credible; there is no frequency gate (SemCor is small
-and hand-tagged: shingles, net-as-income, ex all have count 0).
+Every retrieved WordNet sense remains a lexical proposal; there is no frequency
+gate. Dictionary multiplicity is not evidence of two meanings in this text.
 
 score = W_CONTRAST * contrast + W_BALANCE * balance
   contrast (strong)  1.0 if two senses carry different WordNet lexname()s, else 0.

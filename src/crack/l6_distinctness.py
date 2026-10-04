@@ -9,10 +9,11 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import anthropic
 import google.genai as _genai
@@ -22,7 +23,7 @@ from google.genai.errors import ServerError as _GeminiServerError
 from pydantic import BaseModel, ConfigDict
 
 from .config import DEFAULT_SETTINGS, Settings
-from .enums import AmbiguityAblation, AnchorRelation, AnchoringStatus, DistinctnessStatus, Genre
+from .enums import AmbiguityAblation, AnchoringStatus, DistinctnessStatus, Genre
 from .providers import (
     PROVIDERS,
     call_openai_compatible,
@@ -31,13 +32,13 @@ from .providers import (
     resolve_backend,
     resolve_model,
 )
-from .schema import AnalysisRecord, L6Result
+from .schema import AgeEstimate, AnalysisRecord, L6Result
+from .age_evidence import compact_age_prompt
 from .validation import ModelResponseError, validate_l6_response, require_completion
 
 _LOG = logging.getLogger(__name__)
 
 _PROMPT_PATH = Path(__file__).parent / "prompts" / "l6_distinctness.md"
-_RETRY_SUFFIX = "\n\nRespond with valid JSON only matching the schema."
 
 
 # ---------------------------------------------------------------------------
@@ -45,7 +46,7 @@ _RETRY_SUFFIX = "\n\nRespond with valid JSON only matching the schema."
 # ---------------------------------------------------------------------------
 
 class _L6LLMResponse(BaseModel):
-    model_config = ConfigDict(extra="ignore")
+    model_config = ConfigDict(extra="forbid")
 
     sense_a_paraphrase: str
     sense_b_paraphrase: str
@@ -54,6 +55,7 @@ class _L6LLMResponse(BaseModel):
     distinctness_status: DistinctnessStatus
     ambiguity_ablation: AmbiguityAblation
     explanation: str
+    age_assessment: dict[str, AgeEstimate] | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -74,14 +76,12 @@ def _render_l6_prompt(
         "text": text,
         "genre": genre.value,
         "term": term,
-        "sense_a": sense_a or "(not specified)",
-        "anchor_a": anchor_a or term,
-        "sense_b": sense_b or "(not specified)",
-        "anchor_b": anchor_b or term,
+        "sense_a": sense_a,
+        "anchor_a": anchor_a,
+        "sense_b": sense_b,
+        "anchor_b": anchor_b,
     }
-    for k, v in mapping.items():
-        template = template.replace(f"{{{k}}}", str(v))
-    return template
+    return re.sub(r"\{(\w+)\}", lambda m: str(mapping.get(m.group(1), m.group(0))), template)
 
 
 def _extract_json(raw: str) -> dict[str, Any]:
@@ -115,25 +115,22 @@ def _call_anthropic_l6(
     prompt_text: str,
     model: str,
     client: anthropic.Anthropic | None = None,
+    max_output_tokens: int = 4096,
 ) -> dict[str, Any] | None:
     if client is None:
         client = anthropic.Anthropic()
 
-    for attempt in range(2):
-        suffix = "" if attempt == 0 else _RETRY_SUFFIX
-        response = client.messages.create(
-            model=model,
-            max_tokens=1024,
-            messages=[{"role": "user", "content": prompt_text + suffix}],
-        )
-        require_completion(getattr(response, "stop_reason", None))
-        raw = response.content[0].text
-        try:
-            return _extract_json(raw)
-        except (json.JSONDecodeError, ValueError, IndexError):
-            if attempt == 1:
-                return None
-    return None
+    response = client.messages.create(
+        model=model,
+        max_tokens=max_output_tokens,
+        messages=[{"role": "user", "content": prompt_text}],
+    )
+    require_completion(getattr(response, "stop_reason", None))
+    raw = response.content[0].text
+    try:
+        return _extract_json(raw)
+    except (json.JSONDecodeError, ValueError, IndexError):
+        return None
 
 
 def _call_gemini_l6_single(
@@ -155,19 +152,16 @@ def _call_gemini_l6_single(
             time.sleep(delays[attempt - 1])
             retries += 1
         try:
-            for parse_try in range(2):
-                suffix = "" if parse_try == 0 else _RETRY_SUFFIX
-                resp = client.models.generate_content(
-                    model=model, contents=prompt_text + suffix, config=config
-                )
-                candidate = resp.candidates[0] if getattr(resp, "candidates", None) else None
-                require_completion(getattr(candidate, "finish_reason", None))
-                raw = resp.text
-                try:
-                    return _extract_json(raw), retries, None
-                except (json.JSONDecodeError, ValueError, IndexError):
-                    if parse_try == 1:
-                        return None, retries, None
+            resp = client.models.generate_content(
+                model=model, contents=prompt_text, config=config
+            )
+            candidate = resp.candidates[0] if getattr(resp, "candidates", None) else None
+            require_completion(getattr(candidate, "finish_reason", None))
+            raw = resp.text
+            try:
+                return _extract_json(raw), retries, None
+            except (json.JSONDecodeError, ValueError, IndexError):
+                return None, retries, None
         except _GeminiServerError as e:
             if attempt == len(delays):
                 return None, retries, e
@@ -225,6 +219,7 @@ def _call_openai_l6(
         prompt_text=prompt_text,
         max_output_tokens=settings.L6_MAX_OUTPUT_TOKENS,
         temperature=0.0,
+        parse_attempts=1,
     )
     return _L6Call(parsed, model, fallback_used, retries)
 
@@ -236,63 +231,10 @@ def _complete_l6(
 ) -> _L6Call:
     backend = resolve_backend(settings.L6_BACKEND, settings)
 
-    # If client is a mock, dispatch according to backend and capabilities
-    if client is not None:
-        if backend == "gemini" and hasattr(client, "models"):
-            resp = client.models.generate_content(model="mock", contents=prompt)
-            raw = getattr(resp, "text", "")
-            try:
-                parsed = _extract_json(raw)
-            except Exception:
-                parsed = None
-            return _L6Call(parsed, "mock", False, 0)
-        if backend == "anthropic" and hasattr(client, "messages"):
-            resp = client.messages.create(model="mock", messages=[{"role": "user", "content": prompt}])
-            raw = resp.content[0].text
-            try:
-                parsed = _extract_json(raw)
-            except Exception:
-                parsed = None
-            return _L6Call(parsed, "mock", False, 0)
-        if backend in PROVIDERS and PROVIDERS[backend].sdk_family == "openai" and hasattr(client, "chat"):
-            resp = client.chat.completions.create(model="mock", messages=[{"role": "user", "content": prompt}])
-            raw = resp.choices[0].message.content
-            try:
-                parsed = _extract_json(raw)
-            except Exception:
-                parsed = None
-            return _L6Call(parsed, "mock", False, 0)
-
-        # Fallbacks for generic mocks where backend wasn't specifically matched
-        if hasattr(client, "models"):
-            resp = client.models.generate_content(model="mock", contents=prompt)
-            raw = getattr(resp, "text", "")
-            try:
-                parsed = _extract_json(raw)
-            except Exception:
-                parsed = None
-            return _L6Call(parsed, "mock", False, 0)
-        if hasattr(client, "messages"):
-            resp = client.messages.create(model="mock", messages=[{"role": "user", "content": prompt}])
-            raw = resp.content[0].text
-            try:
-                parsed = _extract_json(raw)
-            except Exception:
-                parsed = None
-            return _L6Call(parsed, "mock", False, 0)
-        if hasattr(client, "chat"):
-            resp = client.chat.completions.create(model="mock", messages=[{"role": "user", "content": prompt}])
-            raw = resp.choices[0].message.content
-            try:
-                parsed = _extract_json(raw)
-            except Exception:
-                parsed = None
-            return _L6Call(parsed, "mock", False, 0)
-
     if backend == "gemini":
         return _call_gemini_l6(prompt, settings, client)
     if backend == "anthropic":
-        parsed = _call_anthropic_l6(prompt, settings.L6_MODEL_ANTHROPIC, client)
+        parsed = _call_anthropic_l6(prompt, settings.L6_MODEL_ANTHROPIC, client, settings.L6_MAX_OUTPUT_TOKENS)
         return _L6Call(parsed, settings.L6_MODEL_ANTHROPIC, False, 0)
     if backend in PROVIDERS and PROVIDERS[backend].sdk_family == "openai":
         return _call_openai_l6(prompt, backend, settings, client)
@@ -320,9 +262,9 @@ def distinctness_l6(
         )
 
     l4 = record.l4_result
-    term = "ambiguity"
-    if record.l3_result and record.l3_result.candidates:
-        term = record.l3_result.candidates[0].term
+    term = l4.target_term
+    if not term:
+        raise ModelResponseError("L6 requires L4's explicit assessed target")
 
     genre = record.l1_result.genre if record.l1_result else Genre.DECLARATIVE
     prompt = _render_l6_prompt(
@@ -334,9 +276,10 @@ def distinctness_l6(
         sense_b=l4.sense_b,
         anchor_b=l4.sense_b_anchor_quote,
     )
+    prompt += compact_age_prompt(record)
 
     call = _complete_l6(prompt, settings, client)
     if call.parsed is None:
         raise ModelResponseError("L6 did not return a valid JSON response")
     parsed = validate_l6_response(call.parsed)
-    return L6Result(**parsed)
+    return L6Result(**parsed, age_assessment=call.parsed.get("age_assessment"))

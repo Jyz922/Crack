@@ -1,8 +1,20 @@
 import os
+import socket
 
 import pytest
 
 from crack.config import DEFAULT_SETTINGS
+
+
+@pytest.fixture(autouse=True)
+def _offline_network_guard(request, monkeypatch):
+    """A test without the live marker cannot spend API quota accidentally."""
+    if request.node.get_closest_marker("live"):
+        return
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Offline tests must mock provider calls; network access is disabled")
+    monkeypatch.setattr(socket.socket, "connect", forbidden)
+    monkeypatch.setattr(socket.socket, "connect_ex", forbidden)
 
 
 @pytest.fixture(autouse=True)
@@ -26,4 +38,3 @@ def _live_gate(request):
     key_val, key_name = resolve_api_key(backend)
     if not key_val:
         pytest.skip(f"Live test skipped: {key_name} not set for backend '{backend}'")
-

@@ -16,38 +16,23 @@ from crack.validation import ModelResponseError, validate_l4_response
 
 
 @pytest.mark.parametrize("backend", ["openai", "anthropic", "gemini"])
-def test_providers_preserve_raw_responses_and_share_one_correction(backend):
-    text = "The seal kept the envelope closed beside a swimming seal."
-    p = {
-        "target_term": "seal", "split_parts": [],
-        "sense_a": "a closure", "sense_a_anchor_quote": "envelope closed",
-        "sense_b": "a marine animal", "sense_b_anchor_quote": "swimming seal",
-        "anchor_relation": "separate_contexts", "anchoring_status": "PASS",
-        "resolving_sense": "sense_b", "reasoning": "The two contexts support two meanings.",
-    }
-    replies = iter(["not json", json.dumps(p)])
-    requests = []
-
+def test_providers_preserve_invalid_raw_response_without_correction(backend):
+    calls = []
     def create(**kwargs):
-        requests.append(kwargs)
-        raw = next(replies)
-        return NS(
-            text=raw, candidates=[NS(finish_reason="STOP")],
-            stop_reason="end_turn", content=[NS(text=raw)],
-            choices=[NS(finish_reason="stop", message=NS(content=raw, refusal=None))],
-        )
-
+        calls.append(kwargs)
+        return NS(text="not json", candidates=[NS(finish_reason="STOP")],
+                  stop_reason="end_turn", content=[NS(text="not json")],
+                  choices=[NS(finish_reason="stop", message=NS(content="not json", refusal=None))])
     client = NS(chat=NS(completions=NS(create=create)), messages=NS(create=create),
                 models=NS(generate_content=create))
-    r = AnalysisRecord(item_id="unseen_provider", text=text, target_ages=[8], l1_result=analyze(text),
-                       l3_result=L3Result(candidates=[CandidateEntry(term="seal", score=0.7)], total_terms=1))
-    settings = DEFAULT_SETTINGS.model_copy(update={"L4_BACKEND": backend})
-    result = anchor_l4(r, settings, client=client)
-    assert result.anchoring_status == AnchoringStatus.PASS
-    assert len(requests) == 2
-    assert [a.accepted for a in r.l4_attempts] == [False, True]
+    r = AnalysisRecord(item_id="provider", text="A swimming seal closed an envelope.", target_ages=[],
+                       l1_result=analyze("A swimming seal closed an envelope."),
+                       l3_result=L3Result(candidates=[CandidateEntry(term="seal", score=.7)], total_terms=1))
+    with pytest.raises(ModelResponseError):
+        anchor_l4(r, DEFAULT_SETTINGS.model_copy(update={"L4_BACKEND": backend}), client=client)
+    assert len(calls) == 1
     assert r.l4_attempts[0].raw_responses == ["not json"]
-    assert json.loads(r.l4_attempts[1].raw_responses[0]) == p
+    assert not r.l4_attempts[0].accepted
 
 
 def test_pass_requires_resolving_sense():
@@ -72,7 +57,7 @@ def test_prompt_has_no_unexpanded_variables():
     rendered = _render_l4_prompt("A short sentence.", Genre.DECLARATIVE, "sentence", "dictionary proposal")
     for placeholder in ("{text}", "{genre}", "{candidate_term}", "{candidate_details}"):
         assert placeholder not in rendered
-    assert "Candidate ambiguous term: sentence" in rendered
+    assert "Candidate shortlist: sentence" in rendered
 
 
 @pytest.mark.parametrize("quote,text,expected", [

@@ -8,7 +8,7 @@ from typing import Any
 from .enums import AnchorRelation, AnchoringStatus, DistinctnessStatus, AmbiguityAblation
 
 
-RESPONSE_CONTRACT_VERSION = "4"
+RESPONSE_CONTRACT_VERSION = "6"
 
 L4_RESPONSE_FIELDS = frozenset({
     "sense_a", "sense_b", "sense_a_anchor_quote", "sense_b_anchor_quote",
@@ -105,10 +105,15 @@ def validate_l4_response(
 
 
 def validate_l5_response(value: Any, score_keys: set[str]) -> dict[str, Any]:
-    p = require_fields(value, score_keys | {"evidence_sufficient", "reasoning"})
+    p = require_fields(value, score_keys | {"evidence_sufficient", "context_consistent", "reasoning"})
     if type(p["evidence_sufficient"]) is not bool:
         raise ModelResponseError("evidence_sufficient must be a JSON boolean")
     require_text(p["reasoning"], "reasoning")
+    if p["evidence_sufficient"]:
+        if type(p["context_consistent"]) is not bool:
+            raise ModelResponseError("An assessed L5 response requires a boolean context_consistent")
+    elif p["context_consistent"] is not None:
+        raise ModelResponseError("Insufficient evidence requires null context_consistent")
     for key in score_keys:
         score = p[key]
         if not p["evidence_sufficient"]:
@@ -120,6 +125,10 @@ def validate_l5_response(value: Any, score_keys: set[str]) -> dict[str, Any]:
 
 
 def validate_l6_response(value: Any) -> dict[str, Any]:
+    # Age evidence is checked separately by the age layers. Its absence or
+    # malformed content must not become a detection failure.
+    if isinstance(value, dict):
+        value = {k: v for k, v in value.items() if k != "age_assessment"}
     p = require_fields(value, {
         "sense_a_paraphrase", "sense_b_paraphrase", "suppresses_other", "materially_different",
         "distinctness_status", "ambiguity_ablation", "explanation",
@@ -133,15 +142,17 @@ def validate_l6_response(value: Any) -> dict[str, Any]:
     except (ValueError, TypeError) as exc:
         raise ModelResponseError("Unknown L6 status or ablation result") from exc
     flags = (p["suppresses_other"], p["materially_different"])
+    if p["suppresses_other"] is not None and type(p["suppresses_other"]) is not bool:
+        raise ModelResponseError("suppresses_other must be a boolean or null diagnostic")
     if status == DistinctnessStatus.L6_SKIPPED_NO_PARAPHRASE:
         if flags != (None, None) or ablation != AmbiguityAblation.SKIPPED:
             raise ModelResponseError("An unassessed L6 result requires null flags and SKIPPED ablation")
     else:
-        if not a.strip() or not b.strip() or any(type(flag) is not bool for flag in flags):
-            raise ModelResponseError("An assessed L6 result requires paraphrases and explicit boolean findings")
+        if not a.strip() or not b.strip() or type(p["materially_different"]) is not bool:
+            raise ModelResponseError("An assessed L6 result requires paraphrases and a material-difference finding")
         if status == DistinctnessStatus.SENSES_DISTINCT:
-            if flags != (True, True) or a.strip().casefold() == b.strip().casefold():
-                raise ModelResponseError("SENSES_DISTINCT contradicts the paraphrases or boolean findings")
-        elif all(flags) or ablation == AmbiguityAblation.SUPPORTED:
+            if not p["materially_different"] or a.strip().casefold() == b.strip().casefold():
+                raise ModelResponseError("SENSES_DISTINCT contradicts the paraphrases or material difference")
+        elif p["materially_different"] or ablation == AmbiguityAblation.SUPPORTED:
             raise ModelResponseError("SENSES_TOO_CLOSE contradicts distinctness or supported ablation")
     return p

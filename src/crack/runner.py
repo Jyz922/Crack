@@ -57,8 +57,9 @@ if __package__ in (None, ""):
     if str(_src_dir) not in sys.path:
         sys.path.insert(0, str(_src_dir))
     from crack.config import DEFAULT_SETTINGS, Settings
-    from crack.decisions import DETECTION_LAYERS, detection_decision
+    from crack.decisions import CANDIDATE_SEARCH_VERSION, DETECTION_LAYERS, detection_decision
     from crack.validation import RESPONSE_CONTRACT_VERSION
+    from crack.age_evidence import AGE_AGGREGATION_VERSION, AGE_RESPONSE_CONTRACT_VERSION
     from crack.corpus import evaluate_run, load_blind
     from crack.enums import (
         AmbiguityAblation,
@@ -66,6 +67,8 @@ if __package__ in (None, ""):
         AnchoringStatus,
         DistinctnessStatus,
         MainClassification,
+        AgeAppropriatenessVerdict,
+        ComprehensionStatus,
         ResolutionStatus,
         ScopeLabel,
     )
@@ -86,11 +89,12 @@ if __package__ in (None, ""):
         run_l8,
     )
     from crack.providers import resolve_backend
-    from crack.schema import AnalysisRecord, FinalVerdict, LayerTrace
+    from crack.schema import AgeVerdict, AnalysisRecord, FinalVerdict, LayerTrace
 else:
     from .config import DEFAULT_SETTINGS, Settings
-    from .decisions import DETECTION_LAYERS, detection_decision
+    from .decisions import CANDIDATE_SEARCH_VERSION, DETECTION_LAYERS, detection_decision
     from .validation import RESPONSE_CONTRACT_VERSION
+    from .age_evidence import AGE_AGGREGATION_VERSION, AGE_RESPONSE_CONTRACT_VERSION
     from .corpus import evaluate_run, load_blind
     from .enums import (
         AmbiguityAblation,
@@ -98,6 +102,8 @@ else:
         AnchoringStatus,
         DistinctnessStatus,
         MainClassification,
+        AgeAppropriatenessVerdict,
+        ComprehensionStatus,
         ResolutionStatus,
         ScopeLabel,
     )
@@ -118,7 +124,7 @@ else:
         run_l8,
     )
     from .providers import resolve_backend
-    from .schema import AnalysisRecord, FinalVerdict, LayerTrace
+    from .schema import AgeVerdict, AnalysisRecord, FinalVerdict, LayerTrace
 
 
 
@@ -142,19 +148,34 @@ def clear_registry() -> None:
     _LAYER_REGISTRY.clear()
 
 
+def _discard_dependent_results(record: AnalysisRecord, name: str) -> None:
+    """A skipped/failed layer cannot expose old or partially written results."""
+    layers = [f"L{i}" for i in range(1, 9)]
+    if name in layers:
+        for layer in layers[layers.index(name):]:
+            setattr(record, f"{layer.lower()}_result", None)
+
+
 def execute_layer(
     name: str, fn: Callable[[AnalysisRecord, Settings], AnalysisRecord],
     record: AnalysisRecord, settings: Settings,
+    *, stage_observer: Callable[[str], None] | None = None,
 ) -> AnalysisRecord:
     """Stop dependent work after failure/abstention; always run the finalizer."""
     reason = ""
+    if name == "L4":
+        record.candidate_search_version = CANDIDATE_SEARCH_VERSION
     if name != "L0-post":
         if any(t.layer in DETECTION_LAYERS and t.status in {"ERROR", "REJECTED"} for t in record.trace):
             reason = "An earlier detection stage failed."
+        elif any(t.layer in DETECTION_LAYERS and t.status in {"FAIL", "UNKNOWN"} for t in record.trace):
+            reason = "An earlier detection stage rejected the analysis or lacked evidence."
         elif name in {"L5", "L6", "L7", "L8"} and (
             record.l4_result is None or record.l4_result.anchoring_status != AnchoringStatus.PASS
         ):
             reason = "L4 did not confirm two anchored meanings."
+        elif name in {"L7", "L8"} and not record.target_ages:
+            reason = "No age assessment was requested."
         elif name in {"L6", "L7", "L8"} and (
             record.l5_result is None or record.l5_result.resolution_status != ResolutionStatus.RESOLUTION_PASS
         ):
@@ -162,15 +183,36 @@ def execute_layer(
         elif name in {"L7", "L8"} and (
             record.l6_result is None
             or record.l6_result.distinctness_status != DistinctnessStatus.SENSES_DISTINCT
-            or record.l6_result.ambiguity_ablation != AmbiguityAblation.SUPPORTED
         ):
             reason = "L6 did not complete the required distinctness assessment."
-        elif name == "L8" and record.l7_result is None:
-            reason = "Comprehension assessment is unavailable."
+        elif name == "L8":
+            if any(t.layer == "L7" and t.status == "ERROR" for t in record.trace):
+                reason = "L7 failed; age assessment stopped."
+            elif record.l7_result is None:
+                reason = "Comprehension assessment is unavailable."
+            elif not any(record.l7_result.per_age_comprehension.get(a)
+                         == ComprehensionStatus.FULLY_COMPREHENSIBLE for a in record.target_ages):
+                reason = "L7 did not pass for any requested age; age assessment stopped."
     if reason:
+        _discard_dependent_results(record, name)
         record.trace.append(LayerTrace(layer=name, status="SKIPPED", reason=reason, duration_ms=0))
         return record
-    return fn(record, settings)
+    if stage_observer:
+        stage_observer(name)
+    try:
+        result = fn(record, settings)
+        if not isinstance(result, AnalysisRecord):
+            raise TypeError(f"{name} must return an AnalysisRecord")
+        return result
+    except Exception as exc:
+        _discard_dependent_results(record, name)
+        if name in {"L4", "L5", "L6"} and record.l4_search:
+            record.l4_search.stop_reason = "EXECUTION_FAILED"
+        if name == "L0-post":
+            record.final = FinalVerdict(main_classification=MainClassification.EXECUTION_FAILED,
+                                        scope_label=ScopeLabel.NO_SCOPE_MECHANISM,
+                                        review_reason=f"Finalization failed: {exc}")
+        raise
 
 
 # ---------------------------------------------------------------------------
@@ -181,11 +223,13 @@ def _l0_pre_layer(record: AnalysisRecord, settings: Settings) -> AnalysisRecord:
     """L0-pre: validate and normalise input text."""
     start = time.monotonic()
     record.validation_version = RESPONSE_CONTRACT_VERSION
+    record.age_validation_version = AGE_RESPONSE_CONTRACT_VERSION
+    record.age_aggregation_version = AGE_AGGREGATION_VERSION
     try:
         record.text = preprocess_input(record.text, settings)
-        status, reason = "OK", None
+        status, reason = "PASS", None
     except InputValidationError as exc:
-        status, reason = "REJECTED", str(exc)
+        status, reason = "ERROR", str(exc)
     duration_ms = round((time.monotonic() - start) * 1000, 3)
     record.trace.append(LayerTrace(
         layer="L0-pre",
@@ -195,19 +239,6 @@ def _l0_pre_layer(record: AnalysisRecord, settings: Settings) -> AnalysisRecord:
         hints_used=0,
     ))
     return record
-
-
-_COMMON_HOMOPHONES = (
-    ("knight", "night"), ("flower", "flour"), ("bear", "bare"), ("sea", "see"),
-    ("sun", "son"), ("right", "write"), ("deer", "dear"), ("hair", "hare"),
-    ("plain", "plane"), ("piece", "peace"), ("break", "brake"), ("pair", "pear"),
-    ("wait", "weight"), ("meat", "meet"), ("tail", "tale"), ("hole", "whole"),
-    ("weak", "week"), ("sail", "sale"), ("mail", "male"), ("stair", "stare"),
-    ("sole", "soul"), ("toe", "tow"), ("root", "route"), ("steal", "steel"),
-    ("cell", "sell"), ("buy", "by"), ("dye", "die"), ("board", "bored"),
-    ("heal", "heel"), ("flea", "flee"), ("chews", "choose"), ("clause", "claws"),
-    ("cereal", "serial"), ("coarse", "course"),
-)
 
 
 def _l0_post_layer(record: AnalysisRecord, settings: Settings) -> AnalysisRecord:
@@ -222,12 +253,8 @@ def _l0_post_layer(record: AnalysisRecord, settings: Settings) -> AnalysisRecord
     if record.final and record.final.scope_label == ScopeLabel.OUT_OF_SCOPE_HOMOPHONE:
         is_homophone = True
 
-    tokens_lower = set(re.findall(r"[A-Za-z]+", record.text.lower()))
-    for w1, w2 in _COMMON_HOMOPHONES:
-        if w1 in tokens_lower and w2 in tokens_lower:
-            is_homophone = True
-            break
-
+    # Co-occurring soundalike spellings do not establish a homophone joke.
+    # Scope follows assessed wordplay evidence, never a token-pair blacklist.
     if is_homophone:
         has_homo = False
         has_split = False
@@ -259,9 +286,15 @@ def _l0_post_layer(record: AnalysisRecord, settings: Settings) -> AnalysisRecord
     record.confidence = (
         record.l5_result.resolution_score if decided and record.l5_result else None
     )
+    per_age = {}
+    if main_class in {MainClassification.VALID_HOMOGRAPH_JOKE, MainClassification.VALID_COMPOUND_SPLIT_JOKE}:
+        for age in record.target_ages:
+            comp = record.l7_result.per_age_comprehension.get(age, ComprehensionStatus.AOA_UNKNOWN) if record.l7_result else ComprehensionStatus.AOA_UNKNOWN
+            appr = record.l8_result.per_age_verdict.get(age, AgeAppropriatenessVerdict.UNKNOWN) if record.l8_result else AgeAppropriatenessVerdict.UNKNOWN
+            per_age[age] = AgeVerdict(comprehension=comp, appropriateness=appr)
     record.final = FinalVerdict(
         main_classification=main_class, scope_label=scope_label,
-        per_age=record.final.per_age if decided and record.final else {},
+        per_age=per_age,
         review_reason=review_reason,
     )
     duration_ms = round((time.monotonic() - start) * 1000, 3)
@@ -322,6 +355,29 @@ def _run_fingerprint(blind_path: str | Path, settings: Settings) -> dict:
     }
 
 
+def _check_resume_fingerprint(resume_path: Path, fingerprint: dict) -> None:
+    """Reuse decisions only with the same source, prompts and nonsecret settings.
+
+    The corpus may grow; item text and ages are checked separately below.
+    Reject incompatible caches before making any new model calls.
+    """
+    metadata_path = resume_path.parent / "run_meta.json"
+    try:
+        metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        raise ValueError(
+            "Resume requires readable run_meta.json next to records.jsonl. "
+            "Omit --resume to start a fresh run."
+        ) from exc
+    if not isinstance(metadata, dict) or any(
+        metadata.get(key) != fingerprint[key] for key in ("source_sha256", "config")
+    ):
+        raise ValueError(
+            "Resume source, prompts or model/settings differ from this run. "
+            "Omit --resume to start a fresh run without mixing results."
+        )
+
+
 def run(
     blind_path: str | Path,
     settings: Settings = DEFAULT_SETTINGS,
@@ -347,10 +403,14 @@ def run(
         })
 
     blind_items = load_blind(blind_path)
+    fingerprint = _run_fingerprint(blind_path, settings)
 
     existing_records: dict[str, AnalysisRecord] = {}
     if resume_from:
         resume_p = Path(resume_from)
+        if not resume_p.is_file():
+            raise ValueError(f"Resume records file does not exist: {resume_p}")
+        _check_resume_fingerprint(resume_p, fingerprint)
         if resume_p.is_file():
             with resume_p.open("r", encoding="utf-8") as rf:
                 for line in rf:
@@ -361,8 +421,11 @@ def run(
                             # Only resume items that completed cleanly without layer errors
                             if (
                                 rec.validation_version == RESPONSE_CONTRACT_VERSION
+                                and rec.age_validation_version == AGE_RESPONSE_CONTRACT_VERSION
+                                and rec.age_aggregation_version == AGE_AGGREGATION_VERSION
+                                and rec.candidate_search_version == CANDIDATE_SEARCH_VERSION
                                 and rec.final and not rec.final.review_required
-                                and not any(t.status == "ERROR" for t in rec.trace)
+                                and not any(t.status in {"ERROR", "UNKNOWN"} for t in rec.trace)
                             ):
                                 verified, _ = detection_decision(rec, rec.final.scope_label)
                                 if verified == rec.final.main_classification:
@@ -376,9 +439,11 @@ def run(
     meta = {
         "timestamp": ts,
         "validation_version": RESPONSE_CONTRACT_VERSION,
+        "age_validation_version": AGE_RESPONSE_CONTRACT_VERSION,
+        "age_aggregation_version": AGE_AGGREGATION_VERSION,
         "git_sha": _git_sha(),
         "blind_path": str(blind_path),
-        **_run_fingerprint(blind_path, settings),
+        **fingerprint,
         "layers": [name for name, _ in _LAYER_REGISTRY],
         "item_count": len(blind_items),
         "concurrency": concurrency,
@@ -471,7 +536,7 @@ def format_analysis_report(record: AnalysisRecord, target_age: int) -> str:
         verdict = "⚠️ OUT OF SCOPE (Potential joke beyond homograph model scope)"
     elif mc == "EXECUTION_FAILED":
         verdict = "EXECUTION FAILED — retry or review required"
-    elif mc in ("ONE_SENSE_ONLY", "RESOLUTION_FAIL", "SENSES_TOO_CLOSE"):
+    elif mc in ("ONE_SENSE_ONLY", "ANCHORING_FAIL", "RESOLUTION_FAIL", "SENSES_TOO_CLOSE"):
         verdict = "NO PUN DETECTED"
     else:
         verdict = "INSUFFICIENT EVIDENCE — context or review required"
@@ -596,7 +661,11 @@ def _main(argv: list[str] | None = None) -> None:
     )
     parser.add_argument(
         "--candidate-budget", type=int, default=None, metavar="N",
-        help="Maximum distinct L4 candidates per text (default: 24). Does not change decision thresholds.",
+        help="Maximum candidates offered in one L4 shortlist request (default: 8). No tail search or downstream restarts.",
+    )
+    parser.add_argument(
+        "--no-candidate-continuation", action="store_true",
+        help="Legacy compatibility flag; downstream candidate continuation is always disabled.",
     )
     parser.add_argument(
         "--serve", action="store_true",
@@ -631,6 +700,7 @@ def _main(argv: list[str] | None = None) -> None:
         "L6_BACKEND": backend,
         "L7_BACKEND": backend,
         "L8_BACKEND": backend,
+        "CONTINUE_AFTER_CANDIDATE_REJECTION": False,
         **({"L4_MAX_CANDIDATES": args.candidate_budget} if args.candidate_budget is not None else {}),
     })
 
@@ -698,6 +768,8 @@ def _main(argv: list[str] | None = None) -> None:
         print(f"  Age label agreement (all labels): {percent(eval_res['age_accuracy'])} ({eval_res['correct_age_evals']}/{eval_res['total_age_evals']})")
         print(f"  Age assessment coverage: {percent(eval_res['age_assessment_coverage'])} ({eval_res['assessed_age_evals']}/{eval_res['total_age_evals']})")
         print(f"  Age label agreement (assessed): {percent(eval_res['age_accuracy_on_assessed'])}")
+        pun_age = eval_res['age_gold_puns']
+        print(f"  Age agreement (gold puns, all labels): {percent(pun_age['accuracy_all_labels'])} ({pun_age['correct_labels']}/{pun_age['total_labels']}); coverage: {percent(pun_age['assessment_coverage'])}")
         print(f"  Report written to: {eval_file}")
 
 

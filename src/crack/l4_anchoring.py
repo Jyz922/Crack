@@ -18,8 +18,8 @@ from google.genai.errors import ServerError as _GeminiServerError
 from pydantic import BaseModel, ConfigDict, ValidationError
 
 from .config import DEFAULT_SETTINGS, Settings
-from .enums import AnchorRelation, AnchoringStatus, Genre
-from .schema import AnalysisRecord, CandidateEntry, L4Attempt, L4CandidateFinding, L4Result, L4Search
+from .enums import AnchorRelation, AnchoringStatus, DetectionStatus, Genre
+from .schema import AnalysisRecord, CandidateAssessment, CandidateEntry, L4Attempt, L4CandidateFinding, L4Result, L4Search
 from .validation import ModelResponseError, validate_l4_response, require_completion
 
 _PROMPT_PATH = Path(__file__).parent / "prompts" / "l4_anchoring.md"
@@ -77,10 +77,9 @@ def _render_l4_prompt(
         "candidate_term": candidate_term,
         "candidate_details": candidate_details,
     }
-    tmpl = _load_prompt()
-    for k, v in variables.items():
-        tmpl = tmpl.replace(f"{{{k}}}", v)
-    return tmpl
+    # Render the template once: placeholder-shaped text in an input must stay
+    # literal, rather than being replaced by a later template variable.
+    return re.sub(r"\{(\w+)\}", lambda m: variables.get(m.group(1), m.group(0)), _load_prompt())
 
 
 def _extract_json(text: str) -> dict[str, Any]:
@@ -236,80 +235,6 @@ def _complete_l4(
 ) -> _L4Call:
     backend = resolve_backend(settings.L4_BACKEND, settings)
 
-    # Check for unit test mock objects
-    is_mock = (
-        client is not None
-        and (
-            hasattr(client, "_is_mock")
-            or type(client).__name__ in ("MagicMock", "Mock", "NonCallableMagicMock")
-            or "unittest.mock" in getattr(type(client), "__module__", "")
-        )
-    )
-
-    if is_mock:
-        if backend == "gemini" and hasattr(client, "models"):
-            resp = client.models.generate_content(model="mock", contents=prompt)
-            raw = getattr(resp, "text", "")
-            if response_log is not None:
-                response_log.append(raw)
-            try:
-                parsed = _extract_json(raw)
-            except Exception:
-                parsed = None
-            return _L4Call(parsed, "mock", False, 0)
-        if backend == "anthropic" and hasattr(client, "messages"):
-            resp = client.messages.create(model="mock", messages=[{"role": "user", "content": prompt}])
-            raw = resp.content[0].text
-            if response_log is not None:
-                response_log.append(raw)
-            try:
-                parsed = _extract_json(raw)
-            except Exception:
-                parsed = None
-            return _L4Call(parsed, "mock", False, 0)
-        if backend in PROVIDERS and PROVIDERS[backend].sdk_family == "openai" and hasattr(client, "chat"):
-            resp = client.chat.completions.create(model="mock", messages=[{"role": "user", "content": prompt}])
-            raw = resp.choices[0].message.content
-            if response_log is not None:
-                response_log.append(raw)
-            try:
-                parsed = _extract_json(raw)
-            except Exception:
-                parsed = None
-            return _L4Call(parsed, "mock", False, 0)
-
-        # Fallbacks for generic mocks where backend wasn't specifically matched
-        if hasattr(client, "models"):
-            resp = client.models.generate_content(model="mock", contents=prompt)
-            raw = getattr(resp, "text", "")
-            if response_log is not None:
-                response_log.append(raw)
-            try:
-                parsed = _extract_json(raw)
-            except Exception:
-                parsed = None
-            return _L4Call(parsed, "mock", False, 0)
-        if hasattr(client, "messages"):
-            resp = client.messages.create(model="mock", messages=[{"role": "user", "content": prompt}])
-            raw = resp.content[0].text
-            if response_log is not None:
-                response_log.append(raw)
-            try:
-                parsed = _extract_json(raw)
-            except Exception:
-                parsed = None
-            return _L4Call(parsed, "mock", False, 0)
-        if hasattr(client, "chat"):
-            resp = client.chat.completions.create(model="mock", messages=[{"role": "user", "content": prompt}])
-            raw = resp.choices[0].message.content
-            if response_log is not None:
-                response_log.append(raw)
-            try:
-                parsed = _extract_json(raw)
-            except Exception:
-                parsed = None
-            return _L4Call(parsed, "mock", False, 0)
-
     if backend == "gemini":
         return _call_gemini_l4(prompt, settings, client, response_log)
     if backend == "anthropic":
@@ -327,82 +252,52 @@ def _complete_l4(
 # Public API
 # ---------------------------------------------------------------------------
 
-def _anchor_term(
-    record: AnalysisRecord,
-    genre: Genre,
-    term: str,
-    is_compound_split_candidate: bool,
-    settings: Settings,
-    client: Any,
+def _anchor_shortlist(
+    record: AnalysisRecord, genre: Genre, candidates: list[CandidateEntry],
+    settings: Settings, client: Any,
 ) -> L4Result:
-    lines: list[str] = []
-    split_options = list(dict.fromkeys(
-        option
-        for c in (record.l3_result.candidates if record.l3_result else [])
-        if c.term == term
-        for option in c.split_options
-    ))
-    if record.l2_result and record.l2_result.senses:
-        matched_senses = [s for s in record.l2_result.senses if s.term.lower() == term.lower()]
-        # All distinct supplied senses are visible; the first four entries can
-        # contain only one POS and omit both the contrast and the split parts.
-        seen: set[tuple[str, str, str]] = set()
-        for s in matched_senses:
-            key = (s.source, s.lemma, s.sense_id)
+    """Compare the supplied shortlist in one request, then validate its target."""
+    proposals = []
+    for candidate in candidates:
+        senses = []
+        seen = set()
+        for sense in record.l2_result.senses if record.l2_result else []:
+            if sense.term.casefold() != candidate.term.casefold():
+                continue
+            key = (sense.source, sense.lemma, sense.sense_id)
             if key not in seen:
                 seen.add(key)
-                lines.append(f"- [{s.source}] {s.lemma} / {s.sense_id}: {s.definition}")
-    candidate_details = "Supplied dictionary proposals (not contextual evidence):\n" + ("\n".join(lines) or "None")
-    candidate_details += "\nAllowed split_options: " + json.dumps(split_options)
-    candidate_details += f"\nDetected compound-split candidate: {str(is_compound_split_candidate).lower()}"
-
-    prompt = _render_l4_prompt(record.text, genre, term, candidate_details)
-    error = ""
-    for attempt in range(2):
-        attempt_prompt = prompt
-        if attempt:
-            attempt_prompt += (
-                "\n\nLocal response validation rejected the previous response: " + error
-                + "\nReturn a new response for the SAME candidate, satisfying the full contract."
-                " Copy quotes exactly from Text. Do not change the verdict merely to pass validation."
-                " Use INSUFFICIENT_EVIDENCE when the source cannot support a finding."
-            )
-        log = L4Attempt(
-            candidate_term=term,
-            attempt=attempt + 1,
-            prompt_sha256=hashlib.sha256(attempt_prompt.encode()).hexdigest(),
-        )
-        record.l4_attempts.append(log)
-        # Completion refusals, transport failures, and truncation are not
-        # corrected into findings. Their available raw text remains in the log.
-        try:
-            call = _complete_l4(attempt_prompt, settings, client, log.raw_responses)
-        except Exception as exc:
-            log.error = f"{type(exc).__name__}: {exc}"
-            raise
-        log.model_used = call.model_used
-        log.provider_retries = call.retries
+                senses.append([sense.sense_id, sense.definition])
+        proposals.append({"term": candidate.term,
+                          "split_options": candidate.split_options,
+                          "compound_split": candidate.score_components.get("compound_split") == 1.0,
+                          "dictionary_proposals": senses})
+    terms = [c.term for c in candidates]
+    details = "Dictionary proposals are possibilities, not contextual evidence.\n" + json.dumps(proposals, ensure_ascii=False)
+    prompt = _render_l4_prompt(record.text, genre, json.dumps(terms, ensure_ascii=False), details)
+    log = L4Attempt(candidate_term=terms[0] if len(terms) == 1 else "", candidate_terms=terms,
+                    attempt=1, prompt_sha256=hashlib.sha256(prompt.encode()).hexdigest())
+    record.l4_attempts.append(log)
+    try:
+        call = _complete_l4(prompt, settings, client, log.raw_responses)
+        log.model_used, log.provider_retries = call.model_used, call.retries
         log.fallback_used = call.fallback_used
         log.parsed_response = call.parsed if isinstance(call.parsed, dict) else None
-        try:
-            parsed = validate_l4_response(
-                call.parsed, record.text, term, is_compound_split_candidate, split_options
-            )
-            result = L4Result(**parsed)
-        except (ModelResponseError, ValidationError) as exc:
-            error = str(exc)
-            log.error = error
-            if attempt == 1:
-                raise ModelResponseError(f"L4 contract rejected two responses for {term!r}: {error}") from exc
-        else:
-            log.accepted = True
-            return result
-    raise AssertionError("Unreachable L4 retry state")
+        target = call.parsed.get("target_term") if isinstance(call.parsed, dict) else None
+        candidate = next((c for c in candidates if isinstance(target, str)
+                          and c.term.strip().casefold() == target.strip().casefold()), None)
+        if candidate is None:
+            raise ModelResponseError("L4 target_term must name a supplied shortlisted candidate")
+        parsed = validate_l4_response(call.parsed, record.text, candidate.term,
+            candidate.score_components.get("compound_split") == 1.0, candidate.split_options)
+        result = L4Result(**parsed)
+    except Exception as exc:
+        log.error = f"{type(exc).__name__}: {exc}"
+        raise
+    log.candidate_term = result.target_term
+    log.accepted = True
+    return result
 
-
-# ---------------------------------------------------------------------------
-# Public API
-# ---------------------------------------------------------------------------
 
 def anchor_l4(
     record: AnalysisRecord,
@@ -411,134 +306,64 @@ def anchor_l4(
     ambiguous_term: str | None = None,
     client: Any = None,
     diagnostics: dict[str, Any] | None = None,
+    continue_search: bool = False,
 ) -> L4Result:
-    """Compute the L4 sense-anchoring result for *record*."""
+    """Choose and anchor the strongest target in one bounded shortlist request."""
     if record.l1_result is None:
         raise ValueError("L1 must run before L4: l1_result is None")
-
-    genre = record.l1_result.genre
-
-    candidates = record.l3_result.candidates if record.l3_result else []
-    deferred = record.l3_result.deferred_candidates if record.l3_result else []
-    cands = list(candidates) + list(deferred)
-    if len({c.term for c in cands}) != len(cands):
-        raise ValueError("L3 candidate terms must be unique across the initial and deferred lists")
-    total_terms = record.l3_result.total_terms if record.l3_result else None
-    total_terms = len(cands) if total_terms is None else total_terms
-    if total_terms < len(cands):
+    if continue_search:
+        raise ValueError("Candidate continuation is disabled; failed or unknown layers terminate the item")
+    candidates = list(record.l3_result.candidates if record.l3_result else [])
+    total = record.l3_result.total_terms if record.l3_result else None
+    total = len(candidates) if total is None else total
+    if len({c.term.casefold() for c in candidates}) != len(candidates):
+        raise ValueError("L3 candidate terms must be unique")
+    if total < len(candidates):
         raise ValueError("L3 total_terms is smaller than its available candidate list")
-    if settings.L4_MAX_CANDIDATES < 1:
-        raise ValueError("L4_MAX_CANDIDATES must permit at least one candidate assessment")
-    search = L4Search(
-        mode="target_only" if ambiguous_term is not None else "automatic",
-        candidate_budget=1 if ambiguous_term is not None else settings.L4_MAX_CANDIDATES,
-        retrieved_terms=total_terms, available_terms=len(cands),
-        untested_terms=total_terms,
-    )
-    record.l4_search = search
-
-    def assess(cand: CandidateEntry) -> L4Result:
-        # Make this candidate's split proposals visible to the existing exact
-        # validator and downstream layers, without discarding the ranked tail.
-        if record.l3_result and cand.term not in {c.term for c in record.l3_result.candidates}:
-            record.l3_result.candidates.append(cand)
-            record.l3_result.deferred_candidates = [
-                c for c in record.l3_result.deferred_candidates if c.term != cand.term
-            ]
-        is_split = cand.score_components.get("compound_split", 0.0) == 1.0
-        try:
-            result = _anchor_term(record, genre, cand.term, is_split, settings, client)
-        except Exception:
-            search.stop_reason = "EXECUTION_FAILED"
-            raise
-        search.findings.append(L4CandidateFinding(term=cand.term, status=result.anchoring_status))
-        search.untested_terms = max(0, total_terms - len(search.findings))
-        return result
-
+    budget = min(settings.L3_TOP_K, settings.L4_MAX_CANDIDATES)
     if ambiguous_term is not None:
-        if cands and not any(c.term == ambiguous_term for c in cands):
+        if candidates and not any(c.term == ambiguous_term for c in candidates):
             raise ValueError("The requested target must be among the supplied L3 candidates")
-        if cands:
-            result = assess(next(c for c in cands if c.term == ambiguous_term))
-        else:
-            # Direct candidate assessment remains supported without L3; it is
-            # explicitly a target-only finding, not a complete lexical search.
-            search.retrieved_terms = search.available_terms = search.untested_terms = 1
-            total_terms = 1
-            result = assess(CandidateEntry(term=ambiguous_term, score=0.0))
-        search.stop_reason = "TARGET_ONLY"
-        if record.l3_result:
-            active = record.l3_result.candidates
-            record.l3_result.candidates = [c for c in active if c.term == ambiguous_term] + [
-                c for c in active if c.term != ambiguous_term
-            ]
-        return result
-
-    if not cands:
+        candidates = [next((c for c in candidates if c.term == ambiguous_term),
+                           CandidateEntry(term=ambiguous_term, score=0.0))]
+        total, budget = 1, 1
+    shortlist = candidates[:budget]
+    search = L4Search(mode="target_only" if ambiguous_term is not None else "automatic",
+                      candidate_budget=budget, retrieved_terms=total,
+                      available_terms=len(candidates), untested_terms=total,
+                      considered_terms=[c.term for c in shortlist])
+    record.l4_search = search
+    if not shortlist:
         search.stop_reason = "NO_CANDIDATES"
-        return L4Result(
-            sense_a="", sense_b="", sense_a_anchor_quote="", sense_b_anchor_quote="",
-            anchoring_status=AnchoringStatus.INSUFFICIENT_EVIDENCE,
-            reasoning="Lexical retrieval produced no candidates; no candidate assessment was performed.",
-        )
-
-    # The top-k list is the initial priority queue, not a permanent truncation.
-    # Continue into the saved tail up to the separate operational call budget.
-    max_to_try = min(len(cands), settings.L4_MAX_CANDIDATES)
-    best_result: L4Result | None = None
-    winning_idx: int | None = None
-    tested: list[tuple[int, L4Result]] = []
-
-    for idx in range(max_to_try):
-        cand = cands[idx]
-        res = assess(cand)
-        tested.append((idx, res))
-
-        if res.anchoring_status == AnchoringStatus.PASS:
-            best_result = res
-            winning_idx = idx
-            search.stop_reason = "PASS_FOUND"
-            break
-
-        if best_result is None:
-            best_result = res
-            winning_idx = idx
-        elif (
-            best_result.anchoring_status == AnchoringStatus.ONE_SENSE_ONLY
-            and res.anchoring_status in {AnchoringStatus.FAIL, AnchoringStatus.INSUFFICIENT_EVIDENCE}
-        ):
-            best_result = res
-            winning_idx = idx
-
-    # A candidate-level negative cannot establish a text-level negative when
-    # additional lexical candidates have not been examined.
-    if search.stop_reason == "IN_PROGRESS":
-        if search.untested_terms == 0:
-            search.stop_reason = "ALL_RETRIEVED_ASSESSED"
-        elif len(tested) >= settings.L4_MAX_CANDIDATES:
-            search.stop_reason = "BUDGET_EXHAUSTED"
-        else:
-            search.stop_reason = "CANDIDATES_UNAVAILABLE"
-    if best_result and best_result.anchoring_status == AnchoringStatus.ONE_SENSE_ONLY:
-        if total_terms > len(tested):
-            best_result = best_result.model_copy(update={
-                "anchoring_status": AnchoringStatus.INSUFFICIENT_EVIDENCE,
-                "reasoning": f"Only {len(tested)} of {total_terms} lexical candidate terms were assessed. "
-                "The tested candidates have one grounded reading each; untested candidates remain unresolved.",
-            })
+        return L4Result(sense_a="", sense_b="", sense_a_anchor_quote="", sense_b_anchor_quote="",
+                        anchoring_status=AnchoringStatus.INSUFFICIENT_EVIDENCE,
+                        reasoning="Lexical retrieval produced no candidates; no assessment was performed.")
+    try:
+        result = _anchor_shortlist(record, record.l1_result.genre, shortlist, settings, client)
+    except Exception:
+        search.stop_reason = "EXECUTION_FAILED"
+        raise
+    assessment = CandidateAssessment(term=result.target_term, l4_result=result.model_copy(deep=True),
+                                     reason=result.reasoning)
+    record.candidate_assessments.append(assessment)
+    search.findings.append(L4CandidateFinding(term=result.target_term, status=result.anchoring_status))
+    # Only the chosen finding has separately validated evidence. Other terms
+    # were offered for comparison, not given manufactured individual verdicts.
+    search.untested_terms = max(0, total - 1)
+    if result.anchoring_status == AnchoringStatus.PASS:
+        search.stop_reason = "PASS_FOUND"
+    elif result.anchoring_status == AnchoringStatus.INSUFFICIENT_EVIDENCE:
+        assessment.outcome = DetectionStatus.INSUFFICIENT_EVIDENCE
+        search.stop_reason = "INSUFFICIENT_EVIDENCE"
+    else:
+        assessment.outcome = DetectionStatus.NON_PUN
+        search.stop_reason = "CANDIDATES_REJECTED"
+    if record.l3_result:
+        record.l3_result.candidates = [c for c in candidates if c.term == result.target_term] + [
+            c for c in candidates if c.term != result.target_term]
+    if ambiguous_term is not None:
+        search.stop_reason = "TARGET_ONLY"
     if diagnostics is not None:
-        diagnostics["candidate_findings"] = [
-            {"term": cands[i].term, "status": result.anchoring_status.value}
-            for i, result in tested
-        ]
+        diagnostics["candidate_findings"] = [f.model_dump(mode="json") for f in search.findings]
         diagnostics["search"] = search.model_dump(mode="json")
-
-    # If a non-first candidate was the winner, rotate it to index 0 so L5/L6 and report receive it
-    if winning_idx is not None and winning_idx > 0 and record.l3_result:
-        winning_cand = cands[winning_idx]
-        record.l3_result.candidates = [winning_cand] + [
-            c for c in record.l3_result.candidates if c.term != winning_cand.term
-        ]
-
-    assert best_result is not None
-    return best_result
+    return result

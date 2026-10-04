@@ -1,135 +1,121 @@
-# Response validation and unresolved decisions
+# Response validation and terminal states
 
-The detection pipeline uses response contract version `4`. Each LLM request
-contains the current text and the complete stage prompt. L4, L5, and L6 responses
-are checked locally before their findings can affect the final decision.
+Current detection contract: `6`; candidate-selection policy: `4`.
+Every model answer is checked locally before it becomes a layer result.
+The pipeline does not repair an invalid response with another model request.
 
-## Enforced checks
+## Layer states and stopping
 
-- **L4:** all response fields are required; status values must match the schema;
-  `target_term` must match the supplied candidate's spelling, allowing only
-  letter case and surrounding whitespace differences. The accepted result uses
-  the supplied identifier; the logged raw/parsed response is preserved.
-  Lemmatization, internal whitespace changes and spelling substitutions are
-  rejected. This identifier rule does not normalize source quotes.
-  A resegmentation pass must
-  name a supplied `split_options` pair in `split_parts`; other findings use an
-  empty array. Alternative split proposals survive L3 term deduplication.
-  Every nonempty quote must occur verbatim in the input. A pass requires two
-  nonempty, different meaning descriptions and explicit context evidence,
-  relation, and resolving sense. Non-split anchors must be different context
-  spans, not just the candidate word. Same-word anchors are allowed only for a
-  detected compound-split candidate. A negative `ONE_SENSE_ONLY` finding still
-  requires a described reading and a source quote.
-- **L5:** every subscore and the `evidence_sufficient` flag are required. Scores
-  must be finite JSON numbers in [0, 1]. If evidence is insufficient, all scores
-  must be null and the explanation must identify the missing information.
-- **L6:** paraphrases, both boolean findings, status, ablation result, and
-  explanation are required. A distinctness claim must agree with its boolean
-  findings and use different paraphrases. Unknown findings use null flags and
-  `SKIPPED` ablation. Compound-split candidates also receive this assessment.
-- **Final decision:** a positive result requires L4 PASS, L5 RESOLUTION_PASS,
-  and a completed L6 SENSES_DISTINCT finding with SUPPORTED ablation. Missing or
-  skipped L6 findings cannot produce a positive decision. L6's ablation remains
-  a model assessment; it is not a separate run of a rewritten text. It concerns
-  disappearance of the claimed two-meaning wordplay, not disappearance of every
-  other source of humor. The explanation identifies the replacement and contrast.
-
-L4 permits one corrective request after a JSON or contract rejection, for the
-same candidate. Each attempt saves the raw response, parsed object when
-available, prompt SHA-256, acceptance flag and rejection reason in
-`l4_attempts`. The corrective request includes the local validation error;
-quotes are never silently aligned or normalized. A valid negative or unknown
-finding is accepted without a correction. Transient provider retries remain
-separate from this single contract correction.
-
-Persistent malformed responses, missing fields, contradictory findings,
-reported output truncation/refusal, and request failures produce an execution
-failure. They are not converted into negative examples or filled in with
-passing defaults.
-Dependent stages stop after a detection failure or unresolved prerequisite.
-
-These checks establish response completeness and checkable consistency. Whether
-a quote really supports a proposed meaning remains a semantic judgment to
-evaluate against annotated examples. Echoing the correct `target_term` does not
-prove that both meaning descriptions actually concern that word.
-
-L3 retains the ranked tail in `deferred_candidates` after its initial top-k
-queue (default eight). L4 examines successive candidates until it finds a pass
-or exhausts its separate `L4_MAX_CANDIDATES` budget (default 24). Remaining terms
-are promoted into the active list as they are examined, preserving their split
-proposals and the selected target for L5/L6. `l4_search` saves each validated
-candidate finding, the remaining count and the stop reason. Persistent invalid
-evidence aborts the stage; another candidate cannot conceal that failure.
-
-A candidate-level `ONE_SENSE_ONLY` result becomes a text-level negative only
-when all supplied lexical candidate terms were assessed. Budget exhaustion,
-unavailable candidate data, unresolved findings or no retrieved candidates
-remain `INSUFFICIENT_EVIDENCE`. Completeness here concerns retrieved lexical
-proposals; it does not establish that a dictionary covers every possible
-mechanism. The CLI's `--candidate-budget` changes only the search budget.
-See [candidate search continuation](candidate_search_continuation.md).
-
-## Result states
-
-`final.detection_status` and the web response distinguish:
-
-| State | Meaning | Next action |
+| State | Meaning | Dependent work |
 |---|---|---|
-| `PUN` | All required positive detection checks completed | View the analysis |
-| `NON_PUN` | A completed check rejected the proposed wordplay | View the finding |
-| `INSUFFICIENT_EVIDENCE` | Required context or an assessment is missing | Review or add context |
-| `EXECUTION_FAILED` | A request or response validation failed | Inspect the trace and retry |
-| `OUT_OF_SCOPE` | A different mechanism needs assessment | Review separately |
+| PASS | The layer completed its required positive check | Continue |
+| FAIL | The completed check rejected the proposed analysis | Stop |
+| UNKNOWN | Context or evidence is inadequate | Stop |
+| ERROR | Execution failed, output was truncated, or validation rejected it | Stop |
+| SKIPPED | A dependency did not pass or the task was not requested | No assessment |
 
-The last three states set `review_required: true` and carry a `review_reason`.
-They do not show a confirmed joke, a negative judgment, invented senses, or a
-default confidence/safety pass. The existing detailed `main_classification`
-labels are retained. The UI's resolution score is a stage score, not a
-calibrated probability of correctness.
+Detection failure/abstention skips later semantic and age layers. The finalizer
+always runs. An exception or skip discards the stage's partial and downstream
+results. Age failures affect age outputs only; completed detection is preserved.
+For multiple requested ages, L8 processes only ages that passed comprehension;
+other ages retain unknown appropriateness.
 
-## Evaluation denominators
+## Essential response checks
 
-Evaluation covers every ID in the supplied gold file. Missing predictions count
-as execution failures; duplicate or unknown prediction IDs are rejected.
+- **L4:** required fields and supported status values; the supplied candidate
+  identifier; real verbatim source quotes; two described readings and an
+  explicit resolving sense for PASS. A compound split must match a supplied
+  split proposal. Missing facts are not inferred from defaults. Raw responses
+  and rejection reasons remain in `l4_attempts`.
+- **L5:** required finite subscores in [0, 1], an explicit evidence finding and
+  context-consistency finding. A relation necessary for the proposed wordplay
+  cannot contradict the source. An unassessed result uses null scores and a
+  reason. Self-contained questions do not require an invented answer turn.
+- **L6:** materially different meanings, distinct paraphrases and an explicit
+  result. Missing assessment stays unknown. Compound splits are checked too.
+  Mutual suppression and the historical ablation field are diagnostics, not
+  positive gates. No controlled rewrite is required.
+- **Final positive:** L4 PASS, L5 RESOLUTION_PASS and L6 SENSES_DISTINCT must all
+  be present and valid. Skipped or unknown evidence never becomes positive.
 
-- `decision_coverage` = decided items / all gold items.
-- `classification_accuracy` = correct exact-label decisions / all gold items.
-- `classification_accuracy_on_decided` = correct exact-label decisions / decided items.
-- `outcome_counts` reports each state separately.
-- `age_assessment_coverage` = assessed age labels / all supplied gold age labels.
-- `age_accuracy_on_assessed` = matching age labels / assessed age labels.
-  Missing outputs and `AOA_UNKNOWN` are unassessed. `age_accuracy` retains the
-  all-label denominator for compatibility. These are agreement rates with the
-  supplied annotations; assessed-label agreement must accompany its coverage.
-- `binary_detection` reports corresponding binary accuracies and coverage,
-  plus precision, recall, F1, and confusion counts **on decided binary items**.
-  Gold items outside the supported binary labels are excluded from that binary
-  denominator. Abstentions are counted separately by gold class and are never
-  folded into TN or FN.
+L4 compares the original shortlist (default eight terms) in one request and
+returns the strongest target's evidence. The target must be supplied and its
+quotes/split must validate. Rejection, UNKNOWN or invalid output stops; no
+corrective request or next-candidate search follows. `considered_terms` records
+the offered list; only the chosen result has individual validated evidence.
+L5/L6 rejection never resumes search. Dictionary tails are metadata only, and
+exhaustive rejection is not a condition for a bounded negative. The candidate
+budget controls the number of terms offered, not additional requests. The
+legacy continuation flag is a compatibility no-op.
 
-For example, 36 correct decisions out of 40 decided items in a 50-item corpus
-means 90% decided-item accuracy, 80% coverage, and 72% all-item accuracy. An empty
-denominator is reported as null, not as a perfect or zero score.
+Existing transport retries for transient provider errors remain. These are
+separate from response correction or requests for additional semantic evidence.
+Normal-response request bounds are L4 <= 1, L5 <= 1, L6 <= 1, L7/L8 = 0.
+OpenAI-compatible calls retain their selected model; Gemini's configured chain
+is used only after its server-error attempts exhaust. SDK and request-option
+compatibility retries can add calls; counters do not cap HTTP attempts or total
+latency. See [the layer/provider recovery policy](provider_failure_policy.md)
+for exact triggers and terminal behavior.
 
-Saved benchmark scores predate this contract and retain their original run
-definitions. New evaluations flag records without the current contract version
-as `unverified_contract_items`. Resume only reuses current-version, decided,
-error-free records with matching text and target ages; older runs need fresh
-inference to establish results under these checks.
+## Final outcomes
 
-New batch runs save input and source/prompt SHA-256 hashes and nonsecret settings
-in `run_meta.json` before inference. L4 raw responses remain in local run files.
-For the repair rationale, frozen baseline and evaluation protocol, see
-[the repair review](repair_review.md).
+| State | Meaning |
+|---|---|
+| PUN | All required positive detection checks completed |
+| NON_PUN | A completed check rejected the proposed wordplay in the bounded search |
+| INSUFFICIENT_EVIDENCE | Context or a required assessment is missing |
+| EXECUTION_FAILED | Execution or response validation failed |
+| OUT_OF_SCOPE | A different mechanism needs assessment |
 
-Version 4 adds bounded candidate-identifier normalization. The accompanying L6
-wording clarifies the existing ablation criterion without removing its gate.
-Historical version-3 runs and comparison results retain their original version
-and scores. See [the constraint review](constraint_review.md) for the evidence
-and adoption decisions; no new live score is reported for these changes.
+The last three states require review. They do not receive invented senses,
+default confidence or safety passes. L5's resolution score is a stage score,
+not a calibrated probability of correctness.
 
-Production prompts use abstract rules without fixed evaluation examples.
-Development examples are stored separately. See
-[the prompt cleanup and controlled comparison](prompt_cleanup_comparison.md)
-for overlap checks and the comparison procedure.
+## Age assessment
+
+Age response contract `3`, aggregation version `4`. L6's existing request
+returns one compact understanding estimate and separate content/inference
+findings per requested age. L7/L8 validate and aggregate these locally with no
+provider requests. Missing/malformed data fails age assessment; UNKNOWN/null
+remains unknown. AoA citations come from local lookup, never model-written
+numbers. Numeric sense ages and fixed genre age floors are not invented.
+The web interface requests only the selected age. See [age evidence](age_evidence.md).
+
+## Evaluation and provenance
+
+Evaluation includes every gold ID. Missing predictions are failures; duplicate
+or unknown IDs are rejected. Decision coverage is decided/all items, all-item
+accuracy is correct/all items, and decided-item accuracy is correct/decided
+items. Unresolved outputs remain separate from negative predictions. Binary
+precision, recall and F1 are reported on decided binary items, with abstentions
+counted separately by gold class. Empty denominators are null.
+
+Age agreement accompanies assessment coverage. Missing outputs, AOA_UNKNOWN
+and unknown appropriateness are unassessed; no age accuracy improvement is
+established by offline contract tests.
+
+Runs save input/source/prompt hashes and nonsecret settings before inference.
+Resume requires matching provenance, text, ages, current contract versions and
+an error-free decided record. Records with UNKNOWN traces are rerun. Historical
+scores keep their original definitions and cannot establish current accuracy
+or latency. Older continuation, ablation and five-dimension age experiments
+are historical records; reproduce them with their frozen source snapshots.
+
+## Status reference
+
+These values include compatibility labels retained for saved records. Current
+final outcomes and their meaning are described in the result-state table above.
+
+| Field | Values |
+|---|---|
+| `ScopeLabel` | `HOMOGRAPH`, `COMPOUND_SPLIT`, `OUT_OF_SCOPE_HOMOPHONE`, `OUT_OF_SCOPE_NONLEXICAL_JOKE`, `NO_SCOPE_MECHANISM` |
+| `Genre` | `QA_RIDDLE`, `DEFINITIONAL_ONELINER`, `DIALOGUE_MISUNDERSTANDING`, `DECLARATIVE` |
+| `AnchoringStatus` | `PASS`, `FAIL`, `ONE_SENSE_ONLY`, `INSUFFICIENT_EVIDENCE` |
+| `AnchorRelation` | `separate_contexts`, `resegmentation`, `speaker_mismatch` |
+| `ResolutionStatus` | `RESOLUTION_PASS`, `RESOLUTION_FAIL`, `INSUFFICIENT_CONTEXT`, `TRUNCATED_OUTPUT`, `EXECUTION_FAILED` |
+| `DistinctnessStatus` | `SENSES_DISTINCT`, `SENSES_TOO_CLOSE`, `L6_SKIPPED_NO_PARAPHRASE` |
+| `AmbiguityAblation` | `SUPPORTED`, `UNSUPPORTED`, `SKIPPED` |
+| `ComprehensionStatus` | `FULLY_COMPREHENSIBLE`, `PARTIALLY_COMPREHENSIBLE`, `SENSE_B_TOO_ADVANCED`, `WORDPLAY_SKILL_TOO_ADVANCED`, `AOA_UNKNOWN` |
+| `AgeAppropriatenessVerdict` | `UNKNOWN`, `FULLY_AGE_APPROPRIATE`, `CONTENT_OK_INFERENCE_TOO_ADVANCED`, `VOCABULARY_TOO_ADVANCED`, `CONTENT_NOT_APPROPRIATE` |
+| `MainClassification` | `VALID_HOMOGRAPH_JOKE`, `VALID_COMPOUND_SPLIT_JOKE`, `NO_AMBIGUITY_FOUND`, `ONE_SENSE_ONLY`, `ANCHORING_FAIL`, `RESOLUTION_FAIL`, `SENSES_TOO_CLOSE`, `OUT_OF_SCOPE_HOMOPHONE`, `OUT_OF_SCOPE_NONLEXICAL_JOKE`, `INSUFFICIENT_EVIDENCE`, `EXECUTION_FAILED` |
+| `DetectionStatus` | `PUN`, `NON_PUN`, `INSUFFICIENT_EVIDENCE`, `EXECUTION_FAILED`, `OUT_OF_SCOPE` |

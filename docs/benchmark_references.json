@@ -1,0 +1,16 @@
+{
+  "pungraph_homographic": {
+    "paper": "https://arxiv.org/abs/2609.16557v1",
+    "table": 1,
+    "dataset": "SemEval homographic interpretation",
+    "items": 1298,
+    "input": "pun sentence and supplied pun word",
+    "metric_units": "percent",
+    "published_encoder": null,
+    "published_table_threshold": null,
+    "published_interpretation_f1_formula": null,
+    "routing_threshold_in_section_3_2": 0.5,
+    "author_repository": "https://github.com/ysu132/PunGraph",
+    "repository_revision_inspected": "034ed8e9f52962d6b52934a10cd53c7dd8d04595"
+  }
+}

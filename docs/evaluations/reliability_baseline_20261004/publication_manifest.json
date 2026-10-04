@@ -1,0 +1,31 @@
+{
+  "original_run_directory": "runs/corpus_reliability/20261004T214044Z",
+  "original_records_sha256": "d9466d48131025fcd55b7bcfd2903765772a94b55d6be08bf97ba74b9ac69b6a",
+  "original_run_meta_sha256": "9e845ea4e72ae4914b9b22edd1464d10c2f26822078d0fea02d21a0b79000f90",
+  "original_evaluation_sha256": "b7691645e61951d7c6c19974e6ccd86b6dfa84643d580c9531d3046a8ba0d01a",
+  "published_records_sha256": "22458058926f495d54c9e4466b519945c0572167e734544c6669193595e79c83",
+  "published_run_meta_sha256": "0fb67f16ead0c0fbb05a5da024e69f45e1cc31b3cfc0417d1cd54a35e6567aec",
+  "published_evaluation_sha256": "b7691645e61951d7c6c19974e6ccd86b6dfa84643d580c9531d3046a8ba0d01a",
+  "omitted_record_fields": [
+    "l2_result",
+    "l4_attempts",
+    "age_attempts"
+  ],
+  "item_count": 60,
+  "gold_path": "corpus/joke_corpus_gold.jsonl",
+  "gold_sha256": "103769879da029a0f8defe5f2c62674a22cc0142015689ce4ed2eb8efd4607cc",
+  "offline_rescore_matches_every_original_metric": true,
+  "additional_gold_pun_age_view": {
+    "total_labels": 75,
+    "assessed_labels": 53,
+    "correct_labels": 37,
+    "accuracy_all_labels": 0.4933,
+    "assessment_coverage": 0.7067,
+    "accuracy_on_assessed": 0.6981
+  },
+  "limitations": [
+    "Compact records are an explicitly declared projection, not raw SDK receipts.",
+    "Local structural revalidation and metric arithmetic do not prove model semantic correctness.",
+    "The project corpus was inspected during development; these are regression runs, not an unseen benchmark."
+  ]
+}

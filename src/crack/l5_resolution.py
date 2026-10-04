@@ -34,12 +34,6 @@ _PROMPTS_DIR = Path(__file__).parent / "prompts"
 _PLACEHOLDER = re.compile(r"\{(\w+)\}")
 _LOG = logging.getLogger(__name__)
 
-_RETRY_SUFFIX = (
-    "\n\nIMPORTANT: Your previous response could not be parsed as JSON"
-    " or was missing required fields."
-    " Return ONLY a valid JSON object with no surrounding text."
-)
-
 # Weights for branches not covered by settings.L5_QA_WEIGHTS.
 # Each dict must sum to 1.0.
 _L5_DEFINITIONAL_WEIGHTS: dict[str, float] = {
@@ -77,6 +71,7 @@ _GENRE_TO_PROMPT: dict[Genre, str] = {
 class _ResolutionResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
     evidence_sufficient: bool
+    context_consistent: bool | None
     reasoning: str
 
 
@@ -179,7 +174,10 @@ def _resolution_status(
     *,
     min_polarity: float | None = None,
     polarity: float | None = None,
+    context_consistent: bool = True,
 ) -> ResolutionStatus:
+    if not context_consistent:
+        return ResolutionStatus.RESOLUTION_FAIL
     if min_polarity is not None and polarity is not None and polarity < min_polarity:
         return ResolutionStatus.RESOLUTION_FAIL
     return (
@@ -260,29 +258,24 @@ def _call_llm(
     *,
     required_keys: frozenset[str] | None = None,
 ) -> dict[str, Any] | None:
-    """Anthropic path: retry once on JSON-parse or missing-field failure."""
+    """Anthropic path: one response attempt; malformed output fails the layer."""
     if client is None:
         client = anthropic.Anthropic()
 
-    for attempt in range(2):
-        suffix = "" if attempt == 0 else _RETRY_SUFFIX
-        response = client.messages.create(
-            model=model,
-            max_tokens=512,
-            messages=[{"role": "user", "content": prompt_text + suffix}],
-        )
-        require_completion(getattr(response, "stop_reason", None))
-        raw: str = response.content[0].text
-        try:
-            parsed = _extract_json(raw)
-            if required_keys:
-                _validate_keys(parsed, required_keys, attempt, "anthropic")
-            return parsed
-        except (json.JSONDecodeError, ValueError, IndexError):
-            if attempt == 1:
-                return None
-
-    return None  # unreachable
+    response = client.messages.create(
+        model=model,
+        max_tokens=512,
+        messages=[{"role": "user", "content": prompt_text}],
+    )
+    require_completion(getattr(response, "stop_reason", None))
+    raw: str = response.content[0].text
+    try:
+        parsed = _extract_json(raw)
+        if required_keys:
+            _validate_keys(parsed, required_keys, 0, "anthropic")
+        return parsed
+    except (json.JSONDecodeError, ValueError, IndexError):
+        return None
 
 
 # ---------------------------------------------------------------------------
@@ -391,35 +384,31 @@ def _call_gemini_single(
             retries += 1
 
         try:
-            for parse_attempt in range(2):
-                suffix = "" if parse_attempt == 0 else _RETRY_SUFFIX
-                response = _gemini_generate(client, model, prompt_text + suffix, config)
-                raw: str = response.text
-                thoughts = _thoughts_tokens(response)
-                _cand = response.candidates[0] if response.candidates else None
-                _finish = getattr(_cand, "finish_reason", None) if _cand is not None else None
-                if diagnostics is not None:
-                    # Persist the model's ACTUAL response so failed parses are
-                    # not silently discarded (last attempt wins).
-                    diagnostics["raw_text"] = raw if raw is not None else ""
-                    diagnostics["finish_reason"] = str(_finish) if _finish is not None else ""
-                    diagnostics["thoughts_tokens"] = thoughts
+            response = _gemini_generate(client, model, prompt_text, config)
+            raw: str = response.text
+            thoughts = _thoughts_tokens(response)
+            _cand = response.candidates[0] if response.candidates else None
+            _finish = getattr(_cand, "finish_reason", None) if _cand is not None else None
+            if diagnostics is not None:
+                # Persist the model's ACTUAL response so failed parses are
+                # not silently discarded (last attempt wins).
+                diagnostics["raw_text"] = raw if raw is not None else ""
+                diagnostics["finish_reason"] = str(_finish) if _finish is not None else ""
+                diagnostics["thoughts_tokens"] = thoughts
 
-                if _finish == _genai_types.FinishReason.MAX_TOKENS:
-                    # Cut off before emitting complete JSON — surface distinctly,
-                    # do NOT parse or retry (would just truncate again).
-                    return None, retries, None, True, thoughts
+            if _finish == _genai_types.FinishReason.MAX_TOKENS:
+                # Cut off before emitting complete JSON — surface distinctly,
+                # do NOT parse or retry (would just truncate again).
+                return None, retries, None, True, thoughts
 
-                require_completion(_finish)
-                try:
-                    parsed = _extract_json(raw)
-                    if required_keys:
-                        _validate_keys(parsed, required_keys, parse_attempt, "gemini")
-                    return parsed, retries, None, False, thoughts
-                except (json.JSONDecodeError, ValueError, IndexError):
-                    if parse_attempt == 1:
-                        return None, retries, None, False, thoughts
-
+            require_completion(_finish)
+            try:
+                parsed = _extract_json(raw)
+                if required_keys:
+                    _validate_keys(parsed, required_keys, 0, "gemini")
+                return parsed, retries, None, False, thoughts
+            except (json.JSONDecodeError, ValueError, IndexError):
+                return None, retries, None, False, thoughts
         except _GeminiServerError as e:
             if e.code in (500, 502, 503, 504):
                 last_5xx = e
@@ -525,6 +514,7 @@ def _call_openai_l5(
         temperature=0.0,
         required_keys=required_keys,
         validate_fn=_validate,
+        parse_attempts=1,
     )
     return _L5Call(parsed, model, fallback_used, retries, False, None)
 
@@ -542,27 +532,6 @@ def _complete_json(
     diagnostics: dict[str, Any] | None = None,
 ) -> _L5Call:
     backend = resolve_backend(settings.L5_BACKEND, settings)
-
-    # If client is mock, route according to backend and capabilities
-    if client is not None:
-        if backend == "gemini" and hasattr(client, "models"):
-            return _call_gemini_with_chain(
-                prompt, response_model, required_keys, settings, client, diagnostics
-            )
-        if backend == "anthropic" and hasattr(client, "messages"):
-            result = _call_llm(prompt, settings.L5_MODEL_ANTHROPIC, client, required_keys=required_keys)
-            return _L5Call(result, settings.L5_MODEL_ANTHROPIC, False, 0)
-        if backend in PROVIDERS and PROVIDERS[backend].sdk_family == "openai" and hasattr(client, "chat"):
-            return _call_openai_l5(prompt, backend, required_keys, settings, client, diagnostics)
-        if hasattr(client, "models"):
-            return _call_gemini_with_chain(
-                prompt, response_model, required_keys, settings, client, diagnostics
-            )
-        if hasattr(client, "messages"):
-            result = _call_llm(prompt, settings.L5_MODEL_ANTHROPIC, client, required_keys=required_keys)
-            return _L5Call(result, settings.L5_MODEL_ANTHROPIC, False, 0)
-        if hasattr(client, "chat"):
-            return _call_openai_l5(prompt, backend, required_keys, settings, client, diagnostics)
 
     if backend == "gemini":
         return _call_gemini_with_chain(
@@ -590,8 +559,8 @@ def resolve_l5(
 ) -> L5Result:
     """Compute the L5 resolution result for *record*.
 
-    ambiguous_term: explicit override used in tests; if None, derived from
-        l3_result candidates or falls back to sense_a_anchor_quote.
+    ambiguous_term: explicit override used in tests; otherwise use L4's
+        explicitly assessed target. Never substitute an unassessed candidate.
     client: injectable backend client (anthropic.Anthropic or google.genai.Client);
         if None, the appropriate client is created from the environment.
     diagnostics: optional dict sink; if provided, the Gemini path fills it with
@@ -608,6 +577,11 @@ def resolve_l5(
         raise ValueError("L4 must run before L5: l4_result is None")
 
     genre = record.l1_result.genre
+    # A self-contained question can carry wordplay without an answer turn.
+    # Use the existing general wordplay branch rather than inventing a reply
+    # or treating absent QA-specific features as missing evidence.
+    if genre == Genre.QA_RIDDLE and not record.text.partition("?")[2].strip():
+        genre = Genre.DECLARATIVE
     l4 = record.l4_result
 
     if l4.anchoring_status != AnchoringStatus.PASS:
@@ -626,11 +600,9 @@ def resolve_l5(
         )
         return _empty_result(genre)
 
-    term = ambiguous_term
-    if term is None and record.l3_result and record.l3_result.candidates:
-        term = record.l3_result.candidates[0].term
-    if term is None:
-        term = l4.sense_a_anchor_quote
+    term = ambiguous_term if ambiguous_term is not None else l4.target_term
+    if not term:
+        raise ModelResponseError("L5 requires L4's explicit assessed target")
 
     prompt = _render_prompt(genre, record.text, term, l4)
 
@@ -648,7 +620,7 @@ def resolve_l5(
         response_model = _DialogueLLMResponse
 
     call = _complete_json(
-        prompt, frozenset(weights) | {"evidence_sufficient", "reasoning"}, response_model, settings, client, diagnostics
+        prompt, frozenset(weights) | {"evidence_sufficient", "context_consistent", "reasoning"}, response_model, settings, client, diagnostics
     )
 
     if call.truncated:
@@ -685,6 +657,7 @@ def resolve_l5(
         model_used=call.model_used,
         fallback_used=call.fallback_used,
         retries=call.retries,
+        context_consistent=parsed["context_consistent"],
     )
 
     if genre == Genre.QA_RIDDLE:
@@ -695,23 +668,24 @@ def resolve_l5(
                 settings.L5_RESOLUTION_THRESHOLDS[genre],
                 min_polarity=settings.L5_QA_MIN_POLARITY,
                 polarity=subscores.get("polarity_or_direction"),
+                context_consistent=parsed["context_consistent"],
             ),
             **kw,
         )
     if genre == Genre.DEFINITIONAL_ONELINER:
         return L5DefinitionalResult(
             genre=Genre.DEFINITIONAL_ONELINER,
-            resolution_status=_resolution_status(score, settings.L5_RESOLUTION_THRESHOLDS[genre]),
+            resolution_status=_resolution_status(score, settings.L5_RESOLUTION_THRESHOLDS[genre], context_consistent=parsed["context_consistent"]),
             **kw,
         )
     if genre == Genre.DECLARATIVE:
         return L5DeclarativeResult(
             genre=Genre.DECLARATIVE,
-            resolution_status=_resolution_status(score, settings.L5_RESOLUTION_THRESHOLDS[genre]),
+            resolution_status=_resolution_status(score, settings.L5_RESOLUTION_THRESHOLDS[genre], context_consistent=parsed["context_consistent"]),
             **kw,
         )
     return L5DialogueResult(
         genre=genre,
-        resolution_status=_resolution_status(score, settings.L5_RESOLUTION_THRESHOLDS[genre]),
+        resolution_status=_resolution_status(score, settings.L5_RESOLUTION_THRESHOLDS[genre], context_consistent=parsed["context_consistent"]),
         **kw,
     )

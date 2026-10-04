@@ -1,0 +1,365 @@
+{
+  "run_path": "/Users/yizhengjiang/Desktop/Git/Joke_identification/runs/age_aggregation/20261003T201305.305628Z",
+  "source_run": "/Users/yizhengjiang/Desktop/Git/Joke_identification/runs/age_evidence/20261003T185243.323665Z",
+  "scope": "offline age aggregation; no fresh model or reviewer calls",
+  "records": 60,
+  "revalidated_l7_l8_pairs": 26,
+  "new_api_calls": 0,
+  "new_api_tokens": 0,
+  "offline_processing_seconds": 0.046355165977729484,
+  "original_inference_times_preserved": true,
+  "underlying_evidence_raw_replies_detection_preserved": true,
+  "changed_age_verdicts": 9,
+  "changed_comprehension_labels": 9,
+  "changed_appropriateness_labels": 1,
+  "records_sha256": "094a6d4c1f54352ad055f21e6fe37a4437a15e8f18ca948160131c66e8b3e91a",
+  "arms": {
+    "before": {
+      "detection": {
+        "counts": {
+          "tp": 23,
+          "fn": 1,
+          "unresolved_positive": 1,
+          "tn": 32,
+          "fp": 3
+        },
+        "correct": 55,
+        "accuracy_all": 0.9166666666666666,
+        "accuracy_decided": 0.9322033898305084,
+        "precision": 0.8846153846153846,
+        "recall_full_gold": 0.92,
+        "f1_full_gold": 0.9019607843137255,
+        "coverage": 0.9833333333333333,
+        "outcomes": {
+          "PUN": 26,
+          "NON_PUN": 33,
+          "INSUFFICIENT_EVIDENCE": 1
+        }
+      },
+      "gold_pun_age_labels": {
+        "total": 75,
+        "assessed": 45,
+        "matches": 37,
+        "agreement_all": 0.49333333333333335,
+        "coverage": 0.6,
+        "agreement_assessed": 0.8222222222222222,
+        "ages_with_verified_vocabulary_citations": 69,
+        "vocabulary_citation_coverage": 0.92
+      },
+      "all_age_labels": {
+        "total": 180,
+        "assessed": 50,
+        "matches": 41,
+        "agreement_all": 0.22777777777777777,
+        "coverage": 0.2777777777777778,
+        "agreement_assessed": 0.82,
+        "ages_with_verified_vocabulary_citations": 78,
+        "vocabulary_citation_coverage": 0.43333333333333335
+      },
+      "gold_pun_dimensions": {
+        "total_age_labels": 75,
+        "ages_with_dimensions": 69,
+        "ages_with_unknown_dimensions": 24,
+        "fully_assessed_ages": 45,
+        "ages_with_barriers": 13,
+        "barrier_and_unknown_ages": 8,
+        "without_dimension_assessment": 6,
+        "fully_assessed_coverage": 0.6,
+        "unknown_dimensions": {
+          "sense_a": 7,
+          "sense_b": 15,
+          "vocabulary": 8,
+          "wordplay": 13,
+          "background_knowledge": 9
+        }
+      }
+    },
+    "after": {
+      "detection": {
+        "counts": {
+          "tp": 23,
+          "fn": 1,
+          "unresolved_positive": 1,
+          "tn": 32,
+          "fp": 3
+        },
+        "correct": 55,
+        "accuracy_all": 0.9166666666666666,
+        "accuracy_decided": 0.9322033898305084,
+        "precision": 0.8846153846153846,
+        "recall_full_gold": 0.92,
+        "f1_full_gold": 0.9019607843137255,
+        "coverage": 0.9833333333333333,
+        "outcomes": {
+          "PUN": 26,
+          "NON_PUN": 33,
+          "INSUFFICIENT_EVIDENCE": 1
+        }
+      },
+      "gold_pun_age_labels": {
+        "total": 75,
+        "assessed": 53,
+        "matches": 42,
+        "agreement_all": 0.56,
+        "coverage": 0.7066666666666667,
+        "agreement_assessed": 0.7924528301886793,
+        "ages_with_verified_vocabulary_citations": 69,
+        "vocabulary_citation_coverage": 0.92
+      },
+      "all_age_labels": {
+        "total": 180,
+        "assessed": 59,
+        "matches": 46,
+        "agreement_all": 0.25555555555555554,
+        "coverage": 0.3277777777777778,
+        "agreement_assessed": 0.7796610169491526,
+        "ages_with_verified_vocabulary_citations": 78,
+        "vocabulary_citation_coverage": 0.43333333333333335
+      },
+      "gold_pun_dimensions": {
+        "total_age_labels": 75,
+        "ages_with_dimensions": 69,
+        "ages_with_unknown_dimensions": 24,
+        "fully_assessed_ages": 45,
+        "ages_with_barriers": 13,
+        "barrier_and_unknown_ages": 8,
+        "without_dimension_assessment": 6,
+        "fully_assessed_coverage": 0.6,
+        "unknown_dimensions": {
+          "sense_a": 7,
+          "sense_b": 15,
+          "vocabulary": 8,
+          "wordplay": 13,
+          "background_knowledge": 9
+        }
+      }
+    }
+  },
+  "frozen_artifacts": {
+    "manifest_sha256": "29d9b2c04e26280a9dd426d875116efad4f1c123f2b5b4e7e58a1437ec3443d7",
+    "source_records_sha256": "436687adf83e3ea202dbac352464184da45d13edccfba6857e1b4f5d4b324552",
+    "input_sha256": {
+      "blind.jsonl": "2bb32346fb40148bdd73800358935cc7d745af04f0de44880d526528ceed4c70",
+      "gold.jsonl": "103769879da029a0f8defe5f2c62674a22cc0142015689ce4ed2eb8efd4607cc",
+      "shared_inputs.jsonl": "7744681a16a6fea0422d017f1f8c9578c269565a855b1382707e3f43dab60e86"
+    },
+    "age_resource_sha256": "45db20f3083b2f38904751d498fa5a60e19e89f59ed4b44c8a0b791de31b87d8",
+    "runner_sha256": "34eb8fdf84430387f9e2da82ac22249fad86ddc206c4d5a0c1ab85ea4510b74f",
+    "evaluator_sha256": "76ddc74a1079aa6b36d88092cea02759a09033a259926a854b41139cb1508577"
+  },
+  "changes": [
+    {
+      "item_id": "J01",
+      "age": 6,
+      "before": {
+        "comprehension": "AOA_UNKNOWN",
+        "appropriateness": "CONTENT_OK_INFERENCE_TOO_ADVANCED"
+      },
+      "after": {
+        "comprehension": "PARTIALLY_COMPREHENSIBLE",
+        "appropriateness": "CONTENT_OK_INFERENCE_TOO_ADVANCED"
+      },
+      "summary": {
+        "status": "PARTIALLY_COMPREHENSIBLE",
+        "barrier_dimensions": [
+          "vocabulary",
+          "wordplay"
+        ],
+        "unknown_dimensions": [
+          "sense_a",
+          "sense_b"
+        ],
+        "fully_assessed": false
+      }
+    },
+    {
+      "item_id": "J04",
+      "age": 8,
+      "before": {
+        "comprehension": "AOA_UNKNOWN",
+        "appropriateness": "CONTENT_OK_INFERENCE_TOO_ADVANCED"
+      },
+      "after": {
+        "comprehension": "PARTIALLY_COMPREHENSIBLE",
+        "appropriateness": "CONTENT_OK_INFERENCE_TOO_ADVANCED"
+      },
+      "summary": {
+        "status": "PARTIALLY_COMPREHENSIBLE",
+        "barrier_dimensions": [
+          "vocabulary",
+          "sense_b",
+          "wordplay",
+          "background_knowledge"
+        ],
+        "unknown_dimensions": [
+          "sense_a"
+        ],
+        "fully_assessed": false
+      }
+    },
+    {
+      "item_id": "J09",
+      "age": 6,
+      "before": {
+        "comprehension": "AOA_UNKNOWN",
+        "appropriateness": "CONTENT_OK_INFERENCE_TOO_ADVANCED"
+      },
+      "after": {
+        "comprehension": "PARTIALLY_COMPREHENSIBLE",
+        "appropriateness": "CONTENT_OK_INFERENCE_TOO_ADVANCED"
+      },
+      "summary": {
+        "status": "PARTIALLY_COMPREHENSIBLE",
+        "barrier_dimensions": [
+          "vocabulary",
+          "wordplay"
+        ],
+        "unknown_dimensions": [
+          "background_knowledge"
+        ],
+        "fully_assessed": false
+      }
+    },
+    {
+      "item_id": "J07",
+      "age": 6,
+      "before": {
+        "comprehension": "AOA_UNKNOWN",
+        "appropriateness": "CONTENT_OK_INFERENCE_TOO_ADVANCED"
+      },
+      "after": {
+        "comprehension": "PARTIALLY_COMPREHENSIBLE",
+        "appropriateness": "CONTENT_OK_INFERENCE_TOO_ADVANCED"
+      },
+      "summary": {
+        "status": "PARTIALLY_COMPREHENSIBLE",
+        "barrier_dimensions": [
+          "sense_a",
+          "wordplay"
+        ],
+        "unknown_dimensions": [
+          "vocabulary"
+        ],
+        "fully_assessed": false
+      }
+    },
+    {
+      "item_id": "J19",
+      "age": 8,
+      "before": {
+        "comprehension": "AOA_UNKNOWN",
+        "appropriateness": "CONTENT_OK_INFERENCE_TOO_ADVANCED"
+      },
+      "after": {
+        "comprehension": "PARTIALLY_COMPREHENSIBLE",
+        "appropriateness": "CONTENT_OK_INFERENCE_TOO_ADVANCED"
+      },
+      "summary": {
+        "status": "PARTIALLY_COMPREHENSIBLE",
+        "barrier_dimensions": [
+          "vocabulary",
+          "wordplay"
+        ],
+        "unknown_dimensions": [
+          "sense_b",
+          "background_knowledge"
+        ],
+        "fully_assessed": false
+      }
+    },
+    {
+      "item_id": "J16",
+      "age": 6,
+      "before": {
+        "comprehension": "AOA_UNKNOWN",
+        "appropriateness": "UNKNOWN"
+      },
+      "after": {
+        "comprehension": "PARTIALLY_COMPREHENSIBLE",
+        "appropriateness": "UNKNOWN"
+      },
+      "summary": {
+        "status": "PARTIALLY_COMPREHENSIBLE",
+        "barrier_dimensions": [
+          "vocabulary"
+        ],
+        "unknown_dimensions": [
+          "wordplay"
+        ],
+        "fully_assessed": false
+      }
+    },
+    {
+      "item_id": "J25",
+      "age": 8,
+      "before": {
+        "comprehension": "AOA_UNKNOWN",
+        "appropriateness": "UNKNOWN"
+      },
+      "after": {
+        "comprehension": "PARTIALLY_COMPREHENSIBLE",
+        "appropriateness": "VOCABULARY_TOO_ADVANCED"
+      },
+      "summary": {
+        "status": "PARTIALLY_COMPREHENSIBLE",
+        "barrier_dimensions": [
+          "vocabulary",
+          "sense_a",
+          "wordplay"
+        ],
+        "unknown_dimensions": [
+          "sense_b"
+        ],
+        "fully_assessed": false
+      }
+    },
+    {
+      "item_id": "D03",
+      "age": 6,
+      "before": {
+        "comprehension": "AOA_UNKNOWN",
+        "appropriateness": "CONTENT_OK_INFERENCE_TOO_ADVANCED"
+      },
+      "after": {
+        "comprehension": "PARTIALLY_COMPREHENSIBLE",
+        "appropriateness": "CONTENT_OK_INFERENCE_TOO_ADVANCED"
+      },
+      "summary": {
+        "status": "PARTIALLY_COMPREHENSIBLE",
+        "barrier_dimensions": [
+          "vocabulary",
+          "wordplay"
+        ],
+        "unknown_dimensions": [
+          "sense_a",
+          "sense_b"
+        ],
+        "fully_assessed": false
+      }
+    },
+    {
+      "item_id": "J20",
+      "age": 6,
+      "before": {
+        "comprehension": "AOA_UNKNOWN",
+        "appropriateness": "CONTENT_OK_INFERENCE_TOO_ADVANCED"
+      },
+      "after": {
+        "comprehension": "PARTIALLY_COMPREHENSIBLE",
+        "appropriateness": "CONTENT_OK_INFERENCE_TOO_ADVANCED"
+      },
+      "summary": {
+        "status": "PARTIALLY_COMPREHENSIBLE",
+        "barrier_dimensions": [
+          "vocabulary",
+          "wordplay"
+        ],
+        "unknown_dimensions": [
+          "sense_b",
+          "background_knowledge"
+        ],
+        "fully_assessed": false
+      }
+    }
+  ]
+}

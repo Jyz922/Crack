@@ -1,4 +1,43 @@
+> Historical experiment. Current search policy `3` checks only the original
+> L4 shortlist (up to eight terms), stops on unknown/error, and never resumes
+> after L5/L6 rejection. The continuation policy below is retired. Reproduce
+> its saved comparisons with frozen source snapshots, not the current runtime.
+> See [current response rules](response_validation.md).
+
 # Completing the candidate search
+
+## Extension: candidate-level L4–L6 continuation
+
+Search policy version `2` completes the L5/L6 checks for a candidate before
+accepting it as the text's target. If those checks reject it or remain uncertain,
+automatic search resumes in the original ranked order, skipping terms already
+assessed. The default budget remains 24 distinct L4 candidates for the entire
+item. Scope rules, response checks, prompts, semantic thresholds and age
+algorithms remain unchanged.
+
+`candidate_assessments` preserves per-term L4/L5/L6 outputs and outcomes. An
+uncertain candidate cannot be erased by later negative findings. A complete
+negative requires all retrieved candidates to have conclusive rejections;
+budget exhaustion or unavailable candidates remain insufficient evidence.
+Execution/validation failures stop the item, and are never bypassed by trying
+another term. Age assessment runs on the final accepted candidate only.
+
+Use `--no-candidate-continuation` for the previous search policy. Resume checks
+the separate search-policy version so older results are not silently reused.
+The implementation below describes the earlier L4-only continuation; its saved
+results and rationale remain historical records.
+
+The fixed-prefix comparison protocol is in
+[candidate_continuation_protocol.md](../experiments/full_assignment/candidate_continuation_protocol.md).
+It reuses byte-identical, request-matched SDK replies from the saved 60-item
+full-assignment run and calls the model only for new candidates. Both policies
+must reproduce that original prefix. This isolates continuation from resampling
+the initial findings, and supplies full outputs for anonymous review; it does
+not measure fresh end-to-end runtime or generalization.
+
+```bash
+.venv/bin/python scripts/compare_candidate_continuation.py --concurrency 8
+```
 
 ## Diagnosis
 

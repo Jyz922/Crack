@@ -26,6 +26,7 @@ from crack.l5_resolution import (
     resolve_l5,
 )
 from crack.providers import resolve_backend
+from crack.validation import ModelResponseError
 from crack.schema import (
     AnalysisRecord,
     L1Result,
@@ -42,6 +43,12 @@ _FIXTURES_PATH = Path(__file__).parent / "fixtures" / "l5_anchors.jsonl"
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
+def _assessed_json(scores):
+    """A complete assessed response envelope for the mocked score fixtures."""
+    return json.dumps({"evidence_sufficient": True, "context_consistent": True,
+                       "reasoning": "The source supports this assessed finding.", **scores})
+
 
 def _make_record(
     text: str,
@@ -66,9 +73,11 @@ def _mock_client(responses: list[str]) -> MagicMock:
     for text in responses:
         a = MagicMock()
         a.content = [MagicMock(text=text)]
+        a.stop_reason = "end_turn"
         anthropic_msgs.append(a)
         g = MagicMock()
         g.text = text
+        g.candidates = [MagicMock(finish_reason=FinishReason.STOP)]
         gemini_msgs.append(g)
     client.messages.create.side_effect = anthropic_msgs
     client.models.generate_content.side_effect = gemini_msgs
@@ -232,7 +241,7 @@ class TestResolveL5Offline:
 
     def test_qa_pass_with_high_scores(self) -> None:
         record = _make_record(self._QA_TEXT, Genre.QA_RIDDLE, self._qa_l4())
-        payload = json.dumps({
+        payload = _assessed_json({
             "polarity_or_direction": 0.9, "answer_relevance": 0.9,
             "causal": 0.9, "agent": 0.9, "tense_aspect": 0.9,
             "reasoning": "Strong polarity flip.",
@@ -247,7 +256,7 @@ class TestResolveL5Offline:
 
     def test_qa_fail_with_low_scores(self) -> None:
         record = _make_record(self._QA_TEXT, Genre.QA_RIDDLE, self._qa_l4())
-        payload = json.dumps({
+        payload = _assessed_json({
             "polarity_or_direction": 0.1, "answer_relevance": 0.1,
             "causal": 0.1, "agent": 0.1, "tense_aspect": 0.1,
             "reasoning": "Weak.",
@@ -262,7 +271,7 @@ class TestResolveL5Offline:
     def test_qa_fail_when_polarity_is_zero_despite_other_high_subscores(self) -> None:
         """Contradicted polarity cannot PASS even if other subscores sum to > threshold (0.55 >= 0.46)."""
         record = _make_record(self._QA_TEXT, Genre.QA_RIDDLE, self._qa_l4())
-        payload = json.dumps({
+        payload = _assessed_json({
             "polarity_or_direction": 0.0, "answer_relevance": 1.0,
             "causal": 1.0, "agent": 1.0, "tense_aspect": 1.0,
             "reasoning": "Contradicted polarity.",
@@ -278,7 +287,7 @@ class TestResolveL5Offline:
     def test_definitional_pass_same_span_anchor_allowed(self) -> None:
         """Resegmentation items have identical anchor quotes — must not be penalised."""
         record = _make_record(self._DEF_TEXT, Genre.DEFINITIONAL_ONELINER, self._definitional_l4())
-        payload = json.dumps({
+        payload = _assessed_json({
             "setup_invites_literal": 0.9, "punchline_exploits_split": 0.9,
             "contrast_strength": 0.9, "reasoning": "Strong compound split.",
         })
@@ -291,7 +300,7 @@ class TestResolveL5Offline:
 
     def test_dialogue_pass(self) -> None:
         record = _make_record(self._DLG_TEXT, Genre.DIALOGUE_MISUNDERSTANDING, self._dialogue_l4())
-        payload = json.dumps({
+        payload = _assessed_json({
             "misunderstanding_plausible": 0.9, "contrast_clear": 0.9,
             "speaker_intention_clear": 0.9, "reasoning": "Clear misunderstanding.",
         })
@@ -322,14 +331,12 @@ class TestResolveL5Offline:
         failing_client.messages.create.assert_not_called()
         failing_client.models.generate_content.assert_not_called()
 
-    def test_insufficient_context_after_two_json_failures(self) -> None:
+    def test_malformed_json_is_execution_failure_without_retry(self) -> None:
         record = _make_record(self._QA_TEXT, Genre.QA_RIDDLE, self._qa_l4())
-        result = resolve_l5(
-            record, DEFAULT_SETTINGS,
-            ambiguous_term="guts",
-            client=_mock_client(["not json", "still not json"]),
-        )
-        assert result.resolution_status == ResolutionStatus.INSUFFICIENT_CONTEXT
+        client = _mock_client(["not json", "still not json"])
+        with pytest.raises(ModelResponseError):
+            resolve_l5(record, DEFAULT_SETTINGS, ambiguous_term="guts", client=client)
+        client.models.generate_content.assert_called_once()
 
     def test_max_tokens_yields_truncated_not_insufficient(self) -> None:
         """finish_reason=MAX_TOKENS must map to TRUNCATED_OUTPUT, distinct from
@@ -353,20 +360,13 @@ class TestResolveL5Offline:
         # No parse retry, no fallback — exactly one model call.
         client.models.generate_content.assert_called_once()
 
-    def test_retry_succeeds_on_second_attempt(self) -> None:
-        """First response is malformed; second is valid — must return a real verdict."""
+    def test_valid_second_response_is_not_used_to_repair_failure(self) -> None:
         record = _make_record(self._QA_TEXT, Genre.QA_RIDDLE, self._qa_l4())
-        good = json.dumps({
-            "polarity_or_direction": 0.8, "answer_relevance": 0.8,
-            "causal": 0.8, "agent": 0.8, "tense_aspect": 0.8,
-            "reasoning": "Retry success.",
-        })
-        result = resolve_l5(
-            record, DEFAULT_SETTINGS,
-            ambiguous_term="guts",
-            client=_mock_client(["not json at all", good]),
-        )
-        assert result.resolution_status == ResolutionStatus.RESOLUTION_PASS
+        good = _assessed_json({k: .9 for k in DEFAULT_SETTINGS.L5_QA_WEIGHTS})
+        client = _mock_client(["not json", good])
+        with pytest.raises(ModelResponseError):
+            resolve_l5(record, DEFAULT_SETTINGS, ambiguous_term="guts", client=client)
+        client.models.generate_content.assert_called_once()
 
     def test_raises_when_l1_result_absent(self) -> None:
         record = AnalysisRecord(item_id="x", text="test", target_ages=[8])
@@ -384,7 +384,7 @@ class TestResolveL5Offline:
         """Verify the weighted score formula against known inputs."""
         record = _make_record(self._QA_TEXT, Genre.QA_RIDDLE, self._qa_l4())
         # All subscores = 1.0 → weighted sum must equal 1.0
-        payload = json.dumps({k: 1.0 for k in DEFAULT_SETTINGS.L5_QA_WEIGHTS} | {"reasoning": "all max"})
+        payload = _assessed_json({k: 1.0 for k in DEFAULT_SETTINGS.L5_QA_WEIGHTS} | {"reasoning": "all max"})
         result = resolve_l5(
             record, DEFAULT_SETTINGS,
             ambiguous_term="guts", client=_mock_client([payload]),
@@ -394,7 +394,7 @@ class TestResolveL5Offline:
 
     def test_definitional_score_uses_correct_weights(self) -> None:
         record = _make_record(self._DEF_TEXT, Genre.DEFINITIONAL_ONELINER, self._definitional_l4())
-        payload = json.dumps({k: 1.0 for k in _L5_DEFINITIONAL_WEIGHTS} | {"reasoning": "all max"})
+        payload = _assessed_json({k: 1.0 for k in _L5_DEFINITIONAL_WEIGHTS} | {"reasoning": "all max"})
         result = resolve_l5(
             record, DEFAULT_SETTINGS,
             ambiguous_term="autobiography", client=_mock_client([payload]),
@@ -404,7 +404,7 @@ class TestResolveL5Offline:
 
     def test_dialogue_score_uses_correct_weights(self) -> None:
         record = _make_record(self._DLG_TEXT, Genre.DIALOGUE_MISUNDERSTANDING, self._dialogue_l4())
-        payload = json.dumps({k: 1.0 for k in _L5_DIALOGUE_WEIGHTS} | {"reasoning": "all max"})
+        payload = _assessed_json({k: 1.0 for k in _L5_DIALOGUE_WEIGHTS} | {"reasoning": "all max"})
         result = resolve_l5(
             record, DEFAULT_SETTINGS,
             ambiguous_term="pull yourself together", client=_mock_client([payload]),
@@ -436,7 +436,7 @@ class TestResolveL5Offline:
         assert "{sense_a" not in template and "{sense_b" not in template
         l4 = self._definitional_l4()
         rendered = _render_prompt(genre, self._DEF_TEXT, "autobiography", l4)
-        assert "resolves to):** auto (car) + biography" in rendered
+        assert l4.sense_b in rendered
 
     def test_pass_anchoring_requires_resolving_sense(self) -> None:
         with pytest.raises(ValidationError):
@@ -451,12 +451,12 @@ class TestResolveL5Offline:
         qa = resolve_l5(
             _make_record(self._QA_TEXT, Genre.QA_RIDDLE, self._qa_l4()),
             DEFAULT_SETTINGS, ambiguous_term="guts",
-            client=_mock_client([json.dumps({k: 0.35 for k in DEFAULT_SETTINGS.L5_QA_WEIGHTS})]),
+            client=_mock_client([_assessed_json({k: 0.35 for k in DEFAULT_SETTINGS.L5_QA_WEIGHTS})]),
         )
         decl = resolve_l5(
             _make_record(self._QA_TEXT, Genre.DECLARATIVE, self._qa_l4()),
             DEFAULT_SETTINGS, ambiguous_term="guts",
-            client=_mock_client([json.dumps({k: 0.35 for k in _L5_DECLARATIVE_WEIGHTS})]),
+            client=_mock_client([_assessed_json({k: 0.35 for k in _L5_DECLARATIVE_WEIGHTS})]),
         )
         assert qa.resolution_status == ResolutionStatus.RESOLUTION_FAIL
         assert decl.resolution_status == ResolutionStatus.RESOLUTION_PASS
@@ -474,7 +474,7 @@ class TestResolveL5Offline:
         record = _make_record(
             "The fishermen are calculating the net loss.", Genre.DECLARATIVE, l4
         )
-        payload = json.dumps({k: 1.0 for k in _L5_DECLARATIVE_WEIGHTS} | {"reasoning": "all max"})
+        payload = _assessed_json({k: 1.0 for k in _L5_DECLARATIVE_WEIGHTS} | {"reasoning": "all max"})
         result = resolve_l5(
             record, DEFAULT_SETTINGS,
             ambiguous_term="net", client=_mock_client([payload]),
@@ -533,7 +533,7 @@ def test_fixture_item_offline(fixture: dict[str, Any]) -> None:
     else:
         keys = list(_L5_DIALOGUE_WEIGHTS.keys())
 
-    payload = json.dumps({k: score_val for k in keys} | {"reasoning": "mock"})
+    payload = _assessed_json({k: score_val for k in keys} | {"reasoning": "mock"})
     result = resolve_l5(
         record, DEFAULT_SETTINGS,
         ambiguous_term=fixture["ambiguous_term"],
@@ -565,7 +565,7 @@ def _qa_record_for_routing() -> AnalysisRecord:
 
 def test_anthropic_backend_calls_messages_create_not_gemini() -> None:
     settings = Settings(L5_BACKEND="anthropic")
-    payload = json.dumps({k: 0.9 for k in settings.L5_QA_WEIGHTS})
+    payload = _assessed_json({k: 0.9 for k in settings.L5_QA_WEIGHTS})
     client = _mock_client([payload])
     resolve_l5(_qa_record_for_routing(), settings, ambiguous_term="guts", client=client)
     client.messages.create.assert_called_once()
@@ -574,7 +574,7 @@ def test_anthropic_backend_calls_messages_create_not_gemini() -> None:
 
 def test_gemini_backend_calls_generate_content_not_anthropic() -> None:
     settings = Settings(L5_BACKEND="gemini")
-    payload = json.dumps({k: 0.9 for k in settings.L5_QA_WEIGHTS})
+    payload = _assessed_json({k: 0.9 for k in settings.L5_QA_WEIGHTS})
     client = _mock_client([payload])
     resolve_l5(_qa_record_for_routing(), settings, ambiguous_term="guts", client=client)
     client.models.generate_content.assert_called_once()
@@ -595,10 +595,12 @@ def test_openai_and_deepseek_backends_accepted_at_config_load() -> None:
 
 def test_openai_backend_calls_chat_completions() -> None:
     settings = Settings(L5_BACKEND="openai")
-    payload = json.dumps({k: 0.9 for k in settings.L5_QA_WEIGHTS})
+    payload = _assessed_json({k: 0.9 for k in settings.L5_QA_WEIGHTS})
     client = MagicMock()
     choice = MagicMock()
     choice.message.content = payload
+    choice.finish_reason = "stop"
+    choice.message.refusal = None
     client.chat.completions.create.return_value = MagicMock(choices=[choice])
     resolve_l5(_qa_record_for_routing(), settings, ambiguous_term="guts", client=client)
     client.chat.completions.create.assert_called_once()
@@ -606,10 +608,12 @@ def test_openai_backend_calls_chat_completions() -> None:
 
 def test_deepseek_backend_calls_chat_completions() -> None:
     settings = Settings(L5_BACKEND="deepseek")
-    payload = json.dumps({k: 0.9 for k in settings.L5_QA_WEIGHTS})
+    payload = _assessed_json({k: 0.9 for k in settings.L5_QA_WEIGHTS})
     client = MagicMock()
     choice = MagicMock()
     choice.message.content = payload
+    choice.finish_reason = "stop"
+    choice.message.refusal = None
     client.chat.completions.create.return_value = MagicMock(choices=[choice])
     resolve_l5(_qa_record_for_routing(), settings, ambiguous_term="guts", client=client)
     client.chat.completions.create.assert_called_once()
@@ -690,7 +694,8 @@ def test_5xx_then_success_two_calls_one_sleep() -> None:
     settings = Settings(L5_BACKEND="gemini")
     client = MagicMock()
     good = MagicMock()
-    good.text = json.dumps({k: 0.9 for k in settings.L5_QA_WEIGHTS})
+    good.text = _assessed_json({k: 0.9 for k in settings.L5_QA_WEIGHTS})
+    good.candidates = [MagicMock(finish_reason=FinishReason.STOP)]
     client.models.generate_content.side_effect = [_make_server_error(503), good]
 
     with patch("crack.l5_resolution.time.sleep") as mock_sleep:
@@ -710,7 +715,8 @@ def test_five_503s_on_primary_triggers_fallback() -> None:
     )
     client = MagicMock()
     good = MagicMock()
-    good.text = json.dumps({k: 0.9 for k in settings.L5_QA_WEIGHTS})
+    good.text = _assessed_json({k: 0.9 for k in settings.L5_QA_WEIGHTS})
+    good.candidates = [MagicMock(finish_reason=FinishReason.STOP)]
     client.models.generate_content.side_effect = [_make_server_error(503)] * 5 + [good]
 
     with patch("crack.l5_resolution.time.sleep") as mock_sleep:

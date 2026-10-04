@@ -1,11 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="970" viewBox="0 0 1280 970" role="img" aria-labelledby="title description">
   <title id="title">CRACK analysis pipeline structure</title>
-  <desc id="description">A left-to-right diagram of CRACK. The pipeline validates text in L0-pre, routes the text in L1, retrieves lexical evidence in L2, ranks candidates in L3, uses LLM anchoring in L4, evaluates resolution in L5, checks sense distinctness in L6, estimates comprehension in L7, evaluates appropriateness in L8, and assigns a final classification in L0-post. Stages may stop or skip when prerequisites are missing.</desc>
+  <desc id="description">A left-to-right diagram of CRACK. The pipeline validates text in L0-pre, routes the text in L1, retrieves lexical evidence in L2, ranks candidates in L3, uses LLM anchoring in L4, evaluates resolution in L5, checks sense distinctness in L6, returns compact age estimates in L6, locally validates comprehension in L7, locally aggregates appropriateness in L8, and assigns a final classification in L0-post. Stages may stop or skip when prerequisites are missing.</desc>
   <rect x="10" y="10" width="1260" height="950" rx="18" fill="#ffffff" stroke="#dbe4e9"/>
   <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-variant-numeric="tabular-nums">
     <text x="52" y="48" fill="#13836f" font-size="15" font-weight="700" letter-spacing="1.8">CRACK / PIPELINE</text>
     <text x="52" y="101" fill="#1b2e3d" font-size="42" font-weight="700">How CRACK analyzes wordplay</text>
-    <text x="52" y="137" fill="#657789" font-size="20">From joke text and target ages to evidence-grounded classification</text>
+    <text x="52" y="137" fill="#657789" font-size="20">From English text and target ages to evidence-grounded classification</text>
 
     <!-- Phase 1 -->
     <rect x="40" y="246" width="378" height="527" rx="16" fill="#f5f8fa" stroke="#dbe4e9"/>
@@ -51,8 +51,8 @@
     <rect x="465" y="382" width="350" height="64" rx="9" fill="#ffffff" stroke="#dbe4e9"/>
     <rect x="479" y="400" width="62" height="28" rx="7" fill="#e8f6f2"/>
     <text x="510" y="419" fill="#13836f" font-size="12" font-weight="700" text-anchor="middle">L4</text>
-    <text x="555" y="407" fill="#1b2e3d" font-size="15" font-weight="700">LLM anchoring</text>
-    <text x="555" y="427" fill="#657789" font-size="13">Checks readings against text spans</text>
+    <text x="555" y="407" fill="#1b2e3d" font-size="15" font-weight="700">Target &amp; anchoring</text>
+    <text x="555" y="427" fill="#657789" font-size="13">One shortlist request · exact source cues</text>
 
     <path d="M640 446 V462 M636 458 L640 462 L644 458" fill="none" stroke="#13836f" stroke-width="2"/>
     <rect x="465" y="464" width="350" height="64" rx="9" fill="#ffffff" stroke="#dbe4e9"/>
@@ -66,11 +66,11 @@
     <rect x="479" y="564" width="62" height="28" rx="7" fill="#e8f6f2"/>
     <text x="510" y="583" fill="#13836f" font-size="12" font-weight="700" text-anchor="middle">L6</text>
     <text x="555" y="571" fill="#1b2e3d" font-size="15" font-weight="700">Sense distinctness</text>
-    <text x="555" y="591" fill="#657789" font-size="13">Checks that the readings differ</text>
+    <text x="555" y="591" fill="#657789" font-size="13">Distinct meanings + shared age estimates</text>
 
     <rect x="479" y="638" width="322" height="42" rx="8" fill="#e8f6f2"/>
     <text x="640" y="656" fill="#13836f" font-size="12" font-weight="700" text-anchor="middle">EVIDENCE-BASED FLOW</text>
-    <text x="640" y="672" fill="#526678" font-size="12" text-anchor="middle">Missing prerequisites can skip later stages</text>
+    <text x="640" y="672" fill="#526678" font-size="12" text-anchor="middle">FAIL / UNKNOWN / ERROR stops dependents</text>
 
     <!-- Phase 3 -->
     <rect x="862" y="246" width="378" height="527" rx="16" fill="#f5f8fa" stroke="#dbe4e9"/>
@@ -83,7 +83,7 @@
     <rect x="890" y="400" width="62" height="28" rx="7" fill="#e8f6f2"/>
     <text x="921" y="419" fill="#13836f" font-size="12" font-weight="700" text-anchor="middle">L7</text>
     <text x="966" y="407" fill="#1b2e3d" font-size="15" font-weight="700">Comprehension by age</text>
-    <text x="966" y="427" fill="#657789" font-size="13">AoA and heuristics for each target age</text>
+    <text x="966" y="427" fill="#657789" font-size="13">Validate cached L6 estimates · no calls</text>
 
     <path d="M1051 446 V462 M1047 458 L1051 462 L1055 458" fill="none" stroke="#13836f" stroke-width="2"/>
     <rect x="876" y="464" width="350" height="64" rx="9" fill="#ffffff" stroke="#dbe4e9"/>

@@ -178,6 +178,7 @@ def evaluate_run(
 
     total_items = len(gold_dict)
     correct = decided = total_age = correct_age = assessed_age = 0
+    pun_age_total = pun_age_assessed = pun_age_correct = 0
     eligible = binary_decided = binary_correct = 0
     tp = fp = tn = fn = 0
     confusion: dict[str, dict[str, int]] = {}
@@ -236,13 +237,17 @@ def evaluate_run(
         per_age = final.get("per_age", {}) if is_decided else {}
         for age, expected in gold.expected_age_verdict.items():
             total_age += 1
+            gold_pun = gold_state == DetectionStatus.PUN
+            pun_age_total += int(gold_pun)
             actual = per_age.get(str(age)) or per_age.get(int(age)) or {}
             field = "comprehension" if expected in _COMPREHENSION_STATUSES else "appropriateness"
             value = actual.get(field)
             valid_statuses = _COMPREHENSION_STATUSES if field == "comprehension" else _APPROPRIATENESS_STATUSES
-            if value in valid_statuses and value != ComprehensionStatus.AOA_UNKNOWN.value:
+            if value in valid_statuses and value not in {ComprehensionStatus.AOA_UNKNOWN.value, AgeAppropriatenessVerdict.UNKNOWN.value}:
                 assessed_age += 1
                 correct_age += int(value == expected)
+                pun_age_assessed += int(gold_pun)
+                pun_age_correct += int(gold_pun and value == expected)
 
     def ratio(n: int, d: int) -> float | None:
         return round(n / d, 4) if d else None
@@ -265,6 +270,14 @@ def evaluate_run(
         "assessed_age_evals": assessed_age,
         "age_assessment_coverage": ratio(assessed_age, total_age),
         "age_accuracy_on_assessed": ratio(correct_age, assessed_age),
+        "age_gold_puns": {
+            "total_labels": pun_age_total,
+            "assessed_labels": pun_age_assessed,
+            "correct_labels": pun_age_correct,
+            "accuracy_all_labels": ratio(pun_age_correct, pun_age_total),
+            "assessment_coverage": ratio(pun_age_assessed, pun_age_total),
+            "accuracy_on_assessed": ratio(pun_age_correct, pun_age_assessed),
+        },
         "binary_detection": {
             "eligible_items": eligible,
             "decided_items": binary_decided,
