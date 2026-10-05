@@ -39,10 +39,67 @@
 
   <style>
     [v-cloak] { display: none; }
-    .joke-input { resize: none; line-height: 1.5; }
+    #app .joke-input { resize: none; line-height: 1.5; }
+    #app .scanner-heading { position: relative; margin-bottom: 3rem; }
+    #app .scanner-heading > .status-banner {
+      position: absolute; top: 100%; left: 0; right: 0; margin: .5rem 0 0;
+    }
     .age-grid { grid-template-columns: repeat(auto-fit, minmax(3rem, 1fr)); }
     .trace-table { min-width: 36rem; }
     .result-card { min-width: 0; overflow-wrap: anywhere; }
+    #app .status-badge { white-space: nowrap; flex-shrink: 0; overflow-wrap: normal; }
+    #app .safety-header, #app .safety-axis-heading { flex-wrap: wrap; gap: .5rem .75rem; }
+    #app .safety-header > h3 { flex: 1 1 12rem; min-width: 0; }
+    #app .safety-header > h3 > svg { flex-shrink: 0; }
+    #app .safety-header > .status-badge { margin-left: auto; }
+    .scanner-input-hidden { opacity: 0; pointer-events: none; }
+    #app .scanner-row {
+      position: absolute; inset: 0; height: 100%; padding: 0 1.5rem;
+      display: flex; align-items: center; justify-content: center; overflow: hidden;
+    }
+    #app .scanner-row .joke-tokens {
+      display: inline-flex; width: max-content; white-space: nowrap;
+      align-items: center; justify-content: center; text-align: center; line-height: 1;
+    }
+    #app .scanner-row .joke-tokens > .scanner-token {
+      display: inline-flex; align-items: center; justify-content: center;
+      margin: 0; padding: 0; border: 0 solid transparent; line-height: 1;
+      vertical-align: middle;
+      transition: margin .3s, padding .3s, border-width .3s, border-color .3s, background-color .3s, box-shadow .3s;
+    }
+    #app .scanner-row.words-expanded .joke-tokens > .scanner-token {
+      margin: 0 .125rem; padding: .25rem; border-width: 2px;
+    }
+    #app .scanner-row.words-expanded .joke-tokens > .scanner-token.token-marked {
+      margin: 0 .5rem; padding: .375rem .625rem .5rem;
+    }
+    #app .scanner-row .scanner-token > span { display: inline-block; line-height: 1; }
+    #app .scanner-row .joke-tokens > .scanner-token.candidate-revealed {
+      border-style: dashed; border-color: #22d3ee;
+    }
+    #app .scanner-row .joke-tokens > .scanner-token.punchline-halo { border-style: solid; border-color: #67e8f9; }
+    @media (min-width: 640px) { #app .scanner-row { padding-inline: 2.5rem; } }
+    @media (min-width: 1024px) {
+      /* The landing text uses the scanner's final token geometry from its first frame. */
+      #app .report-tokens {
+        display: inline-flex; width: max-content; white-space: nowrap;
+        align-items: center; justify-content: center; line-height: 1;
+      }
+      #app .report-tokens > .report-token {
+        display: inline-flex; align-items: center; justify-content: center;
+        margin: 0 .125rem; padding: .25rem; border: 2px solid transparent;
+        line-height: 1; vertical-align: middle;
+      }
+      #app .report-tokens > .report-token.token-marked {
+        margin: 0 .5rem; padding: .375rem .625rem .5rem; border-color: #67e8f9;
+      }
+      #app .report-token > span { display: inline-block; line-height: 1; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #app .scanner-row .candidate-revealed, #app .punchline-halo,
+      #app .status-pill, #app .status-pill > span { animation: none; }
+      #app .scanner-row .joke-tokens > .scanner-token { transition: none; }
+    }
 
     @media (pointer: coarse) {
       #app button, #app .github-link { min-height: 44px; }
@@ -63,6 +120,7 @@
       #app .github-link > i, #app .github-link > svg { display: none; }
       #app button { min-height: 44px; }
       #app .scanner-card, #app .result-card { padding: 1rem; }
+      #app .scanner-heading { margin-bottom: 3.5rem; }
       #app .status-banner { height: auto; min-height: 2rem; text-align: center; }
       #app .status-pill { max-width: 100%; line-height: 1.5; }
       #app .status-pill > span:first-child { flex-shrink: 0; }
@@ -72,7 +130,11 @@
         font-size: 16px; text-align: left; overflow-y: auto;
       }
       #app .clear-input { top: .75rem; right: .5rem; transform: none; min-width: 44px; }
-      #app .scanner-row { height: auto; min-height: 9rem; padding: 1rem; }
+      #app .scanner-row { display: block; min-height: 9rem; padding: 1rem 3.25rem 1rem 1rem; overflow: auto; }
+      #app .scanner-row .joke-tokens {
+        display: block; width: 100%; text-align: left; white-space: pre-wrap;
+        overflow-wrap: anywhere; line-height: 1.9;
+      }
       #app .joke-tokens {
         display: block; width: 100%; white-space: pre-wrap;
         overflow-wrap: anywhere; font-size: 16px; line-height: 1.9;
@@ -270,23 +332,29 @@
     <!-- ==================================================================== -->
     <section
       v-if="viewState === 'INPUT' || viewState === 'SCANNING'"
+      ref="scannerSectionRef"
+      :style="scannerSectionStyle"
       class="my-auto w-full max-w-4xl mx-auto flex flex-col items-center"
     >
       
       <!-- Top Header Title: Stays rock-solid in place (Zero vertical drift) -->
-      <div class="text-center w-full mb-6">
-        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight mb-2.5 bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+      <div class="scanner-heading text-center w-full">
+        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
           Linguistic Humor & Pun Identification
         </h2>
-        <p class="text-slate-400 text-sm sm:text-base max-w-xl mx-auto">
-          Deep neuro-symbolic cognitive pipeline analyzing wordplay ambiguity, punchline resolution, and child developmental appropriateness.
-        </p>
+        <!-- Keep progress in the heading gap without pushing the input down. -->
+        <div ref="statusBannerRef" :style="scannerSlotStyle('status')" class="status-banner h-8 flex items-center justify-center">
+          <div v-if="morphPhase > 0" class="status-pill flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/25 text-cyan-300 text-xs font-medium animate-pulse">
+            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+            <span>{{ scannerStageMessage }}</span>
+          </div>
+        </div>
       </div>
 
       <!-- Main Scanner Card (Unified parameters: constant max-w, constant padding) -->
       <div
         :class="[
-          'scanner-card apple-glass rounded-3xl w-full relative overflow-hidden transition-all duration-500 flex flex-col p-6 sm:p-8',
+          'scanner-card apple-glass rounded-3xl w-full relative overflow-hidden transition-[border-color,box-shadow] duration-500 flex flex-col p-6 sm:p-8',
           morphPhase >= 1 ? 'border-cyan-400/80 shadow-[0_0_40px_rgba(6,182,212,0.3)] ring-1 ring-cyan-400/30' : 'border-white/10'
         ]"
       >
@@ -297,33 +365,44 @@
         <!-- Internal Card Content -->
         <div class="relative z-10 w-full flex flex-col justify-center">
 
-          <!-- Fixed-Height Status Banner (Never pushes or moves the text stage) -->
-          <div class="status-banner h-8 mb-4 flex items-center justify-center">
-            <div v-if="morphPhase === 0" class="text-xs text-slate-400 font-medium tracking-wide flex items-center gap-1.5 select-none">
-              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-cyan-400"></i>
-              <span>Type a joke or select a benchmark below</span>
-            </div>
-            <div v-else class="status-pill flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/25 text-cyan-300 text-xs font-medium animate-pulse">
-              <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-              <span>{{ scannerStageMessage }}</span>
-            </div>
-          </div>
-
           <!-- Text wraps on compact screens; desktop keeps its scanner geometry. -->
-          <div class="text-stage relative w-full h-20 sm:h-24 flex items-center justify-center">
+          <div ref="textStageRef" :style="scannerSlotStyle('text')" class="text-stage relative w-full h-20 sm:h-24 flex items-center justify-center">
             
-            <!-- State 0: Text input with automatic height on compact screens. -->
-            <textarea
-              v-if="morphPhase === 0"
+            <!-- Desktop keeps the original centered, single-line editor. -->
+            <input
+              v-if="!isCompactLayout"
               ref="jokeInputRef"
               v-model="jokeInput"
+              type="text"
+              maxlength="1000"
+              aria-label="Text to analyze"
+              :readonly="morphPhase > 0"
+              :aria-hidden="morphPhase > 0 ? 'true' : undefined"
+              :tabindex="morphPhase > 0 ? -1 : 0"
+              placeholder="e.g. I used to be a banker, but I lost interest."
+              :class="[
+                'joke-input w-full h-full bg-slate-950/70 border border-slate-800 rounded-2xl px-6 sm:px-10 text-center font-medium tracking-tight text-slate-100 placeholder-slate-500 outline-none transition-[border-color,box-shadow] duration-300 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 shadow-inner',
+                computedFontSizeClass, { 'scanner-input-hidden': morphPhase > 0 }
+              ]"
+              @keydown="handleInputKeydown"
+              @input="handleInputClean"
+            >
+            <!-- Compact screens retain a wrapping editor and touch controls. -->
+            <textarea
+              v-else
+              ref="jokeInputRef"
+              v-model="jokeInput"
+              :readonly="morphPhase > 0"
+              :aria-hidden="morphPhase > 0 ? 'true' : undefined"
+              :tabindex="morphPhase > 0 ? -1 : 0"
               rows="3"
               maxlength="1000"
               aria-label="Text to analyze"
-              placeholder="e.g. Why was 6 afraid of 7? Because 7 ate 9."
+              placeholder="e.g. I used to be a banker, but I lost interest."
               :class="[
-                'joke-input w-full h-full bg-slate-950/70 border border-slate-800 rounded-2xl px-6 sm:px-10 py-3 text-center font-medium tracking-tight text-slate-100 placeholder-slate-500 outline-none transition-all duration-300 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 shadow-inner',
-                computedFontSizeClass
+                'joke-input w-full h-full bg-slate-950/70 border border-slate-800 rounded-2xl px-6 sm:px-10 py-3 text-center font-medium tracking-tight text-slate-100 placeholder-slate-500 outline-none transition-[border-color,box-shadow] duration-300 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 shadow-inner',
+                computedFontSizeClass,
+                { 'scanner-input-hidden': morphPhase > 0 }
               ]"
               @keydown="handleInputKeydown"
               @input="handleInputClean"
@@ -331,8 +410,9 @@
 
             <!-- State 1, 2, 3: Continuous Tokenized Typography (In-place scanner stage) -->
             <div
-              v-else
+              v-if="morphPhase > 0"
               ref="jokeRowRef"
+              :class="{ 'words-expanded': wordsExpanded }"
               class="scanner-row relative w-full h-full select-none flex items-center justify-center overflow-visible bg-slate-950/40 border border-cyan-500/20 rounded-2xl px-6 sm:px-10"
             >
               <!-- Moving Laser Scanner Line (Confined strictly inside text box) -->
@@ -371,18 +451,16 @@
                 >{{ tok.text }}</span><span
                   v-else
                   :class="[
-                    'relative inline-flex items-center justify-center transition-all duration-300 rounded-xl leading-none border-2',
-                    // Spacing and padding around words (mx-2 on candidates gives clear gap between adjacent boxes)
+                    'scanner-token relative rounded-xl',
                     (isCandidateStage && tok.is_candidate && !isPunchlineLocked) || (isPunchlineLocked && tok.is_punchline)
-                      ? 'token-marked mx-2 px-2.5 pt-1.5 pb-2'
-                      : 'mx-0.5 px-1 py-1 border-transparent',
+                      ? 'token-marked' : '',
                     // Punchline locked state
                     isPunchlineLocked && tok.is_punchline
-                      ? 'text-cyan-100 font-medium punchline-halo bg-cyan-500/30 border-cyan-300 z-30 shadow-2xl shadow-cyan-500/50'
+                      ? 'text-cyan-100 font-medium punchline-halo bg-cyan-500/30 z-30'
                       : '',
                     // Candidate highlighted state (Full 360-degree glowing dashed box)
                     isCandidateStage && tok.is_candidate && !isPunchlineLocked
-                      ? 'text-cyan-200 font-medium border-dashed border-cyan-400 bg-cyan-500/20 shadow-[0_0_16px_rgba(6,182,212,0.4)] z-20'
+                      ? 'candidate-revealed text-cyan-200 font-medium bg-cyan-500/20 shadow-[0_0_16px_rgba(6,182,212,0.4)] z-20'
                       : (!isPunchlineLocked || !tok.is_punchline ? 'text-slate-200' : '')
                   ]"
                 ><span class="inline-block leading-none">{{ tok.text }}</span></span></template>
@@ -403,7 +481,7 @@
           </div>
 
           <!-- Controls stack on compact screens; scanning uses the same area for logs. -->
-          <div class="controls-slot h-14 mt-6 pt-4 border-t border-slate-800/80 flex items-center justify-between">
+          <div ref="controlsSlotRef" :style="scannerSlotStyle('controls')" class="controls-slot h-14 mt-6 pt-4 border-t border-slate-800/80 flex items-center justify-between">
             
             <!-- State 0: Target Age & Analyze Trigger Button -->
             <div v-if="morphPhase === 0" class="input-actions w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -439,7 +517,8 @@
             </div>
 
             <!-- State 1, 2, 3: Terminal Log Ticker in the exact same bottom slot -->
-            <div v-else class="w-full flex items-center text-xs font-mono text-slate-400">
+            <div v-else class="w-full flex flex-col items-start gap-2 text-xs font-mono text-slate-400">
+              <p v-if="candidateRevealMessage" class="candidate-display text-cyan-300 whitespace-normal" aria-live="polite">{{ candidateRevealMessage }}</p>
               <div class="log-ticker flex items-center gap-2 truncate">
                 <span class="text-cyan-400 font-semibold">[CRACK_PIPELINE]</span>
                 <span class="text-slate-300">{{ currentLogLine }}</span>
@@ -476,17 +555,21 @@
         ]"
       >
         <div class="flex items-center justify-between mb-3 px-1">
-          <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Try Curated Benchmarks</span>
+          <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Try Examples</span>
         </div>
         <div class="flex flex-wrap gap-2">
           <button
             v-for="(preset, idx) in presets"
             :key="idx"
             @click="selectPreset(preset)"
-            class="text-xs bg-slate-900/60 hover:bg-slate-800/80 border border-slate-800 hover:border-slate-700 text-slate-300 px-3 py-2 rounded-xl transition-all flex items-center gap-2"
+            :title="preset.text"
+            class="example-chip text-xs bg-slate-900/60 hover:bg-slate-800/80 border border-slate-800 hover:border-slate-700 text-slate-300 px-3 py-2 rounded-xl transition-all flex items-start gap-2 text-left"
           >
-            <span>{{ preset.icon }}</span>
-            <span class="truncate max-w-[240px]">{{ preset.title }}</span>
+            <span class="shrink-0">{{ preset.icon }}</span>
+            <span class="min-w-0 max-w-[280px]">
+              <span class="block whitespace-normal">{{ preset.title }}</span>
+              <span :class="['block mt-1 text-[10px]', preset.kind === 'pun' ? 'text-cyan-400' : 'text-slate-500']">{{ preset.kind === 'pun' ? 'Pun example' : 'Literal control — no pun expected' }}</span>
+            </span>
           </button>
         </div>
       </div>
@@ -631,7 +714,7 @@
               ref="dashboardJokeRef"
               :style="[dashboardTextScaleStyle, { opacity: isMagicMoving ? 0 : 1 }]"
               :class="[
-                'joke-tokens inline-flex flex-nowrap items-center whitespace-nowrap tracking-tight font-medium leading-none',
+                'joke-tokens report-tokens inline-flex flex-nowrap items-center whitespace-nowrap tracking-tight font-medium leading-none',
                 computedFontSizeClass
               ]"
             >
@@ -641,7 +724,7 @@
               >{{ tok.text }}</span><span
                 v-else
                 :class="[
-                  'relative inline-flex items-center justify-center rounded-xl leading-none border-2',
+                  'report-token relative inline-flex items-center justify-center rounded-xl leading-none border-2',
                   tok.is_punchline
                     ? 'token-marked mx-2 px-2.5 pt-1.5 pb-2 text-cyan-100 font-medium punchline-halo bg-cyan-500/30 border-cyan-300 z-30 shadow-2xl shadow-cyan-500/50'
                     : 'mx-0.5 px-1 py-1 border-transparent text-slate-200'
@@ -749,7 +832,7 @@
                 </h3>
                 <p class="text-xs text-slate-400">Comprehension estimate at the requested age</p>
               </div>
-              <span class="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 font-mono">
+              <span class="status-badge text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 font-mono">
                 Viewing: Age {{ activeDisplayAge }}
               </span>
             </div>
@@ -764,7 +847,7 @@
                 :class="[
                   'py-2 px-1 rounded-xl text-center transition-all border',
                   activeDisplayAge === age
-                    ? 'bg-cyan-500/20 border-cyan-400 text-white font-bold shadow-md shadow-cyan-500/20 scale-105'
+                    ? 'bg-cyan-500/20 border-cyan-400 text-white font-bold shadow-md shadow-cyan-500/20'
                     : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200'
                 ]"
               >
@@ -780,7 +863,7 @@
                   At Age {{ activeDisplayAge }}:
                 </span>
                 <span :class="[
-                  'font-semibold px-2.5 py-0.5 rounded-full text-xs',
+                  'status-badge font-semibold px-2.5 py-0.5 rounded-full text-xs',
                   friendlyComprehension(currentAgeAssessment.comprehension, currentAgeAssessment.comprehension_summary, currentAgeAssessment.comprehension_status).tagClass
                 ]">
                   {{ friendlyComprehension(currentAgeAssessment.comprehension, currentAgeAssessment.comprehension_summary, currentAgeAssessment.comprehension_status).label }}
@@ -816,12 +899,12 @@
         <!-- L8 Safety & Appropriateness Guardrails (1 col) -->
         <div class="result-card apple-glass rounded-3xl p-6 flex flex-col justify-between">
           <div>
-            <div class="card-heading flex items-center justify-between mb-1">
+            <div class="card-heading safety-header flex items-center justify-between mb-1">
               <h3 class="text-sm font-bold text-slate-100 uppercase tracking-wider flex items-center gap-2">
                 <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
                 <span>Audience Appropriateness</span>
               </h3>
-              <span :class="['text-xs px-2 py-0.5 rounded-full border font-bold', currentSafety.is_safe === true ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20' : 'bg-amber-500/10 text-amber-300 border-amber-500/20']">
+              <span :class="['status-badge text-xs px-2 py-0.5 rounded-full border font-bold', currentSafety.is_safe === true ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20' : 'bg-amber-500/10 text-amber-300 border-amber-500/20']">
                 {{ currentAgeAssessment.appropriateness_status === 'EXECUTION_FAILED' ? 'FAILED' : currentAgeAssessment.appropriateness_status === 'SKIPPED' ? 'NOT ASSESSED' : currentSafety.is_safe === null ? 'UNKNOWN' : currentSafety.is_safe ? 'SUITABLE' : 'REVIEW' }}
               </span>
             </div>
@@ -829,17 +912,17 @@
 
             <div class="space-y-3">
               <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-3">
-                <div class="flex items-center justify-between mb-1">
+                <div class="safety-axis-heading flex items-center justify-between mb-1">
                   <span class="text-xs font-semibold text-slate-200">Surface Language</span>
-                  <span :class="['text-[11px] font-bold px-2 py-0.5 rounded-full', traceStatusClass(currentSafety.surface_status)]">{{ currentSafety.surface_status === 'PASS' ? 'SUITABLE' : currentSafety.surface_status === 'FAIL' ? 'REVIEW' : 'UNKNOWN' }}</span>
+                  <span :class="['status-badge text-[11px] font-bold px-2 py-0.5 rounded-full', traceStatusClass(currentSafety.surface_status)]">{{ currentSafety.surface_status === 'PASS' ? 'SUITABLE' : currentSafety.surface_status === 'FAIL' ? 'REVIEW' : 'UNKNOWN' }}</span>
                 </div>
                 <div class="text-[11px] text-slate-400">{{ currentSafety.content_issues.join('; ') || (currentSafety.surface_status === 'NOT_ASSESSED' ? 'Content has not been assessed for this age.' : 'See the age-specific assessment below.') }}</div>
               </div>
 
               <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-3">
-                <div class="flex items-center justify-between mb-1">
+                <div class="safety-axis-heading flex items-center justify-between mb-1">
                   <span class="text-xs font-semibold text-slate-200">Background Knowledge</span>
-                  <span :class="['text-[11px] font-bold px-2 py-0.5 rounded-full', traceStatusClass(currentSafety.inferential_status)]">{{ currentSafety.inferential_status === 'PASS' ? 'ACCESSIBLE' : currentSafety.inferential_status === 'FAIL' ? 'ADVANCED' : 'UNKNOWN' }}</span>
+                  <span :class="['status-badge text-[11px] font-bold px-2 py-0.5 rounded-full', traceStatusClass(currentSafety.inferential_status)]">{{ currentSafety.inferential_status === 'PASS' ? 'ACCESSIBLE' : currentSafety.inferential_status === 'FAIL' ? 'ADVANCED' : 'UNKNOWN' }}</span>
                 </div>
                 <div class="text-[11px] text-slate-400">{{ currentSafety.inference_issues.join('; ') || (currentSafety.inferential_status === 'NOT_ASSESSED' ? 'Background knowledge has not been assessed for this age.' : 'See the age-specific assessment below.') }}</div>
               </div>
@@ -934,15 +1017,16 @@
       setup() {
         // View States: 'INPUT', 'SCANNING', 'DASHBOARD'
         const viewState = ref('INPUT');
-        const jokeInput = ref('Why was 6 afraid of 7? Because 7 ate 9.');
-        const targetAge = ref(8);
-        const activeDisplayAge = ref(8);
+        const jokeInput = ref('I used to be a banker, but I lost interest.');
+        const targetAge = ref(10);
+        const activeDisplayAge = ref(10);
 
         // Animation States
         const laserActive = ref(false);
         const laserDir = ref(1);
         const isCandidateStage = ref(false);
         const isPunchlineLocked = ref(false);
+        const wordsExpanded = ref(false);
         const scannerStageMessage = ref('Initializing lexical scanner...');
         const currentLogLine = ref('Tokenizing input string...');
 
@@ -955,11 +1039,17 @@
         const ageResponseError = ref(null);
         const liveTrace = ref([]);
         const pendingLayer = ref(null);
+        const candidateRevealMessage = ref('');
 
         // Desktop text scaling and compact-screen wrapping
         // morphPhase: 0 = IDLE, 1 = FRAMING, 2 = MORPHING & CENTERING, 3 = SCANNING
         const morphPhase = ref(0);
         const jokeInputRef = ref(null);
+        const scannerSectionRef = ref(null);
+        const statusBannerRef = ref(null);
+        const textStageRef = ref(null);
+        const controlsSlotRef = ref(null);
+        const scannerLayout = ref(null);
         const isCompactLayout = ref(window.matchMedia('(max-width: 1023px)').matches);
         const jokeRowRef = ref(null);
         const jokeInnerRef = ref(null);
@@ -967,10 +1057,112 @@
         const dashboardJokeRef = ref(null);
         const isMagicMoving = ref(false);
         const textScale = ref(1);
+        const dashboardTextScale = ref(1);
+        let magicFlightAnimation = null;
+        let magicFlightViewport = null;
         let laserAnimationId = null;
         let laserTrackWidth = 0;
         let laserResizeObserver = null;
         let candidateTimeouts = [];
+        let wordSpreadFrame = null;
+        let textResizeObserver = null;
+
+        function stopMagicMove() {
+          magicFlightAnimation?.cancel();
+          magicFlightAnimation = null;
+          magicFlightViewport = null;
+          document.getElementById('magic-move-flyer')?.remove();
+          isMagicMoving.value = false;
+        }
+
+        function stopWordSpread() {
+          if (wordSpreadFrame !== null) cancelAnimationFrame(wordSpreadFrame);
+          wordSpreadFrame = null;
+        }
+
+        function expandWords() {
+          stopWordSpread();
+          if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            wordsExpanded.value = true;
+            return;
+          }
+          // Commit the original typography, then animate to the baseline's spaced tokens.
+          wordSpreadFrame = requestAnimationFrame(() => {
+            wordSpreadFrame = requestAnimationFrame(() => {
+              wordSpreadFrame = null;
+              wordsExpanded.value = true;
+              updateTextScale();
+            });
+          });
+        }
+
+        const scannerSectionStyle = computed(() => scannerLayout.value && viewState.value === 'SCANNING'
+          ? { marginTop: `${scannerLayout.value.topGap}px`, marginBottom: '0' } : {});
+
+        function scannerSlotStyle(slot) {
+          const height = scannerLayout.value?.[slot];
+          return height && viewState.value === 'SCANNING' ? { height: `${height}px`, minHeight: `${height}px` } : {};
+        }
+
+        function captureScannerLayout() {
+          const section = scannerSectionRef.value;
+          const header = document.querySelector('.app-header');
+          if (!section || !header) return;
+          scannerLayout.value = {
+            viewportWidth: window.innerWidth,
+            viewportHeight: window.innerHeight,
+            topGap: Math.max(0, section.getBoundingClientRect().top - header.getBoundingClientRect().bottom -
+              (parseFloat(getComputedStyle(header).marginBottom) || 0)),
+            status: statusBannerRef.value?.getBoundingClientRect().height,
+            text: textStageRef.value?.getBoundingClientRect().height,
+            controls: controlsSlotRef.value?.getBoundingClientRect().height,
+            inputScroll: jokeInputRef.value?.scrollTop || 0,
+          };
+        }
+
+        function clearCandidateAnimation() {
+          candidateTimeouts.forEach(clearTimeout);
+          candidateTimeouts = [];
+        }
+
+        function revealCandidates(candidates) {
+          clearCandidateAnimation();
+          // Animate only source words from the returned shortlist, in reading order.
+          const display = candidates.map(candidate => {
+            if (typeof candidate.term !== 'string') throw new Error('Invalid candidate term.');
+            const term = candidate.term.toLowerCase().replace(/\s+/g, ' ').trim();
+            const indices = new Set();
+            tokens.value.forEach((token, start) => {
+              if (!term || !token.is_word) return;
+              let phrase = '';
+              for (let end = start; end < tokens.value.length; end++) {
+                phrase += tokens.value[end].text.toLowerCase();
+                const normalized = phrase.replace(/\s+/g, ' ');
+                if (normalized === term) {
+                  for (let i = start; i <= end; i++) if (tokens.value[i].is_word) indices.add(i);
+                  break;
+                }
+                if (normalized.length >= term.length) break;
+              }
+            });
+            return { ...candidate, indices };
+          }).filter(c => c.indices.size).sort((a, b) => Math.min(...a.indices) - Math.min(...b.indices));
+          if (!display.length) return;
+          isCandidateStage.value = true;
+          candidateRevealMessage.value = 'Showing possible wordplay sites from the shortlist…';
+          const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          display.forEach((candidate, index) => {
+            const reveal = () => {
+              if (viewState.value !== 'SCANNING' || isPunchlineLocked.value) return;
+              tokens.value = tokens.value.map((t, i) => candidate.indices.has(i)
+                ? { ...t, is_candidate: true, candidate_score: candidate.score, candidate_term: candidate.term } : t);
+              candidateRevealMessage.value = `Possible wordplay site: “${candidate.term}”`;
+              updateTextScale();
+            };
+            if (reducedMotion) reveal();
+            else candidateTimeouts.push(setTimeout(reveal, (index + 1) * 1500));
+          });
+        }
 
         function resizeTextInput() {
           nextTick(() => {
@@ -985,28 +1177,37 @@
         }
 
         function updateViewport() {
+          if (magicFlightAnimation && magicFlightViewport &&
+              (magicFlightViewport.width !== window.innerWidth || magicFlightViewport.height !== window.innerHeight)) {
+            stopMagicMove();
+          }
           isCompactLayout.value = window.matchMedia('(max-width: 1023px)').matches;
+          // A resize starts a new geometry; release the old viewport's fixed slots.
+          if (viewState.value === 'SCANNING' && scannerLayout.value &&
+              (scannerLayout.value.viewportWidth !== window.innerWidth ||
+               scannerLayout.value.viewportHeight !== window.innerHeight)) {
+            scannerLayout.value = { topGap: 0, viewportWidth: window.innerWidth, viewportHeight: window.innerHeight };
+          }
           resizeTextInput();
           updateTextScale();
         }
 
-        function updateTextScale() {
-          nextTick(() => {
-            if (isCompactLayout.value) {
-              textScale.value = 1;
-              return;
-            }
-            const content = viewState.value === 'DASHBOARD' ? dashboardJokeRef.value : jokeInnerRef.value;
-            const container = viewState.value === 'DASHBOARD' ? content?.parentElement : jokeRowRef.value;
-            if (!container || !content) return;
-            const containerW = container.clientWidth - 24;
-            const contentW = content.scrollWidth;
-            if (contentW > containerW && containerW > 0) {
-              textScale.value = Math.max(0.5, containerW / contentW);
-            } else {
-              textScale.value = 1;
-            }
-          });
+        async function updateTextScale() {
+          await nextTick();
+          const scale = viewState.value === 'DASHBOARD' ? dashboardTextScale : textScale;
+          if (isCompactLayout.value) {
+            scale.value = 1;
+            return;
+          }
+          const content = viewState.value === 'DASHBOARD' ? dashboardJokeRef.value : jokeInnerRef.value;
+          const container = viewState.value === 'DASHBOARD' ? content?.parentElement : jokeRowRef.value;
+          if (!container || !content) return;
+          const containerStyle = getComputedStyle(container);
+          const containerW = container.clientWidth - (parseFloat(containerStyle.paddingLeft) || 0) -
+            (parseFloat(containerStyle.paddingRight) || 0) - 24;
+          const contentW = content.scrollWidth;
+          scale.value = contentW > containerW && containerW > 0 ? Math.max(0.5, containerW / contentW) : 1;
+          await nextTick();
         }
 
         const computedFontSizeClass = computed(() => {
@@ -1035,16 +1236,16 @@
         });
 
         const dashboardTextScaleStyle = computed(() => ({
-          ...textScaleStyle.value,
+          transform: `scale(${dashboardTextScale.value})`,
           transformOrigin: 'left center',
         }));
 
         const presets = [
-          { icon: '🔢', title: 'Why was 6 afraid of 7? Because 7 ate 9.', text: 'Why was 6 afraid of 7? Because 7 ate 9.', age: 8 },
-          { icon: '🏦', title: 'I used to be a banker, but I lost interest.', text: 'I used to be a banker, but I lost interest.', age: 10 },
-          { icon: '🎹', title: 'What has keys but no locks? A piano.', text: 'What has keys but no locks? A piano.', age: 6 },
-          { icon: '🍝', title: 'What do you call a fake noodle? An impasta.', text: 'What do you call a fake noodle? An impasta.', age: 8 },
-          { icon: '🦊', title: 'The quick brown fox jumps over the lazy dog.', text: 'The quick brown fox jumps over the lazy dog.', age: 8 },
+          { "id": "interest", "icon": "🏦", "title": "I used to be a banker, but I lost interest.", "text": "I used to be a banker, but I lost interest.", "age": 10, "kind": "pun", "expected_detection_status": "PUN", "expected_punchline": "interest" },
+          { "id": "keys", "icon": "🎹", "title": "What has keys but no locks? A piano.", "text": "What has keys but no locks? A piano.", "age": 6, "kind": "pun", "expected_detection_status": "PUN", "expected_punchline": "keys" },
+          { "id": "guts", "icon": "💀", "title": "Why don't skeletons fight? Because they have no guts.", "text": "Why don't skeletons fight? Because they have no guts.", "age": 8, "kind": "pun", "expected_detection_status": "PUN", "expected_punchline": "guts" },
+          { "id": "trunk", "icon": "🐘", "title": "Why do elephants have a trunk? Because they don't have pockets to put stuff in.", "text": "Why do elephants have a trunk? Because they don't have pockets to put stuff in.", "age": 8, "kind": "pun", "expected_detection_status": "PUN", "expected_punchline": "trunk" },
+          { "id": "literal", "icon": "🦊", "title": "The quick brown fox jumps over the lazy dog.", "text": "The quick brown fox jumps over the lazy dog.", "age": 8, "kind": "literal", "expected_detection_status": "NON_PUN", "expected_punchline": null }
         ];
 
         function handleInputClean(e) {
@@ -1140,12 +1341,13 @@
           ageResponseError.value = null;
           liveTrace.value = [];
           pendingLayer.value = null;
+          wordsExpanded.value = false;
+          candidateRevealMessage.value = '';
           analysisData.value = null;
           showTrace.value = false;
 
-          const oldFlyer = document.getElementById('magic-move-flyer');
-          if (oldFlyer) oldFlyer.remove();
-          isMagicMoving.value = false;
+          stopMagicMove();
+          dashboardTextScale.value = 1;
 
           // Break tokens from input text immediately
           const rawMatches = jokeInput.value.trim().match(/(\w+|[^\w\s]|\s+)/g) || [];
@@ -1159,21 +1361,29 @@
             candidate_score: null,
           }));
 
-          // Activate scanning immediately on the unified stage (zero layout jump, zero drift)
+          // Keep the editor's position and slots while progress accumulates below it.
+          captureScannerLayout();
           morphPhase.value = 1;
           viewState.value = 'SCANNING';
           scannerStageMessage.value = 'Connecting to real-time CRACK pipeline...';
           currentLogLine.value = 'Initializing neuro-symbolic layers (L0-L8)...';
           textScale.value = 1;
           await nextTick();
+          textResizeObserver?.disconnect();
+          if (jokeInnerRef.value && window.ResizeObserver) {
+            textResizeObserver = new ResizeObserver(updateTextScale);
+            textResizeObserver.observe(jokeInnerRef.value);
+          }
+          expandWords();
           updateTextScale();
           lucide.createIcons();
 
-          laserActive.value = true;
+          laserActive.value = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
           laserDir.value = 1;
           isCandidateStage.value = false;
           isPunchlineLocked.value = false;
           await nextTick();
+          if (jokeRowRef.value) jokeRowRef.value.scrollTop = scannerLayout.value?.inputScroll || 0;
           const laserTrack = laserLineRef.value?.parentElement;
           laserTrackWidth = laserTrack?.clientWidth || 0;
           laserResizeObserver?.disconnect();
@@ -1189,8 +1399,7 @@
             cancelAnimationFrame(laserAnimationId);
             laserAnimationId = null;
           }
-          candidateTimeouts.forEach(clearTimeout);
-          candidateTimeouts = [];
+          clearCandidateAnimation();
 
           // Direct DOM RAF animation: zero VDOM diff overhead, zero CSS transition fighting, zero border hitch
           let laserPos = 0;
@@ -1224,8 +1433,8 @@
 
           function stopStream() {
             evtSource.close();
-            candidateTimeouts.forEach(clearTimeout);
-            candidateTimeouts = [];
+            clearCandidateAnimation();
+            stopWordSpread();
             if (laserAnimationId) cancelAnimationFrame(laserAnimationId);
             laserAnimationId = null;
             laserActive.value = false;
@@ -1240,6 +1449,10 @@
             requestError.value = { message, layer: pendingLayer.value, trace: [...liveTrace.value] };
             viewState.value = 'INPUT';
             morphPhase.value = 0;
+            textResizeObserver?.disconnect();
+            textResizeObserver = null;
+            scannerLayout.value = null;
+            candidateRevealMessage.value = '';
             isPunchlineLocked.value = false;
             nextTick(() => { resizeTextInput(); lucide.createIcons(); });
           }
@@ -1276,30 +1489,26 @@
               scannerStageMessage.value = `[${d.layer}] ${d.status}`;
               currentLogLine.value = d.message;
               if (event === 'l3' && Array.isArray(d.candidates) && d.status === 'PASS') {
-                const candidates = new Map(d.candidates.map(c => [c.term.toLowerCase(), c]));
-                isCandidateStage.value = true;
-                tokens.value = tokens.value.map(t => ({ ...t, is_candidate: candidates.has(t.lower),
-                  candidate_score: candidates.get(t.lower)?.score ?? null }));
-                updateTextScale();
+                revealCandidates(d.candidates);
+              }
+              if (['L0-pre', 'L1', 'L2', 'L3', 'L4', 'L5', 'L6'].includes(d.layer) &&
+                  ['ERROR', 'FAIL', 'UNKNOWN'].includes(d.status)) {
+                clearCandidateAnimation();
+                candidateRevealMessage.value = '';
               }
             }));
           }
 
           evtSource.addEventListener('complete', async (e) => {
             if (streamFinished) return;
-            candidateTimeouts.forEach(clearTimeout);
-            candidateTimeouts = [];
-
-            if (laserAnimationId) {
-              cancelAnimationFrame(laserAnimationId);
-              laserAnimationId = null;
-            }
-
             let payload;
             try { payload = validateFinalPayload(JSON.parse(e.data)); }
             catch (err) { failStream(`${err.message} No validated result was displayed; retry the analysis.`); return; }
             streamFinished = true;
             stopStream();
+            candidateRevealMessage.value = '';
+            isCandidateStage.value = false;
+            wordsExpanded.value = true;
             analysisData.value = payload;
             ageResponseError.value = agePayloadError(payload);
             showTrace.value = payload.review_required || payload.trace.some(t => t.status === 'ERROR');
@@ -1329,23 +1538,37 @@
 
             // Ensure viewport is at top before measuring any coordinate frames
             window.scrollTo({ top: 0, behavior: 'instant' });
+            textResizeObserver?.disconnect();
+            textResizeObserver = null;
 
             const sourceEl = jokeInnerRef.value;
             if (!sourceEl || isCompactLayout.value || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
               viewState.value = 'DASHBOARD';
               await nextTick();
               lucide.createIcons();
+              await updateTextScale();
               return;
             }
 
             // 1. Capture exact geometry in scanner view
             const sourceRect = sourceEl.getBoundingClientRect();
-            const w0 = sourceEl.offsetWidth || sourceRect.width;
-            const h0 = sourceEl.offsetHeight || sourceRect.height;
             const s0 = textScale.value || 1;
+            const w0 = sourceRect.width / s0;
+            const h0 = sourceRect.height / s0;
 
             // 2. Clone source element to document.body as fixed flying proxy
             const flyer = sourceEl.cloneNode(true);
+            // Scoped scanner styles must travel with the proxy outside #app.
+            const sourceNodes = [sourceEl, ...sourceEl.querySelectorAll('*')];
+            const flyerNodes = [flyer, ...flyer.querySelectorAll('*')];
+            const visualProperties = ['display', 'font-family', 'font-size', 'font-weight', 'font-style',
+              'line-height', 'letter-spacing', 'color', 'margin', 'padding', 'border', 'border-radius',
+              'background-color', 'box-shadow', 'white-space', 'vertical-align', 'align-items',
+              'justify-content', 'box-sizing'];
+            sourceNodes.forEach((node, index) => {
+              const style = getComputedStyle(node);
+              visualProperties.forEach(property => flyerNodes[index].style.setProperty(property, style.getPropertyValue(property)));
+            });
             const badge = flyer.querySelector('.punchline-badge');
             if (badge) badge.remove();
 
@@ -1372,6 +1595,9 @@
 
             await nextTick();
             lucide.createIcons();
+            // Let dashboard layout and newly generated utility styles settle before measuring.
+            await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+            await updateTextScale();
 
             // 4. Measure exact target geometry on Dashboard
             const targetEl = dashboardJokeRef.value;
@@ -1384,27 +1610,24 @@
             const targetRect = targetEl.getBoundingClientRect();
             const deltaX = targetRect.left - sourceRect.left;
             const deltaY = targetRect.top - sourceRect.top;
-            const targetScaleX = w0 > 0 ? (targetRect.width / w0) : 1;
-            const targetScaleY = h0 > 0 ? (targetRect.height / h0) : 1;
+            // Preserve the glide, scaling glyphs uniformly to the report's final typography.
+            const flight = flyer.animate([
+              { transform: `scale(${s0})` },
+              { transform: `translate3d(${deltaX}px, ${deltaY}px, 0) scale(${dashboardTextScale.value})` },
+            ], { duration: 850, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: 'forwards' });
+            magicFlightAnimation = flight;
+            magicFlightViewport = { width: window.innerWidth, height: window.innerHeight };
 
-            // 5. Force reflow to commit start frame
-            flyer.getBoundingClientRect();
-
-            // 6. Fluid Apple spring glide to target position
-            requestAnimationFrame(() => {
-              flyer.style.transition = 'transform 0.85s cubic-bezier(0.16, 1, 0.3, 1)';
-              flyer.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0) scale(${targetScaleX}, ${targetScaleY})`;
-            });
-
-            // 7. Clean, seamless handoff at target landing (Zero blink / zero flash)
-            setTimeout(() => {
-              isMagicMoving.value = false;
-              requestAnimationFrame(() => {
-                if (flyer.parentNode) {
-                  flyer.remove();
-                }
-              });
-            }, 850);
+            // Handoff follows actual completion, including delayed frames, rather than a timer.
+            try { await flight.finished; } catch { return; }
+            if (magicFlightAnimation !== flight) return;
+            isMagicMoving.value = false;
+            await nextTick();
+            flyer.remove();
+            if (magicFlightAnimation === flight) {
+              magicFlightAnimation = null;
+              magicFlightViewport = null;
+            }
           });
 
           evtSource.onerror = () => failStream(
@@ -1417,14 +1640,17 @@
             cancelAnimationFrame(laserAnimationId);
             laserAnimationId = null;
           }
-          candidateTimeouts.forEach(clearTimeout);
-          candidateTimeouts = [];
+          clearCandidateAnimation();
+          stopWordSpread();
+          textResizeObserver?.disconnect();
+          textResizeObserver = null;
 
-          const oldFlyer = document.getElementById('magic-move-flyer');
-          if (oldFlyer) oldFlyer.remove();
-          isMagicMoving.value = false;
+          stopMagicMove();
           viewState.value = 'INPUT';
           morphPhase.value = 0;
+          wordsExpanded.value = false;
+          scannerLayout.value = null;
+          candidateRevealMessage.value = '';
           laserActive.value = false;
           laserResizeObserver?.disconnect();
           laserResizeObserver = null;
@@ -1659,8 +1885,16 @@
           laserDir,
           isCandidateStage,
           isPunchlineLocked,
+          wordsExpanded,
+          isCompactLayout,
           morphPhase,
           jokeInputRef,
+          scannerSectionRef,
+          statusBannerRef,
+          textStageRef,
+          controlsSlotRef,
+          scannerSectionStyle,
+          scannerSlotStyle,
           jokeRowRef,
           jokeInnerRef,
           laserLineRef,
@@ -1671,6 +1905,7 @@
           dashboardTextScaleStyle,
           scannerStageMessage,
           currentLogLine,
+          candidateRevealMessage,
           analysisData,
           heroVerdict,
           recommendedAge,

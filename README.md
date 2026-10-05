@@ -305,6 +305,14 @@ and dependency skips, and keeps confirmed detection separate from age failures.
 Its execution trace exposes recorded L4–L6 model, application retry and fallback
 metadata. Slow requests show the current stage rather than simulated progress;
 interrupted or malformed streams preserve the input for an explicit retry.
+Possible wordplay sites highlight one at a time, 1.5 seconds apart, on a separate
+animation timeline. Scanning keeps the joke in its input position; the actual
+layer status stays visible, and the final result cancels unfinished highlights.
+The original `0c674f0` word-spacing transition and candidate-box expansion are
+preserved. Homepage examples include four verified same-spelling puns and a
+labeled literal control; the [example check](docs/web_examples.md) records two
+live rounds and explains the removed sound-based examples. Recheck them with
+`python scripts/validate_web_examples.py --repeat 2` (makes live provider calls).
 See the [web pipeline contract](docs/web_pipeline_contract.md) for the state
 mapping and observability limits.
 After updating the UI/service contract, restart the web service and reload the

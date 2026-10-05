@@ -17,6 +17,38 @@ Every 15 seconds while a layer remains pending, `waiting` reports that same
 layer. It also keeps the SSE connection alive. The UI does not rotate through
 imaginary steps or assume which provider is running.
 
+Candidate highlights have their own presentation timeline: after a successful
+L3 shortlist arrives, matching source words appear in reading order, 1.5 seconds
+apart. This can continue across later layers;
+the separate stage label and trace still show the actual backend state.
+Highlights are possible wordplay sites, not confirmed meanings. The current-word
+message does not display a reveal count or candidate total. A detection
+failure/unknown, interrupted stream or final response cancels pending reveals.
+The final response does not wait for the animation queue. Reduced-motion
+preferences show the shortlist without stagger or glow. No model calls are
+added for animation.
+
+The editor remains in the layout during scanning. Its text area, status and
+controls retain their measured space, and the input section keeps its starting
+position as trace entries appear. The stage label occupies the gap between
+the title and the scanner card, so the input has no empty status row above it
+inside the card. The original 300 ms word-spacing transition,
+expanded candidate boxes, scanner beam, punchline halo and desktop flight are
+preserved. On desktop, ordinary tokens use 2 px side margins and 4 px padding;
+candidate tokens use 8 px side margins, 10 px horizontal padding, 6/8 px
+vertical padding and a 2 px dashed border, as in `0c674f0`. Word spacing can
+change while the card stays anchored. Compact screens wrap these tokens;
+desktop scales the line as its width animates. A viewport resize releases the
+old measurements so the compact layout can adapt.
+
+The desktop flight keeps its 850 ms glide. Scanner and report tokens share the
+same final typography and spacing, with each container's scale measured
+independently before flight. Text scales uniformly, and the report becomes
+visible only when the flight actually finishes; there is no timer-based swap
+to differently sized text. A viewport resize during flight removes the proxy
+and shows the report in its current layout. Age and appropriateness badges
+stay on one line; their heading rows wrap when space is limited.
+
 | Final state | UI behavior |
 |---|---|
 | `PUN` | Display validated readings and exact source anchors. A/B order is neutral; the resolving reading comes from `resolving_sense`. |
