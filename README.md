@@ -300,6 +300,16 @@ pip install -e ".[web]"
 crack --serve
 ```
 
+The responsive web UI displays actual layer states, including failure, unknown
+and dependency skips, and keeps confirmed detection separate from age failures.
+Its execution trace exposes recorded L4–L6 model, application retry and fallback
+metadata. Slow requests show the current stage rather than simulated progress;
+interrupted or malformed streams preserve the input for an explicit retry.
+See the [web pipeline contract](docs/web_pipeline_contract.md) for the state
+mapping and observability limits.
+After updating the UI/service contract, restart the web service and reload the
+page so both sides use the same event fields.
+
 ## Reproduce a run
 
 To rebuild the SemEval files from the official archive and evaluate a fresh run, configure a provider API key first:

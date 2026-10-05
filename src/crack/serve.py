@@ -25,7 +25,7 @@ from typing import Any, AsyncGenerator
 from crack.providers import load_dotenv, resolve_backend
 load_dotenv()
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -95,6 +95,64 @@ class AnalyzeRequest(BaseModel):
     target_age: int = Field(default=8, ge=4, le=18)
 
 
+def _provider_metadata(rec: AnalysisRecord, layer: str) -> dict[str, Any] | None:
+    if layer not in {"L4", "L5", "L6"}:
+        return None
+    known = rec.provider_metadata.get(layer)
+    if known:
+        return {"recorded": True, **known.model_dump()}
+    if layer == "L4" and rec.l4_attempts:
+        attempt = rec.l4_attempts[-1]
+        if attempt.model_used:
+            return dict(recorded=True, model_used=attempt.model_used,
+                        application_retries=attempt.provider_retries, fallback_used=attempt.fallback_used)
+    if layer == "L5" and rec.l5_result and rec.l5_result.model_used:
+        result = rec.l5_result
+        return dict(recorded=True, model_used=result.model_used,
+                    application_retries=result.retries, fallback_used=result.fallback_used)
+    # An exception/skip may precede returned counters. Never report zero attempts.
+    return dict(recorded=False, model_used=None, application_retries=None, fallback_used=None)
+
+
+def _trace_payload(rec: AnalysisRecord, trace: LayerTrace) -> dict[str, Any]:
+    return {**trace.model_dump(exclude={"hints_used"}), "provider": _provider_metadata(rec, trace.layer)}
+
+
+def _age_stage_status(rec: AnalysisRecord, layer: str, value: Any, *, assessed_unknown: str) -> str:
+    traces = [t for t in rec.trace if t.layer == layer]
+    if any(t.status in {"ERROR", "REJECTED"} for t in traces):
+        return "EXECUTION_FAILED"
+    if not rec.target_ages:
+        return "NOT_REQUESTED"
+    if value is not None:
+        return "UNKNOWN" if value.value == assessed_unknown else "ASSESSED"
+    if traces and traces[-1].status == "SKIPPED":
+        return "SKIPPED"
+    return "UNKNOWN"
+
+
+def _unassessed_safety(notes: str) -> dict[str, Any]:
+    return dict(surface_status="NOT_ASSESSED", inferential_status="NOT_ASSESSED", is_safe=None,
+                content_issues=[], inference_issues=[], notes=notes)
+
+
+def _failure_payload(rec: AnalysisRecord, target_age: int, reason: str) -> dict[str, Any]:
+    """The same display contract for setup/final-payload failures in both APIs."""
+    return dict(
+        text=rec.text, target_age=target_age,
+        genre=rec.l1_result.genre.value if rec.l1_result else None,
+        scope_label="NO_SCOPE_MECHANISM", main_classification="EXECUTION_FAILED",
+        detection_status="EXECUTION_FAILED", review_required=True, review_reason=reason,
+        suggested_action="RETRY_ANALYSIS", age_assessment_available=False, confidence=None,
+        punchline=None, tokens=_tokenize_text(rec.text), candidates=[], sense_a=None, sense_b=None,
+        resolving_sense=None, anchor_relation=None, split_parts=[], resolution_explanation=reason,
+        target_verdict=dict(age=target_age, comprehension="NOT_APPLICABLE", appropriateness="NOT_APPLICABLE",
+                            description="No validated detection result is available."),
+        age_spectrum={}, safety=_unassessed_safety("Appropriateness was not assessed."),
+        trace=[_trace_payload(rec, t) for t in rec.trace],
+    )
+
+
 def _tokenize_text(text: str) -> list[dict[str, Any]]:
     """Tokenize text preserving whitespace and position offsets."""
     pattern = re.compile(r"(\w+|[^\w\s]|\s+)")
@@ -133,7 +191,7 @@ def _build_final_payload(rec: AnalysisRecord, target_age: int) -> dict[str, Any]
     # 1. Candidates from L3
     candidates = []
     if rec.l3_result and rec.l3_result.candidates:
-        for c in rec.l3_result.candidates[:6]:
+        for c in rec.l3_result.candidates:
             candidates.append({
                 "term": c.term,
                 "score": round(c.score, 3),
@@ -173,20 +231,29 @@ def _build_final_payload(rec: AnalysisRecord, target_age: int) -> dict[str, Any]
             "definition": rec.l4_result.sense_a,
             "quote": rec.l4_result.sense_a_anchor_quote,
             "aoa": getattr(rec.l7_result, "sense_a_aoa", None),
-            "label": "Sense A (Anchored Meaning)",
+            "label": "Meaning A",
+            "is_resolving_sense": rec.l4_result.resolving_sense == "sense_a",
         }
         sense_b = {
             "definition": rec.l4_result.sense_b,
             "quote": rec.l4_result.sense_b_anchor_quote,
             "aoa": getattr(rec.l7_result, "sense_b_aoa", None),
-            "label": "Sense B (Anchored Meaning)",
+            "label": "Meaning B",
+            "is_resolving_sense": rec.l4_result.resolving_sense == "sense_b",
         }
     # 4. Incongruity Resolution explanation
     resolution_explanation = ""
     if review_required:
         resolution_explanation = review_reason
     elif not has_confirmed_wordplay:
-        resolution_explanation = "No confirmed humorous wordplay was found in this text."
+        if classification == MainClassification.SENSES_TOO_CLOSE and rec.l6_result:
+            resolution_explanation = rec.l6_result.explanation or ""
+        elif classification == MainClassification.RESOLUTION_FAIL and rec.l5_result:
+            resolution_explanation = rec.l5_result.explanation
+        elif rec.l4_result:
+            resolution_explanation = rec.l4_result.reasoning
+        if not resolution_explanation:
+            resolution_explanation = "No confirmed humorous wordplay was found in this text."
     elif rec.l5_result:
         expl = getattr(rec.l5_result, "explanation", "")
         if expl:
@@ -224,7 +291,30 @@ def _build_final_payload(rec: AnalysisRecord, target_age: int) -> dict[str, Any]
                        rec.l7_result.explanation if rec.l7_result else "")
             reason8 = rec.l8_result.per_age_reasons.get(a, rec.l8_result.explanation or "") if rec.l8_result else ""
             citations = [e.model_dump(mode="json") for e in rec.l7_result.aoa_evidence] if rec.l7_result else []
+            status7 = _age_stage_status(rec, "L7", comp, assessed_unknown="AOA_UNKNOWN")
+            status8 = _age_stage_status(rec, "L8", appr, assessed_unknown="UNKNOWN")
+            content = rec.l8_result.content_appropriate.get(a) if rec.l8_result else None
+            inference = rec.l8_result.inference_appropriate.get(a) if rec.l8_result else None
+            is_safe = (False if content is False or inference is False else
+                       True if content is True and inference is True else None)
+            safety = {
+                "surface_status": "PASS" if content is True else "FAIL" if content is False else "NOT_ASSESSED",
+                "inferential_status": "PASS" if inference is True else "FAIL" if inference is False else "NOT_ASSESSED",
+                "is_safe": is_safe,
+                "content_issues": rec.l8_result.content_issues if rec.l8_result else [],
+                "inference_issues": rec.l8_result.inference_issues if rec.l8_result else [],
+                "notes": reason8 or next((t.reason for t in reversed(rec.trace) if t.layer == "L8"), None)
+                         or "Appropriateness evidence is unavailable.",
+            }
+            overall = ("EXECUTION_FAILED" if "EXECUTION_FAILED" in {status7, status8} else
+                       "NOT_REQUESTED" if not rec.target_ages else
+                       "UNKNOWN" if status7 == "UNKNOWN" else
+                       "ASSESSED" if status7 == status8 == "ASSESSED" else "PARTIAL")
             age_spectrum[a] = {
+                "assessment_status": overall,
+                "comprehension_status": status7,
+                "appropriateness_status": status8,
+                "safety": safety,
                 "comprehension": comp.value if comp else "AOA_UNKNOWN",
                 "appropriateness": appr.value if appr else "UNKNOWN",
                 "desc": " ".join(x for x in (reason7, reason8, age_errors) if x) or "Age evidence is unavailable. Retry the assessment.",
@@ -239,34 +329,14 @@ def _build_final_payload(rec: AnalysisRecord, target_age: int) -> dict[str, Any]
         target_eval = {"comprehension": "NOT_APPLICABLE", "appropriateness": "NOT_APPLICABLE",
                        "desc": "Age assessment applies to confirmed wordplay."}
 
-    # 7. Empty issue lists cannot turn an unassessed axis into a pass.
-    content_issues = rec.l8_result.content_issues if rec.l8_result else []
-    inference_issues = rec.l8_result.inference_issues if rec.l8_result else []
-    content = rec.l8_result.content_appropriate.get(target_age) if is_joke_result and rec.l8_result else None
-    inference = rec.l8_result.inference_appropriate.get(target_age) if is_joke_result and rec.l8_result else None
-    is_safe = False if content is False or inference is False else True if content is True and inference is True else None
-    safety = {
-        "surface_status": "PASS" if content is True else "FAIL" if content is False else "NOT_ASSESSED",
-        "inferential_status": "PASS" if inference is True else "FAIL" if inference is False else "NOT_ASSESSED",
-        "is_safe": is_safe, "content_issues": content_issues, "inference_issues": inference_issues,
-        "notes": (rec.l8_result.per_age_reasons.get(target_age) if rec.l8_result else None) or "Appropriateness evidence is unavailable.",
-    }
-
-    # 8. Trace
-    trace_summary = [
-        {
-            "layer": t.layer,
-            "status": t.status,
-            "duration_ms": t.duration_ms,
-            "reason": t.reason,
-        }
-        for t in rec.trace
-    ]
+    # 7. Appropriateness axes remain age-specific; absent axes never pass.
+    safety = target_eval.get("safety") or _unassessed_safety("Appropriateness was not assessed.")
+    trace_summary = [_trace_payload(rec, t) for t in rec.trace]
 
     return {
         "text": rec.text,
         "target_age": target_age,
-        "genre": rec.l1_result.genre.value if rec.l1_result else "DECLARATIVE",
+        "genre": rec.l1_result.genre.value if rec.l1_result else None,
         "scope_label": rec.final.scope_label.value if rec.final else "NO_SCOPE_MECHANISM",
         "main_classification": classification.value,
         "detection_status": detection_status.value,
@@ -280,6 +350,9 @@ def _build_final_payload(rec: AnalysisRecord, target_age: int) -> dict[str, Any]
         "candidates": candidates,
         "sense_a": sense_a,
         "sense_b": sense_b,
+        "resolving_sense": rec.l4_result.resolving_sense if has_confirmed_wordplay and rec.l4_result else None,
+        "anchor_relation": rec.l4_result.anchor_relation.value if has_confirmed_wordplay and rec.l4_result else None,
+        "split_parts": rec.l4_result.split_parts if has_confirmed_wordplay and rec.l4_result else [],
         "resolution_explanation": resolution_explanation,
         "target_verdict": {
             "age": target_age,
@@ -289,11 +362,48 @@ def _build_final_payload(rec: AnalysisRecord, target_age: int) -> dict[str, Any]
             "aoa_evidence": target_eval.get("aoa_evidence", []),
             "dimensions": target_eval.get("dimensions", {}),
             "comprehension_summary": target_eval.get("comprehension_summary"),
+            "assessment_status": target_eval.get("assessment_status", "NOT_APPLICABLE"),
+            "comprehension_status": target_eval.get("comprehension_status", "NOT_APPLICABLE"),
+            "appropriateness_status": target_eval.get("appropriateness_status", "NOT_APPLICABLE"),
         },
         "age_spectrum": age_spectrum,
         "safety": safety,
         "trace": trace_summary,
     }
+
+
+def _layer_event(rec: AnalysisRecord, name: str, duration_ms: float) -> dict[str, Any]:
+    trace = next((t for t in reversed(rec.trace) if t.layer == name), None)
+    if trace is None:
+        trace = LayerTrace(layer=name, status="UNKNOWN", duration_ms=duration_ms,
+                           reason="No execution trace was returned for this stage.")
+    data = _trace_payload(rec, trace)
+    data["message"] = f"{name}: {trace.status}" + (f" — {trace.reason}" if trace.reason else "")
+    if name == "L1":
+        data["genre"] = rec.l1_result.genre.value if rec.l1_result else None
+    elif name == "L2":
+        data["senses_count"] = len(rec.l2_result.senses) if rec.l2_result else None
+    elif name == "L3":
+        data["candidates"] = [{"term": c.term, "score": round(c.score, 3)}
+                              for c in rec.l3_result.candidates] if rec.l3_result else []
+    elif name == "L4":
+        data["anchoring_status"] = rec.l4_result.anchoring_status.value if rec.l4_result else None
+    elif name == "L5":
+        data["resolution_status"] = rec.l5_result.resolution_status.value if rec.l5_result else None
+        data["score"] = rec.l5_result.resolution_score if rec.l5_result else None
+    elif name == "L6":
+        data["distinctness"] = rec.l6_result.distinctness_status.value if rec.l6_result else None
+    elif name == "L7":
+        data["comprehension"] = (rec.l7_result.per_age_comprehension.get(rec.target_ages[0])
+                                 if rec.l7_result and rec.target_ages else None)
+    elif name == "L8":
+        data["verdict"] = (rec.l8_result.per_age_verdict.get(rec.target_ages[0])
+                           if rec.l8_result and rec.target_ages else None)
+    return data
+
+
+def _sse(event: str, data: dict[str, Any]) -> str:
+    return f"event: {event}\ndata: {json.dumps(data)}\n\n"
 
 
 # ---------------------------------------------------------------------------
@@ -312,13 +422,17 @@ async def serve_index():
 async def analyze_joke(req: AnalyzeRequest):
     """Run full real pipeline synchronously and return complete payload."""
     clean_text = req.text.strip()
-    settings = _get_configured_settings()
-
     record = AnalysisRecord(
         item_id=f"WEB_{int(time.time()*1000)}",
         text=clean_text,
         target_ages=[req.target_age],
     )
+
+    try:
+        settings = _get_configured_settings()
+    except Exception as exc:
+        record.trace.append(LayerTrace(layer="CONFIG", status="ERROR", reason=str(exc), duration_ms=0))
+        return JSONResponse(content=_failure_payload(record, req.target_age, f"Backend setup failed: {exc}"))
 
     loop = asyncio.get_event_loop()
     def _execute():
@@ -338,15 +452,22 @@ async def analyze_joke(req: AnalyzeRequest):
         return rec
 
     rec = await loop.run_in_executor(None, _execute)
-    payload = _build_final_payload(rec, req.target_age)
+    try:
+        payload = _build_final_payload(rec, req.target_age)
+    except Exception as exc:
+        _LOG.exception("Error building final payload")
+        rec.trace.append(LayerTrace(layer="PAYLOAD", status="ERROR", reason=str(exc), duration_ms=0))
+        payload = _failure_payload(rec, req.target_age, "The result could not be prepared. Retry or inspect the execution trace.")
     return JSONResponse(content=payload)
 
 
 @app.get("/api/analyze/stream")
-async def stream_analysis(text: str, target_age: int = 8):
+async def stream_analysis(
+    text: str = Query(min_length=1, max_length=1000),
+    target_age: int = Query(default=8, ge=4, le=18),
+):
     """Real-time SSE event stream executing each layer live."""
     clean_text = text.strip()
-    settings = _get_configured_settings()
     loop = asyncio.get_event_loop()
 
     async def event_generator() -> AsyncGenerator[str, None]:
@@ -357,9 +478,17 @@ async def stream_analysis(text: str, target_age: int = 8):
         )
 
         tokens = _tokenize_text(clean_text)
-        yield f"event: start\ndata: {json.dumps({'message': 'Initializing real pipeline...', 'tokens': tokens})}\n\n"
+        yield _sse("start", {"message": "Initializing real pipeline...", "tokens": tokens})
+        try:
+            settings = _get_configured_settings()
+        except Exception as exc:
+            rec.trace.append(LayerTrace(layer="CONFIG", status="ERROR", reason=str(exc), duration_ms=0))
+            yield _sse("complete", _failure_payload(rec, target_age, f"Backend setup failed: {exc}"))
+            return
 
         for layer_name, layer_fn in _LAYER_REGISTRY:
+            yield _sse("layer_start", {"layer": layer_name, "status": "CHECKING",
+                                      "message": f"Checking {layer_name} and its prerequisites..."})
             start = time.monotonic()
             try:
                 # Run the actual layer in thread pool to prevent blocking event loop
@@ -368,7 +497,7 @@ async def stream_analysis(text: str, target_age: int = 8):
                     done, _ = await asyncio.wait((layer_future,), timeout=15)
                     if not done:
                         # Keep proxies and browsers from treating a slow model call as a dead stream.
-                        yield ": keep-alive\n\n"
+                        yield _sse("waiting", {"layer": layer_name, "message": f"Still waiting for {layer_name} to return; no result yet."})
                 rec = layer_future.result()
             except Exception as exc:
                 err_ms = round((time.monotonic() - start) * 1000, 1)
@@ -381,75 +510,15 @@ async def stream_analysis(text: str, target_age: int = 8):
                 ))
             duration_ms = round((time.monotonic() - start) * 1000, 1)
 
-            # Send real event payload corresponding to layer completion
-            if layer_name == "L1":
-                genre = rec.l1_result.genre.value if rec.l1_result else "DECLARATIVE"
-                yield f"event: l1\ndata: {json.dumps({'layer': 'L1', 'genre': genre, 'duration_ms': duration_ms, 'message': f'L1 Surface: Detected genre {genre}'})}\n\n"
-            elif layer_name == "L2":
-                s_count = len(rec.l2_result.senses) if rec.l2_result else 0
-                yield f"event: l2\ndata: {json.dumps({'layer': 'L2', 'senses_count': s_count, 'duration_ms': duration_ms, 'message': f'L2 Lexical: Loaded {s_count} WordNet synsets & AoA ratings'})}\n\n"
-            elif layer_name == "L3":
-                candidates = []
-                if rec.l3_result and rec.l3_result.candidates:
-                    candidates = [{"term": c.term, "score": round(c.score, 3)} for c in rec.l3_result.candidates[:5]]
-                yield f"event: l3\ndata: {json.dumps({'layer': 'L3', 'candidates': candidates, 'duration_ms': duration_ms, 'message': f'L3 Ranking: Identified {len(candidates)} ambiguity candidates'})}\n\n"
-            elif layer_name == "L4":
-                anchored = rec.l4_result.anchoring_status.value if rec.l4_result else "SKIPPED"
-                sense_a_text = rec.l4_result.sense_a if rec.l4_result else ""
-                sense_b_text = rec.l4_result.sense_b if rec.l4_result else ""
-                yield f"event: l4\ndata: {json.dumps({'layer': 'L4', 'status': anchored, 'sense_a': sense_a_text, 'sense_b': sense_b_text, 'duration_ms': duration_ms, 'message': f'L4 LLM Anchoring ({settings.L4_BACKEND}): {anchored}'})}\n\n"
-            elif layer_name == "L5":
-                res_status = rec.l5_result.resolution_status.value if rec.l5_result else "SKIPPED"
-                score = getattr(rec.l5_result, "resolution_score", None) if rec.l5_result else None
-                yield f"event: l5\ndata: {json.dumps({'layer': 'L5', 'status': res_status, 'score': score, 'duration_ms': duration_ms, 'message': f'L5 Incongruity Resolution: {res_status} (score: {score})'})}\n\n"
-            elif layer_name == "L6":
-                dist = rec.l6_result.distinctness_status.value if rec.l6_result else "SKIPPED"
-                yield f"event: l6\ndata: {json.dumps({'layer': 'L6', 'distinctness': dist, 'duration_ms': duration_ms, 'message': f'L6 Distinctness Check: {dist}'})}\n\n"
-            elif layer_name == "L7":
-                comp = getattr(rec.l7_result.per_age_comprehension.get(target_age), "value", "NOT_ASSESSED") if (rec.l7_result and rec.l7_result.per_age_comprehension) else "UNKNOWN"
-                yield f"event: l7\ndata: {json.dumps({'layer': 'L7', 'comprehension': comp, 'duration_ms': duration_ms, 'message': f'L7 Developmental: Age {target_age} -> {comp}'})}\n\n"
-            elif layer_name == "L8":
-                appr = getattr(rec.l8_result.per_age_verdict.get(target_age), "value", "NOT_ASSESSED") if (rec.l8_result and rec.l8_result.per_age_verdict) else "UNKNOWN"
-                yield f"event: l8\ndata: {json.dumps({'layer': 'L8', 'verdict': appr, 'duration_ms': duration_ms, 'message': f'L8 Child Safety Guardrail: {appr}'})}\n\n"
+            yield _sse(layer_name.lower(), _layer_event(rec, layer_name, duration_ms))
 
-        # Final complete payload
         try:
             payload = _build_final_payload(rec, target_age)
-            yield f"event: complete\ndata: {json.dumps(payload)}\n\n"
         except Exception as exc:
-            _LOG.error(f"Error building final payload: {exc}", exc_info=True)
-            err_payload = {
-                "text": clean_text,
-                "target_age": target_age,
-                "genre": "DECLARATIVE",
-                "scope_label": "NO_SCOPE_MECHANISM",
-                "main_classification": "EXECUTION_FAILED",
-                "detection_status": "EXECUTION_FAILED",
-                "review_required": True,
-                "review_reason": "The analysis could not be completed. Retry or inspect the execution trace.",
-                "suggested_action": "RETRY_ANALYSIS",
-                "age_assessment_available": False,
-                "confidence": None,
-                "punchline": None,
-                "tokens": tokens,
-                "candidates": [],
-                "sense_a": None,
-                "sense_b": None,
-                "resolution_explanation": "Analysis failed before a validated result could be produced.",
-                "target_verdict": {
-                    "age": target_age,
-                    "comprehension": "UNKNOWN",
-                    "appropriateness": "NOT_ASSESSED",
-                    "description": "Evaluation could not be completed.",
-                },
-                "age_spectrum": {},
-                "safety": {"surface_status": "NOT_ASSESSED", "inferential_status": "NOT_ASSESSED", "is_safe": None, "notes": "Safety has not been assessed."},
-                "trace": [
-                    {"layer": t.layer, "status": t.status, "duration_ms": t.duration_ms, "reason": t.reason}
-                    for t in rec.trace
-                ],
-            }
-            yield f"event: complete\ndata: {json.dumps(err_payload)}\n\n"
+            _LOG.exception("Error building final payload")
+            rec.trace.append(LayerTrace(layer="PAYLOAD", status="ERROR", reason=str(exc), duration_ms=0))
+            payload = _failure_payload(rec, target_age, "The result could not be prepared. Retry or inspect the execution trace.")
+        yield _sse("complete", payload)
 
     return StreamingResponse(
         event_generator(),

@@ -192,7 +192,7 @@ def _call_gemini_l4(
             return _L4Call(parsed, model, idx > 0, total_retries)
         if err_5xx is None:
             return _L4Call(None, model, idx > 0, total_retries)
-    return _L4Call(None, models[-1], True, total_retries)
+    return _L4Call(None, models[-1], len(models) > 1, total_retries)
 
 
 from .providers import (

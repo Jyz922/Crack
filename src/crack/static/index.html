@@ -2,7 +2,7 @@
 <html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>CRACK — Neuro-Symbolic Humor & Pun Analysis Engine</title>
   <link rel="preconnect" href="https://cdn.tailwindcss.com">
   <link rel="preconnect" href="https://unpkg.com" crossorigin>
@@ -38,6 +38,73 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
+    [v-cloak] { display: none; }
+    .joke-input { resize: none; line-height: 1.5; }
+    .age-grid { grid-template-columns: repeat(auto-fit, minmax(3rem, 1fr)); }
+    .trace-table { min-width: 36rem; }
+    .result-card { min-width: 0; overflow-wrap: anywhere; }
+
+    @media (pointer: coarse) {
+      #app button, #app .github-link { min-height: 44px; }
+    }
+
+    @media (max-width: 1023px) {
+      body { min-height: 100svh; }
+      #app.app-shell {
+        padding-top: max(1rem, env(safe-area-inset-top));
+        padding-bottom: max(1rem, env(safe-area-inset-bottom));
+        padding-left: max(1rem, env(safe-area-inset-left));
+        padding-right: max(1rem, env(safe-area-inset-right));
+      }
+      #app .app-header { gap: .75rem; margin-bottom: 1.5rem; }
+      #app .brand-copy { min-width: 0; }
+      #app .brand-subtitle { max-width: 28ch; font-size: .65rem; line-height: 1.45; }
+      #app .github-link { min-width: 44px; justify-content: center; padding: .65rem; }
+      #app .github-link > i, #app .github-link > svg { display: none; }
+      #app button { min-height: 44px; }
+      #app .scanner-card, #app .result-card { padding: 1rem; }
+      #app .status-banner { height: auto; min-height: 2rem; text-align: center; }
+      #app .status-pill { max-width: 100%; line-height: 1.5; }
+      #app .status-pill > span:first-child { flex-shrink: 0; }
+      #app .text-stage { display: block; height: auto; min-height: 9rem; }
+      #app .joke-input {
+        min-height: 9rem; padding: 1rem 3.25rem 1rem 1rem;
+        font-size: 16px; text-align: left; overflow-y: auto;
+      }
+      #app .clear-input { top: .75rem; right: .5rem; transform: none; min-width: 44px; }
+      #app .scanner-row { height: auto; min-height: 9rem; padding: 1rem; }
+      #app .joke-tokens {
+        display: block; width: 100%; white-space: pre-wrap;
+        overflow-wrap: anywhere; font-size: 16px; line-height: 1.9;
+      }
+      #app .joke-tokens > span {
+        display: inline; margin: 0; padding: 0; border-width: 0;
+        white-space: pre-wrap; box-decoration-break: clone;
+        -webkit-box-decoration-break: clone;
+      }
+      #app .joke-tokens > span > span { display: inline; }
+      #app .joke-tokens > span.token-marked { padding: .15rem .25rem; border-width: 2px; }
+      #app .controls-slot { height: auto; min-height: 3.5rem; align-items: stretch; }
+      #app .input-actions { flex-direction: column; align-items: stretch; gap: 1rem; }
+      #app .age-control { flex-direction: column; align-items: flex-start; width: 100%; gap: .6rem; }
+      #app .age-options { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .375rem; width: 100%; }
+      #app .age-choice { min-height: 44px; padding: .6rem .15rem; }
+      #app .analyze-button { width: 100%; min-height: 48px; align-self: stretch; }
+      #app .log-ticker { flex-direction: column; align-items: flex-start; white-space: normal; overflow-wrap: anywhere; }
+      #app .action-bar, #app .card-heading { flex-wrap: wrap; gap: .75rem; }
+      #app .verdict-main, #app .verdict-copy { min-width: 0; }
+      #app .verdict-main { gap: .75rem; }
+      #app .verdict-headline { display: block; }
+      #app .verdict-headline > span:last-child:not(:first-child) { display: inline-block; margin-top: .5rem; }
+      #app .takeaways { min-width: 0; grid-template-columns: minmax(0, 1fr); }
+      #app .original-text { overflow: visible; }
+      #app .trace-toggle { padding: 1rem; gap: .75rem; }
+      #app .trace-title { min-width: 0; }
+      #app .trace-meta { flex-shrink: 0; }
+      #app .trace-meta > span { display: none; }
+      #app .trace-body { padding: 0 1rem 1rem; }
+    }
+
     /* Custom Apple-Style Aesthetics & Keyframe Animations */
     body {
       background-color: #070B12;
@@ -169,15 +236,15 @@
 </head>
 <body class="min-h-screen antialiased flex flex-col selection:bg-cyan-500/30 selection:text-cyan-200">
 
-  <div id="app" class="flex-1 flex flex-col max-w-6xl w-full mx-auto px-4 sm:px-6 py-6" v-cloak>
+  <div id="app" class="app-shell flex-1 flex flex-col max-w-6xl w-full mx-auto px-4 sm:px-6 py-6" v-cloak>
 
     <!-- Top Navigation Bar -->
-    <header class="flex items-center justify-between py-3 mb-8 border-b border-white/5">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-violet-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+    <header class="app-header flex items-center justify-between py-3 mb-8 border-b border-white/5">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-tr from-cyan-500 to-violet-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
           <i data-lucide="sparkles" class="w-5 h-5 text-white"></i>
         </div>
-        <div>
+        <div class="brand-copy">
           <div class="flex items-center gap-2">
             <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
               CRACK
@@ -186,14 +253,14 @@
               v1.0.0
             </span>
           </div>
-          <p class="text-xs text-slate-400 font-normal">Computational Resolution & Anchoring of Comedy & Knowledge</p>
+          <p class="brand-subtitle text-xs text-slate-400 font-normal">Computational Resolution & Anchoring of Comedy & Knowledge</p>
         </div>
       </div>
 
       <div class="flex items-center gap-3">
-        <a href="https://github.com/Jyz922/Crack" target="_blank" class="flex items-center gap-2 text-xs text-slate-400 hover:text-white px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20 transition-all bg-white/[0.02]">
+        <a href="https://github.com/Jyz922/Crack" target="_blank" rel="noopener noreferrer" aria-label="View CRACK on GitHub" class="github-link flex items-center gap-2 text-xs text-slate-400 hover:text-white px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20 transition-all bg-white/[0.02]">
           <i data-lucide="github" class="w-4 h-4"></i>
-          <span>GitHub</span>
+          <span class="github-label">GitHub</span>
         </a>
       </div>
     </header>
@@ -219,7 +286,7 @@
       <!-- Main Scanner Card (Unified parameters: constant max-w, constant padding) -->
       <div
         :class="[
-          'apple-glass rounded-3xl w-full relative overflow-hidden transition-all duration-500 flex flex-col p-6 sm:p-8',
+          'scanner-card apple-glass rounded-3xl w-full relative overflow-hidden transition-all duration-500 flex flex-col p-6 sm:p-8',
           morphPhase >= 1 ? 'border-cyan-400/80 shadow-[0_0_40px_rgba(6,182,212,0.3)] ring-1 ring-cyan-400/30' : 'border-white/10'
         ]"
       >
@@ -231,39 +298,42 @@
         <div class="relative z-10 w-full flex flex-col justify-center">
 
           <!-- Fixed-Height Status Banner (Never pushes or moves the text stage) -->
-          <div class="h-8 mb-4 flex items-center justify-center">
+          <div class="status-banner h-8 mb-4 flex items-center justify-center">
             <div v-if="morphPhase === 0" class="text-xs text-slate-400 font-medium tracking-wide flex items-center gap-1.5 select-none">
               <i data-lucide="sparkles" class="w-3.5 h-3.5 text-cyan-400"></i>
               <span>Type a joke or select a benchmark below</span>
             </div>
-            <div v-else class="flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/25 text-cyan-300 text-xs font-medium animate-pulse">
+            <div v-else class="status-pill flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/25 text-cyan-300 text-xs font-medium animate-pulse">
               <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
               <span>{{ scannerStageMessage }}</span>
             </div>
           </div>
 
-          <!-- Unified Text Stage: Exactly identical h-20 sm:h-24 and font metrics -->
-          <div class="relative w-full h-20 sm:h-24 flex items-center justify-center">
+          <!-- Text wraps on compact screens; desktop keeps its scanner geometry. -->
+          <div class="text-stage relative w-full h-20 sm:h-24 flex items-center justify-center">
             
-            <!-- State 0: Interactive Text Input (Shares identical geometry & font) -->
-            <input
+            <!-- State 0: Text input with automatic height on compact screens. -->
+            <textarea
               v-if="morphPhase === 0"
+              ref="jokeInputRef"
               v-model="jokeInput"
-              type="text"
+              rows="3"
+              maxlength="1000"
+              aria-label="Text to analyze"
               placeholder="e.g. Why was 6 afraid of 7? Because 7 ate 9."
               :class="[
-                'w-full h-full bg-slate-950/70 border border-slate-800 rounded-2xl px-6 sm:px-10 text-center font-medium tracking-tight text-slate-100 placeholder-slate-500 outline-none transition-all duration-300 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 leading-none shadow-inner',
+                'joke-input w-full h-full bg-slate-950/70 border border-slate-800 rounded-2xl px-6 sm:px-10 py-3 text-center font-medium tracking-tight text-slate-100 placeholder-slate-500 outline-none transition-all duration-300 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 shadow-inner',
                 computedFontSizeClass
               ]"
-              @keydown.enter.prevent="startAnalysis"
+              @keydown="handleInputKeydown"
               @input="handleInputClean"
-            />
+            ></textarea>
 
             <!-- State 1, 2, 3: Continuous Tokenized Typography (In-place scanner stage) -->
             <div
               v-else
               ref="jokeRowRef"
-              class="relative w-full h-full select-none flex items-center justify-center overflow-visible bg-slate-950/40 border border-cyan-500/20 rounded-2xl px-6 sm:px-10"
+              class="scanner-row relative w-full h-full select-none flex items-center justify-center overflow-visible bg-slate-950/40 border border-cyan-500/20 rounded-2xl px-6 sm:px-10"
             >
               <!-- Moving Laser Scanner Line (Confined strictly inside text box) -->
               <div
@@ -290,7 +360,7 @@
               <div
                 ref="jokeInnerRef"
                 :class="[
-                  'inline-flex flex-nowrap items-center justify-center whitespace-nowrap tracking-tight font-medium leading-none',
+                  'joke-tokens inline-flex flex-nowrap items-center justify-center whitespace-nowrap tracking-tight font-medium leading-none',
                   computedFontSizeClass
                 ]"
                 :style="textScaleStyle"
@@ -304,7 +374,7 @@
                     'relative inline-flex items-center justify-center transition-all duration-300 rounded-xl leading-none border-2',
                     // Spacing and padding around words (mx-2 on candidates gives clear gap between adjacent boxes)
                     (isCandidateStage && tok.is_candidate && !isPunchlineLocked) || (isPunchlineLocked && tok.is_punchline)
-                      ? 'mx-2 px-2.5 pt-1.5 pb-2'
+                      ? 'token-marked mx-2 px-2.5 pt-1.5 pb-2'
                       : 'mx-0.5 px-1 py-1 border-transparent',
                     // Punchline locked state
                     isPunchlineLocked && tok.is_punchline
@@ -323,28 +393,30 @@
             <button
               v-if="jokeInput && morphPhase === 0"
               @click="jokeInput = ''"
-              class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors p-1.5 rounded-lg hover:bg-slate-800/50"
+              class="clear-input absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors p-1.5 rounded-lg hover:bg-slate-800/50"
               title="Clear"
+              aria-label="Clear text"
             >
               <i data-lucide="x" class="w-4 h-4"></i>
             </button>
 
           </div>
 
-          <!-- Unified Bottom Slot (Fixed height h-14: Age selector <-> Log ticker) -->
-          <div class="h-14 mt-6 pt-4 border-t border-slate-800/80 flex items-center justify-between">
+          <!-- Controls stack on compact screens; scanning uses the same area for logs. -->
+          <div class="controls-slot h-14 mt-6 pt-4 border-t border-slate-800/80 flex items-center justify-between">
             
             <!-- State 0: Target Age & Analyze Trigger Button -->
-            <div v-if="morphPhase === 0" class="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div class="flex items-center gap-2">
+            <div v-if="morphPhase === 0" class="input-actions w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div class="age-control flex items-center gap-2">
                 <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Target Child Age:</span>
-                <div class="flex items-center gap-1.5">
+                <div class="age-options flex items-center gap-1.5">
                   <button
                     v-for="age in [6, 8, 10, 12, 14]"
                     :key="age"
                     @click="targetAge = age"
+                    :aria-pressed="targetAge === age"
                     :class="[
-                      'px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
+                      'age-choice px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
                       targetAge === age
                         ? 'bg-gradient-to-r from-cyan-500 to-violet-600 text-white shadow-md shadow-cyan-500/20 scale-105'
                         : 'bg-slate-800/60 text-slate-400 hover:bg-slate-800 hover:text-slate-200'
@@ -359,7 +431,7 @@
               <button
                 @click="startAnalysis"
                 :disabled="!jokeInput.trim()"
-                class="inline-flex items-center justify-center gap-2.5 px-6 py-2.5 rounded-xl font-semibold text-sm tracking-wide text-white bg-gradient-to-r from-cyan-500 via-teal-500 to-violet-600 hover:opacity-95 shadow-lg shadow-cyan-500/25 active:scale-95 transition-all disabled:opacity-40 disabled:pointer-events-none self-end sm:self-center"
+                class="analyze-button inline-flex items-center justify-center gap-2.5 px-6 py-2.5 rounded-xl font-semibold text-sm tracking-wide text-white bg-gradient-to-r from-cyan-500 via-teal-500 to-violet-600 hover:opacity-95 shadow-lg shadow-cyan-500/25 active:scale-95 transition-all disabled:opacity-40 disabled:pointer-events-none self-end sm:self-center"
               >
                 <i data-lucide="play" class="w-4 h-4 fill-white"></i>
                 <span>Analyze Joke</span>
@@ -368,7 +440,7 @@
 
             <!-- State 1, 2, 3: Terminal Log Ticker in the exact same bottom slot -->
             <div v-else class="w-full flex items-center text-xs font-mono text-slate-400">
-              <div class="flex items-center gap-2 truncate">
+              <div class="log-ticker flex items-center gap-2 truncate">
                 <span class="text-cyan-400 font-semibold">[CRACK_PIPELINE]</span>
                 <span class="text-slate-300">{{ currentLogLine }}</span>
               </div>
@@ -376,6 +448,23 @@
 
           </div>
 
+        </div>
+      </div>
+
+      <div v-if="requestError && viewState === 'INPUT'" role="alert" class="result-card w-full mt-4 rounded-2xl p-4 border border-rose-500/30 bg-rose-500/10">
+        <h3 class="text-sm font-semibold text-rose-300">Analysis connection or response failed</h3>
+        <p class="mt-2 text-sm text-slate-300">{{ requestError.message }}</p>
+        <p v-if="requestError.layer" class="mt-2 text-xs text-slate-400">Last stage: {{ requestError.layer }}. Your text is preserved; use Analyze Joke to retry.</p>
+        <details v-if="requestError.trace.length" class="mt-3 text-xs text-slate-300">
+          <summary class="cursor-pointer">Stages received before the interruption</summary>
+          <ul class="mt-2 space-y-2"><li v-for="t in requestError.trace" :key="t.layer">{{ t.layer }} · {{ t.status }} — {{ t.reason || 'No additional detail returned.' }}</li></ul>
+        </details>
+      </div>
+
+      <div v-if="viewState === 'SCANNING' && liveTrace.length" class="result-card w-full mt-4 rounded-2xl p-4 border border-slate-800 bg-slate-900/60" aria-live="polite">
+        <div class="text-xs text-slate-400 mb-2">Reported layer states</div>
+        <div class="flex flex-wrap gap-2">
+          <span v-for="t in liveTrace" :key="t.layer" :class="['text-xs rounded px-2 py-1', traceStatusClass(t.status)]">{{ t.layer }} · {{ t.status }}</span>
         </div>
       </div>
 
@@ -410,7 +499,7 @@
     <section v-else-if="viewState === 'DASHBOARD'" class="w-full flex-1 flex flex-col gap-6">
       
       <!-- Top Action & Return Bar -->
-      <div class="flex items-center justify-between">
+      <div class="action-bar flex items-center justify-between">
         <button
           @click="resetToInput"
           class="inline-flex items-center gap-2 text-xs font-medium text-slate-400 hover:text-white px-3 py-1.5 rounded-lg border border-slate-800 hover:border-slate-700 bg-slate-900/60 transition-all"
@@ -427,12 +516,18 @@
         </div>
       </div>
 
+      <div v-if="recoveryEvents.length" class="result-card rounded-2xl p-4 border border-cyan-500/20 bg-cyan-500/5">
+        <h3 class="text-sm font-semibold text-cyan-300">Service recovery recorded</h3>
+        <p class="mt-1 text-xs text-slate-400">Retries or model fallback do not change the validation rules. The final decision remains authoritative.</p>
+        <ul class="mt-2 text-xs text-slate-300 space-y-2"><li v-for="t in recoveryEvents" :key="t.layer">{{ t.layer }} — {{ providerSummary(t) }}</li></ul>
+      </div>
+
       <!-- Bento Grid Module 1: Executive Verdict Card (The Direct Answer: Is it a Joke?) -->
-      <div class="animate-spring-1 apple-glass rounded-3xl p-6 sm:p-7 border border-white/10 relative overflow-hidden">
+      <div class="result-card animate-spring-1 apple-glass rounded-3xl p-6 sm:p-7 border border-white/10 relative overflow-hidden">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           
           <!-- Left: Big Direct Verdict Statement -->
-          <div class="flex items-start gap-4">
+          <div class="verdict-main flex items-start gap-4">
             <div
               :class="[
                 'w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg text-white',
@@ -444,7 +539,7 @@
               <i :data-lucide="heroVerdict.isJoke ? 'smile' : 'message-square'" class="w-7 h-7"></i>
             </div>
 
-            <div>
+            <div class="verdict-copy">
               <div class="flex flex-wrap items-center gap-2 mb-1.5">
                 <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Verdict:</span>
                 <span
@@ -460,10 +555,10 @@
                 </span>
               </div>
 
-              <h3 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mb-1 flex items-center gap-2">
+              <h3 class="verdict-headline text-2xl sm:text-3xl font-extrabold text-white tracking-tight mb-1 flex flex-wrap items-center gap-2">
                 <span>{{ heroVerdict.headline }}</span>
                 <span v-if="heroVerdict.isJoke" class="text-base font-normal text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
-                  Checks Passed
+                  Detection Checks Passed
                 </span>
               </h3>
 
@@ -474,14 +569,14 @@
           </div>
 
           <!-- Right: Key Executive Takeaways (Punchline, Recommended Age, Safety) -->
-          <div v-if="heroVerdict.isJoke" class="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-col gap-3 pt-4 lg:pt-0 border-t lg:border-t-0 lg:border-l border-slate-800 lg:pl-6 min-w-[220px]">
+          <div v-if="heroVerdict.isJoke" class="takeaways grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-col gap-3 pt-4 lg:pt-0 border-t lg:border-t-0 lg:border-l border-slate-800 lg:pl-6 min-w-[220px]">
             
             <!-- Punchline site -->
             <div v-if="analysisData.punchline" class="flex items-center gap-3">
               <div class="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 flex-shrink-0">
                 <i data-lucide="target" class="w-4 h-4"></i>
               </div>
-              <div class="truncate">
+              <div class="min-w-0 break-words">
                 <div class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">Punchline Word</div>
                 <div class="text-xs font-bold text-cyan-300 font-mono">"{{ analysisData.punchline }}"</div>
               </div>
@@ -494,19 +589,19 @@
               </div>
               <div>
                 <div class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">Age Assessment</div>
-                <div class="text-xs font-bold text-violet-300">{{ recommendedAge === null ? 'Assessment Pending' : 'Assessed at Age ' + recommendedAge }}</div>
+                <div class="text-xs font-bold text-violet-300">{{ ageAssessmentLabel }}</div>
               </div>
             </div>
 
             <!-- Safety Guardrail -->
-            <div v-if="analysisData.safety.is_safe !== null" class="flex items-center gap-3">
+            <div v-if="currentSafety.is_safe !== null" class="flex items-center gap-3">
               <div class="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0">
                 <i data-lucide="shield-check" class="w-4 h-4"></i>
               </div>
               <div>
                 <div class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">Child Safety</div>
                 <div class="text-xs font-bold text-emerald-300">
-                  {{ analysisData.safety.is_safe ? 'Content Checks Passed' : 'Review Flagged' }}
+                  {{ currentSafety.is_safe ? 'Content Checks Passed' : 'Review Flagged' }}
                 </div>
               </div>
             </div>
@@ -516,7 +611,7 @@
         </div>
       </div>
 
-      <div v-if="analysisData.review_required" class="apple-glass rounded-2xl p-6 border border-amber-500/20">
+      <div v-if="analysisData.review_required" class="result-card apple-glass rounded-2xl p-6 border border-amber-500/20">
         <h3 class="text-sm font-semibold text-amber-300 mb-2">Review required</h3>
         <p class="text-sm text-slate-300 whitespace-pre-wrap">{{ analysisData.review_reason }}</p>
         <button @click="resetToInput" class="mt-4 px-4 py-2 rounded-lg border border-amber-500/30 text-amber-200 text-sm hover:bg-amber-500/10">
@@ -526,17 +621,17 @@
 
       <!-- Bento Grid Module 2: The Core Joke Anatomy (Text + Double Meaning Collision) -->
       <template v-if="heroVerdict.isJoke">
-      <div class="apple-glass rounded-3xl p-6 sm:p-8 animate-card-fade">
+      <div class="result-card apple-glass rounded-3xl p-6 sm:p-8 animate-card-fade">
         
         <!-- Joke Text Anchor Header -->
         <div class="mb-6 pb-4 border-b border-slate-800/80">
           <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Original Text & Punchline Site</div>
-          <div class="w-full overflow-hidden py-1">
+          <div class="original-text w-full overflow-hidden py-1">
             <div
               ref="dashboardJokeRef"
-              :style="[textScaleStyle, { opacity: isMagicMoving ? 0 : 1 }]"
+              :style="[dashboardTextScaleStyle, { opacity: isMagicMoving ? 0 : 1 }]"
               :class="[
-                'inline-flex flex-nowrap items-center whitespace-nowrap tracking-tight font-medium leading-none',
+                'joke-tokens inline-flex flex-nowrap items-center whitespace-nowrap tracking-tight font-medium leading-none',
                 computedFontSizeClass
               ]"
             >
@@ -548,7 +643,7 @@
                 :class="[
                   'relative inline-flex items-center justify-center rounded-xl leading-none border-2',
                   tok.is_punchline
-                    ? 'mx-2 px-2.5 pt-1.5 pb-2 text-cyan-100 font-medium punchline-halo bg-cyan-500/30 border-cyan-300 z-30 shadow-2xl shadow-cyan-500/50'
+                    ? 'token-marked mx-2 px-2.5 pt-1.5 pb-2 text-cyan-100 font-medium punchline-halo bg-cyan-500/30 border-cyan-300 z-30 shadow-2xl shadow-cyan-500/50'
                     : 'mx-0.5 px-1 py-1 border-transparent text-slate-200'
                 ]"
               ><span class="inline-block leading-none">{{ tok.text }}</span></span></template>
@@ -580,12 +675,13 @@
               <div class="flex items-center justify-between mb-2">
                 <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-1.5">
                   <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
-                  <span>Meaning 1 (Everyday Sense)</span>
+                  <span>Meaning A</span>
                 </span>
                 <span class="text-[11px] font-mono text-slate-400 bg-slate-800 px-2 py-0.5 rounded">
                   {{ formatAoA(analysisData.sense_a.aoa) }}
                 </span>
               </div>
+              <div v-if="analysisData.resolving_sense === 'sense_a'" class="text-xs text-cyan-300 mb-2">Resolving reading</div>
               <p class="text-sm text-slate-200 mb-3 leading-relaxed font-medium">
                 "{{ analysisData.sense_a.definition }}"
               </p>
@@ -604,12 +700,13 @@
               <div class="flex items-center justify-between mb-2">
                 <span class="text-xs font-bold text-violet-400 uppercase tracking-wider flex items-center gap-1.5">
                   <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
-                  <span>Meaning 2 (Wordplay Twist)</span>
+                  <span>Meaning B</span>
                 </span>
                 <span class="text-[11px] font-mono text-slate-400 bg-slate-800 px-2 py-0.5 rounded">
                   {{ formatAoA(analysisData.sense_b.aoa) }}
                 </span>
               </div>
+              <div v-if="analysisData.resolving_sense === 'sense_b'" class="text-xs text-violet-300 mb-2">Resolving reading</div>
               <p class="text-sm text-slate-200 mb-3 leading-relaxed font-medium">
                 "{{ analysisData.sense_b.definition }}"
               </p>
@@ -627,18 +724,24 @@
       </div>
       </template>
 
-      <div v-else class="apple-glass rounded-3xl p-6 sm:p-8 animate-card-fade">
+      <div v-else class="result-card apple-glass rounded-3xl p-6 sm:p-8 animate-card-fade">
         <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">Analyzed Text</div>
         <p class="text-lg text-slate-200 leading-relaxed">{{ analysisData.text }}</p>
+        <p v-if="analysisData.detection_status === 'NON_PUN'" class="mt-4 text-sm text-slate-400 leading-relaxed">{{ humanExplanation }}</p>
+      </div>
+
+      <div v-if="heroVerdict.isJoke && ageResponseError" role="alert" class="result-card rounded-2xl p-4 border border-amber-500/30 bg-amber-500/10">
+        <h3 class="text-sm font-semibold text-amber-300">Age assessment unavailable</h3>
+        <p class="mt-2 text-sm text-slate-300">{{ ageResponseError }} The validated wordplay detection is retained; no age or appropriateness pass is implied.</p>
       </div>
 
       <!-- Bento Grid Module 3: Developmental Age Spectrum & L8 Safety -->
-      <div v-if="heroVerdict.isJoke && analysisData.age_assessment_available" class="animate-spring-3 grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div v-if="heroVerdict.isJoke && analysisData.age_assessment_available && !ageResponseError" class="animate-spring-3 grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         <!-- Developmental Spectrum (2 cols) -->
-        <div class="apple-glass rounded-3xl p-6 lg:col-span-2 flex flex-col justify-between">
+        <div class="result-card apple-glass rounded-3xl p-6 lg:col-span-2 flex flex-col justify-between">
           <div>
-            <div class="flex items-center justify-between mb-3">
+            <div class="card-heading flex items-center justify-between mb-3">
               <div>
                 <h3 class="text-sm font-bold text-slate-100 uppercase tracking-wider flex items-center gap-2">
                   <i data-lucide="brain" class="w-4 h-4 text-cyan-400"></i>
@@ -652,11 +755,12 @@
             </div>
 
             <!-- Interactive Age Slider / Buttons -->
-            <div class="grid grid-cols-6 gap-2 my-4">
+            <div class="age-grid grid gap-2 my-4">
               <button
                 v-for="age in Object.keys(analysisData.age_spectrum).map(Number)"
                 :key="age"
                 @click="activeDisplayAge = age"
+                :aria-pressed="activeDisplayAge === age"
                 :class="[
                   'py-2 px-1 rounded-xl text-center transition-all border',
                   activeDisplayAge === age
@@ -671,17 +775,18 @@
 
             <!-- Current Selected Age Detailed Insight -->
             <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 text-xs">
-              <div class="flex items-center justify-between mb-1.5">
+              <div class="card-heading flex items-center justify-between mb-1.5">
                 <span class="font-bold text-slate-200 text-sm">
                   At Age {{ activeDisplayAge }}:
                 </span>
                 <span :class="[
                   'font-semibold px-2.5 py-0.5 rounded-full text-xs',
-                  friendlyComprehension(currentAgeAssessment.comprehension, currentAgeAssessment.comprehension_summary).tagClass
+                  friendlyComprehension(currentAgeAssessment.comprehension, currentAgeAssessment.comprehension_summary, currentAgeAssessment.comprehension_status).tagClass
                 ]">
-                  {{ friendlyComprehension(currentAgeAssessment.comprehension, currentAgeAssessment.comprehension_summary).label }}
+                  {{ friendlyComprehension(currentAgeAssessment.comprehension, currentAgeAssessment.comprehension_summary, currentAgeAssessment.comprehension_status).label }}
                 </span>
               </div>
+              <p class="mb-2 text-slate-400">Age assessment: {{ ageAssessmentLabel }}. Appropriateness: {{ ageStageLabel(currentAgeAssessment.appropriateness_status) }}.</p>
               <div v-if="currentAgeAssessment.comprehension_summary" class="my-2 space-y-1 leading-relaxed">
                 <p v-if="currentAgeAssessment.comprehension_summary.barrier_dimensions.length" class="text-amber-300">
                   Estimated barriers: {{ currentAgeAssessment.comprehension_summary.barrier_dimensions.map(friendlyAgeDimension).join(', ') }}
@@ -709,41 +814,41 @@
         </div>
 
         <!-- L8 Safety & Appropriateness Guardrails (1 col) -->
-        <div class="apple-glass rounded-3xl p-6 flex flex-col justify-between">
+        <div class="result-card apple-glass rounded-3xl p-6 flex flex-col justify-between">
           <div>
-            <div class="flex items-center justify-between mb-1">
+            <div class="card-heading flex items-center justify-between mb-1">
               <h3 class="text-sm font-bold text-slate-100 uppercase tracking-wider flex items-center gap-2">
                 <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
                 <span>Audience Appropriateness</span>
               </h3>
-              <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 font-bold">
-                {{ analysisData.safety.is_safe === null ? 'UNKNOWN' : analysisData.safety.is_safe ? 'SUITABLE' : 'REVIEW' }}
+              <span :class="['text-xs px-2 py-0.5 rounded-full border font-bold', currentSafety.is_safe === true ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20' : 'bg-amber-500/10 text-amber-300 border-amber-500/20']">
+                {{ currentAgeAssessment.appropriateness_status === 'EXECUTION_FAILED' ? 'FAILED' : currentAgeAssessment.appropriateness_status === 'SKIPPED' ? 'NOT ASSESSED' : currentSafety.is_safe === null ? 'UNKNOWN' : currentSafety.is_safe ? 'SUITABLE' : 'REVIEW' }}
               </span>
             </div>
-            <p class="text-xs text-slate-400 mb-4">Content and background knowledge assessed for the target age</p>
+            <p class="text-xs text-slate-400 mb-4">Content and background knowledge · Age {{ activeDisplayAge }}</p>
 
             <div class="space-y-3">
               <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-3">
                 <div class="flex items-center justify-between mb-1">
                   <span class="text-xs font-semibold text-slate-200">Surface Language</span>
-                  <span class="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">{{ analysisData.safety.surface_status === 'PASS' ? 'SUITABLE' : analysisData.safety.surface_status === 'FAIL' ? 'REVIEW' : 'UNKNOWN' }}</span>
+                  <span :class="['text-[11px] font-bold px-2 py-0.5 rounded-full', traceStatusClass(currentSafety.surface_status)]">{{ currentSafety.surface_status === 'PASS' ? 'SUITABLE' : currentSafety.surface_status === 'FAIL' ? 'REVIEW' : 'UNKNOWN' }}</span>
                 </div>
-                <div class="text-[11px] text-slate-400">{{ analysisData.safety.content_issues.join('; ') || 'See the age-specific content assessment below.' }}</div>
+                <div class="text-[11px] text-slate-400">{{ currentSafety.content_issues.join('; ') || (currentSafety.surface_status === 'NOT_ASSESSED' ? 'Content has not been assessed for this age.' : 'See the age-specific assessment below.') }}</div>
               </div>
 
               <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-3">
                 <div class="flex items-center justify-between mb-1">
                   <span class="text-xs font-semibold text-slate-200">Background Knowledge</span>
-                  <span class="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">{{ analysisData.safety.inferential_status === 'PASS' ? 'ACCESSIBLE' : analysisData.safety.inferential_status === 'FAIL' ? 'ADVANCED' : 'UNKNOWN' }}</span>
+                  <span :class="['text-[11px] font-bold px-2 py-0.5 rounded-full', traceStatusClass(currentSafety.inferential_status)]">{{ currentSafety.inferential_status === 'PASS' ? 'ACCESSIBLE' : currentSafety.inferential_status === 'FAIL' ? 'ADVANCED' : 'UNKNOWN' }}</span>
                 </div>
-                <div class="text-[11px] text-slate-400">{{ analysisData.safety.inference_issues.join('; ') || 'See the age-specific reasoning assessment below.' }}</div>
+                <div class="text-[11px] text-slate-400">{{ currentSafety.inference_issues.join('; ') || (currentSafety.inferential_status === 'NOT_ASSESSED' ? 'Background knowledge has not been assessed for this age.' : 'See the age-specific assessment below.') }}</div>
               </div>
             </div>
           </div>
 
           <div class="mt-4 pt-3 border-t border-slate-800/80 text-xs text-slate-400">
             <span>Assessment: </span>
-            <strong class="text-emerald-400 font-semibold">{{ analysisData.safety.notes }}</strong>
+            <strong class="text-slate-300 font-semibold">{{ currentSafety.notes }}</strong>
           </div>
         </div>
 
@@ -753,23 +858,24 @@
       <div class="animate-spring-4 apple-glass rounded-2xl overflow-hidden">
         <button
           @click="showTrace = !showTrace"
-          class="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-white/[0.02] transition-colors"
+          :aria-expanded="showTrace"
+          class="trace-toggle w-full px-6 py-4 flex items-center justify-between text-left hover:bg-white/[0.02] transition-colors"
         >
-          <div class="flex items-center gap-2.5">
+          <div class="trace-title flex items-center gap-2.5">
             <i data-lucide="cpu" class="w-4 h-4 text-cyan-400"></i>
             <span class="text-xs font-bold text-slate-200 uppercase tracking-wider">
               Inspectable Neuro-Symbolic Execution Trace (L0–L8)
             </span>
           </div>
-          <div class="flex items-center gap-2 text-xs text-slate-400">
+          <div class="trace-meta flex items-center gap-2 text-xs text-slate-400">
             <span>{{ analysisData.trace.length }} Layers Executed</span>
             <i :data-lucide="showTrace ? 'chevron-up' : 'chevron-down'" class="w-4 h-4"></i>
           </div>
         </button>
 
-        <div v-if="showTrace" class="p-6 pt-0 border-t border-slate-800/80">
+        <div v-if="showTrace" class="trace-body p-6 pt-0 border-t border-slate-800/80">
           <div class="overflow-x-auto my-3">
-            <table class="w-full text-left text-xs font-mono">
+            <table class="trace-table w-full text-left text-xs font-mono">
               <thead>
                 <tr class="text-slate-500 border-b border-slate-800">
                   <th class="py-2">Layer</th>
@@ -784,17 +890,21 @@
                   <td class="py-2">
                     <span :class="[
                       'px-1.5 py-0.5 rounded text-[10px]',
-                      ['OK', 'PASS'].includes(t.status) ? 'bg-emerald-500/20 text-emerald-300' : (t.status === 'ERROR' ? 'bg-rose-500/20 text-rose-300' : 'bg-amber-500/20 text-amber-300')
+                      traceStatusClass(t.status)
                     ]">
                       {{ t.status }}
                     </span>
                   </td>
                   <td class="py-2 text-slate-400">{{ t.duration_ms }}ms</td>
-                  <td class="py-2 text-slate-400 whitespace-normal break-words max-w-xs">{{ t.reason || '-' }}</td>
+                  <td class="py-2 text-slate-400 whitespace-normal break-words max-w-xs">
+                    <div>{{ t.reason || '-' }}</div>
+                    <div v-if="providerSummary(t)" class="mt-1 text-cyan-300">{{ providerSummary(t) }}</div>
+                  </td>
                 </tr>
               </tbody>
             </table>
           </div>
+          <p class="text-xs text-slate-500">Recovery metadata is reported after a stage returns. These backoff counters exclude SDK retries, request-option compatibility retries and the separate Gemini L5 rate-limit retry; missing counters mean unavailable.</p>
 
           <div class="flex justify-end mt-2">
             <button
@@ -818,7 +928,7 @@
   </div>
 
   <script>
-    const { createApp, ref, computed, nextTick, onMounted } = Vue;
+    const { createApp, ref, computed, nextTick, onMounted, watch } = Vue;
 
     createApp({
       setup() {
@@ -841,10 +951,16 @@
         const analysisData = ref(null);
         const showTrace = ref(false);
         const copyStatus = ref('Copy Raw JSON');
+        const requestError = ref(null);
+        const ageResponseError = ref(null);
+        const liveTrace = ref([]);
+        const pendingLayer = ref(null);
 
-        // Single-Line Dynamic Scaling & Phased Transition
+        // Desktop text scaling and compact-screen wrapping
         // morphPhase: 0 = IDLE, 1 = FRAMING, 2 = MORPHING & CENTERING, 3 = SCANNING
         const morphPhase = ref(0);
+        const jokeInputRef = ref(null);
+        const isCompactLayout = ref(window.matchMedia('(max-width: 1023px)').matches);
         const jokeRowRef = ref(null);
         const jokeInnerRef = ref(null);
         const laserLineRef = ref(null);
@@ -856,11 +972,35 @@
         let laserResizeObserver = null;
         let candidateTimeouts = [];
 
+        function resizeTextInput() {
+          nextTick(() => {
+            const input = jokeInputRef.value;
+            if (!input) return;
+            input.style.height = '';
+            if (isCompactLayout.value) {
+              input.style.height = 'auto';
+              input.style.height = `${Math.max(144, Math.min(input.scrollHeight, 384))}px`;
+            }
+          });
+        }
+
+        function updateViewport() {
+          isCompactLayout.value = window.matchMedia('(max-width: 1023px)').matches;
+          resizeTextInput();
+          updateTextScale();
+        }
+
         function updateTextScale() {
           nextTick(() => {
-            if (!jokeRowRef.value || !jokeInnerRef.value) return;
-            const containerW = jokeRowRef.value.clientWidth - 24;
-            const contentW = jokeInnerRef.value.scrollWidth;
+            if (isCompactLayout.value) {
+              textScale.value = 1;
+              return;
+            }
+            const content = viewState.value === 'DASHBOARD' ? dashboardJokeRef.value : jokeInnerRef.value;
+            const container = viewState.value === 'DASHBOARD' ? content?.parentElement : jokeRowRef.value;
+            if (!container || !content) return;
+            const containerW = container.clientWidth - 24;
+            const contentW = content.scrollWidth;
             if (contentW > containerW && containerW > 0) {
               textScale.value = Math.max(0.5, containerW / contentW);
             } else {
@@ -870,6 +1010,7 @@
         }
 
         const computedFontSizeClass = computed(() => {
+          if (isCompactLayout.value) return 'text-base';
           const text = (jokeInput.value || '').trim();
           if (!text) {
             // Elegant hint size for placeholder - guaranteed never to overflow or clip
@@ -893,6 +1034,11 @@
           return {};
         });
 
+        const dashboardTextScaleStyle = computed(() => ({
+          ...textScaleStyle.value,
+          transformOrigin: 'left center',
+        }));
+
         const presets = [
           { icon: '🔢', title: 'Why was 6 afraid of 7? Because 7 ate 9.', text: 'Why was 6 afraid of 7? Because 7 ate 9.', age: 8 },
           { icon: '🏦', title: 'I used to be a banker, but I lost interest.', text: 'I used to be a banker, but I lost interest.', age: 10 },
@@ -909,6 +1055,79 @@
           }
         }
 
+        function handleInputKeydown(event) {
+          if (event.key !== 'Enter' || event.isComposing) return;
+          if (event.ctrlKey || event.metaKey || (!isCompactLayout.value && !event.shiftKey)) {
+            event.preventDefault();
+            startAnalysis();
+          }
+        }
+
+        watch(jokeInput, resizeTextInput);
+
+        function traceStatusClass(status) {
+          if (['PASS', 'OK'].includes(status)) return 'bg-emerald-500/20 text-emerald-300';
+          if (['ERROR', 'REJECTED', 'FAIL'].includes(status)) return 'bg-rose-500/20 text-rose-300';
+          if (['SKIPPED', 'NOT_ASSESSED'].includes(status)) return 'bg-slate-800 text-slate-400';
+          return 'bg-amber-500/20 text-amber-300';
+        }
+
+        function providerSummary(trace) {
+          if (!['L4', 'L5', 'L6'].includes(trace.layer)) return '';
+          if (trace.status === 'SKIPPED') return 'Not executed';
+          if (!trace.provider?.recorded) return 'Recovery metadata unavailable';
+          const p = trace.provider;
+          return `Model: ${p.model_used}; application backoff retries: ${p.application_retries}; model fallback: ${p.fallback_used ? 'used' : 'not recorded'}`;
+        }
+
+        const recoveryEvents = computed(() => (analysisData.value?.trace || []).filter(t =>
+          t.provider?.recorded && (t.provider.application_retries > 0 || t.provider.fallback_used)));
+
+        function validateFinalPayload(d) {
+          const object = value => value && typeof value === 'object' && !Array.isArray(value);
+          const states = ['PUN', 'NON_PUN', 'INSUFFICIENT_EVIDENCE', 'EXECUTION_FAILED', 'OUT_OF_SCOPE'];
+          if (!object(d) || typeof d.text !== 'string' || typeof d.main_classification !== 'string' ||
+              !states.includes(d.detection_status) || typeof d.review_required !== 'boolean' ||
+              !Array.isArray(d.tokens) || !Array.isArray(d.trace)) {
+            throw new Error('The server returned an incomplete or invalid final result.');
+          }
+          const classifications = {
+            VALID_HOMOGRAPH_JOKE: 'PUN', VALID_COMPOUND_SPLIT_JOKE: 'PUN',
+            ONE_SENSE_ONLY: 'NON_PUN', ANCHORING_FAIL: 'NON_PUN', RESOLUTION_FAIL: 'NON_PUN', SENSES_TOO_CLOSE: 'NON_PUN',
+            OUT_OF_SCOPE_HOMOPHONE: 'OUT_OF_SCOPE', OUT_OF_SCOPE_NONLEXICAL_JOKE: 'OUT_OF_SCOPE',
+            EXECUTION_FAILED: 'EXECUTION_FAILED',
+          };
+          const expected = classifications[d.main_classification] || 'INSUFFICIENT_EVIDENCE';
+          if (d.detection_status !== expected || d.review_required !== !['PUN', 'NON_PUN'].includes(expected)) {
+            throw new Error('The final decision fields contradict one another.');
+          }
+          if (d.tokens.some(t => !object(t) || typeof t.text !== 'string') ||
+              d.trace.some(t => !object(t) || typeof t.layer !== 'string' || typeof t.status !== 'string')) {
+            throw new Error('The text or execution trace is malformed.');
+          }
+          if (expected === 'PUN' && (!d.punchline || ![d.sense_a, d.sense_b].every(s =>
+              object(s) && typeof s.definition === 'string' && s.definition.trim() && typeof s.quote === 'string' && s.quote.trim()))) {
+            throw new Error('The confirmed wordplay result is missing its readings or source anchors.');
+          }
+          return d;
+        }
+
+        function agePayloadError(d) {
+          if (!d.age_assessment_available) return null;
+          const object = value => value && typeof value === 'object' && !Array.isArray(value);
+          if (!object(d.age_spectrum) || !object(d.safety) || !Object.keys(d.age_spectrum).length) {
+            return 'Age assessment data is unavailable or malformed.';
+          }
+          for (const item of Object.values(d.age_spectrum)) {
+            if (!object(item) || typeof item.comprehension !== 'string' || typeof item.appropriateness !== 'string' ||
+                (item.comprehension_summary && (!Array.isArray(item.comprehension_summary.barrier_dimensions) ||
+                 !Array.isArray(item.comprehension_summary.unknown_dimensions)))) {
+              return 'Age assessment data could not be displayed safely.';
+            }
+          }
+          return null;
+        }
+
         function selectPreset(preset) {
           if (morphPhase.value > 0) return;
           jokeInput.value = preset.text;
@@ -917,6 +1136,12 @@
 
         async function startAnalysis() {
           if (!jokeInput.value.trim() || morphPhase.value > 0) return;
+          requestError.value = null;
+          ageResponseError.value = null;
+          liveTrace.value = [];
+          pendingLayer.value = null;
+          analysisData.value = null;
+          showTrace.value = false;
 
           const oldFlyer = document.getElementById('magic-move-flyer');
           if (oldFlyer) oldFlyer.remove();
@@ -993,150 +1218,75 @@
           if (laserLineRef.value) laserLineRef.value.style.transform = 'translate3d(0, 0, 0)';
           laserAnimationId = requestAnimationFrame(animateLaser);
 
-          // Dynamic reasoning ticker for the deep LLM thinking phase
-          const reasoningMessages = [
-            "Querying frontier cognitive reasoning model (OpenAI)...",
-            "Evaluating contextual anchor quotes across sentence boundaries...",
-            "Checking semantic contrast and metaphorical divergence...",
-            "Verifying punchline incongruity without ungrounded hallucination...",
-            "Computing psycholinguistic AoA acquisition curves...",
-          ];
-          let reasonIdx = 0;
-          const reasonInterval = setInterval(() => {
-            if (!isPunchlineLocked.value && viewState.value === 'SCANNING') {
-              currentLogLine.value = reasoningMessages[reasonIdx % reasoningMessages.length];
-              reasonIdx++;
-            }
-          }, 2200);
-
-          // Connect to real-time Server-Sent Events stream
           const streamUrl = `/api/analyze/stream?text=${encodeURIComponent(jokeInput.value.trim())}&target_age=${targetAge.value}`;
           const evtSource = new EventSource(streamUrl);
+          let streamFinished = false;
 
-          evtSource.addEventListener('start', (e) => {
+          function stopStream() {
+            evtSource.close();
+            candidateTimeouts.forEach(clearTimeout);
+            candidateTimeouts = [];
+            if (laserAnimationId) cancelAnimationFrame(laserAnimationId);
+            laserAnimationId = null;
+            laserActive.value = false;
+            laserResizeObserver?.disconnect();
+            laserResizeObserver = null;
+          }
+
+          function failStream(message) {
+            if (streamFinished) return;
+            streamFinished = true;
+            stopStream();
+            requestError.value = { message, layer: pendingLayer.value, trace: [...liveTrace.value] };
+            viewState.value = 'INPUT';
+            morphPhase.value = 0;
+            isPunchlineLocked.value = false;
+            nextTick(() => { resizeTextInput(); lucide.createIcons(); });
+          }
+
+          function readEvent(e, handler) {
+            if (streamFinished) return;
             try {
               const d = JSON.parse(e.data);
+              if (!d || typeof d !== 'object' || Array.isArray(d)) throw new Error('Invalid progress event.');
+              handler(d);
+            } catch (err) {
+              failStream('The live stream returned an invalid progress event. No validated decision was received.');
+            }
+          }
+
+          evtSource.addEventListener('start', e => readEvent(e, d => {
+            currentLogLine.value = d.message;
+            if (Array.isArray(d.tokens)) { tokens.value = d.tokens; updateTextScale(); }
+          }));
+          evtSource.addEventListener('layer_start', e => readEvent(e, d => {
+            pendingLayer.value = d.layer;
+            scannerStageMessage.value = `[${d.layer}] Checking stage prerequisites`;
+            currentLogLine.value = d.message;
+          }));
+          evtSource.addEventListener('waiting', e => readEvent(e, d => {
+            scannerStageMessage.value = `[${d.layer}] Waiting for a result`;
+            currentLogLine.value = d.message;
+          }));
+          for (const event of ['l0-pre', 'l1', 'l2', 'l3', 'l4', 'l5', 'l6', 'l7', 'l8', 'l0-post']) {
+            evtSource.addEventListener(event, e => readEvent(e, d => {
+              if (typeof d.layer !== 'string' || typeof d.status !== 'string') throw new Error('Missing layer state.');
+              pendingLayer.value = d.layer;
+              liveTrace.value = [...liveTrace.value.filter(t => t.layer !== d.layer), d];
+              scannerStageMessage.value = `[${d.layer}] ${d.status}`;
               currentLogLine.value = d.message;
-              if (d.tokens) {
-                tokens.value = d.tokens;
+              if (event === 'l3' && Array.isArray(d.candidates) && d.status === 'PASS') {
+                const candidates = new Map(d.candidates.map(c => [c.term.toLowerCase(), c]));
+                isCandidateStage.value = true;
+                tokens.value = tokens.value.map(t => ({ ...t, is_candidate: candidates.has(t.lower),
+                  candidate_score: candidates.get(t.lower)?.score ?? null }));
                 updateTextScale();
               }
-            } catch (err) {
-              console.warn('Error handling start event:', err);
-            }
-          });
-
-          evtSource.addEventListener('l1', (e) => {
-            try {
-              const d = JSON.parse(e.data);
-              scannerStageMessage.value = `[L1] Genre: ${d.genre}`;
-              currentLogLine.value = d.message;
-            } catch (err) {
-              console.warn('Error handling l1 event:', err);
-            }
-          });
-
-          evtSource.addEventListener('l2', (e) => {
-            try {
-              const d = JSON.parse(e.data);
-              scannerStageMessage.value = `[L2] WordNet & AoA: ${d.senses_count} Senses`;
-              currentLogLine.value = d.message;
-            } catch (err) {
-              console.warn('Error handling l2 event:', err);
-            }
-          });
-
-          evtSource.addEventListener('l3', (e) => {
-            try {
-              const d = JSON.parse(e.data);
-              scannerStageMessage.value = `[L3] Ambiguity Sites: Scanning ${d.candidates.length} candidates...`;
-              currentLogLine.value = `Running lexical contrast and SemCor balance metrics...`;
-
-              // Stagger candidate reveals smoothly (750ms apart)
-              d.candidates.forEach((cand, cIdx) => {
-                const tId = setTimeout(() => {
-                  if (viewState.value !== 'SCANNING' || isPunchlineLocked.value) return;
-                  isCandidateStage.value = true;
-                  const candTerm = cand.term.toLowerCase();
-                  tokens.value = tokens.value.map(t => {
-                    if (t.lower === candTerm || t.candidate_term === candTerm) {
-                      return {
-                        ...t,
-                        is_candidate: true,
-                        candidate_score: cand.score,
-                        candidate_term: candTerm,
-                      };
-                    }
-                    return t;
-                  });
-                  updateTextScale();
-                  if (!isPunchlineLocked.value && viewState.value === 'SCANNING') {
-                    scannerStageMessage.value = `[L3] Candidate #${cIdx + 1}: "${cand.term}"`;
-                    currentLogLine.value = `Identified dual synsets for "${cand.term}". Evaluating incongruity potential...`;
-                  }
-                }, (cIdx + 1) * 750);
-                candidateTimeouts.push(tId);
-              });
-            } catch (err) {
-              console.warn('Error handling l3 event:', err);
-            }
-          });
-
-          evtSource.addEventListener('l4', (e) => {
-            try {
-              // Clear pending L3 timeouts so L3 doesn't overwrite L4/L5 status
-              candidateTimeouts.forEach(clearTimeout);
-              candidateTimeouts = [];
-
-              const d = JSON.parse(e.data);
-              scannerStageMessage.value = `[L4] Sense Anchoring: ${d.status}`;
-              currentLogLine.value = d.message;
-            } catch (err) {
-              console.warn('Error handling l4 event:', err);
-            }
-          });
-
-          evtSource.addEventListener('l5', (e) => {
-            try {
-              const d = JSON.parse(e.data);
-              scannerStageMessage.value = `[L5] Incongruity Resolution: ${d.status}`;
-              currentLogLine.value = d.message;
-            } catch (err) {
-              console.warn('Error handling l5 event:', err);
-            }
-          });
-
-          evtSource.addEventListener('l6', (e) => {
-            try {
-              const d = JSON.parse(e.data);
-              scannerStageMessage.value = `[L6] Distinctness: ${d.distinctness}`;
-              currentLogLine.value = d.message;
-            } catch (err) {
-              console.warn('Error handling l6 event:', err);
-            }
-          });
-
-          evtSource.addEventListener('l7', (e) => {
-            try {
-              const d = JSON.parse(e.data);
-              scannerStageMessage.value = `[L7] Developmental: Age ${targetAge.value} -> ${d.comprehension}`;
-              currentLogLine.value = d.message;
-            } catch (err) {
-              console.warn('Error handling l7 event:', err);
-            }
-          });
-
-          evtSource.addEventListener('l8', (e) => {
-            try {
-              const d = JSON.parse(e.data);
-              scannerStageMessage.value = `[L8] Child Safety: ${d.verdict}`;
-              currentLogLine.value = d.message;
-            } catch (err) {
-              console.warn('Error handling l8 event:', err);
-            }
-          });
+            }));
+          }
 
           evtSource.addEventListener('complete', async (e) => {
+            if (streamFinished) return;
             candidateTimeouts.forEach(clearTimeout);
             candidateTimeouts = [];
 
@@ -1145,37 +1295,43 @@
               laserAnimationId = null;
             }
 
-            const payload = JSON.parse(e.data);
+            let payload;
+            try { payload = validateFinalPayload(JSON.parse(e.data)); }
+            catch (err) { failStream(`${err.message} No validated result was displayed; retry the analysis.`); return; }
+            streamFinished = true;
+            stopStream();
             analysisData.value = payload;
+            ageResponseError.value = agePayloadError(payload);
+            showTrace.value = payload.review_required || payload.trace.some(t => t.status === 'ERROR');
             tokens.value = payload.tokens;
             activeDisplayAge.value = targetAge.value;
             updateTextScale();
 
             // Punchline locked in!
-            isPunchlineLocked.value = true;
+            isPunchlineLocked.value = payload.detection_status === 'PUN';
             await nextTick();
             lucide.createIcons();
 
-            scannerStageMessage.value = payload.punchline
-              ? `[L5] Punchline Site Locked: '${payload.punchline}'`
-              : 'Analysis complete: No punchline site found.';
-            currentLogLine.value = 'Pipeline execution finished successfully.';
+            scannerStageMessage.value = `Final decision: ${payload.detection_status}`;
+            currentLogLine.value = payload.review_required ? payload.review_reason :
+              (payload.trace.some(t => ['L7', 'L8'].includes(t.layer) && t.status === 'ERROR')
+                ? 'Detection completed; age assessment failed. See the age results and trace.'
+                : 'Validated decision received. See the recorded layer states.');
 
-            // Stop laser, timers and interval
+            // The stream is already closed before the transition begins.
             laserActive.value = false;
             laserResizeObserver?.disconnect();
             laserResizeObserver = null;
-            clearInterval(reasonInterval);
             evtSource.close();
 
             // Savor the punchline lock and halo spotlight for 1.2s before smooth flight transition
-            await new Promise(r => setTimeout(r, 1200));
+            await new Promise(r => setTimeout(r, isCompactLayout.value ? 250 : 1200));
 
             // Ensure viewport is at top before measuring any coordinate frames
             window.scrollTo({ top: 0, behavior: 'instant' });
 
             const sourceEl = jokeInnerRef.value;
-            if (!sourceEl) {
+            if (!sourceEl || isCompactLayout.value || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
               viewState.value = 'DASHBOARD';
               await nextTick();
               lucide.createIcons();
@@ -1251,23 +1407,9 @@
             }, 850);
           });
 
-          evtSource.onerror = (err) => {
-            console.error('SSE Error:', err);
-            evtSource.close();
-            clearInterval(reasonInterval);
-            if (laserAnimationId) {
-              cancelAnimationFrame(laserAnimationId);
-              laserAnimationId = null;
-            }
-            candidateTimeouts.forEach(clearTimeout);
-            candidateTimeouts = [];
-            laserActive.value = false;
-            laserResizeObserver?.disconnect();
-            laserResizeObserver = null;
-            alert('Live analysis error. Check server console for details.');
-            viewState.value = 'INPUT';
-            morphPhase.value = 0;
-          };
+          evtSource.onerror = () => failStream(
+            'The live connection ended before a validated result arrived. No decision was produced. Retry the analysis.'
+          );
         }
 
         function resetToInput() {
@@ -1291,6 +1433,7 @@
           isPunchlineLocked.value = false;
           isCandidateStage.value = false;
           nextTick(() => {
+            resizeTextInput();
             updateTextScale();
             lucide.createIcons();
           });
@@ -1371,8 +1514,14 @@
           if (cls === 'ONE_SENSE_ONLY') {
             nonJokeType = 'Literal Language';
             nonJokeSummary = 'The evaluated text supports a single reading without confirmed wordplay.';
+          } else if (cls === 'ANCHORING_FAIL') {
+            nonJokeType = 'Readings Not Anchored';
+            nonJokeSummary = 'The supplied context did not establish both proposed readings.';
+          } else if (cls === 'RESOLUTION_FAIL') {
+            nonJokeType = 'Resolution Rejected';
+            nonJokeSummary = 'The proposed readings did not form coherent wordplay in this context.';
           } else if (cls === 'SENSES_TOO_CLOSE') {
-            nonJokeType = 'Synonymous Terms';
+            nonJokeType = 'Meanings Too Similar';
             nonJokeSummary = 'Candidate meanings are too similar in context to create a comedic twist.';
           }
 
@@ -1418,7 +1567,9 @@
           }[dimension] || dimension;
         }
 
-        function friendlyComprehension(comp, summary = null) {
+        function friendlyComprehension(comp, summary = null, assessmentStatus = null) {
+          if (assessmentStatus === 'EXECUTION_FAILED') return { label: 'Assessment Failed', tagClass: 'bg-rose-500/20 text-rose-300' };
+          if (['SKIPPED', 'NOT_REQUESTED'].includes(assessmentStatus)) return { label: 'Not Assessed', tagClass: 'bg-slate-800 text-slate-300' };
           if (summary?.barrier_dimensions?.length && summary?.unknown_dimensions?.length) {
             return { label: 'Estimated Barrier · Some Unknown', tagClass: 'bg-amber-500/20 text-amber-300 border border-amber-500/30' };
           }
@@ -1448,6 +1599,33 @@
           return analysisData.value.age_spectrum[activeDisplayAge.value] || { comprehension: 'UNKNOWN', desc: '' };
         });
 
+        function ageStageLabel(status) {
+          return { ASSESSED: 'Assessed', UNKNOWN: 'More evidence needed', EXECUTION_FAILED: 'Assessment failed',
+            SKIPPED: 'Not assessed — earlier age check stopped', NOT_REQUESTED: 'Not requested',
+            PARTIAL: 'Comprehension assessed; appropriateness incomplete', NOT_APPLICABLE: 'Not applicable' }[status] || 'More evidence needed';
+        }
+
+        const ageAssessmentLabel = computed(() => {
+          if (ageResponseError.value) return 'Assessment unavailable';
+          const item = currentAgeAssessment.value;
+          if (item.assessment_status) return ageStageLabel(item.assessment_status);
+          return item.comprehension && !['UNKNOWN', 'AOA_UNKNOWN'].includes(item.comprehension)
+            ? 'Comprehension assessed' : 'More evidence needed';
+        });
+
+        const currentSafety = computed(() => {
+          const d = analysisData.value;
+          const value = ageResponseError.value || !d?.age_assessment_available ? null : currentAgeAssessment.value.safety ||
+            (d && activeDisplayAge.value === d.target_age ? d.safety : null);
+          const surface = value?.surface_status || 'NOT_ASSESSED';
+          const inference = value?.inferential_status || 'NOT_ASSESSED';
+          return { surface_status: surface, inferential_status: inference,
+            is_safe: surface === 'FAIL' || inference === 'FAIL' ? false : surface === 'PASS' && inference === 'PASS' ? true : null,
+            content_issues: Array.isArray(value?.content_issues) ? value.content_issues : [],
+            inference_issues: Array.isArray(value?.inference_issues) ? value.inference_issues : [],
+            notes: value?.notes || 'Appropriateness evidence is unavailable for this age.' };
+        });
+
         async function copyJson() {
           if (!analysisData.value) return;
           try {
@@ -1461,7 +1639,8 @@
 
         onMounted(() => {
           lucide.createIcons();
-          window.addEventListener('resize', updateTextScale);
+          updateViewport();
+          window.addEventListener('resize', updateViewport);
         });
 
         return {
@@ -1472,6 +1651,7 @@
           presets,
           selectPreset,
           handleInputClean,
+          handleInputKeydown,
           startAnalysis,
           resetToInput,
           tokens,
@@ -1480,6 +1660,7 @@
           isCandidateStage,
           isPunchlineLocked,
           morphPhase,
+          jokeInputRef,
           jokeRowRef,
           jokeInnerRef,
           laserLineRef,
@@ -1487,6 +1668,7 @@
           isMagicMoving,
           computedFontSizeClass,
           textScaleStyle,
+          dashboardTextScaleStyle,
           scannerStageMessage,
           currentLogLine,
           analysisData,
@@ -1500,6 +1682,15 @@
           showTrace,
           copyJson,
           copyStatus,
+          requestError,
+          ageResponseError,
+          liveTrace,
+          recoveryEvents,
+          providerSummary,
+          traceStatusClass,
+          currentSafety,
+          ageAssessmentLabel,
+          ageStageLabel,
         };
       }
     }).mount('#app');

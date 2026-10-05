@@ -70,9 +70,14 @@ exceed three transport requests; they are never requests to improve accuracy.
 
 L4 attempts persist raw responses, model, application retries and fallback flag;
 L5 results persist model, application retry count and fallback flag when a result
-is returned. L6's provider wrapper tracks these internally but its result does
-not persist those counters. A terminal exception may occur before counters
-reach the result. The recovery trial's separate SDK observer recorded 115
+is returned. New L6 executions persist returned wrapper metadata separately in
+`AnalysisRecord.provider_metadata`, including when response validation then
+fails. Older L6 records do not contain these counters. The web trace exposes
+available L4–L6 metadata after each stage returns; it does not stream individual
+retry attempts. A terminal provider exception may occur before counters are
+returned, so unavailable metadata remains null rather than implying zero
+backoff retries or no fallback. These counters also exclude Gemini L5's
+separate positive-retry-delay 429 recovery inside an attempt. The recovery trial's separate SDK observer recorded 115
 invocations; the user's repeat count of 116 is inferred from layer records.
 Neither count proves a universal transport-request or latency bound.
 

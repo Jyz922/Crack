@@ -32,7 +32,7 @@ from .providers import (
     resolve_backend,
     resolve_model,
 )
-from .schema import AgeEstimate, AnalysisRecord, L6Result
+from .schema import AgeEstimate, AnalysisRecord, L6Result, ProviderCallMetadata
 from .age_evidence import compact_age_prompt
 from .validation import ModelResponseError, validate_l6_response, require_completion
 
@@ -279,6 +279,11 @@ def distinctness_l6(
     prompt += compact_age_prompt(record)
 
     call = _complete_l6(prompt, settings, client)
+    # Recovery is execution metadata, separate from the validated findings.
+    record.provider_metadata["L6"] = ProviderCallMetadata(
+        model_used=call.model_used, application_retries=call.retries,
+        fallback_used=call.fallback_used,
+    )
     if call.parsed is None:
         raise ModelResponseError("L6 did not return a valid JSON response")
     parsed = validate_l6_response(call.parsed)

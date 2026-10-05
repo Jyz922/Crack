@@ -428,6 +428,15 @@ class LayerTrace(BaseModel):
     candidate_term: Optional[str] = None
 
 
+class ProviderCallMetadata(BaseModel):
+    """Observed backoff counters and model fallback, not total HTTP attempts."""
+
+    model_config = ConfigDict(extra="forbid")
+    model_used: str
+    application_retries: int = Field(ge=0)
+    fallback_used: bool
+
+
 class AgeVerdict(BaseModel):
     """Per-age assessment holding ONLY age-dependent outputs.
 
@@ -507,6 +516,7 @@ class AnalysisRecord(BaseModel):
     l8_result: Optional[L8Result] = None
     age_attempts: list[AgeModelAttempt] = Field(default_factory=list)
     age_preparation_error: Optional[str] = None
+    provider_metadata: dict[str, ProviderCallMetadata] = Field(default_factory=dict)
 
     trace: list[LayerTrace] = Field(default_factory=list)
     final: Optional[FinalVerdict] = None
