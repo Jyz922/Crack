@@ -186,7 +186,11 @@ search, alternate verification) is local and makes no provider calls.
 - Versions: `RESPONSE_CONTRACT_VERSION` "6" → "7" (`validation.py`) and
   `CANDIDATE_SEARCH_VERSION` "4" → "5" (`decisions.py`), bumped together.
   `--resume` reuses a record only when both versions match, so records written
-  before the change are refused and rerun.
+  before the change are refused and rerun. The `--resume` source fingerprint
+  (`runner._run_fingerprint`) currently hashes only top-level `src/crack/*.py`
+  and `prompts/*.md`, so it must be extended to cover `src/crack/phonetics/`,
+  or phonetics changes will not invalidate resumed records (see
+  [03, test 11](docs/soundalike/handoff/03_contract_l3_l4_l0post.md)).
 - Settings (`config.py`): `PHONETIC_TAU_RETRIEVE`, `PHONETIC_TAU_VERIFY`,
   `SOUNDALIKE_MAX_CANDIDATES`, `PHONETIC_INDEL`. `EXCLUDED_MECHANISMS`
   currently lists `heterographic_homophone` and needs a matching decision.
