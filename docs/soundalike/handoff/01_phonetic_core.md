@@ -11,6 +11,9 @@ Status: **not started**. Back to [HANDOFF](../HANDOFF.md).
 | Reference script output | `$env:PYTHONUTF8='1'; py -3.11 docs/soundalike/reference_wlev_fixed.py` (cmudict 1.1.3, panphon 0.22.2). Without `PYTHONUTF8=1`: `UnicodeDecodeError: 'charmap' codec`, because panphon `featuretable.py:83` opens its CSV with no encoding | **Ran** (2026-10-20); see next row |
 | Six-pair values | same command | **Match design.md at 3 decimals.** `sim_maxlen` (`wlev_d`): knight/night 1.0000 (0.0000), cat/cad 0.9943 (0.0172), bat/pat 0.9943 (0.0172), pat/pit 0.9655 (0.1034), cat/cash 0.9540 (0.1379), drum/drama 0.8897 (0.5517) |
 | δ table | same command | **Match** design.md to 4 decimals: t/d 0.0172, b/p 0.0172, ʌ/ɑ 0.0517, æ/ɪ 0.1034, t/ʃ 0.1379, m/ə 0.4828 |
+| Lexicon source: `nltk.corpus.cmudict` pronunciations | `py -3.11 -c "import nltk; nltk.download('cmudict', quiet=True); from nltk.corpus import cmudict; d=cmudict.dict(); print([(w, d[w][0]) for w in [...]])"` (nltk 3.10.3; data is cmudict 0.7a) | **Match** design.md for all nine: cat K AE1 T, cad K AE1 D, cash K AE1 SH, drum D R AH1 M, drama D R AA1 M AH0, knight = night N AY1 T, bat B AE1 T, pat P AE1 T, pit P IH1 T. Also purr P ER1, pursuing P ER0 S UW1 IH0 NG (as [02](02_soundalike_finder.md) test 3 assumes) |
+| Six pairs with `nltk.corpus.cmudict` | scratch copy of `reference_wlev_fixed.py` (outside the repo) with `import cmudict` / `cmudict.dict()` replaced by `nltk.corpus.cmudict.dict()`, run with `PYTHONUTF8=1` | **Match** at 3 decimals: identical output to the committed script (same six `sim_maxlen` and six δ values). The committed script is unchanged and remains the record of how the design numbers were produced |
+| Licences | `pip show` metadata; `LICENSE`; `nltk_data/corpora/cmudict/README` | PyPI `cmudict` 1.1.3: **GPL-3.0-or-later**. CRACK: MIT. nltk 3.10.3: Apache-2.0. panphon 0.22.2: MIT. NLTK's cmudict data: CMU BSD-style licence (README lines 45–75) |
 | μ_L percentiles, seed-pair sims | none | **NOT run**; numbers below are copied from design.md (scratch environment outside this repo) |
 | Hand arithmetic on the design's six-pair values | sim = 1 − d/max(n,m) from the design's δ values | Consistent: e.g. pat/pit 1 − 0.1034/3 = 0.966; drum/drama 1 − (0.0517 + 0.5)/5 = 0.890; indel 1.0 → 0.790 |
 
@@ -34,9 +37,15 @@ the pipeline needs to be wired up for this to be submittable.
 - Create `scripts/fit_phonetic_calibration.py`, a seeded random-pair sampler that
   regenerates the calibration table.
 - Create `tests/test_phonetics.py`
-- Modify `pyproject.toml`: add `cmudict`, `panphon` (pin `==0.22.2`, the version
-  whose weight bug is documented) and, if adopted, `g2p_en`. New main
-  dependency or new extra: open decision.
+- Modify `pyproject.toml`: add only `panphon` (pin `==0.22.2`, the version
+  whose weight bug is documented) and, if adopted, `g2p_en` (only after its
+  licence is checked). New main dependency or new extra: open decision.
+- Lexicon source: `nltk.corpus.cmudict` (NLTK data id `"cmudict"`), not the PyPI
+  `cmudict` package. **Licence:** PyPI `cmudict` is GPL-3.0-or-later and CRACK
+  is MIT; `nltk` is already a dependency and CMU's dictionary data is
+  BSD-style. The data is not inside the nltk wheel: download it to
+  `data/nltk_data` on first use, as `l2_senses.py` does for WordNet
+  (`nltk.download(..., download_dir=str(NLTK_DIR), raise_on_error=True)`).
 - Modify `src/crack/runner.py` `_run_fingerprint` if the modules live in a
   subpackage: it hashes only `package_root.glob("*.py")` (non-recursive), so
   `phonetics/*.py` changes would not invalidate `--resume`. Coordinate with
@@ -48,7 +57,7 @@ From design.md, adjusted to the code:
 
 ```python
 # src/crack/phonetics/lexicon.py
-def pronunciations(word: str) -> list[tuple[str, ...]]           # ARPAbet, stress stripped; AH0 kept distinct
+def pronunciations(word: str) -> list[tuple[str, ...]]           # nltk.corpus.cmudict ARPAbet, stress stripped; AH0 kept distinct
 def span_phones(tokens: list[str]) -> list[tuple[str, ...]]      # concatenation over a 1-3 token span
 def to_feature_vectors(arpabet: tuple[str, ...]) -> list[list[int]]
 def lookup_source(word: str) -> Literal["cmudict", "g2p_en", "missing"]
@@ -97,7 +106,7 @@ before changing a test.
    bat/pat 0.994, pat/pit 0.966, cat/cash 0.954, drum/drama 0.890. Also assert
    the ordering knight/night > cat/cad = bat/pat > pat/pit > cat/cash > drum/drama.
 5. `indel=1.0` changes drum/drama to 0.790 and leaves the other five unchanged.
-6. CMUdict first entries: cat K AE1 T, cad K AE1 D, cash K AE1 SH,
+6. `nltk.corpus.cmudict` first entries: cat K AE1 T, cad K AE1 D, cash K AE1 SH,
    drum D R AH1 M, drama D R AA1 M AH0, knight = night N AY1 T, bat B AE1 T,
    pat P AE1 T, pit P IH1 T.
 7. Max over pronunciations: wok/walk returns the best pair (design reports
@@ -109,6 +118,10 @@ before changing a test.
    provider access happens (monkeypatch `crack.providers` to raise).
 10. Windows encoding: the six-pair test (4) passes under plain
     `py -3.11 -m pytest` on Windows, with `PYTHONUTF8` unset. See Risks.
+11. Licence: no new GPL dependency. `pyproject.toml` gains only `panphon`
+    (and `g2p_en` only after its licence is checked); the PyPI `cmudict`
+    package is not added, and no module under `src/crack/phonetics/` imports
+    it (the lexicon uses `nltk.corpus.cmudict`).
 
 ## Depends on
 
@@ -152,6 +165,13 @@ Nothing. This can start immediately.
 - `ARPA2IPA` maps every ER to ɝ, including unstressed ER0, which is often ɚ.
   Whether PanPhon's table has ɝ is unverified.
 - CMUdict is American English only (dialect decision).
+- **Dictionary revision.** NLTK's data is cmudict 0.7a (123,455 words); the
+  PyPI package (1.1.3, installed in this environment but not to be used) ships
+  a different revision (126,052 words). The nine words checked are identical,
+  but other entries may differ, so pin tests to `nltk.corpus.cmudict` output.
+- **cmudict data download.** Offline tests block `socket.connect`
+  (`tests/conftest.py`), so a test run on a machine without
+  `data/nltk_data/corpora/cmudict` cannot download it during the run.
 - `g2p_en`'s dependency footprint and data downloads are unverified.
 - Compressed scale: raw sims for random pairs cluster near 0.72–0.74 (design
   claim), so any threshold on raw sim is fragile.

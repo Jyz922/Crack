@@ -137,7 +137,7 @@ stages, so the registry order in `runner.py` stays unchanged.
 
 | Stage | Planned responsibility | Planned implementation |
 |---|---|---|
-| P0 (new) | Map words and 1–3-token spans to phones: CMUdict, stress stripped except AH0 → ə, g2p_en fallback, ARPAbet → IPA table; keep the maximum over pronunciation pairs. | `phonetics/lexicon.py` |
+| P0 (new) | Map words and 1–3-token spans to phones: CMUdict via `nltk.corpus.cmudict`, stress stripped except AH0 → ə, g2p_en fallback, ARPAbet → IPA table; keep the maximum over pronunciation pairs. | `phonetics/lexicon.py` |
 | P1 (new) | Score how alike two utterances sound with graded, non-binary phone costs, then calibrate by length. | `phonetics/similarity.py`, `phonetics/calibration.py` |
 | P2 (new) | Find soundalike candidates: content-word pairs within the text, hyphen merge/split, and later lexicon neighbours (phone deletion index, k ≤ 2, frequency floor). | `l3_soundalikes.py`, `phonetics/index.py` |
 | L1 (modified) | Also record hyphenated spans as `hyphen_groups`; `tokens` stays byte-identical. | `l1_surface.py` |
@@ -147,6 +147,10 @@ stages, so the registry order in `runner.py` stays unchanged.
 | L5/L6 (prompt inputs) | Receive the mechanism, surface form, alternate and phonetic score; thresholds and weights are unchanged. | `l5_resolution.py`, `l6_distinctness.py`, prompts |
 | L7/L8 (alternate AoA) | Add the alternate word to the AoA lookup payload so that L7 can accept citations for it. | `age_evidence.age_inputs` |
 | L0-post (modified) | Map a PASS soundalike finding to `SOUNDALIKE` / `VALID_SOUNDALIKE_JOKE` → PUN. | `runner._l0_post_layer`, `l0_scope.py`, `decisions.py`, `enums.py` |
+
+Licence note: the lexicon uses NLTK's `cmudict` corpus (BSD-style CMU data;
+`nltk` is already a dependency) rather than the PyPI `cmudict` package, which
+is GPL-3.0-or-later while CRACK is MIT.
 
 Two current constraints must change for hyphenated jokes. The L1 token regex
 splits "purr-suing" and "cat-nap" into separate tokens. In addition,

@@ -37,6 +37,12 @@ and `panphon` 0.22.2 are installed in the project Python 3.11 environment
 (environment only; `pyproject.toml` is unchanged). `g2p_en` and a word-frequency
 package are **not installed**.
 
+**Lexicon source (decided 2026-10-20):** `nltk.corpus.cmudict`, not the PyPI
+`cmudict` package. Licence: PyPI `cmudict` is GPL-3.0-or-later and CRACK is MIT;
+`nltk` is already a dependency and CMU's dictionary data is BSD-style. The PyPI
+package is installed in this environment only to run the committed reference
+script; it must not enter `pyproject.toml`.
+
 **About design.md's final "Verification note".** It refers to a scratch
 environment outside this repository (`/home/claude/research_notes/...`,
 `/home/claude/jyz922/crack`) that is not available here. The only reproducible
@@ -65,6 +71,9 @@ any differences in the workstream file.
 | Offline suite | `py -3.11 -m pytest -m "not live" -q -p no:cacheprovider` | see "Offline suite" below |
 | Reference script | `$env:PYTHONUTF8='1'; py -3.11 docs/soundalike/reference_wlev_fixed.py` (after `py -3.11 -m pip install cmudict panphon==0.22.2`). Without `PYTHONUTF8=1` it crashes with `UnicodeDecodeError: 'charmap' codec` because panphon 0.22.2 `featuretable.py:83` opens its CSV with no encoding (cp1252 on Windows) | **Ran** (2026-10-20); output under "Six-pair values" |
 | Six-pair values | same command | **Match design.md at 3 decimals.** `sim_maxlen`: knight/night 1.0000, cat/cad 0.9943, bat/pat 0.9943, pat/pit 0.9655, cat/cash 0.9540, drum/drama 0.8897 |
+| Pronunciations from `nltk.corpus.cmudict` | `nltk.download('cmudict')`, then `cmudict.dict()[w][0]` for the nine design words plus purr, pursuing (nltk 3.10.3, cmudict 0.7a) | **Match** design.md for all nine; details in [01](handoff/01_phonetic_core.md) |
+| Six pairs with `nltk.corpus.cmudict` | scratch copy of the reference script (outside the repo) with the lexicon swapped to `nltk.corpus.cmudict.dict()`, `PYTHONUTF8=1` | **Match** at 3 decimals (identical output). The committed script is unchanged |
+| Licences | `pip show`, `LICENSE`, `nltk_data/corpora/cmudict/README` | PyPI `cmudict` GPL-3.0-or-later; CRACK MIT; nltk Apache-2.0; panphon MIT; CMU data BSD-style |
 | Calibration percentiles, seed-pair sims | none | **NOT run**; taken from design.md only |
 | Live suite / any provider call | none | **NOT run this session** |
 
