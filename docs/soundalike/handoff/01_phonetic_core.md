@@ -166,9 +166,12 @@ Nothing. This can start immediately.
   Whether PanPhon's table has ɝ is unverified.
 - CMUdict is American English only (dialect decision).
 - **Dictionary revision.** NLTK's data is cmudict 0.7a (123,455 words); the
-  PyPI package (1.1.3, installed in this environment but not to be used) ships
-  a different revision (126,052 words). The nine words checked are identical,
-  but other entries may differ, so pin tests to `nltk.corpus.cmudict` output.
+  PyPI package ships a different revision (126,052 words). The nine words
+  checked are identical, but other entries may differ, so pin tests to
+  `nltk.corpus.cmudict` output. PyPI cmudict 1.1.3 was installed only to run
+  the reference script on 2026-10-20, then uninstalled (GPL-3.0). Rerunning
+  reference_wlev_fixed.py as committed requires reinstalling it temporarily;
+  implementation code must use nltk.corpus.cmudict.
 - **cmudict data download.** Offline tests block `socket.connect`
   (`tests/conftest.py`), so a test run on a machine without
   `data/nltk_data/corpora/cmudict` cannot download it during the run.

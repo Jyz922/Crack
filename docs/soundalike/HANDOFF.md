@@ -32,16 +32,18 @@ The three test texts are a separate slice and do not count towards the 20.
 ## Current status
 
 Design done; no code. Nothing under `src/`, `tests/`, `corpus/`, `data/` or
-`scripts/` has been changed for Project 2. As of 2026-10-20, `cmudict` 1.1.3
-and `panphon` 0.22.2 are installed in the project Python 3.11 environment
-(environment only; `pyproject.toml` is unchanged). `g2p_en` and a word-frequency
+`scripts/` has been changed for Project 2. As of 2026-10-20, `panphon` 0.22.2
+is installed in the project Python 3.11 environment (environment only;
+`pyproject.toml` is unchanged). `g2p_en` and a word-frequency
 package are **not installed**.
 
 **Lexicon source (decided 2026-10-20):** `nltk.corpus.cmudict`, not the PyPI
 `cmudict` package. Licence: PyPI `cmudict` is GPL-3.0-or-later and CRACK is MIT;
-`nltk` is already a dependency and CMU's dictionary data is BSD-style. The PyPI
-package is installed in this environment only to run the committed reference
-script; it must not enter `pyproject.toml`.
+`nltk` is already a dependency and CMU's dictionary data is BSD-style.
+PyPI cmudict 1.1.3 was installed only to run the reference script on
+2026-10-20, then uninstalled (GPL-3.0). Rerunning reference_wlev_fixed.py as
+committed requires reinstalling it temporarily; implementation code must use
+nltk.corpus.cmudict.
 
 **About design.md's final "Verification note".** It refers to a scratch
 environment outside this repository (`/home/claude/research_notes/...`,
