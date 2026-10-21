@@ -27,6 +27,7 @@ Decision table (evaluated top-to-bottom; first match wins):
     │ Condition                                               │ ScopeLabel                   │
     ├─────────────────────────────────────────────────────────┼──────────────────────────────┤
     │ is_homophone AND NOT has_homograph                      │ OUT_OF_SCOPE_HOMOPHONE       │
+    │ has_soundalike                                          │ SOUNDALIKE                   │
     │ has_homograph                                           │ HOMOGRAPH                    │
     │ has_compound_split                                      │ COMPOUND_SPLIT               │
     │ is_nonlexical_joke                                      │ OUT_OF_SCOPE_NONLEXICAL_JOKE │
@@ -37,6 +38,11 @@ Rationale for row ordering:
   - Homophone exclusion is checked first.  The guard NOT has_homograph
     ensures a genuine homograph that happens to be pronounced the same
     (e.g. "lead") is still classified as HOMOGRAPH rather than excluded.
+  - SOUNDALIKE comes from a validated L4 sound_substitution / sound_pair
+    PASS. One L4 choice yields one relation, so it cannot co-occur with a
+    homograph or split PASS; its position matters only for diagnostics.
+    OUT_OF_SCOPE_HOMOPHONE remains for soundalike mechanisms the phonetic
+    module cannot represent.
   - HOMOGRAPH before COMPOUND_SPLIT: homographic ambiguity is the primary
     mechanism; compound splits are a secondary variant.
   - OUT_OF_SCOPE_NONLEXICAL_JOKE after positive matches: a confirmed
@@ -64,6 +70,7 @@ class LayerEvidence:
 
     has_homograph: bool = False
     has_compound_split: bool = False
+    has_soundalike: bool = False
     is_homophone: bool = False
     is_nonlexical_joke: bool = False
 
@@ -80,6 +87,8 @@ def assign_scope_label(evidence: LayerEvidence) -> ScopeLabel:
     """
     if evidence.is_homophone and not evidence.has_homograph:
         return ScopeLabel.OUT_OF_SCOPE_HOMOPHONE
+    if evidence.has_soundalike:
+        return ScopeLabel.SOUNDALIKE
     if evidence.has_homograph:
         return ScopeLabel.HOMOGRAPH
     if evidence.has_compound_split:

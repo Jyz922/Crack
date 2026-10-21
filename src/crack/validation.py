@@ -19,6 +19,25 @@ L4_RESPONSE_FIELDS = frozenset({
 SOUND_RELATIONS = frozenset({AnchorRelation.SOUND_SUBSTITUTION, AnchorRelation.SOUND_PAIR})
 
 
+def soundalike_note(term: str, relation: Any, alternate: str | None) -> str:
+    """Prompt note for L5/L6 when L4 validated a soundalike reading.
+
+    Empty for every other relation, so homograph and split prompts stay
+    byte-identical to their previous versions.
+    """
+    name = getattr(relation, "value", relation)
+    if not alternate or name not in {"sound_substitution", "sound_pair"}:
+        return ""
+    how = ("evokes the absent, similar-sounding" if name == "sound_substitution"
+           else "is juxtaposed with the similar-sounding")
+    return (
+        f'\n\nSoundalike reading: "{term}" {how} "{alternate}" ({name}). One proposed '
+        f'meaning belongs to the written form or its parts, the other to "{alternate}". '
+        "Judge whether the text supports both; do not reject the reading only because "
+        "the second meaning belongs to the soundalike word rather than to the spelling."
+    )
+
+
 class ModelResponseError(ValueError):
     """A model response cannot safely be used as a stage result."""
 

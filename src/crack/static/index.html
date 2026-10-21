@@ -1293,7 +1293,7 @@
             throw new Error('The server returned an incomplete or invalid final result.');
           }
           const classifications = {
-            VALID_HOMOGRAPH_JOKE: 'PUN', VALID_COMPOUND_SPLIT_JOKE: 'PUN',
+            VALID_HOMOGRAPH_JOKE: 'PUN', VALID_COMPOUND_SPLIT_JOKE: 'PUN', VALID_SOUNDALIKE_JOKE: 'PUN',
             ONE_SENSE_ONLY: 'NON_PUN', ANCHORING_FAIL: 'NON_PUN', RESOLUTION_FAIL: 'NON_PUN', SENSES_TOO_CLOSE: 'NON_PUN',
             OUT_OF_SCOPE_HOMOPHONE: 'OUT_OF_SCOPE', OUT_OF_SCOPE_NONLEXICAL_JOKE: 'OUT_OF_SCOPE',
             EXECUTION_FAILED: 'EXECUTION_FAILED',
@@ -1697,10 +1697,10 @@
               typeLabel: 'Review Required',
               badgeBg: 'bg-amber-500/10 text-amber-300 border-amber-500/30',
               confidencePct: null,
-              summary: 'This text needs review beyond the current homographic and compound-split checks.',
+              summary: 'This text needs review beyond the current homographic, compound-split and soundalike checks.',
             };
           }
-          const decidedLabels = ['VALID_HOMOGRAPH_JOKE', 'VALID_COMPOUND_SPLIT_JOKE', 'ONE_SENSE_ONLY', 'ANCHORING_FAIL', 'RESOLUTION_FAIL', 'SENSES_TOO_CLOSE'];
+          const decidedLabels = ['VALID_HOMOGRAPH_JOKE', 'VALID_COMPOUND_SPLIT_JOKE', 'VALID_SOUNDALIKE_JOKE', 'ONE_SENSE_ONLY', 'ANCHORING_FAIL', 'RESOLUTION_FAIL', 'SENSES_TOO_CLOSE'];
           if (analysisData.value.review_required || !decidedLabels.includes(cls)) {
             return {
               isJoke: false, headline: 'More Context or Review Needed',
@@ -1731,6 +1731,19 @@
               badgeBg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
               confidencePct: conf,
               summary: 'Humor is created by creatively splitting and re-interpreting word boundaries.',
+            };
+          }
+          if (cls === 'VALID_SOUNDALIKE_JOKE') {
+            const alt = analysisData.value.alternate_form;
+            return {
+              isJoke: true,
+              headline: 'Yes, this is a Joke!',
+              typeLabel: 'Soundalike Wordplay Joke',
+              badgeBg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+              confidencePct: conf,
+              summary: punch && alt
+                ? `"${punch}" sounds like "${alt}", and the text supports both readings.`
+                : 'Humor comes from a word that sounds like another word the text also supports.',
             };
           }
           // Non-joke verdicts:
