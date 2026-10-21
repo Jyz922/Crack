@@ -1,5 +1,5 @@
 # HANDOFF — CRACK soundalike extension (Project 2)
-Last updated: 2026-10-20 by phonetic-core implementation session (workstream 01 implemented on `feat/phonetic-core`)
+Last updated: 2026-10-21 by soundalike docs-sync session (workstreams 01–03 merged; offline, no API calls)
 
 ---
 
@@ -13,17 +13,17 @@ deterministic local phonetic module to find and score soundalikes. CRACK's
 existing L4 anchoring, L5 resolution and L6 distinctness checks then decide
 whether a soundalike creates incongruity. The LLM never decides what sounds
 alike, and no extra model requests are added. Design and evidence:
-[design.md](design.md); planned architecture:
-[ARCHITECTURE.md § Planned: soundalike wordplay extension](../../ARCHITECTURE.md#planned-soundalike-wordplay-extension-not-yet-implemented).
+[design.md](design.md) (the original design record; not updated); implemented
+architecture: [ARCHITECTURE.md § Soundalike wordplay extension](../../ARCHITECTURE.md#soundalike-wordplay-extension).
 
 ## Instructor deliverables
 
 | Deliverable | Produced by | Status |
 |---|---|---|
-| Sound-similarity method with formulas, and why it is adequate (component b) | [01](handoff/01_phonetic_core.md) | **Implemented** in `src/crack/phonetics/` (formulas in `similarity.py` and `calibration.py` docstrings) |
-| Similarity results for {cat,cad} {cat,cash} {drum,drama} {knight,night} {bat,pat} {pat,pit} | [01](handoff/01_phonetic_core.md) | **Reproduced in this repo on 2026-10-20** with `reference_wlev_fixed.py` (all six match design.md at 3 decimals); also pinned by `tests/test_phonetics.py` against `src/crack/phonetics/` |
-| Soundalike finder (component a) | [02](handoff/02_soundalike_finder.md), [05](handoff/05_lexicon_neighbours.md) | Not started |
-| Results on the three test texts (drum/drama, purr-suing, cat-nap) | [03](handoff/03_contract_l3_l4_l0post.md) + [04](handoff/04_eval_data.md) | design.md has design-time **expectations only**, not results |
+| Sound-similarity method with formulas, and why it is adequate (component b) | [01](handoff/01_phonetic_core.md) | **Done** (PR #5). Formulas in `src/crack/phonetics/similarity.py` and `calibration.py` docstrings and in ARCHITECTURE.md |
+| Similarity results for {cat,cad} {cat,cash} {drum,drama} {knight,night} {bat,pat} {pat,pit} | [01](handoff/01_phonetic_core.md) | **Done.** sim: knight/night 1.000, cat/cad 0.994, bat/pat 0.994, pat/pit 0.966, cat/cash 0.954, drum/drama 0.890; pinned by `tests/test_phonetics.py`; reproduced on Windows |
+| Finding utterances that sound similar (component a) | [02](handoff/02_soundalike_finder.md); [05](handoff/05_lexicon_neighbours.md) optional | **Done** for in-text pairs and hyphen merges (PR #6). Lexicon neighbours (05) not started |
+| Results on the three test texts (drum/drama, purr-suing, cat-nap) | [03](handoff/03_contract_l3_l4_l0post.md) + [04](handoff/04_eval_data.md) | **Mocked end-to-end only** (PR #7): purr-suing and drum/drama → `VALID_SOUNDALIKE_JOKE`, cat-nap → `VALID_COMPOUND_SPLIT_JOKE`, with scripted L4/L5/L6 answers. **Live results NOT run** |
 | ≥ 20 soundalike jokes | [04](handoff/04_eval_data.md) | 29 drafts in design.md; not yet a data file or labelled |
 | ≥ 20 negatives | [04](handoff/04_eval_data.md) | 39 drafts in design.md; not yet a data file or labelled |
 
@@ -31,11 +31,21 @@ The three test texts are a separate slice and do not count towards the 20.
 
 ## Current status
 
-Design done. Workstream 01 (phonetic core) is implemented on branch
-`feat/phonetic-core`, pending review and a Windows test run; see
-[01](handoff/01_phonetic_core.md). Workstreams 01 and 02 are merged; 03 (soundalike contract) is implemented on `feat/soundalike-contract`; 04–06 have no code yet. The live 60-item corpus has not been rerun since the L4 prompt changed.
-`panphon==0.22.2` is now a main dependency in `pyproject.toml`. `g2p_en` is
-not adopted, and no word-frequency package is installed yet (needed by 05).
+Workstreams **01, 02 and 03 are merged** into `main` (PRs #5, #6, #7), together
+with the Windows offline-guard fix (PR #4). CRACK can now output
+`VALID_SOUNDALIKE_JOKE`; see the
+[architecture section](../../ARCHITECTURE.md#soundalike-wordplay-extension).
+Workstreams 04–06 have no code yet.
+
+**Not yet verified live.** The L4 prompt changed for every text (new soundalike
+section and an 11-key response). The 60-item project corpus has not been rerun
+since, so the README's October 4 numbers (55/60 exact) predate the extension,
+and no real-model result exists for the three test texts. Offline, the
+homograph top-8 shortlist is unchanged for all 74 corpus and fixture texts, and
+the L5/L6 prompts are byte-identical for non-soundalike readings.
+
+`panphon==0.22.2` is a main dependency. `g2p_en` is not adopted, and no
+word-frequency package is installed (05 would need one).
 
 **Lexicon source (decided 2026-10-20):** `nltk.corpus.cmudict`, not the PyPI
 `cmudict` package. Licence: PyPI `cmudict` is GPL-3.0-or-later and CRACK is MIT;
@@ -55,33 +65,50 @@ phonetic number in design.md (μ_L percentiles, seed-pair sims, index sizes)
 remains unverified until someone runs it here. Do not edit design.md; record
 any differences in the workstream file.
 
-## Checks this session
+## Planning-session checks (2026-10-19/20, historical)
+
+These record the code **before** workstreams 01–03. Rows marked superseded no
+longer describe `main`; each workstream file has its own current checks.
+
 
 | Check | Command | Result |
 |---|---|---|
-| L1 regex splits hyphenated forms | `_TOKEN.findall(...)` on both texts (py) | **Confirmed**: `purr`,`suing`; `cat`,`nap` |
-| L4 prompt forbids differently spelled soundalikes in splits | read `src/crack/prompts/l4_anchoring.md` | **Confirmed**, lines 33–34 |
-| `OUT_OF_SCOPE_HOMOPHONE` exists but nothing produces it | read `enums.py`, `runner._l0_post_layer`, `l0_scope.assign_scope_label` | **Confirmed**: `is_homophone` is set only from a previous `record.final` |
-| Contract versions | read `validation.py:11`, `decisions.py:12` | **Confirmed**: `RESPONSE_CONTRACT_VERSION = "6"`, `CANDIDATE_SEARCH_VERSION = "4"` |
+| L1 regex splits hyphenated forms | `_TOKEN.findall(...)` on both texts (py) | **Confirmed**: `purr`,`suing`; `cat`,`nap`. Still true for `tokens`; hyphen spans are now kept in `hyphen_groups` (02) |
+| L4 prompt forbids differently spelled soundalikes in splits | read `src/crack/prompts/l4_anchoring.md` | **Confirmed**, lines 33–34. Kept for splits; soundalikes now have their own prompt section (03) |
+| `OUT_OF_SCOPE_HOMOPHONE` exists but nothing produces it | read `enums.py`, `runner._l0_post_layer`, `l0_scope.assign_scope_label` | **Confirmed**: `is_homophone` is set only from a previous `record.final`. Superseded in part: soundalike PASS now gives `SOUNDALIKE` (03) |
+| Contract versions | read `validation.py:11`, `decisions.py:12` | **Confirmed** then: "6" / "4". **Superseded**: now "7" / "5" (03) |
 | `CandidateEntry`, `L4Result` use `extra="forbid"` | read `schema.py` | **Confirmed** (also `_L4LLMResponse` in `l4_anchoring.py`) |
 | L3 score | read `l3_candidates.py:32-33,58` | **Confirmed**: `0.7*contrast + 0.3*balance` |
 | No heterographic corpus items | id prefixes, `heterograph\|homophone` grep over `corpus/*.jsonl` | **Confirmed**: IDs are `J/D/N` and `hom_` only; 0 matches |
 | `scripts/prepare_semeval.py` builds only the homographic split | grep | **Confirmed** |
 | WordNet lists `catnap`; `compound_splits("catnap")` | `py -3.11 -c ...` | `nap.n.04`, `nap.v.01`; `[('cat','nap')]` |
-| L4 accepts a resegmentation of `cat-nap` | `validate_l4_response` with term `catnap` and `cat-nap` | **Rejected both** (see "Design vs code" below) |
-| Phonetic deps installed | `py -3.11 -m pip install cmudict panphon==0.22.2` (2026-10-20, environment only) | **Installed**: cmudict 1.1.3, panphon 0.22.2. **Still missing**: g2p_en, wordfreq |
+| L4 accepts a resegmentation of `cat-nap` | `validate_l4_response` with term `catnap` and `cat-nap` | **Rejected both** then. **Superseded**: term `cat-nap` with parts `cat`+`nap` is accepted (03) |
+| Phonetic deps installed | `py -3.11 -m pip install cmudict panphon==0.22.2` (2026-10-20, environment only) | **Installed** then: cmudict 1.1.3, panphon 0.22.2. **Superseded**: PyPI cmudict uninstalled (GPL); panphon is now a dependency |
 | Offline suite | `py -3.11 -m pytest -m "not live" -q -p no:cacheprovider` | see "Offline suite" below |
 | Reference script | `$env:PYTHONUTF8='1'; py -3.11 docs/soundalike/reference_wlev_fixed.py` (after `py -3.11 -m pip install cmudict panphon==0.22.2`). Without `PYTHONUTF8=1` it crashes with `UnicodeDecodeError: 'charmap' codec` because panphon 0.22.2 `featuretable.py:83` opens its CSV with no encoding (cp1252 on Windows) | **Ran** (2026-10-20); output under "Six-pair values" |
 | Six-pair values | same command | **Match design.md at 3 decimals.** `sim_maxlen`: knight/night 1.0000, cat/cad 0.9943, bat/pat 0.9943, pat/pit 0.9655, cat/cash 0.9540, drum/drama 0.8897 |
 | Pronunciations from `nltk.corpus.cmudict` | `nltk.download('cmudict')`, then `cmudict.dict()[w][0]` for the nine design words plus purr, pursuing (nltk 3.10.3, cmudict 0.7a) | **Match** design.md for all nine; details in [01](handoff/01_phonetic_core.md) |
 | Six pairs with `nltk.corpus.cmudict` | scratch copy of the reference script (outside the repo) with the lexicon swapped to `nltk.corpus.cmudict.dict()`, `PYTHONUTF8=1` | **Match** at 3 decimals (identical output). The committed script is unchanged |
 | Licences | `pip show`, `LICENSE`, `nltk_data/corpora/cmudict/README` | PyPI `cmudict` GPL-3.0-or-later; CRACK MIT; nltk Apache-2.0; panphon MIT; CMU data BSD-style |
-| Calibration percentiles, seed-pair sims | none | **NOT run**; taken from design.md only |
+| Calibration percentiles, seed-pair sims | none | **NOT run** then. **Superseded**: `data/phonetic_calibration.json` fitted in this repo (01); seed-pair sims still unverified |
 | Live suite / any provider call | none | **NOT run this session** |
 
-## Design vs code (use the code's truth)
+## Design vs code (planning-time gaps, all resolved)
 
-All seven claims listed above hold. These eight gaps were found in addition:
+All eight gaps found while planning are now closed:
+
+| Gap | Resolved by |
+|---|---|
+| 1. Hyphen resegmentation | 02 (L2 whole-word + split senses under `cat-nap`) and 03 (validation joins parts without hyphens) |
+| 2. Exact-key contracts | 03 (`alternate_form` in `L4Result`, `L4_RESPONSE_FIELDS`, `_L4LLMResponse`) |
+| 3. Hard-coded label sets | 03 (runner, `serve.py`, all three `index.html` sites; guarded by a test) |
+| 4. Age contract | Deferred by team decision; age contract unchanged, alternates only added to the AoA table |
+| 5. `EXCLUDED_MECHANISMS` | 03 (`heterographic_homophone` moved to accepted) |
+| 6. Calibration file location | 01 (`.gitignore` exception for `data/phonetic_calibration.json`) |
+| 7. Interpreter | Documented: use `py -3.11` |
+| 8. `--resume` misses subpackages | 01 (`rglob`), tested |
+
+Original notes:
 
 1. **Hyphen resegmentation does not "just work."** design.md says that passing
    "catnap" through `compound_splits` lets the existing resegmentation path
@@ -136,30 +163,37 @@ All seven claims listed above hold. These eight gaps were found in addition:
 6. [06 Optional extensions](handoff/06_optional_extensions.md): only if the
    evaluation shows L4 picking wrong alternates.
 
-## Open team decisions (from design.md)
+## Team decisions
 
-| Decision | Options | Recommendation |
+| Decision | Chosen | Where |
 |---|---|---|
-| May L4 propose an alternate not in the supplied list? | Closed set only / free proposal verified locally | Free proposal with local verification at τ_verify. It keeps one request and recovers retrieval misses, which were 19% of failures in PunGraph |
-| Does an in-text juxtaposition (drum/drama) count as soundalike wordplay? | Yes, as `sound_pair` / No, out of scope | Yes, but report it as a separate mechanism, because it does not test target recovery |
-| Primary metric for the submission | Custom weighted Levenshtein / ALINE / bounded library score | Custom weighted Levenshtein as primary, with ALINE and the bounded score as comparison columns |
-| Thresholds τ_retrieve, τ_verify | Fixed from the notes / fitted | Fit on a dev split of seed pairs plus random pairs. Start retrieval at raw ≥ 0.75 and verification at sim_cal around the random-pair 99th percentile, then tune |
-| Separate shortlist budget for soundalikes | Share the top 8 / separate 4 × 3 | Separate, so homograph regressions stay comparable |
-| Local language model for the diagnostic | None / distilgpt2 / masked-LM pseudo-likelihood ([Salazar et al. 2020](https://aclanthology.org/2020.acl-main.240)) | Defer. Add it only as a diagnostic after the core works |
-| Dialect | CMUdict American only / add variants | Document the limit. CMUdict is American English, so pairs that depend on dialect mergers such as cot/caught are scored by CMUdict's listed pronunciations only |
+| May L4 propose an alternate not in the supplied list? | **Yes, verified locally** at the p99 random-pair similarity (`PHONETIC_VERIFY_PERCENTILE`); finder-supplied alternates are accepted as is | 03 |
+| Does an in-text juxtaposition (drum/drama) count? | **Yes, as `sound_pair`**, reported separately from `sound_substitution` | 03 |
+| Primary metric | **Custom weighted Levenshtein** over name-aligned PanPhon features (ALINE and the library score as comparison columns) | 01 |
+| Thresholds | **Finder: p95** of random same-length pairs (raw 0.75 flagged 554 corpus pairs). **Verification: p99** | 02, 03 |
+| Separate shortlist budget for soundalikes | **Separate** (`L3_SOUNDALIKE_TOP_K = 4`) | 03 |
+| Phonological age barrier | **Deferred** | 03 |
+| Local language model diagnostic | Deferred (06) | — |
+| Dialect | Documented limit: CMUdict American English only | 01 |
 
 ## Workstreams
 
 | # | File | Scope | Depends on | Status |
 |---|---|---|---|---|
-| 01 | [handoff/01_phonetic_core.md](handoff/01_phonetic_core.md) | P0 lexicon, P1 similarity, calibration | — | done, pending review |
-| 02 | [handoff/02_soundalike_finder.md](handoff/02_soundalike_finder.md) | P2 in-text pairs, hyphen merge/split, L1 `hyphen_groups`, L2 hyphen splits | 01 | done, pending review |
-| 03 | [handoff/03_contract_l3_l4_l0post.md](handoff/03_contract_l3_l4_l0post.md) | Schemas, L3 entries, L4 prompt + validation, enums, L0-post, version bumps | 01, 02 | done, pending review and live rerun |
+| 01 | [handoff/01_phonetic_core.md](handoff/01_phonetic_core.md) | P0 lexicon, P1 similarity, calibration | — | **merged** (PR #5) |
+| 02 | [handoff/02_soundalike_finder.md](handoff/02_soundalike_finder.md) | P2 in-text pairs, hyphen merge/split, L1 `hyphen_groups`, L2 hyphen splits | 01 | **merged** (PR #6) |
+| 03 | [handoff/03_contract_l3_l4_l0post.md](handoff/03_contract_l3_l4_l0post.md) | Schemas, L3 entries, L4 prompt + validation, enums, L0-post, version bumps | 01, 02 | **merged** (PR #7); live corpus rerun pending |
 | 04 | [handoff/04_eval_data.md](handoff/04_eval_data.md) | Minimal-pair data, heterographic SemEval, eval script, baselines | 01 (data file can start now) | not started |
 | 05 | [handoff/05_lexicon_neighbours.md](handoff/05_lexicon_neighbours.md) | k ≤ 2 phone deletion index, frequency floor | 01, 02 | not started |
 | 06 | [handoff/06_optional_extensions.md](handoff/06_optional_extensions.md) | LM re-ranking, DP resegmentation, curated list, dual-support diagnostic | 03, 04 results | not started |
 
 ## Offline suite
+
+Current: Linux after 03, 541 passed. Windows was last confirmed after 01
+(488 passed, 2 skipped; the skips are panphon-loader comparisons that skip by
+design on Windows); a Windows run after 02/03 is not recorded here. The rows below are the
+planning-time history.
+
 
 | Check | Command | Result |
 |---|---|---|
@@ -171,7 +205,7 @@ All seven claims listed above hold. These eight gaps were found in addition:
 No test reads ARCHITECTURE.md or `docs/soundalike/`, so these failures are
 environmental and not caused by this docs change.
 
-### Known environment issue
+### Known environment issue (resolved by PR #4)
 
 On Windows, 45 web tests fail because the `tests/conftest.py` offline guard
 patches `socket.socket.connect`, and asyncio's Windows `socketpair()` fallback

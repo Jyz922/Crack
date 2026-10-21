@@ -34,6 +34,14 @@ the latter. Removing these presets does not repair the detector's general
 handling of sound-based jokes; that semantic limitation remains. This change
 does not broaden scope or alter prompts, thresholds, validation or recovery.
 
+Update (Project 2): soundalike wordplay is now in scope
+([ARCHITECTURE.md](../ARCHITECTURE.md#soundalike-wordplay-extension)), so a
+case like "impasta" can in principle be detected as `VALID_SOUNDALIKE_JOKE`.
+No soundalike preset has been added back: these presets are only listed after
+a live recheck, and no live soundalike run has been made yet. Note that
+"ate/eight" in "7 ate 9" involves a number written as digits, which the
+CMUdict-based phonetic module does not look up.
+
 ## Recheck the examples
 
 This command reads the definitions directly from the homepage and makes fresh

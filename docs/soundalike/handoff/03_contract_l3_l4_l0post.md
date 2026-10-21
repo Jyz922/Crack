@@ -1,7 +1,7 @@
 # 03 — Contract, L3 soundalike entries, L4, enums, L0-post, versions
 Last updated: 2026-10-21 by soundalike-contract implementation session (offline; Linux VM, Windows check pending)
 
-Status: **done, pending review, Windows check and a live corpus rerun** (branch `feat/soundalike-contract`). Back to [HANDOFF](../HANDOFF.md).
+Status: **merged** (PR #7). Still open: a live 60-item corpus rerun after the L4 prompt change. Back to [HANDOFF](../HANDOFF.md).
 
 ## Checks this session
 
