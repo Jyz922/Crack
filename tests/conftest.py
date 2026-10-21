@@ -5,16 +5,35 @@ import pytest
 
 from crack.config import DEFAULT_SETTINGS
 
+_LOOPBACK_HOSTS = {"127.0.0.1", "::1", "localhost"}
+
+
+def _is_local(address) -> bool:
+    if isinstance(address, (str, bytes)):  # AF_UNIX path
+        return True
+    return isinstance(address, tuple) and bool(address) and address[0] in _LOOPBACK_HOSTS
+
 
 @pytest.fixture(autouse=True)
 def _offline_network_guard(request, monkeypatch):
-    """A test without the live marker cannot spend API quota accidentally."""
+    """A test without the live marker cannot spend API quota accidentally.
+
+    Loopback stays allowed: on Windows, asyncio's event loop builds its self-pipe
+    with socket.socketpair(), whose fallback connects to 127.0.0.1. Blocking that
+    breaks every test that starts an event loop (e.g. Starlette's TestClient).
+    """
     if request.node.get_closest_marker("live"):
         return
-    def forbidden(*args, **kwargs):
-        raise AssertionError("Offline tests must mock provider calls; network access is disabled")
-    monkeypatch.setattr(socket.socket, "connect", forbidden)
-    monkeypatch.setattr(socket.socket, "connect_ex", forbidden)
+
+    def guarded(original):
+        def connect(self, address, *args):
+            if _is_local(address):
+                return original(self, address, *args)
+            raise AssertionError("Offline tests must mock provider calls; network access is disabled")
+        return connect
+
+    monkeypatch.setattr(socket.socket, "connect", guarded(socket.socket.connect))
+    monkeypatch.setattr(socket.socket, "connect_ex", guarded(socket.socket.connect_ex))
 
 
 @pytest.fixture(autouse=True)
