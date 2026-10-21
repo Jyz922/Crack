@@ -19,7 +19,7 @@ from pydantic import BaseModel, ConfigDict
 
 from .config import Settings
 from .enums import AnchorRelation, AnchoringStatus, Genre, ResolutionStatus
-from .validation import ModelResponseError, validate_l5_response, require_completion
+from .validation import ModelResponseError, soundalike_note, validate_l5_response, require_completion
 from .schema import (
     AnalysisRecord,
     L4Result,
@@ -133,6 +133,7 @@ def _render_prompt(genre: Genre, text: str, term: str, l4: L4Result) -> str:
         "anchor_relation": (
             str(l4.anchor_relation) if l4.anchor_relation is not None else "unknown"
         ),
+        "mechanism_note": soundalike_note(term, l4.anchor_relation, l4.alternate_form),
     }
     return _PLACEHOLDER.sub(lambda m: variables.get(m.group(1), m.group(0)), _load_prompt(genre))
 

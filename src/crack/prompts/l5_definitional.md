@@ -20,7 +20,7 @@ Anchored at: "{other_sense_anchor_quote}"
 **Proposed resolving reading:** {resolving_sense}
 Anchored at: "{resolving_sense_anchor_quote}"
 
-**Anchor relation:** {anchor_relation}
+**Anchor relation:** {anchor_relation}{mechanism_note}
 
 ## Important note on same-span anchors
 

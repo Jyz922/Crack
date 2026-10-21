@@ -20,7 +20,7 @@ Anchored at: "{other_sense_anchor_quote}"
 **Punchline sense (the reading the punchline resolves to):** {resolving_sense}
 Anchored at: "{resolving_sense_anchor_quote}"
 
-**Anchor relation:** {anchor_relation}
+**Anchor relation:** {anchor_relation}{mechanism_note}
 
 ## Dimensions to score
 

@@ -11,7 +11,7 @@ Ambiguous term: "{term}"
 Sense A description: {sense_a}
 Sense A context anchor: "{anchor_a}"
 Sense B description: {sense_b}
-Sense B context anchor: "{anchor_b}"
+Sense B context anchor: "{anchor_b}"{mechanism_note}
 
 Your task is lexical granularity: distinguish meaning contrasts from minor
 facets of one meaning. Paraphrase each proposed MEANING as a short noun phrase

@@ -39,7 +39,7 @@ def no_network(monkeypatch):
 
 def anchoring():
     return dict(
-        target_term="crane", split_parts=[],
+        target_term="crane", split_parts=[], alternate_form=None,
         sense_a="a lifting machine", sense_a_anchor_quote="lifted a crate",
         sense_b="a long-legged bird", sense_b_anchor_quote="nested nearby",
         anchor_relation="separate_contexts", anchoring_status="PASS",

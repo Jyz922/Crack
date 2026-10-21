@@ -247,6 +247,7 @@ def _l0_post_layer(record: AnalysisRecord, settings: Settings) -> AnalysisRecord
 
     has_split = False
     has_homo = False
+    has_sound = False
     is_homophone = False
     is_nonlexical = False
 
@@ -261,6 +262,8 @@ def _l0_post_layer(record: AnalysisRecord, settings: Settings) -> AnalysisRecord
     elif record.l4_result is not None and record.l4_result.anchoring_status == AnchoringStatus.PASS:
         if record.l4_result.anchor_relation == AnchorRelation.RESEGMENTATION:
             has_split = True
+        elif record.l4_result.anchor_relation in {AnchorRelation.SOUND_SUBSTITUTION, AnchorRelation.SOUND_PAIR}:
+            has_sound = True
         else:
             has_homo = True
     elif record.l3_result is not None and record.l3_result.candidates:
@@ -273,6 +276,7 @@ def _l0_post_layer(record: AnalysisRecord, settings: Settings) -> AnalysisRecord
     evidence = LayerEvidence(
         has_homograph=has_homo,
         has_compound_split=has_split,
+        has_soundalike=has_sound,
         is_homophone=is_homophone,
         is_nonlexical_joke=is_nonlexical,
     )
@@ -281,13 +285,14 @@ def _l0_post_layer(record: AnalysisRecord, settings: Settings) -> AnalysisRecord
     main_class, review_reason = detection_decision(record, scope_label)
     decided = main_class in {
         MainClassification.VALID_HOMOGRAPH_JOKE, MainClassification.VALID_COMPOUND_SPLIT_JOKE,
-        MainClassification.ONE_SENSE_ONLY, MainClassification.RESOLUTION_FAIL, MainClassification.SENSES_TOO_CLOSE,
+        MainClassification.VALID_SOUNDALIKE_JOKE, MainClassification.ONE_SENSE_ONLY, MainClassification.RESOLUTION_FAIL, MainClassification.SENSES_TOO_CLOSE,
     }
     record.confidence = (
         record.l5_result.resolution_score if decided and record.l5_result else None
     )
     per_age = {}
-    if main_class in {MainClassification.VALID_HOMOGRAPH_JOKE, MainClassification.VALID_COMPOUND_SPLIT_JOKE}:
+    if main_class in {MainClassification.VALID_HOMOGRAPH_JOKE, MainClassification.VALID_COMPOUND_SPLIT_JOKE,
+                      MainClassification.VALID_SOUNDALIKE_JOKE}:
         for age in record.target_ages:
             comp = record.l7_result.per_age_comprehension.get(age, ComprehensionStatus.AOA_UNKNOWN) if record.l7_result else ComprehensionStatus.AOA_UNKNOWN
             appr = record.l8_result.per_age_verdict.get(age, AgeAppropriatenessVerdict.UNKNOWN) if record.l8_result else AgeAppropriatenessVerdict.UNKNOWN
@@ -531,7 +536,7 @@ def format_analysis_report(record: AnalysisRecord, target_age: int) -> str:
     mc = record.final.main_classification.value if record.final else "UNKNOWN"
 
     # 1. Clear Verdict at the very top: Is it a joke?
-    if mc in ("VALID_HOMOGRAPH_JOKE", "VALID_COMPOUND_SPLIT_JOKE"):
+    if mc in ("VALID_HOMOGRAPH_JOKE", "VALID_COMPOUND_SPLIT_JOKE", "VALID_SOUNDALIKE_JOKE"):
         verdict = "🎉 VALID JOKE"
     elif mc in ("OUT_OF_SCOPE_HOMOPHONE", "OUT_OF_SCOPE_NONLEXICAL_JOKE"):
         verdict = "⚠️ OUT OF SCOPE (Potential joke beyond homograph model scope)"
@@ -545,9 +550,10 @@ def format_analysis_report(record: AnalysisRecord, target_age: int) -> str:
     mc_map = {
         "VALID_HOMOGRAPH_JOKE": "VALID_HOMOGRAPH_JOKE (Lexical pun: dual meanings of a single homograph)",
         "VALID_COMPOUND_SPLIT_JOKE": "VALID_COMPOUND_SPLIT_JOKE (Compound resegmentation: word split pun)",
+        "VALID_SOUNDALIKE_JOKE": "VALID_SOUNDALIKE_JOKE (Soundalike wordplay: a word evokes or echoes a similar-sounding word)",
         "ONE_SENSE_ONLY": "ONE_SENSE_ONLY (Context activates only a single literal meaning)",
         "RESOLUTION_FAIL": "RESOLUTION_FAIL (Ambiguity present, but punchline lacks contrast or resolution)",
-        "OUT_OF_SCOPE_HOMOPHONE": "OUT_OF_SCOPE_HOMOPHONE (Heterographic wordplay: sounds alike, spelled differently)",
+        "OUT_OF_SCOPE_HOMOPHONE": "OUT_OF_SCOPE_HOMOPHONE (Soundalike wordplay the phonetic module cannot represent)",
         "OUT_OF_SCOPE_NONLEXICAL_JOKE": "OUT_OF_SCOPE_NONLEXICAL_JOKE (Non-lexical humor: situational, absurd, or slapstick)",
         "NO_AMBIGUITY_FOUND": "NO_AMBIGUITY_FOUND (No lexical ambiguity detected in text)",
         "ANCHORING_FAIL": "ANCHORING_FAIL (Failed to anchor multiple senses in context)",

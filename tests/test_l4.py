@@ -70,7 +70,7 @@ def test_optional_alignment_utility(quote, text, expected):
 
 
 def test_optional_alignment_does_not_relax_runtime_contract():
-    p = {"target_term": "draft", "split_parts": [], "sense_a": "a text version",
+    p = {"target_term": "draft", "split_parts": [], "alternate_form": None, "sense_a": "a text version",
          "sense_a_anchor_quote": "DRAFT", "sense_b": "", "sense_b_anchor_quote": "",
          "anchoring_status": "ONE_SENSE_ONLY", "anchor_relation": None, "resolving_sense": None,
          "reasoning": "Only one reading is grounded."}

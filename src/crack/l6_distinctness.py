@@ -34,7 +34,7 @@ from .providers import (
 )
 from .schema import AgeEstimate, AnalysisRecord, L6Result, ProviderCallMetadata
 from .age_evidence import compact_age_prompt
-from .validation import ModelResponseError, validate_l6_response, require_completion
+from .validation import ModelResponseError, soundalike_note, validate_l6_response, require_completion
 
 _LOG = logging.getLogger(__name__)
 
@@ -70,6 +70,7 @@ def _render_l6_prompt(
     anchor_a: str,
     sense_b: str,
     anchor_b: str,
+    mechanism_note: str = "",
 ) -> str:
     template = _PROMPT_PATH.read_text(encoding="utf-8")
     mapping = {
@@ -80,6 +81,7 @@ def _render_l6_prompt(
         "anchor_a": anchor_a,
         "sense_b": sense_b,
         "anchor_b": anchor_b,
+        "mechanism_note": mechanism_note,
     }
     return re.sub(r"\{(\w+)\}", lambda m: str(mapping.get(m.group(1), m.group(0))), template)
 
@@ -275,6 +277,7 @@ def distinctness_l6(
         anchor_a=l4.sense_a_anchor_quote,
         sense_b=l4.sense_b,
         anchor_b=l4.sense_b_anchor_quote,
+        mechanism_note=soundalike_note(term, l4.anchor_relation, l4.alternate_form),
     )
     prompt += compact_age_prompt(record)
 

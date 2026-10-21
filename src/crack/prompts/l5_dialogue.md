@@ -20,7 +20,7 @@ Anchored at: "{sense_a_anchor_quote}"
 **Sense B:** {sense_b}
 Anchored at: "{sense_b_anchor_quote}"
 
-**Anchor relation:** {anchor_relation}
+**Anchor relation:** {anchor_relation}{mechanism_note}
 
 ## Dimensions to score
 

@@ -27,7 +27,7 @@ from functools import lru_cache
 from .config import Settings
 from .l2_senses import STOPWORDS, wordnet
 from .phonetics import MissingPronunciation, pronunciations, sound_similarity
-from .phonetics.calibration import calibration_table
+from .phonetics.calibration import percentile_value
 from .phonetics.lexicon import _cmu
 from .schema import Alternate, L1Result, SoundalikeCandidate
 
@@ -46,12 +46,6 @@ def _content_spans(text: str) -> list[tuple[str, tuple[int, int]]]:
         if word.isalpha() and word not in STOPWORDS and word not in seen:
             seen[word] = (m.start(), m.start() + len(word))
     return list(seen.items())
-
-
-def _threshold(length: int, percentile: str) -> float:
-    rows = calibration_table()["lengths"]
-    nearest = min((int(k) for k in rows), key=lambda k: (abs(k - length), k))
-    return rows[str(nearest)][percentile]
 
 
 def _key(phones: tuple[str, ...]) -> tuple[str, ...]:
@@ -110,7 +104,7 @@ def _in_text_pairs(text: str, percentile: str) -> list[SoundalikeCandidate]:
             score = sound_similarity(late, early)
         except MissingPronunciation:
             continue
-        if score.sim < _threshold(score.length, percentile):
+        if score.sim < percentile_value(score.length, percentile):
             continue
         alt = Alternate(
             form=early, phones=list(score.pron_pair[1]),

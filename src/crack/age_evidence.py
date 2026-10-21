@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from typing import Any, Callable
 
 from .config import Settings
@@ -28,6 +29,10 @@ def age_inputs(record: AnalysisRecord) -> dict[str, Any]:
     words.update(part.lower() for part in l4.split_parts)
     required = set(l4.target_term.lower().split()) | set(part.lower() for part in l4.split_parts)
     words.update(required)
+    # A soundalike's second meaning belongs to the alternate ("pursuing"), so
+    # its AoA must be citable too. Not mandatory vocabulary.
+    if l4.alternate_form:
+        words.update(re.findall(r"[a-z]+", l4.alternate_form.lower()))
     table = []
     for word in sorted(words):
         value, match = aoa_lookup(word)

@@ -11,6 +11,7 @@ from enum import StrEnum
 class ScopeLabel(StrEnum):
     HOMOGRAPH = "HOMOGRAPH"
     COMPOUND_SPLIT = "COMPOUND_SPLIT"
+    SOUNDALIKE = "SOUNDALIKE"
     OUT_OF_SCOPE_HOMOPHONE = "OUT_OF_SCOPE_HOMOPHONE"
     OUT_OF_SCOPE_NONLEXICAL_JOKE = "OUT_OF_SCOPE_NONLEXICAL_JOKE"
     NO_SCOPE_MECHANISM = "NO_SCOPE_MECHANISM"
@@ -34,6 +35,8 @@ class AnchorRelation(StrEnum):
     SEPARATE_CONTEXTS = "separate_contexts"
     RESEGMENTATION = "resegmentation"
     SPEAKER_MISMATCH = "speaker_mismatch"
+    SOUND_SUBSTITUTION = "sound_substitution"  # the surface evokes an absent soundalike
+    SOUND_PAIR = "sound_pair"  # two soundalikes are both present and juxtaposed
 
 
 class ResolutionStatus(StrEnum):
@@ -79,6 +82,7 @@ class AgeAppropriatenessVerdict(StrEnum):
 class MainClassification(StrEnum):
     VALID_HOMOGRAPH_JOKE = "VALID_HOMOGRAPH_JOKE"
     VALID_COMPOUND_SPLIT_JOKE = "VALID_COMPOUND_SPLIT_JOKE"
+    VALID_SOUNDALIKE_JOKE = "VALID_SOUNDALIKE_JOKE"
     NO_AMBIGUITY_FOUND = "NO_AMBIGUITY_FOUND"
     ONE_SENSE_ONLY = "ONE_SENSE_ONLY"
     ANCHORING_FAIL = "ANCHORING_FAIL"
@@ -100,7 +104,8 @@ class DetectionStatus(StrEnum):
 
 def detection_status_for(label: str | MainClassification | None) -> DetectionStatus:
     """Map explicit decisions only; missing/legacy ambiguous labels abstain."""
-    if label in {MainClassification.VALID_HOMOGRAPH_JOKE, MainClassification.VALID_COMPOUND_SPLIT_JOKE}:
+    if label in {MainClassification.VALID_HOMOGRAPH_JOKE, MainClassification.VALID_COMPOUND_SPLIT_JOKE,
+                 MainClassification.VALID_SOUNDALIKE_JOKE}:
         return DetectionStatus.PUN
     if label in {MainClassification.ONE_SENSE_ONLY, MainClassification.ANCHORING_FAIL,
                  MainClassification.RESOLUTION_FAIL, MainClassification.SENSES_TOO_CLOSE}:

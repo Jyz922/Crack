@@ -57,7 +57,11 @@ def test_run_l3_respects_top_k() -> None:
     record = AnalysisRecord(item_id="t", text=_FIXTURES["P3"]["text"], target_ages=[8])
     for layer in (run_l1, run_l2, run_l3):
         record = layer(record, DEFAULT_SETTINGS)
-    assert len(record.l3_result.candidates) == DEFAULT_SETTINGS.L3_TOP_K
+    # The homograph shortlist fills top_k; soundalikes have their own budget after it.
+    assert len(record.l3_result.candidates[:DEFAULT_SETTINGS.L3_TOP_K]) == DEFAULT_SETTINGS.L3_TOP_K
+    extras = record.l3_result.candidates[DEFAULT_SETTINGS.L3_TOP_K:]
+    assert len(extras) <= DEFAULT_SETTINGS.L3_SOUNDALIKE_TOP_K
+    assert all(c.score_components.get("soundalike") == 1.0 for c in extras)
     assert record.trace[-1].layer == "L3"
 
 

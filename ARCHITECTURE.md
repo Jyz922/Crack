@@ -113,88 +113,76 @@ is established by the current evaluation artifacts.
 The [system design review](docs/system_design_review.md) documents the targeted
 reliability and usability revisions, preserved thresholds and offline verification.
 
-## Planned: soundalike wordplay extension (not yet implemented)
+## Soundalike wordplay extension
 
-None of this section is implemented; everything above describes current behaviour. Design and evidence: [docs/soundalike/design.md](docs/soundalike/design.md); work plan: [docs/soundalike/HANDOFF.md](docs/soundalike/HANDOFF.md).
+Implemented in workstreams 01–03 (Project 2). It has offline and mocked
+end-to-end tests; the 60-item project corpus has **not** been rerun live since
+the L4 prompt changed, so the October 4 numbers above predate it. Design and
+evidence: [docs/soundalike/design.md](docs/soundalike/design.md); work plan and
+measured checks: [docs/soundalike/HANDOFF.md](docs/soundalike/HANDOFF.md).
 
 ### When a soundalike becomes wordplay
 
-The current rule above stays: two soundalike spellings alone do not establish
-wordplay. The planned positive rule is: a soundalike finding becomes wordplay
-only when (1) the local phonetic module verifies the surface/alternate pair at
-calibrated similarity ≥ τ_verify, (2) L4 anchors each reading to a different
-source span, with the alternate's reading supported by context the surface word
-does not explain, and (3) L5 resolution and L6 distinctness both PASS. The final
-class is then `VALID_SOUNDALIKE_JOKE` with scope `SOUNDALIKE`.
-`OUT_OF_SCOPE_HOMOPHONE` is reserved for soundalike mechanisms the phonetic
-module cannot represent (G2P failure, alternates longer than three words, or
-the module disabled). τ_verify is not yet fitted.
+The rule above still holds: two soundalike spellings alone do not establish
+wordplay. A soundalike becomes wordplay only when (1) L4 chooses a
+`sound_substitution` (the written form evokes an absent similar-sounding word)
+or `sound_pair` (both words occur and are juxtaposed) reading, (2) the
+alternate is either supplied by the local finder or re-verifies phonetically at
+the 99th percentile of random same-length CMUdict pairs
+(`PHONETIC_VERIFY_PERCENTILE`), never on the model's word, (3) the two readings
+are anchored to different source spans, and (4) L5 resolution and L6
+distinctness pass. The result is `VALID_SOUNDALIKE_JOKE` with scope
+`SOUNDALIKE` (detection status PUN). `OUT_OF_SCOPE_HOMOPHONE` remains for
+soundalike mechanisms the phonetic module cannot represent.
 
-### Planned stages
+### Stages
 
-P0–P2 are local libraries called from L2. They are not new registered runner
-stages, so the registry order in `runner.py` stays unchanged.
+The phonetic modules are local libraries called from L2/L4; the runner's
+registry order is unchanged.
 
-| Stage | Planned responsibility | Planned implementation |
+| Stage | Soundalike responsibility | Implementation |
 |---|---|---|
-| P0 (new) | Map words and 1–3-token spans to phones: CMUdict via `nltk.corpus.cmudict`, stress stripped except AH0 → ə, g2p_en fallback, ARPAbet → IPA table; keep the maximum over pronunciation pairs. | `phonetics/lexicon.py` |
-| P1 (new) | Score how alike two utterances sound with graded, non-binary phone costs, then calibrate by length. | `phonetics/similarity.py`, `phonetics/calibration.py` |
-| P2 (new) | Find soundalike candidates: content-word pairs within the text, hyphen merge/split, and later lexicon neighbours (phone deletion index, k ≤ 2, frequency floor). | `l3_soundalikes.py`, `phonetics/index.py` |
-| L1 (modified) | Also record hyphenated spans as `hyphen_groups`; `tokens` stays byte-identical. | `l1_surface.py` |
-| L2 (modified) | Add senses (source `soundalike:<alt>`) and AoA for each verified alternate; pass hyphen-joined forms through `compound_splits`. | `l2_senses.py`, `layers.run_l2` |
-| L3 (modified) | Add soundalike entries carrying phonetic scores, with their own budget; homograph scoring (`0.7·contrast + 0.3·balance`) and age-free ranking are unchanged. | `l3_candidates.py` |
-| L4 (modified) | Offer alternates in the one shortlist request; accept `sound_substitution` / `sound_pair` only for an alternate that is supplied or re-verifies locally. | `l4_anchoring.py`, `prompts/l4_anchoring.md`, `validation.py` |
-| L5/L6 (prompt inputs) | Receive the mechanism, surface form, alternate and phonetic score; thresholds and weights are unchanged. | `l5_resolution.py`, `l6_distinctness.py`, prompts |
-| L7/L8 (alternate AoA) | Add the alternate word to the AoA lookup payload so that L7 can accept citations for it. | `age_evidence.age_inputs` |
-| L0-post (modified) | Map a PASS soundalike finding to `SOUNDALIKE` / `VALID_SOUNDALIKE_JOKE` → PUN. | `runner._l0_post_layer`, `l0_scope.py`, `decisions.py`, `enums.py` |
+| P0 | Words and 1–3-token spans to phones via `nltk.corpus.cmudict` (stress stripped except AH0 → ə, ER0 → ə˞); hyphenated coinages looked up whole, then by parts; one explicit ARPAbet → IPA table checked against PanPhon at import. No g2p fallback: a miss is reported. | `phonetics/lexicon.py`, `phonetics/features.py` |
+| P1 | Graded sound similarity and length calibration (formulas below). | `phonetics/similarity.py`, `phonetics/calibration.py` |
+| P2 | Recall-only finder: content-word pairs in the text kept at the p95 random-pair similarity for their length (`PHONETIC_RETRIEVE_PERCENTILE`), word families skipped; hyphen merges that exactly match a real word. | `l3_soundalikes.py` |
+| L1 | Also records hyphenated spans in `hyphen_groups`; `tokens` unchanged. | `l1_surface.py` |
+| L2 | Whole-word and split senses for hyphen groups under their exact surface ("cat-nap"); senses for each alternate (source `soundalike:<alt>`); finder output in `L2Result.soundalikes`. L2 status still reflects the text's own senses. | `l2_senses.py`, `layers.run_l2` |
+| L3 | Soundalike entries with a separate budget (`L3_SOUNDALIKE_TOP_K`): a term already in the homograph top-k only gains alternates, others are appended after it, so the homograph shortlist is unchanged. | `l3_candidates.py` |
+| L4 | Alternates (form, relation, similarity, own senses) offered in the single shortlist request; 11-key response with `alternate_form`; hyphenated resegmentation accepted (parts join to the term without hyphens). | `l4_anchoring.py`, `prompts/l4_anchoring.md`, `validation.py` |
+| L5/L6 | A soundalike note (`{mechanism_note}`) names the written form, alternate and relation; it is empty otherwise, so homograph and split prompts are byte-identical. | `l5_resolution.py`, `l6_distinctness.py`, prompts |
+| L7/L8 | The alternate's words are added to the AoA lookup table (citable, not mandatory). | `age_evidence.age_inputs` |
+| L0-post | Soundalike PASS → `SOUNDALIKE` / `VALID_SOUNDALIKE_JOKE`; label sites in `runner.py`, `serve.py` and `static/index.html` updated. | `runner._l0_post_layer`, `l0_scope.py`, `decisions.py`, `enums.py` |
 
-Licence note: the lexicon uses NLTK's `cmudict` corpus (BSD-style CMU data;
-`nltk` is already a dependency) rather than the PyPI `cmudict` package, which
-is GPL-3.0-or-later while CRACK is MIT.
-
-Two current constraints must change for hyphenated jokes. The L1 token regex
-splits "purr-suing" and "cat-nap" into separate tokens. In addition,
-`validate_l4_response` currently rejects a resegmentation of a hyphenated span,
-whether the term is spelled "catnap" or "cat-nap". The validation, not only L2,
-must change before hyphen splits can pass.
+Licence note: the lexicon uses NLTK's `cmudict` corpus (BSD-style CMU data)
+rather than the PyPI `cmudict` package, which is GPL-3.0-or-later while CRACK
+is MIT. PanPhon (MIT) is pinned at 0.22.2; its CSVs are read as UTF-8 by
+`phonetics/features.py` because `panphon.FeatureTable` fails on Windows
+without `PYTHONUTF8`.
 
 ### Similarity method
 
-Phone distance δ(a, b) = Σ_f w_f·|a_f − b_f| / (2·Σ_f w_f), over PanPhon
-articulatory features, with the weights aligned **by feature name** from
-PanPhon's `feature_weights.csv`. The installed library's own weighted distance
-zips the weight list against the feature vector by position, which misweights
-`tense`, so it is not used directly. Word-level distance is a weighted
-Levenshtein with substitution cost δ and insertion/deletion cost 0.5;
+Phone distance δ(a, b) = Σ_f w_f·|a_f − b_f| / (2·Σ_f w_f) over PanPhon's
+articulatory features (values −1/0/+1), with weights matched to features **by
+name** (Σ w = 7.25). PanPhon's own weighted distance zips weights by position,
+which misweights `tense`, so it is not used. Word distance is a weighted
+Levenshtein with substitution cost δ and insertion/deletion 0.5;
 sim = 1 − d / max(n, m), maximised over pronunciation pairs. Raw scores are
-compressed, so thresholds apply to a length-calibrated score
-sim_cal = (sim − μ_L) / (1 − μ_L), where μ_L is the random-pair mean for phone
-length L. The calibration values are not yet fitted in this repository.
+compressed (random pairs average about 0.72–0.75), so
+sim_cal = (sim − μ_L) / (1 − μ_L), with μ_L and the p95/p99 thresholds from
+`data/phonetic_calibration.json` (seeded random pairs; regenerate with
+`scripts/fit_phonetic_calibration.py`).
 
 ### Call budget
 
-The bounds above are unchanged: L4, L5 and L6 each still use at most one
-request, and L7/L8 use zero. All phonetic work (lookup, scoring, candidate
-search, alternate verification) is local and makes no provider calls.
+Unchanged: L4, L5 and L6 each use at most one request and L7/L8 none. All
+phonetic work (lookup, scoring, candidate search, alternate verification) is
+local. A rejected alternate is an L4 validation failure; no corrective request
+is made.
 
-### Planned contract changes
+### Contract versions
 
-- Schema (`schema.py`): new `Alternate` and `SoundalikeCandidate` models;
-  `CandidateEntry.soundalike_alternates`, `L1Result.hyphen_groups`,
-  `L4Result.alternate_form`. The L4 response gains an 11th key, so
-  `L4_RESPONSE_FIELDS` and `_L4LLMResponse` (both exact-key) also change.
-- Enums (`enums.py`): `AnchorRelation.SOUND_SUBSTITUTION`,
-  `AnchorRelation.SOUND_PAIR`, `ScopeLabel.SOUNDALIKE`,
-  `MainClassification.VALID_SOUNDALIKE_JOKE`. The label sets hard-coded in
-  `runner.py`, `serve.py` and `static/index.html` must include the new label.
-- Versions: `RESPONSE_CONTRACT_VERSION` "6" → "7" (`validation.py`) and
-  `CANDIDATE_SEARCH_VERSION` "4" → "5" (`decisions.py`), bumped together.
-  `--resume` reuses a record only when both versions match, so records written
-  before the change are refused and rerun. The `--resume` source fingerprint
-  (`runner._run_fingerprint`) currently hashes only top-level `src/crack/*.py`
-  and `prompts/*.md`, so it must be extended to cover `src/crack/phonetics/`,
-  or phonetics changes will not invalidate resumed records (see
-  [03, test 11](docs/soundalike/handoff/03_contract_l3_l4_l0post.md)).
-- Settings (`config.py`): `PHONETIC_TAU_RETRIEVE`, `PHONETIC_TAU_VERIFY`,
-  `SOUNDALIKE_MAX_CANDIDATES`, `PHONETIC_INDEL`. `EXCLUDED_MECHANISMS`
-  currently lists `heterographic_homophone` and needs a matching decision.
+`RESPONSE_CONTRACT_VERSION` is "7" and `CANDIDATE_SEARCH_VERSION` is "5", so
+`--resume` refuses records written before the soundalike contract. The resume
+source fingerprint hashes `src/crack/**/*.py` recursively, so changes under
+`phonetics/` also invalidate resumed records. `heterographic_homophone` is now
+an accepted mechanism in `config.py`.

@@ -28,9 +28,9 @@ class Settings(BaseModel):
         "idiomatic_expression_with_homograph",
         "compound_split",
         "resegmentation",
+        "heterographic_homophone",  # soundalike wordplay (Project 2)
     })
     EXCLUDED_MECHANISMS: frozenset[str] = frozenset({
-        "heterographic_homophone",
         "rhyming_joke",
         "absurdist_situation",
         "cultural_reference",
@@ -55,6 +55,11 @@ class Settings(BaseModel):
     PHONETIC_RETRIEVE_PERCENTILE: Literal["p95", "p99"] = "p95"
     SOUNDALIKE_MAX_CANDIDATES: int = Field(default=4, ge=0)
     SOUNDALIKE_MAX_ALTERNATES: int = Field(default=3, ge=1)
+    # An alternate L4 proposes itself (not supplied by the finder) is accepted
+    # only when its raw similarity reaches this random-pair percentile.
+    PHONETIC_VERIFY_PERCENTILE: Literal["p95", "p99"] = "p99"
+    # Soundalike candidates get their own L3 budget, so the homograph top-K is unchanged.
+    L3_SOUNDALIKE_TOP_K: int = Field(default=4, ge=0)
 
     # --- L4 backend ------------------------------------------------------
     # Compare the original L3 shortlist in one L4 request. Unknown/error

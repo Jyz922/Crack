@@ -31,9 +31,30 @@ creates a deliberate double reading before rejecting it.
 
 For a compound split, choose only a supplied split_options pair for that target.
 Its parts must have meaningful supported readings; do not invent prefix meanings
-or replace them with differently spelled soundalikes. A conventional whole-word
+or replace them with differently spelled soundalikes (soundalike readings are
+assessed separately below). A conventional whole-word
 meaning and a supported split can interact in a playful definition without two
 real-world events. Choose the headword when that is where the split operates.
+
+## Soundalike assessment
+
+Some candidates list soundalike_alternates: other words that sound like the
+candidate, with a phonetic similarity score. Sounding alike is not evidence of
+wordplay; most soundalikes in ordinary text are coincidences, and a high
+similarity score is not a reason to choose one. A soundalike reading needs its
+own source cue that supports the alternate's meaning and that the candidate's
+written meaning does not explain.
+
+- sound_substitution: the candidate as written evokes a different word that is
+  absent from the text. One meaning belongs to the written form or its parts,
+  the other to the evoked word.
+- sound_pair: the candidate and the alternate both occur in the text, and
+  their near-identical sound is what creates the wordplay.
+
+Prefer a supplied alternate. Name a different one only if it is an ordinary
+English word or phrase that sounds nearly identical to the candidate; it is
+checked phonetically and rejected if it does not. Spell alternate_form as
+ordinary words, never as the candidate itself.
 
 ## Status
 
@@ -48,7 +69,7 @@ real-world events. Choose the headword when that is where the split operates.
 
 ## Response
 
-Return ONLY a JSON object with exactly these ten keys, including null/empty
+Return ONLY a JSON object with exactly these eleven keys, including null/empty
 values where required. Do not add empty keys or prose outside the object.
 {
   "target_term": "<one supplied candidate>",
@@ -57,6 +78,7 @@ values where required. Do not add empty keys or prose outside the object.
   "sense_b": "<different meaning or empty string>",
   "sense_b_anchor_quote": "<exact source context or empty string>",
   "split_parts": [],
+  "alternate_form": null,
   "anchor_relation": null,
   "anchoring_status": "INSUFFICIENT_EVIDENCE",
   "resolving_sense": null,
@@ -73,10 +95,14 @@ that references the resolving/punchline meaning, never the description itself.
 The a/b order is not proof of which sense resolves. Choose anchor_relation:
 - separate_contexts: two different source cues;
 - speaker_mismatch: different speakers adopt different readings;
-- resegmentation: a supplied split pair changes the whole-word reading.
+- resegmentation: a supplied split pair changes the whole-word reading;
+- sound_substitution / sound_pair: a soundalike reading (see above).
 
 Non-split PASS needs different context spans, not just the candidate alone,
 and empty split_parts. Resegmentation PASS uses the exact source occurrence
 of the whole candidate for both quotes and one supplied split pair. For every
 non-PASS status, anchor_relation and resolving_sense are null, split_parts is
 empty, and unavailable meanings/quotes are empty strings. reasoning is nonempty.
+alternate_form is the soundalike word or phrase for a PASS sound_substitution or
+sound_pair, and null for every other relation and status. Soundalike PASS
+follows the non-split quote rule: two different context spans.

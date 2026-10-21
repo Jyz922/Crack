@@ -215,6 +215,7 @@ def _build_final_payload(rec: AnalysisRecord, target_age: int) -> dict[str, Any]
     has_confirmed_wordplay = classification in {
         MainClassification.VALID_HOMOGRAPH_JOKE,
         MainClassification.VALID_COMPOUND_SPLIT_JOKE,
+        MainClassification.VALID_SOUNDALIKE_JOKE,
     }
     is_joke_result = has_confirmed_wordplay
 
@@ -353,6 +354,7 @@ def _build_final_payload(rec: AnalysisRecord, target_age: int) -> dict[str, Any]
         "resolving_sense": rec.l4_result.resolving_sense if has_confirmed_wordplay and rec.l4_result else None,
         "anchor_relation": rec.l4_result.anchor_relation.value if has_confirmed_wordplay and rec.l4_result else None,
         "split_parts": rec.l4_result.split_parts if has_confirmed_wordplay and rec.l4_result else [],
+        "alternate_form": rec.l4_result.alternate_form if has_confirmed_wordplay and rec.l4_result else None,
         "resolution_explanation": resolution_explanation,
         "target_verdict": {
             "age": target_age,

@@ -38,6 +38,7 @@ _README_STATUS_STRINGS: list[str] = [
     # ScopeLabel
     "HOMOGRAPH",
     "COMPOUND_SPLIT",
+    "SOUNDALIKE",
     "OUT_OF_SCOPE_HOMOPHONE",
     "OUT_OF_SCOPE_NONLEXICAL_JOKE",
     "NO_SCOPE_MECHANISM",
@@ -54,6 +55,8 @@ _README_STATUS_STRINGS: list[str] = [
     "separate_contexts",
     "resegmentation",
     "speaker_mismatch",
+    "sound_substitution",
+    "sound_pair",
     # ResolutionStatus
     "RESOLUTION_PASS",
     "RESOLUTION_FAIL",
@@ -80,6 +83,7 @@ _README_STATUS_STRINGS: list[str] = [
     # MainClassification
     "VALID_HOMOGRAPH_JOKE",
     "VALID_COMPOUND_SPLIT_JOKE",
+    "VALID_SOUNDALIKE_JOKE",
     "NO_AMBIGUITY_FOUND",
     "ONE_SENSE_ONLY",
     "ANCHORING_FAIL",
