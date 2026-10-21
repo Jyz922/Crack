@@ -6,7 +6,7 @@
 
 **CRACK** (Computational Resolution & Anchoring of Comedy & Knowledge) analyzes English wordplay by combining WordNet, SemCor, age-of-acquisition data, and configurable LLM judgments. It identifies candidate ambiguous words, records text spans supporting each reading, assesses joke resolution, and reports comprehension and appropriateness by requested age.
 
-The pipeline targets homographic wordplay (one spelling with multiple meanings) and compound resegmentation. Contextual analysis can use any of the supported LLM providers.
+The pipeline targets homographic wordplay (one spelling with multiple meanings), compound resegmentation and, since Project 2, soundalike wordplay (a word that evokes or echoes a similar-sounding word; see [ARCHITECTURE.md](ARCHITECTURE.md#soundalike-wordplay-extension)). The corpus results below predate the soundalike extension. Contextual analysis can use any of the supported LLM providers.
 
 ### Try CRACK live
 

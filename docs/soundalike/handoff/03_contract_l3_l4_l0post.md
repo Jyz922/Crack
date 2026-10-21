@@ -1,7 +1,7 @@
 # 03 — Contract, L3 soundalike entries, L4, enums, L0-post, versions
-Last updated: 2026-10-19 by soundalike docs-planning session (offline, no code written)
+Last updated: 2026-10-21 by soundalike-contract implementation session (offline; Linux VM, Windows check pending)
 
-Status: **not started**. Back to [HANDOFF](../HANDOFF.md).
+Status: **done, pending review, Windows check and a live corpus rerun** (branch `feat/soundalike-contract`). Back to [HANDOFF](../HANDOFF.md).
 
 ## Checks this session
 
@@ -13,7 +13,35 @@ Status: **not started**. Back to [HANDOFF](../HANDOFF.md).
 | L4 prompt prohibition | read `prompts/l4_anchoring.md:32-36` | "do not invent prefix meanings or replace them with differently spelled soundalikes" |
 | Who sets `OUT_OF_SCOPE_HOMOPHONE` | read `runner._l0_post_layer` | only when `record.final` already had that scope, i.e. nothing produces it |
 | Resume version gate | read `runner.py:422-426` | reuses a record only if both versions equal the current constants |
-| End-to-end soundalike positive | none | **NOT run** (nothing implemented; no live calls) |
+| End-to-end, mocked L4/L5/L6 (real L0–L3) | `pytest tests/test_soundalike_end_to_end.py` | Text 2 → `VALID_SOUNDALIKE_JOKE`/`SOUNDALIKE`; text 1 → `VALID_SOUNDALIKE_JOKE` (sound_pair); text 3 → `VALID_COMPOUND_SPLIT_JOKE`; each with `per_age` and exactly one L4, L5 and L6 call. A forced alternate ("chasing") → `EXECUTION_FAILED` after one L4 call. Web result: `punchline` purr-suing, `alternate_form` pursuing |
+| Contract and stage tests | `pytest tests/test_soundalike_contract.py` | 24 passed (11-key contract, verification, sound_pair, hyphen resegmentation, labels/versions, L3 budget, L4 prompt/shortlist, L5/L6 note, alternate AoA) |
+| Homograph regression | 74 corpus + fixture texts, L1 tokens and L3 top-8 before/after, offline | **0 diffs** in terms, order, scores or sense ids (only new soundalike fields). 25 of 60 corpus texts show L4 an attached alternate and 8 get an appended soundalike candidate, so their L4 prompt changes |
+| L5/L6 prompts for non-soundalike readings | rendered template vs `main` | **Byte-identical** (the note is empty); only the L4 prompt changed for homograph texts |
+| Full offline suite (Linux) | `pytest -m "not live"` | 540 passed; the one mount-only timing failure passes on local disk |
+| Full offline suite (Windows) | `py -3.11 -m pytest -m "not live" -q` | **NOT run** |
+| Live 60-item corpus rerun after the L4 prompt change | `crack` live run | **NOT run** (paid); needed to confirm the October 4 homograph numbers |
+
+## Implementation decisions (2026-10-21)
+
+- **Free proposal + verify** (Daren): L4 may name an alternate the finder did
+  not supply; it is accepted only at ≥ p99 random-pair similarity
+  (`PHONETIC_VERIFY_PERCENTILE`). Finder-supplied alternates are accepted as
+  is. Consequence: drum/drama (0.890) passes only because the finder supplies
+  it (it is below p99).
+- **drum/drama counts** as `sound_pair` (Daren), reported separately from
+  `sound_substitution`.
+- **Phonological age barrier deferred** (Daren): the age contract is
+  unchanged; alternates are only added to the AoA lookup table.
+- Separate L3 soundalike budget `L3_SOUNDALIKE_TOP_K = 4`; L4 keeps those
+  extras beyond the homograph cut.
+- `SOUNDALIKE` scope row sits after the homophone guard and before
+  `HOMOGRAPH` (diagnostic only).
+- `heterographic_homophone` moved from `EXCLUDED_MECHANISMS` to
+  `ACCEPTED_MECHANISMS` (no code reads these sets).
+- L5/L6 get the mechanism through a `{mechanism_note}` placeholder that is
+  empty for non-soundalike readings, so those prompts are unchanged.
+- `decisions.py` re-validation uses the default verification percentile (p99,
+  equal to the setting's default); it has no settings object.
 
 ## Goal
 
