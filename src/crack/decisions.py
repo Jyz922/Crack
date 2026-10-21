@@ -9,7 +9,7 @@ from .validation import RESPONSE_CONTRACT_VERSION, ModelResponseError, validate_
 
 
 DETECTION_LAYERS = frozenset({"L0-pre", "L1", "L2", "L3", "L4", "L5", "L6"})
-CANDIDATE_SEARCH_VERSION = "4"
+CANDIDATE_SEARCH_VERSION = "5"
 
 
 def detection_decision(
@@ -41,7 +41,10 @@ def detection_decision(
     ))
     try:
         split_options = candidate.split_options if candidate else []
-        validate_l4_response(l4.model_dump(), record.text, term, is_split, split_options)
+        validate_l4_response(
+            l4.model_dump(), record.text, term, is_split, split_options,
+            alternates=candidate.soundalike_alternates if candidate else [],
+        )
     except ModelResponseError as exc:
         return MainClassification.EXECUTION_FAILED, f"L4 evidence validation failed: {exc}"
 
@@ -71,7 +74,10 @@ def detection_decision(
         return MainClassification.EXECUTION_FAILED, f"L6 evidence validation failed: {exc}"
     if l6.distinctness_status == DistinctnessStatus.SENSES_TOO_CLOSE:
         return MainClassification.SENSES_TOO_CLOSE, ""
-    label = (MainClassification.VALID_COMPOUND_SPLIT_JOKE
-             if l4.anchor_relation == AnchorRelation.RESEGMENTATION
-             else MainClassification.VALID_HOMOGRAPH_JOKE)
+    if l4.anchor_relation == AnchorRelation.RESEGMENTATION:
+        label = MainClassification.VALID_COMPOUND_SPLIT_JOKE
+    elif l4.anchor_relation in {AnchorRelation.SOUND_SUBSTITUTION, AnchorRelation.SOUND_PAIR}:
+        label = MainClassification.VALID_SOUNDALIKE_JOKE
+    else:
+        label = MainClassification.VALID_HOMOGRAPH_JOKE
     return label, ""

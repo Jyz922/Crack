@@ -3,18 +3,20 @@
 from __future__ import annotations
 
 import math
+import re
 from typing import Any
 
 from .enums import AnchorRelation, AnchoringStatus, DistinctnessStatus, AmbiguityAblation
 
 
-RESPONSE_CONTRACT_VERSION = "6"
+RESPONSE_CONTRACT_VERSION = "7"
 
 L4_RESPONSE_FIELDS = frozenset({
     "sense_a", "sense_b", "sense_a_anchor_quote", "sense_b_anchor_quote",
     "anchor_relation", "anchoring_status", "resolving_sense", "reasoning",
-    "target_term", "split_parts",
+    "target_term", "split_parts", "alternate_form",
 })
+SOUND_RELATIONS = frozenset({AnchorRelation.SOUND_SUBSTITUTION, AnchorRelation.SOUND_PAIR})
 
 
 class ModelResponseError(ValueError):
@@ -54,9 +56,40 @@ def source_quote(value: Any, text: str, field: str) -> str:
     return quote
 
 
+def _occurs(word: str, text: str) -> bool:
+    return re.search(rf"(?<![A-Za-z]){re.escape(word)}(?![A-Za-z])", text, re.I) is not None
+
+
+def verify_alternate(
+    term: str, alternate: str, alternates: list | None, verify_percentile: str,
+) -> None:
+    """Accept a soundalike only on phonetic evidence, never on the model's word.
+
+    A finder-supplied alternate is accepted as is; an alternate the model
+    proposed itself must reach the given random-pair similarity percentile.
+    """
+    supplied = {getattr(a, "form", a).casefold() for a in alternates or []}
+    if alternate.strip().casefold() in supplied:
+        return
+    from .phonetics import MissingPronunciation, sound_similarity
+    from .phonetics.calibration import percentile_value
+
+    try:
+        score = sound_similarity(term, alternate)
+    except MissingPronunciation as exc:
+        raise ModelResponseError(f"alternate_form {alternate!r} has no pronunciation to verify") from exc
+    if score.sim < percentile_value(score.length, verify_percentile):
+        raise ModelResponseError(
+            f"alternate_form {alternate!r} does not sound like {term!r} "
+            f"(similarity {score.sim:.3f} is below the {verify_percentile} random-pair level)"
+        )
+
+
 def validate_l4_response(
     value: Any, text: str, term: str, is_split: bool,
     split_options: list[tuple[str, str]] | None = None,
+    alternates: list | None = None,
+    verify_percentile: str = "p99",
 ) -> dict[str, Any]:
     p = require_fields(value, set(L4_RESPONSE_FIELDS))
     target = require_text(p["target_term"], "target_term")
@@ -78,6 +111,11 @@ def validate_l4_response(
     b = require_text(p["sense_b"], "sense_b", allow_empty=True)
     qa = source_quote(p["sense_a_anchor_quote"], text, "sense_a_anchor_quote")
     qb = source_quote(p["sense_b_anchor_quote"], text, "sense_b_anchor_quote")
+    alternate = p["alternate_form"]
+    if alternate is not None:
+        require_text(alternate, "alternate_form")
+    if (status != AnchoringStatus.PASS or relation not in SOUND_RELATIONS) and alternate is not None:
+        raise ModelResponseError("alternate_form is only allowed for a PASS soundalike relation")
     if status == AnchoringStatus.PASS:
         if not all(s.strip() for s in (a, b, qa, qb)):
             raise ModelResponseError("L4 PASS requires two meanings and two source anchors")
@@ -88,12 +126,23 @@ def validate_l4_response(
         if relation == AnchorRelation.RESEGMENTATION:
             if not is_split or qa.casefold() != term.casefold() or qb.casefold() != term.casefold():
                 raise ModelResponseError("Split anchors must name a detected compound-split candidate")
-            if tuple(parts) not in (split_options or []) or "".join(parts).casefold() != term.casefold():
+            # A hyphenated surface ("cat-nap") keeps its verbatim quote; its
+            # parts join to the term without hyphens.
+            if (tuple(parts) not in (split_options or [])
+                    or "".join(parts).casefold() != term.replace("-", "").casefold()):
                 raise ModelResponseError("split_parts must equal a supplied segmentation of the candidate")
         elif qa.casefold() == qb.casefold() or any(q.strip().casefold() == term.casefold() for q in (qa, qb)):
             raise ModelResponseError("Non-split anchors must be different context spans, not just the candidate word")
         if relation != AnchorRelation.RESEGMENTATION and parts:
             raise ModelResponseError("Non-split findings require empty split_parts")
+        if relation in SOUND_RELATIONS:
+            if alternate is None:
+                raise ModelResponseError("A soundalike PASS requires alternate_form")
+            if alternate.strip().casefold() == term.strip().casefold():
+                raise ModelResponseError("alternate_form must differ from the target")
+            if relation == AnchorRelation.SOUND_PAIR and not (_occurs(term, text) and _occurs(alternate.strip(), text)):
+                raise ModelResponseError("sound_pair requires both the target and alternate_form in the text")
+            verify_alternate(term, alternate.strip(), alternates, verify_percentile)
     else:
         if relation is not None or p["resolving_sense"] is not None or parts:
             raise ModelResponseError("Non-PASS status contradicts a claimed resolving sense or relation")

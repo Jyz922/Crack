@@ -51,6 +51,17 @@ class SenseEntry(BaseModel):
     aoa_match: Optional[str] = None
 
 
+class Alternate(BaseModel):
+    """A word or phrase a soundalike surface may evoke, with its phonetic score."""
+    model_config = ConfigDict(extra="forbid")
+
+    form: str  # spelled as ordinary words, e.g. "pursuing", "let us"
+    phones: list[str]  # ARPAbet of the alternate's best-matching pronunciation
+    sim: float
+    sim_cal: float
+    source: Literal["in_text", "lexicon", "hyphen_merge", "resegmentation", "curated_list", "llm_verified"]
+
+
 class CandidateEntry(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -62,22 +73,13 @@ class CandidateEntry(BaseModel):
     # Keep alternative segmentations even when another reading ranks first.
     # These are lexical proposals, not positive detection findings.
     split_options: list[tuple[str, str]] = Field(default_factory=list)
+    # Phonetically scored soundalike readings (workstream 03). Proposals only.
+    soundalike_alternates: list[Alternate] = Field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------
 # Per-layer result models (typed stubs; populated when layers run)
 # ---------------------------------------------------------------------------
-
-class Alternate(BaseModel):
-    """A word or phrase a soundalike surface may evoke, with its phonetic score."""
-    model_config = ConfigDict(extra="forbid")
-
-    form: str  # spelled as ordinary words, e.g. "pursuing", "let us"
-    phones: list[str]  # ARPAbet of the alternate's best-matching pronunciation
-    sim: float
-    sim_cal: float
-    source: Literal["in_text", "lexicon", "hyphen_merge", "resegmentation", "curated_list", "llm_verified"]
-
 
 class SoundalikeCandidate(BaseModel):
     """Finder output (recall stage). Whether it is wordplay is decided later."""
@@ -200,6 +202,8 @@ class L4Result(BaseModel):
     reasoning: str = ""
     target_term: str = ""  # Historical records remain readable.
     split_parts: list[str] = Field(default_factory=list)
+    # The soundalike reading for sound_substitution / sound_pair, as ordinary words.
+    alternate_form: Optional[str] = None
 
     @model_validator(mode="after")
     def _pass_requires_resolving_sense(self) -> "L4Result":

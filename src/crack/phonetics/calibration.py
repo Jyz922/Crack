@@ -40,6 +40,13 @@ def baseline_mean(length: int) -> float:
     return calibration_table()["lengths"][str(nearest)]["mean"]
 
 
+def percentile_value(length: int, percentile: str) -> float:
+    """Random-pair raw-similarity percentile ("p95"/"p99") for a segment length."""
+    lengths = stored_lengths()
+    nearest = min(lengths, key=lambda stored: (abs(stored - length), stored))
+    return calibration_table()["lengths"][str(nearest)][percentile]
+
+
 def calibrate(sim: float, length: int) -> float:
     mu = baseline_mean(length)
     return (sim - mu) / (1 - mu)
