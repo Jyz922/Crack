@@ -7,15 +7,18 @@ CRACK runs input checks, lexical analysis, model-assisted semantic checks, and a
 | Stage | Responsibility | Main implementation |
 |---|---|---|
 | L0-pre | Normalize and validate input length and character content. | `l0_scope.py` |
-| L1 | Tokenize the text and route it to a genre branch. | `l1_surface.py` |
-| L2 | Retrieve WordNet senses and add available SemCor counts and AoA estimates. | `l2_senses.py` |
-| L3 | Rank ambiguous terms, multiword expressions, and compound splits. | `l3_candidates.py` |
+| L1 | Tokenize the text, record hyphenated spans and route it to a genre branch. | `l1_surface.py` |
+| L2 | Retrieve WordNet senses and add available SemCor counts and AoA estimates; find soundalike candidates and their alternates' senses. | `l2_senses.py`, `l3_soundalikes.py`, `phonetics/` |
+| L3 | Rank ambiguous terms, multiword expressions, compound splits, and (separate budget) soundalikes. | `l3_candidates.py` |
 | L4 | Ask an LLM to assess candidate readings and anchor quotes in the input text. | `l4_anchoring.py` |
 | L5 | Assess whether the proposed wordplay resolves coherently in the supplied text. | `l5_resolution.py` |
 | L6 | Check materially different readings and, when requested, return compact age estimates in the same request. | `l6_distinctness.py`, `age_evidence.py` |
 | L7 | Locally validate cached understanding estimates and attach word-level AoA citations. | `l7_comprehension.py` |
 | L8 | Locally derive separate content and inference verdicts for ages that passed L7. | `l8_appropriateness.py` |
 | L0-post | Combine validated evidence into a final class and scope label. | `runner.py`, `decisions.py` |
+
+Soundalike handling across these stages is described in
+[Soundalike wordplay extension](#soundalike-wordplay-extension).
 
 The runner records PASS, FAIL, UNKNOWN or ERROR in each stage's `LayerTrace`.
 FAIL is a completed check that rejected the analysis; UNKNOWN lacks evidence;

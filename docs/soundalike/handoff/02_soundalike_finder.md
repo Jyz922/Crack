@@ -1,7 +1,7 @@
 # 02 — Soundalike finder (in-text pairs + hyphen merge/split)
 Last updated: 2026-10-20 by soundalike-finder implementation session (offline; Linux VM, Windows check pending)
 
-Status: **done, pending review and Windows check** (branch `feat/soundalike-finder`). Test 8's L4-validation half is still owed by [03](03_contract_l3_l4_l0post.md). Back to [HANDOFF](../HANDOFF.md).
+Status: **merged** (PR #6). Test 8's L4-validation half was completed by [03](03_contract_l3_l4_l0post.md). Back to [HANDOFF](../HANDOFF.md).
 
 ## Checks this session
 
