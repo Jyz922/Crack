@@ -33,7 +33,7 @@ The three test texts are a separate slice and do not count towards the 20.
 
 Design done. Workstream 01 (phonetic core) is implemented on branch
 `feat/phonetic-core`, pending review and a Windows test run; see
-[01](handoff/01_phonetic_core.md). Workstreams 02–06 have no code yet.
+[01](handoff/01_phonetic_core.md). Workstream 02 (soundalike finder) is implemented on `feat/soundalike-finder`; 03–06 have no code yet.
 `panphon==0.22.2` is now a main dependency in `pyproject.toml`. `g2p_en` is
 not adopted, and no word-frequency package is installed yet (needed by 05).
 
@@ -153,7 +153,7 @@ All seven claims listed above hold. These eight gaps were found in addition:
 | # | File | Scope | Depends on | Status |
 |---|---|---|---|---|
 | 01 | [handoff/01_phonetic_core.md](handoff/01_phonetic_core.md) | P0 lexicon, P1 similarity, calibration | — | done, pending review |
-| 02 | [handoff/02_soundalike_finder.md](handoff/02_soundalike_finder.md) | P2 in-text pairs, hyphen merge/split, L1 `hyphen_groups`, L2 hyphen splits | 01 | not started |
+| 02 | [handoff/02_soundalike_finder.md](handoff/02_soundalike_finder.md) | P2 in-text pairs, hyphen merge/split, L1 `hyphen_groups`, L2 hyphen splits | 01 | done, pending review |
 | 03 | [handoff/03_contract_l3_l4_l0post.md](handoff/03_contract_l3_l4_l0post.md) | Schemas, L3 entries, L4 prompt + validation, enums, L0-post, version bumps | 01, 02 | not started |
 | 04 | [handoff/04_eval_data.md](handoff/04_eval_data.md) | Minimal-pair data, heterographic SemEval, eval script, baselines | 01 (data file can start now) | not started |
 | 05 | [handoff/05_lexicon_neighbours.md](handoff/05_lexicon_neighbours.md) | k ≤ 2 phone deletion index, frequency floor | 01, 02 | not started |

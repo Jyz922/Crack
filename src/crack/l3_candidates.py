@@ -127,6 +127,8 @@ def rank(
     splits: dict[tuple[str, str], list[SenseEntry]] = defaultdict(list)
     mwes: dict[str, list[SenseEntry]] = defaultdict(list)
     for s in senses:
+        if s.source.startswith("soundalike:"):
+            continue  # alternate senses: ranked by the soundalike contract (workstream 03)
         if s.source == "wordnet":
             whole[s.term].append(s)
         elif s.source.startswith("wordnet_mwe:"):

@@ -25,8 +25,9 @@ from .enums import (
     Genre,
 )
 from .l1_surface import analyze
-from .l2_senses import retrieve
+from .l2_senses import retrieve, senses_for
 from .l3_candidates import rank
+from .l3_soundalikes import find_soundalikes
 from .l4_anchoring import anchor_l4
 from .l5_resolution import resolve_l5
 from .l6_distinctness import distinctness_l6
@@ -54,13 +55,23 @@ def run_l2(record: AnalysisRecord, settings: Settings) -> AnalysisRecord:
     if record.l1_result is None:
         raise ValueError("L1 must run before L2: l1_result is None")
     start = time.monotonic()
-    senses = retrieve(record.l1_result.tokens, text=record.text)
-    record.l2_result = L2Result(senses=senses)
+    senses = retrieve(
+        record.l1_result.tokens, text=record.text, hyphen_groups=record.l1_result.hyphen_groups,
+    )
+    # Soundalike recall (workstream 02): alternates get their own senses so a
+    # later stage can anchor the evoked reading. L3 ignores these until the
+    # soundalike contract (workstream 03) ranks them.
+    soundalikes = find_soundalikes(record.l1_result, record.text, settings)
+    text_senses = len(senses)  # L2 status reflects the text's own senses only
+    for cand in soundalikes:
+        for alt in cand.alternates:
+            senses += senses_for(alt.form, term=cand.surface.lower(), source=f"soundalike:{alt.form}")
+    record.l2_result = L2Result(senses=senses, soundalikes=soundalikes)
     misses = sum(s.aoa_match == "miss" for s in senses)
     record.trace.append(LayerTrace(
         layer="L2",
-        status="PASS" if senses else "UNKNOWN",
-        reason=f"senses={len(senses)} aoa_miss={misses}",
+        status="PASS" if text_senses else "UNKNOWN",
+        reason=f"senses={len(senses)} aoa_miss={misses} soundalikes={len(soundalikes)}",
         duration_ms=round((time.monotonic() - start) * 1000, 3),
         hints_used=0,
     ))

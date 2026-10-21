@@ -49,6 +49,12 @@ class Settings(BaseModel):
     # NOTE: target-age familiarity is intentionally excluded from the
     # candidate score — see module docstring, deviation 1.
     L3_TOP_K: int = Field(default=8, ge=1)
+    # Soundalike finder (workstream 02). Recall stage only: L4 decides.
+    # An in-text pair is retrieved when its raw similarity reaches this
+    # percentile of random same-length CMUdict pairs (data/phonetic_calibration.json).
+    PHONETIC_RETRIEVE_PERCENTILE: Literal["p95", "p99"] = "p95"
+    SOUNDALIKE_MAX_CANDIDATES: int = Field(default=4, ge=0)
+    SOUNDALIKE_MAX_ALTERNATES: int = Field(default=3, ge=1)
 
     # --- L4 backend ------------------------------------------------------
     # Compare the original L3 shortlist in one L4 request. Unknown/error

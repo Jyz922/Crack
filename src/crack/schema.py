@@ -68,6 +68,34 @@ class CandidateEntry(BaseModel):
 # Per-layer result models (typed stubs; populated when layers run)
 # ---------------------------------------------------------------------------
 
+class Alternate(BaseModel):
+    """A word or phrase a soundalike surface may evoke, with its phonetic score."""
+    model_config = ConfigDict(extra="forbid")
+
+    form: str  # spelled as ordinary words, e.g. "pursuing", "let us"
+    phones: list[str]  # ARPAbet of the alternate's best-matching pronunciation
+    sim: float
+    sim_cal: float
+    source: Literal["in_text", "lexicon", "hyphen_merge", "resegmentation", "curated_list", "llm_verified"]
+
+
+class SoundalikeCandidate(BaseModel):
+    """Finder output (recall stage). Whether it is wordplay is decided later."""
+    model_config = ConfigDict(extra="forbid")
+
+    surface: str  # exact substring of the analysed text, e.g. "purr-suing"
+    char_span: tuple[int, int]  # text[char_span[0]:char_span[1]] == surface
+    mechanism: Literal["sound_pair", "sound_substitution"]
+    alternates: list[Alternate]
+
+    @model_validator(mode="after")
+    def _span_is_ordered(self) -> "SoundalikeCandidate":
+        start, end = self.char_span
+        if not 0 <= start < end or end - start != len(self.surface):
+            raise ValueError("char_span must cover exactly the surface string")
+        return self
+
+
 class L1Result(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -77,6 +105,7 @@ class L1Result(BaseModel):
     pos_tags: list[str]
     compound_splits: list[str] = Field(default_factory=list)
     multiword_expressions: list[str] = Field(default_factory=list)
+    hyphen_groups: list[str] = Field(default_factory=list)
     has_question: bool = False
     has_negation: bool = False
     has_speaker_turns: bool = False
@@ -86,6 +115,7 @@ class L2Result(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     senses: list[SenseEntry] = Field(default_factory=list)
+    soundalikes: list[SoundalikeCandidate] = Field(default_factory=list)
 
 
 class L3Result(BaseModel):
