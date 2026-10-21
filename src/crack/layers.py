@@ -99,7 +99,10 @@ def run_l3(record: AnalysisRecord, settings: Settings) -> AnalysisRecord:
         ]
         if repeats:
             preferred = repeats[0]
-    record.l3_result = rank(record.l2_result.senses, settings.L3_TOP_K, preferred_term=preferred)
+    record.l3_result = rank(
+        record.l2_result.senses, settings.L3_TOP_K, preferred_term=preferred,
+        soundalikes=record.l2_result.soundalikes, soundalike_top_k=settings.L3_SOUNDALIKE_TOP_K,
+    )
     record.trace.append(LayerTrace(
         layer="L3",
         status="PASS" if record.l3_result.candidates else "UNKNOWN",

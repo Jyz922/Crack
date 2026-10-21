@@ -42,6 +42,7 @@ class _L4LLMResponse(BaseModel):
     reasoning: str
     target_term: str
     split_parts: list[str]
+    alternate_form: str | None
 
 
 # ---------------------------------------------------------------------------
@@ -260,18 +261,33 @@ def _anchor_shortlist(
     proposals = []
     for candidate in candidates:
         senses = []
+        alt_senses: dict[str, list[list[str]]] = {}
         seen = set()
         for sense in record.l2_result.senses if record.l2_result else []:
             if sense.term.casefold() != candidate.term.casefold():
                 continue
             key = (sense.source, sense.lemma, sense.sense_id)
-            if key not in seen:
-                seen.add(key)
+            if key in seen:
+                continue
+            seen.add(key)
+            if sense.source.startswith("soundalike:"):
+                alt_senses.setdefault(sense.source.split(":", 1)[1], []).append(
+                    [sense.sense_id, sense.definition])
+            else:
                 senses.append([sense.sense_id, sense.definition])
-        proposals.append({"term": candidate.term,
-                          "split_options": candidate.split_options,
-                          "compound_split": candidate.score_components.get("compound_split") == 1.0,
-                          "dictionary_proposals": senses})
+        proposal = {"term": candidate.term,
+                    "split_options": candidate.split_options,
+                    "compound_split": candidate.score_components.get("compound_split") == 1.0,
+                    "dictionary_proposals": senses}
+        if candidate.soundalike_alternates:
+            proposal["soundalike_alternates"] = [
+                {"form": alt.form,
+                 "relation": "sound_pair" if alt.source == "in_text" else "sound_substitution",
+                 "phonetic_similarity": round(alt.sim, 3),
+                 "dictionary_proposals": alt_senses.get(alt.form, [])}
+                for alt in candidate.soundalike_alternates
+            ]
+        proposals.append(proposal)
     terms = [c.term for c in candidates]
     details = "Dictionary proposals are possibilities, not contextual evidence.\n" + json.dumps(proposals, ensure_ascii=False)
     prompt = _render_l4_prompt(record.text, genre, json.dumps(terms, ensure_ascii=False), details)
@@ -289,7 +305,9 @@ def _anchor_shortlist(
         if candidate is None:
             raise ModelResponseError("L4 target_term must name a supplied shortlisted candidate")
         parsed = validate_l4_response(call.parsed, record.text, candidate.term,
-            candidate.score_components.get("compound_split") == 1.0, candidate.split_options)
+            candidate.score_components.get("compound_split") == 1.0, candidate.split_options,
+            alternates=candidate.soundalike_alternates,
+            verify_percentile=settings.PHONETIC_VERIFY_PERCENTILE)
         result = L4Result(**parsed)
     except Exception as exc:
         log.error = f"{type(exc).__name__}: {exc}"
@@ -327,7 +345,11 @@ def anchor_l4(
         candidates = [next((c for c in candidates if c.term == ambiguous_term),
                            CandidateEntry(term=ambiguous_term, score=0.0))]
         total, budget = 1, 1
-    shortlist = candidates[:budget]
+    # Soundalike candidates L3 appended after its homograph top-k have their
+    # own budget; keep them rather than letting the homograph cut drop them.
+    shortlist = candidates[:budget] + [
+        c for c in candidates[budget:] if c.score_components.get("soundalike") == 1.0
+    ][:settings.L3_SOUNDALIKE_TOP_K]
     search = L4Search(mode="target_only" if ambiguous_term is not None else "automatic",
                       candidate_budget=budget, retrieved_terms=total,
                       available_terms=len(candidates), untested_terms=total,

@@ -102,3 +102,103 @@ def test_labels_and_versions():
     assert detection_status_for(MainClassification.VALID_SOUNDALIKE_JOKE) == DetectionStatus.PUN
     assert detection_status_for(MainClassification.OUT_OF_SCOPE_HOMOPHONE) == DetectionStatus.OUT_OF_SCOPE
     assert (RESPONSE_CONTRACT_VERSION, CANDIDATE_SEARCH_VERSION) == ("7", "5")
+
+
+# --- Sub-step B: L3 soundalike entries with a separate budget -------------
+
+def _l3(text, **settings):
+    from crack.config import Settings
+    from crack.layers import run_l1, run_l2, run_l3
+    from crack.schema import AnalysisRecord
+
+    s = Settings(**settings)
+    return run_l3(run_l2(run_l1(AnalysisRecord(item_id="t", text=text, target_ages=[]), s), s), s).l3_result
+
+
+def test_soundalike_appended_after_unchanged_homograph_slots():
+    with_sa, without = _l3(T2), _l3(T2, L3_SOUNDALIKE_TOP_K=0)
+    assert [c.term for c in with_sa.candidates[:8]] == [c.term for c in without.candidates]
+    extra = with_sa.candidates[8]
+    assert extra.term == "purr-suing"
+    assert [a.form for a in extra.soundalike_alternates] == ["pursuing"]
+    assert extra.score_components["soundalike"] == 1.0
+    assert extra.score_components["phonetic_sim"] == 1.0
+
+
+def test_soundalike_on_existing_slot_only_gains_alternates():
+    result = _l3(T1)
+    drum = next(c for c in result.candidates if c.term == "drum")
+    assert [a.form for a in drum.soundalike_alternates] == ["drama"]
+    assert len(result.candidates) == len(_l3(T1, L3_SOUNDALIKE_TOP_K=0).candidates)
+
+
+def test_zero_soundalike_budget_is_the_old_ranking():
+    result = _l3(T2, L3_SOUNDALIKE_TOP_K=0)
+    assert all(not c.soundalike_alternates for c in result.candidates)
+
+
+# --- Sub-step C: L4 prompt, shortlist and single-request validation ---------
+
+def _through_l3_record(text):
+    from crack.config import DEFAULT_SETTINGS
+    from crack.layers import run_l1, run_l2, run_l3
+    from crack.schema import AnalysisRecord
+
+    r = AnalysisRecord(item_id="t", text=text, target_ages=[])
+    return run_l3(run_l2(run_l1(r, DEFAULT_SETTINGS), DEFAULT_SETTINGS), DEFAULT_SETTINGS)
+
+
+def _mock_l4(monkeypatch, body):
+    import json
+    from crack import l4_anchoring as l4
+
+    calls = []
+
+    def complete(prompt, settings, client, response_log=None):
+        calls.append(prompt)
+        response_log.append(json.dumps(body))
+        return l4._L4Call(body, "offline", False, 0)
+
+    monkeypatch.setattr(l4, "_complete_l4", complete)
+    return calls
+
+
+def test_gemini_schema_has_alternate_form():
+    from crack.l4_anchoring import _L4LLMResponse
+    assert "alternate_form" in _L4LLMResponse.model_fields
+
+
+def test_l4_sees_soundalike_candidate_and_its_alternate(monkeypatch):
+    import json
+    from crack import l4_anchoring as l4
+
+    record = _through_l3_record(T2)
+    calls = _mock_l4(monkeypatch, sound())
+    result = l4.anchor_l4(record)
+    assert len(calls) == 1
+    assert "purr-suing" in record.l4_search.considered_terms  # kept beyond the homograph top-8
+    details = json.loads(calls[0].split("Dictionary proposals are possibilities, not contextual evidence.\n", 1)[1]
+                         .split("\n", 1)[0])
+    purr = next(p for p in details if p["term"] == "purr-suing")
+    alt = purr["soundalike_alternates"][0]
+    assert (alt["form"], alt["relation"], alt["phonetic_similarity"]) == ("pursuing", "sound_substitution", 1.0)
+    assert alt["dictionary_proposals"]  # the alternate's own senses
+    assert not any(sid.startswith("pursue") for sid, _ in purr["dictionary_proposals"])
+    assert result.alternate_form == "pursuing" and result.anchor_relation.value == "sound_substitution"
+
+
+def test_forced_sound_link_fails_after_one_request(monkeypatch):
+    from crack import l4_anchoring as l4
+
+    record = _through_l3_record(T2)
+    calls = _mock_l4(monkeypatch, sound(alternate="chasing"))
+    with pytest.raises(ModelResponseError, match="does not sound like"):
+        l4.anchor_l4(record)
+    assert len(calls) == 1 and not record.l4_attempts[0].accepted
+
+
+def test_prompt_declares_eleven_keys_and_both_relations():
+    from crack.l4_anchoring import _load_prompt
+    prompt = _load_prompt()
+    assert "exactly these eleven keys" in prompt and '"alternate_form": null' in prompt
+    assert "sound_substitution" in prompt and "sound_pair" in prompt
