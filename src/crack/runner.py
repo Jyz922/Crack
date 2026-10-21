@@ -342,7 +342,8 @@ def _run_fingerprint(blind_path: str | Path, settings: Settings) -> dict:
     """Freeze inputs, source/prompt bytes and nonsecret settings before inference."""
     package_root = Path(__file__).resolve().parent
     source_files = sorted([
-        *package_root.glob("*.py"), *package_root.joinpath("prompts").glob("*.md"),
+        # rglob: subpackages such as phonetics/ must also invalidate --resume.
+        *package_root.rglob("*.py"), *package_root.joinpath("prompts").glob("*.md"),
     ])
     excluded = {name for name in Settings.model_fields if name.endswith(("_API_KEY", "_BASE_URL"))}
     return {

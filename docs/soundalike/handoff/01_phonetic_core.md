@@ -1,12 +1,16 @@
 # 01 — Phonetic core (P0 lexicon, P1 similarity, calibration)
-Last updated: 2026-10-20 by soundalike handoff-verification session (offline, no code written)
+Last updated: 2026-10-20 by phonetic-core implementation session (offline, no API calls; Linux VM, Windows check pending)
 
-Status: **not started**. Back to [HANDOFF](../HANDOFF.md).
+Status: **done, pending review and Windows check** (branch `feat/phonetic-core`). Back to [HANDOFF](../HANDOFF.md).
 
 ## Checks this session
 
 | Check | Command | Result |
 |---|---|---|
+| Phonetics tests (Linux) | `python -m pytest tests/test_phonetics.py -q` (Python 3.11.16, panphon 0.22.2, nltk 3.10.3) | **39 passed** |
+| Full offline suite (Linux, local disk copy) | `python -m pytest -m "not live" -q` | **490 passed, 10 deselected, 0 failed**. In the Windows-mounted folder one timing-sensitive web test (`test_waiting_event_reports_the_current_stage_without_inventing_progress`, 2 s wait) failed 3/3; the same code passes on local disk, so this is filesystem latency in the VM mount, not this change |
+| Full offline suite (Windows, `PYTHONUTF8` unset) | `py -3.11 -m pytest -m "not live" -q` | **NOT run** (acceptance test 10) |
+| Calibration table | `python scripts/fit_phonetic_calibration.py` (seed 0, 1,500 pairs per length, lengths 2–10) | μ₃ 0.7455, μ₄ 0.7151, μ₅ 0.7276 (design.md's scratch sample: 0.735, 0.719, 0.730). Differences come from the lexicon revision and the ER fix; sim_cal for the six pairs: cat/cad = bat/pat 0.977, pat/pit 0.865, cat/cash 0.819, drum/drama 0.595 |
 | Phonetic deps in project Python | `py -3.11 -m pip install cmudict panphon==0.22.2` (2026-10-20, environment only; `pyproject.toml` unchanged) | **Installed**: cmudict 1.1.3, panphon 0.22.2. **Still missing**: g2p_en |
 | Reference script output | `$env:PYTHONUTF8='1'; py -3.11 docs/soundalike/reference_wlev_fixed.py` (cmudict 1.1.3, panphon 0.22.2). Without `PYTHONUTF8=1`: `UnicodeDecodeError: 'charmap' codec`, because panphon `featuretable.py:83` opens its CSV with no encoding | **Ran** (2026-10-20); see next row |
 | Six-pair values | same command | **Match design.md at 3 decimals.** `sim_maxlen` (`wlev_d`): knight/night 1.0000 (0.0000), cat/cad 0.9943 (0.0172), bat/pat 0.9943 (0.0172), pat/pit 0.9655 (0.1034), cat/cash 0.9540 (0.1379), drum/drama 0.8897 (0.5517) |
@@ -16,6 +20,33 @@ Status: **not started**. Back to [HANDOFF](../HANDOFF.md).
 | Licences | `pip show` metadata; `LICENSE`; `nltk_data/corpora/cmudict/README` | PyPI `cmudict` 1.1.3: **GPL-3.0-or-later**. CRACK: MIT. nltk 3.10.3: Apache-2.0. panphon 0.22.2: MIT. NLTK's cmudict data: CMU BSD-style licence (README lines 45–75) |
 | μ_L percentiles, seed-pair sims | none | **NOT run**; numbers below are copied from design.md (scratch environment outside this repo) |
 | Hand arithmetic on the design's six-pair values | sim = 1 − d/max(n,m) from the design's δ values | Consistent: e.g. pat/pit 1 − 0.1034/3 = 0.966; drum/drama 1 − (0.0517 + 0.5)/5 = 0.890; indel 1.0 → 0.790 |
+
+## Implementation decisions (2026-10-20)
+
+- **No `panphon.FeatureTable`.** `phonetics/features.py` reads panphon's
+  `ipa_all.csv` and `feature_weights.csv` itself as UTF-8 (without importing
+  panphon or pandas), so Windows needs no `PYTHONUTF8`. Weights are matched by
+  name.
+- **Segmentation = one explicit ARPAbet→IPA table** (`lexicon.ARPA_TO_IPA`).
+  Diphthongs and affricates are two segments (aɪ → a + ɪ, tʃ → t + ʃ), which
+  matches PanPhon's segmentation of the reference script's IPA strings; a test
+  pins parity on ten ER-free words.
+- **ER fix (a drift from the reference, found here).** The reference maps ER to
+  ɝ, which is not in panphon's table, so PanPhon **silently drops it** ("purr"
+  became just [p]). ER → ɜ˞ and ER0 → ə˞ (the PanPhon spellings of ɝ/ɚ); every
+  segment is checked against the table at import. The six pairs contain no ER,
+  so their values are unaffected.
+- **g2p_en not adopted.** A CMUdict miss gives `lookup_source() == "missing"`
+  and `sound_similarity` raises `MissingPronunciation`.
+- **Hyphenated coinages** ("purr-suing", "cat-nap") are looked up whole, then
+  as the concatenation of their parts.
+- **Calibration table** lives at `data/phonetic_calibration.json`, with a
+  `.gitignore` exception. `sim_cal` is not clipped below 0.
+- **panphon is a main dependency** (`panphon==0.22.2`), not an extra.
+- **Resume fingerprint** now uses `rglob("*.py")`, so `phonetics/` changes
+  invalidate `--resume` (this closes 03 test 11; tested here).
+- The cmudict corpus must be in `data/nltk_data` before tests run; a missing
+  corpus raises `LookupError` with the one-line download command.
 
 ## Goal
 

@@ -1,5 +1,5 @@
 # HANDOFF — CRACK soundalike extension (Project 2)
-Last updated: 2026-10-20 by soundalike handoff-verification session (offline, no API calls, no source changes)
+Last updated: 2026-10-20 by phonetic-core implementation session (workstream 01 implemented on `feat/phonetic-core`)
 
 ---
 
@@ -20,8 +20,8 @@ alike, and no extra model requests are added. Design and evidence:
 
 | Deliverable | Produced by | Status |
 |---|---|---|
-| Sound-similarity method with formulas, and why it is adequate (component b) | [01](handoff/01_phonetic_core.md) | Formulas drafted in design.md; no code |
-| Similarity results for {cat,cad} {cat,cash} {drum,drama} {knight,night} {bat,pat} {pat,pit} | [01](handoff/01_phonetic_core.md) | **Reproduced in this repo on 2026-10-20** with `reference_wlev_fixed.py` (all six match design.md at 3 decimals); no `src/` implementation yet |
+| Sound-similarity method with formulas, and why it is adequate (component b) | [01](handoff/01_phonetic_core.md) | **Implemented** in `src/crack/phonetics/` (formulas in `similarity.py` and `calibration.py` docstrings) |
+| Similarity results for {cat,cad} {cat,cash} {drum,drama} {knight,night} {bat,pat} {pat,pit} | [01](handoff/01_phonetic_core.md) | **Reproduced in this repo on 2026-10-20** with `reference_wlev_fixed.py` (all six match design.md at 3 decimals); also pinned by `tests/test_phonetics.py` against `src/crack/phonetics/` |
 | Soundalike finder (component a) | [02](handoff/02_soundalike_finder.md), [05](handoff/05_lexicon_neighbours.md) | Not started |
 | Results on the three test texts (drum/drama, purr-suing, cat-nap) | [03](handoff/03_contract_l3_l4_l0post.md) + [04](handoff/04_eval_data.md) | design.md has design-time **expectations only**, not results |
 | ≥ 20 soundalike jokes | [04](handoff/04_eval_data.md) | 29 drafts in design.md; not yet a data file or labelled |
@@ -31,11 +31,11 @@ The three test texts are a separate slice and do not count towards the 20.
 
 ## Current status
 
-Design done; no code. Nothing under `src/`, `tests/`, `corpus/`, `data/` or
-`scripts/` has been changed for Project 2. As of 2026-10-20, `panphon` 0.22.2
-is installed in the project Python 3.11 environment (environment only;
-`pyproject.toml` is unchanged). `g2p_en` and a word-frequency
-package are **not installed**.
+Design done. Workstream 01 (phonetic core) is implemented on branch
+`feat/phonetic-core`, pending review and a Windows test run; see
+[01](handoff/01_phonetic_core.md). Workstreams 02–06 have no code yet.
+`panphon==0.22.2` is now a main dependency in `pyproject.toml`. `g2p_en` is
+not adopted, and no word-frequency package is installed yet (needed by 05).
 
 **Lexicon source (decided 2026-10-20):** `nltk.corpus.cmudict`, not the PyPI
 `cmudict` package. Licence: PyPI `cmudict` is GPL-3.0-or-later and CRACK is MIT;
@@ -152,7 +152,7 @@ All seven claims listed above hold. These eight gaps were found in addition:
 
 | # | File | Scope | Depends on | Status |
 |---|---|---|---|---|
-| 01 | [handoff/01_phonetic_core.md](handoff/01_phonetic_core.md) | P0 lexicon, P1 similarity, calibration | — | not started |
+| 01 | [handoff/01_phonetic_core.md](handoff/01_phonetic_core.md) | P0 lexicon, P1 similarity, calibration | — | done, pending review |
 | 02 | [handoff/02_soundalike_finder.md](handoff/02_soundalike_finder.md) | P2 in-text pairs, hyphen merge/split, L1 `hyphen_groups`, L2 hyphen splits | 01 | not started |
 | 03 | [handoff/03_contract_l3_l4_l0post.md](handoff/03_contract_l3_l4_l0post.md) | Schemas, L3 entries, L4 prompt + validation, enums, L0-post, version bumps | 01, 02 | not started |
 | 04 | [handoff/04_eval_data.md](handoff/04_eval_data.md) | Minimal-pair data, heterographic SemEval, eval script, baselines | 01 (data file can start now) | not started |

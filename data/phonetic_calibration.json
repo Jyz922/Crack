@@ -1,0 +1,72 @@
+{
+  "method": "random pairs of distinct alphabetic CMUdict words with equal IPA segment length; first pronunciation; weighted Levenshtein, name-aligned panphon weights",
+  "lexicon": "nltk.corpus.cmudict (0.7a)",
+  "indel": 0.5,
+  "seed": 0,
+  "pairs_per_length": 1500,
+  "lengths": {
+    "2": {
+      "mean": 0.6798,
+      "p95": 0.931,
+      "p99": 0.9612,
+      "pairs": 1500,
+      "pool_words": 486
+    },
+    "3": {
+      "mean": 0.7455,
+      "p95": 0.9052,
+      "p99": 0.9483,
+      "pairs": 1500,
+      "pool_words": 4349
+    },
+    "4": {
+      "mean": 0.7151,
+      "p95": 0.8815,
+      "p99": 0.9353,
+      "pairs": 1500,
+      "pool_words": 11305
+    },
+    "5": {
+      "mean": 0.7276,
+      "p95": 0.869,
+      "p99": 0.9172,
+      "pairs": 1500,
+      "pool_words": 20191
+    },
+    "6": {
+      "mean": 0.7351,
+      "p95": 0.8549,
+      "p99": 0.9052,
+      "pairs": 1500,
+      "pool_words": 22923
+    },
+    "7": {
+      "mean": 0.7289,
+      "p95": 0.8276,
+      "p99": 0.8842,
+      "pairs": 1500,
+      "pool_words": 18959
+    },
+    "8": {
+      "mean": 0.7306,
+      "p95": 0.8222,
+      "p99": 0.8664,
+      "pairs": 1500,
+      "pool_words": 14186
+    },
+    "9": {
+      "mean": 0.7344,
+      "p95": 0.8218,
+      "p99": 0.8736,
+      "pairs": 1500,
+      "pool_words": 9867
+    },
+    "10": {
+      "mean": 0.7388,
+      "p95": 0.8207,
+      "p99": 0.8612,
+      "pairs": 1500,
+      "pool_words": 5869
+    }
+  }
+}

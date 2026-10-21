@@ -17,3 +17,4 @@ scratch/
 data/*
 !data/aoa_kuperman.csv
 crack-animation/
+!data/phonetic_calibration.json
