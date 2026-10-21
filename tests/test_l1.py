@@ -97,3 +97,25 @@ def test_negation_on_real_curly_strings() -> None:
 
 def test_definition_head_with_curly_apostrophe() -> None:
     assert route_genre("Cat’s cradle: a game of string.") == Genre.DEFINITIONAL_ONELINER
+
+
+# Soundalike workstream 02: hyphenated spans are recorded separately.
+T1 = "When the band broke up, it wasn’t drama — it was just drum!"
+T2 = "Why did the cat stop dating the cad? Because she realized he was only purr-suing her for his own gain!"
+T3 = "Why did the cat start working at a bank? Because she wanted to turn her cat-nap into cash."
+
+
+@pytest.mark.parametrize("text,groups", [
+    (T1, []),
+    (T2, ["purr-suing"]),
+    (T3, ["cat-nap"]),
+    ("A well-known non-fiction book, a well-known one - not x -y.", ["well-known", "non-fiction"]),
+])
+def test_hyphen_groups(text, groups):
+    assert analyze(text).hyphen_groups == groups
+
+
+def test_hyphen_groups_leave_tokens_unchanged():
+    assert "purr" in analyze(T2).tokens and "suing" in analyze(T2).tokens
+    assert "purr-suing" not in analyze(T2).tokens
+    assert analyze(T3).tokens[-4:] == ["cat", "nap", "into", "cash"]

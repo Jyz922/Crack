@@ -267,12 +267,17 @@ def mwe_spans(tokens: list[str], max_n: int = 4) -> list[tuple[str, str]]:
 
 
 @_wordnet_locked
-def retrieve(tokens: list[str], *, text: str | None = None) -> list[SenseEntry]:
+def retrieve(
+    tokens: list[str], *, text: str | None = None, hyphen_groups: list[str] | tuple[str, ...] = (),
+) -> list[SenseEntry]:
     """Senses for every content token, plus part-senses for compound splits,
-    plus multiword-expression senses.
+    plus multiword-expression senses, plus hyphen-group senses.
 
     Split-part senses keep term=<whole word> and source="wordnet_split:<a>+<b>".
     MWE senses have term=<surface phrase> and source="wordnet_mwe:<lemma>".
+    A hyphen group keeps its exact surface as the term ("cat-nap", so L4 can
+    quote it verbatim) and gets whole-word senses for the hyphenated or joined
+    form ("catnap") plus part-senses for the joined form's compound splits.
     """
     token_counts = Counter(re.sub(r"['’]s?$", "", tok.lower()) for tok in tokens if tok.isalpha())
     out: list[SenseEntry] = []
@@ -300,6 +305,12 @@ def retrieve(tokens: list[str], *, text: str | None = None) -> list[SenseEntry]:
         for a, b in compound_splits(t):
             src = f"wordnet_split:{a}+{b}"
             out += senses_for(a, term=t, source=src) + senses_for(b, term=t, source=src)
+    for group in dict.fromkeys(g.lower() for g in hyphen_groups):
+        joined = group.replace("-", "")
+        out += senses_for(group, term=group) or senses_for(joined, term=group)
+        for a, b in compound_splits(joined):
+            src = f"wordnet_split:{a}+{b}"
+            out += senses_for(a, term=group, source=src) + senses_for(b, term=group, source=src)
     return out
 
 

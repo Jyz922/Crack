@@ -1,7 +1,7 @@
 # 02 — Soundalike finder (in-text pairs + hyphen merge/split)
-Last updated: 2026-10-19 by soundalike docs-planning session (offline, no code written)
+Last updated: 2026-10-20 by soundalike-finder implementation session (offline; Linux VM, Windows check pending)
 
-Status: **not started**. Back to [HANDOFF](../HANDOFF.md).
+Status: **done, pending review and Windows check** (branch `feat/soundalike-finder`). Test 8's L4-validation half is still owed by [03](03_contract_l3_l4_l0post.md). Back to [HANDOFF](../HANDOFF.md).
 
 ## Checks this session
 
@@ -11,7 +11,33 @@ Status: **not started**. Back to [HANDOFF](../HANDOFF.md).
 | WordNet lemma `catnap` | `wordnet().synsets("catnap")` | `nap.n.04`, `nap.v.01` (exists) |
 | `compound_splits("catnap")` | `py -3.11 -c ...` | `[('cat', 'nap')]` |
 | Existing L4 validation on a hyphen split | `validate_l4_response`, term `catnap` / `cat-nap` | **Both rejected** (quote/term mismatch; joined parts ≠ `cat-nap`) |
-| Finder behaviour on the three texts | none | **NOT run**; design.md's values are expectations from a scratch environment |
+| Finder output on the three texts | `find_soundalikes(analyze(t), t, DEFAULT_SETTINGS)` | Text 1: `drum` ← drama 0.890 (sound_pair). Text 2: `purr-suing` ← pursuing 1.000 (hyphen_merge); `cad` ← cat 0.994 (sound_pair). Text 3: `cash` ← cat 0.954 (sound_pair) |
+| Retrieval threshold on the 60-item corpus (no soundalike jokes in it) | in-text pairs per item | Raw sim ≥ 0.75: **554 pairs** (random pairs average ≈ 0.73, so 0.75 is noise). ≥ p95 of random same-length pairs: 38 candidates in 25 items. ≥ p99: 9 in 7 items, but drum/drama (0.890 < p99 0.917 at length 5) is lost. **Chosen: p95** (`PHONETIC_RETRIEVE_PERCENTILE`) |
+| Regression: L1 tokens and L3 top-8 for 74 texts (60 corpus + 14 fixture texts) | snapshot before/after, offline | **0 token diffs, 0 top-8 diffs, 0 candidate-field diffs.** D02 gains a `non-fiction` candidate at rank 9 (deferred, outside the top 8) |
+| Text 3 L3 shortlist | `run_l1` → `run_l3` | `cat-nap` is rank 2 with split option (cat, nap) |
+| Tests (Linux) | `pytest tests/test_l1.py tests/test_l2.py tests/test_l3.py tests/test_soundalike_finder.py` | 79 passed; full offline suite 506 passed. The one mount-only timing failure (`test_waiting_event…`) passes on local disk |
+| Full offline suite (Windows) | `py -3.11 -m pytest -m "not live" -q` | **NOT run** |
+
+## Implementation decisions (2026-10-20)
+
+- **Term spelling:** hyphen groups keep the exact surface (`cat-nap`) as the
+  L2/L3 term, so quotes stay verbatim; 03 must compare joined parts against the
+  term with hyphens removed.
+- **Storage:** `L2Result.soundalikes` (default `[]`), not recomputed in L3.
+- **Threshold:** in-text pairs need raw sim ≥ the p95 random-pair value for
+  their length (not raw 0.75; see checks). Hyphen merges are exact phone
+  matches (all stress removed, so ER0 = ER) against a reverse CMUdict index.
+- **Frequency floor:** an alternate must have WordNet synsets (no word-frequency
+  dependency yet; 05 may add one).
+- **Word families skipped** as in-text pairs: shared WordNet base form, or a
+  shared prefix of ≥ 4 letters (or the whole shorter word, ≥ 3): camp/camper,
+  bring/brought, prescribe/prescription.
+- **Lexicalised hyphen words are not skipped**; "well-known" just gets senses.
+- **L2 status** still reflects the text's own senses; alternate senses alone do
+  not turn an UNKNOWN L2 into PASS.
+- **L3 ignores `soundalike:` senses** until 03 adds soundalike entries, so the
+  homograph ranking is unchanged.
+- Limits: `SOUNDALIKE_MAX_CANDIDATES = 4`, `SOUNDALIKE_MAX_ALTERNATES = 3`.
 
 ## Goal
 
