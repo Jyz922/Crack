@@ -24,8 +24,8 @@ architecture: [ARCHITECTURE.md § Soundalike wordplay extension](../../ARCHITECT
 | Similarity results for {cat,cad} {cat,cash} {drum,drama} {knight,night} {bat,pat} {pat,pit} | [01](handoff/01_phonetic_core.md) | **Done.** sim: knight/night 1.000, cat/cad 0.994, bat/pat 0.994, pat/pit 0.966, cat/cash 0.954, drum/drama 0.890; pinned by `tests/test_phonetics.py`; reproduced on Windows |
 | Finding utterances that sound similar (component a) | [02](handoff/02_soundalike_finder.md); [05](handoff/05_lexicon_neighbours.md) optional | **Done** for in-text pairs and hyphen merges (PR #6). Lexicon neighbours (05) not started |
 | Results on the three test texts (drum/drama, purr-suing, cat-nap) | [03](handoff/03_contract_l3_l4_l0post.md) + [04](handoff/04_eval_data.md) | **Mocked end-to-end only** (PR #7): purr-suing and drum/drama → `VALID_SOUNDALIKE_JOKE`, cat-nap → `VALID_COMPOUND_SPLIT_JOKE`, with scripted L4/L5/L6 answers. **Live results NOT run** |
-| ≥ 20 soundalike jokes | [04](handoff/04_eval_data.md) | 29 drafts in design.md; not yet a data file or labelled |
-| ≥ 20 negatives | [04](handoff/04_eval_data.md) | 39 drafts in design.md; not yet a data file or labelled |
+| ≥ 20 soundalike jokes | [04](handoff/04_eval_data.md) | **Built**: 25 seed positives in `corpus/soundalike_*.jsonl` (+8 known, +3 test texts). **Blind double labelling NOT run** |
+| ≥ 20 negatives | [04](handoff/04_eval_data.md) | **Built**: 29 seed minimal-pair negatives typed A–E (+11 known, +3 test). **Blind double labelling NOT run** |
 
 The three test texts are a separate slice and do not count towards the 20.
 
@@ -183,7 +183,7 @@ Original notes:
 | 01 | [handoff/01_phonetic_core.md](handoff/01_phonetic_core.md) | P0 lexicon, P1 similarity, calibration | — | **merged** (PR #5) |
 | 02 | [handoff/02_soundalike_finder.md](handoff/02_soundalike_finder.md) | P2 in-text pairs, hyphen merge/split, L1 `hyphen_groups`, L2 hyphen splits | 01 | **merged** (PR #6) |
 | 03 | [handoff/03_contract_l3_l4_l0post.md](handoff/03_contract_l3_l4_l0post.md) | Schemas, L3 entries, L4 prompt + validation, enums, L0-post, version bumps | 01, 02 | **merged** (PR #7); live corpus rerun pending |
-| 04 | [handoff/04_eval_data.md](handoff/04_eval_data.md) | Minimal-pair data, heterographic SemEval, eval script, baselines | 01 (data file can start now) | not started |
+| 04 | [handoff/04_eval_data.md](handoff/04_eval_data.md) | Minimal-pair data, heterographic SemEval, eval script, baselines | 01 (data file can start now) | built; labelling and live run pending |
 | 05 | [handoff/05_lexicon_neighbours.md](handoff/05_lexicon_neighbours.md) | k ≤ 2 phone deletion index, frequency floor | 01, 02 | not started |
 | 06 | [handoff/06_optional_extensions.md](handoff/06_optional_extensions.md) | LM re-ranking, DP resegmentation, curated list, dual-support diagnostic | 03, 04 results | not started |
 

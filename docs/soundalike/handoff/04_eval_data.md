@@ -1,9 +1,29 @@
 # 04 — Evaluation data, heterographic SemEval, eval script, baselines
-Last updated: 2026-10-19 by soundalike docs-planning session (offline, no code written)
+Last updated: 2026-10-21 by soundalike eval-data session (offline; no provider calls)
 
-Status: **not started**. Back to [HANDOFF](../HANDOFF.md).
+Status: **built, labelling and live run pending** (branch `feat/soundalike-eval-data`). Back to [HANDOFF](../HANDOFF.md).
 
-## Checks this session
+## Results so far (2026-10-21)
+
+| Check | Command | Result |
+|---|---|---|
+| Corpus built | `py -3.11 scripts/build_soundalike_corpus.py` | seed 25 positives / 29 negatives (incl. 4 spare positives S31–S34 + their negatives); known 8 / 11; test_text 3 / 3. Files load with `crack.corpus` |
+| Blind double labelling | `scripts/soundalike_labelling.py sheets`, then `agree` | **NOT run** (needs two people). Sheets are in `docs/soundalike/labelling/` |
+| Heterographic SemEval split | `py -3.11 scripts/prepare_semeval.py --heterographic` | 1,780 contexts, 1,271 puns, 509 non-puns; 1,098 gold targets. Homographic outputs regenerate byte-identically |
+| Always-pun baseline (SemEval het) | `scripts/evaluate_soundalike.py baselines` | P 0.714, R 1.000, **F1 0.833** (acceptance 3 met) |
+| "≥ 9 tokens OR Tom" (L1 tokenisation) | same | **F1 0.807** (design.md: 0.806); "Tom" in 224 puns, 0 non-puns |
+| P1 graded vs binary | `scripts/evaluate_soundalike.py metric` | Six pairs: graded gives 5 distinct values, binary 3 (cat/cad = pat/pit = cat/cash = 0.667). Soundalike-vs-random ROC-AUC: graded 0.994, **binary 1.000** (imperfect pairs only, n = 12: graded 0.983, binary 1.000). Separating soundalikes from random words is easy for both; graded's contribution is ordering close pairs |
+| P2 finder recall | `scripts/evaluate_soundalike.py finder` | Target supplied for **2/35** corpus positives (only test texts) and **2/1,098** SemEval puns (0.2%). The finder fires on 10/43 negatives |
+| Verification of L4-proposed alternates (p99) | phonetics on each positive's pun/target | 3 seed positives fail p99 even if L4 names the right target: tents/tense 0.900, yeast/least 0.929, tuna/tune 0.875 (and drum/drama passes only because the finder supplies it) |
+| Detection rescoring | `scripts/evaluate_soundalike.py detection runs/<run>/records.jsonl` | Implemented and tested on synthetic records; **no live run yet** |
+
+**What this means.** Almost every positive depends on L4 naming the evoked
+word itself (the finder only sees words already in the text), and imperfect
+soundalikes below the p99 bar are guaranteed misses. An exact-homophone lookup
+for every content word, or workstream 05, would supply most targets but adds
+noise; decide after the live run.
+
+## Planning-session checks (2026-10-19)
 
 | Check | Command | Result |
 |---|---|---|
