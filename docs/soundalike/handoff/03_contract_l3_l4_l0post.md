@@ -24,10 +24,12 @@ Status: **merged** (PR #7). Still open: a live 60-item corpus rerun after the L4
 ## Implementation decisions (2026-10-21)
 
 - **Free proposal + verify** (Daren): L4 may name an alternate the finder did
-  not supply; it is accepted only at ≥ p99 random-pair similarity
-  (`PHONETIC_VERIFY_PERCENTILE`). Finder-supplied alternates are accepted as
-  is. Consequence: drum/drama (0.890) passes only because the finder supplies
-  it (it is below p99).
+  not supply; it is accepted only at ≥ p95 random-pair similarity
+  (`PHONETIC_VERIFY_PERCENTILE`; **p99 until 2026-10-23**, lowered after the
+  first live run rejected tents/tense and yeast/least while p95 still blocks
+  the invented needs/knead link). Finder-supplied alternates are accepted as
+  is. A failed check is recorded as L4 `FAIL` (→ `ANCHORING_FAIL`, NON_PUN),
+  not `EXECUTION_FAILED`.
 - **drum/drama counts** as `sound_pair` (Daren), reported separately from
   `sound_substitution`.
 - **Phonological age barrier deferred** (Daren): the age contract is
@@ -40,8 +42,11 @@ Status: **merged** (PR #7). Still open: a live 60-item corpus rerun after the L4
   `ACCEPTED_MECHANISMS` (no code reads these sets).
 - L5/L6 get the mechanism through a `{mechanism_note}` placeholder that is
   empty for non-soundalike readings, so those prompts are unchanged.
-- `decisions.py` re-validation uses the default verification percentile (p99,
+- `decisions.py` re-validation uses the default verification percentile (p95,
   equal to the setting's default); it has no settings object.
+- L4 ignores a content-free `"": ""` entry (2026-10-23, live run: 5 of 79
+  answers carried it). This flips the earlier strict test in
+  `tests/test_reliability.py`; any other extra key still fails.
 
 ## Goal
 

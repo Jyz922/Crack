@@ -1,8 +1,12 @@
 # Response validation and terminal states
 
-Current detection contract: `6`; candidate-selection policy: `4`.
+Current detection contract: `7`; candidate-selection policy: `5`.
 Every model answer is checked locally before it becomes a layer result.
 The pipeline does not repair an invalid response with another model request.
+One content-free artefact is ignored locally: an L4 entry whose key and value
+are both empty (`"": ""`, observed from gpt-6-luna). Any other extra or missing
+key still rejects the response. A soundalike alternate that fails phonetic
+verification makes L4 a `FAIL` (a negative finding), not an error.
 
 ## Layer states and stopping
 

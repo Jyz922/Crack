@@ -167,10 +167,10 @@ Original notes:
 
 | Decision | Chosen | Where |
 |---|---|---|
-| May L4 propose an alternate not in the supplied list? | **Yes, verified locally** at the p99 random-pair similarity (`PHONETIC_VERIFY_PERCENTILE`); finder-supplied alternates are accepted as is | 03 |
+| May L4 propose an alternate not in the supplied list? | **Yes, verified locally** at the p95 random-pair similarity (`PHONETIC_VERIFY_PERCENTILE`; p99 until the first live run); finder-supplied alternates are accepted as is; a failed check is a NON_PUN finding | 03 |
 | Does an in-text juxtaposition (drum/drama) count? | **Yes, as `sound_pair`**, reported separately from `sound_substitution` | 03 |
 | Primary metric | **Custom weighted Levenshtein** over name-aligned PanPhon features (ALINE and the library score as comparison columns) | 01 |
-| Thresholds | **Finder: p95** of random same-length pairs (raw 0.75 flagged 554 corpus pairs). **Verification: p99** | 02, 03 |
+| Thresholds | **Finder: p95** of random same-length pairs (raw 0.75 flagged 554 corpus pairs). **Verification: p95** (was p99; lowered 2026-10-23 after the live run) | 02, 03 |
 | Separate shortlist budget for soundalikes | **Separate** (`L3_SOUNDALIKE_TOP_K = 4`) | 03 |
 | Phonological age barrier | **Deferred** | 03 |
 | Local language model diagnostic | Deferred (06) | — |

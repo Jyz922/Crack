@@ -42,6 +42,15 @@ class ModelResponseError(ValueError):
     """A model response cannot safely be used as a stage result."""
 
 
+class AlternateNotVerified(ModelResponseError):
+    """A soundalike alternate failed local phonetic verification.
+
+    Unlike other response errors this is a substantive finding (the claimed
+    soundalike does not sound alike enough), so L4 records it as a FAIL
+    rather than an execution failure.
+    """
+
+
 def require_completion(reason: Any) -> None:
     """Reject truncation, refusal, and other incomplete terminal states."""
     if reason is None:
@@ -80,7 +89,7 @@ def _occurs(word: str, text: str) -> bool:
 
 
 def verify_alternate(
-    term: str, alternate: str, alternates: list | None, verify_percentile: str,
+    term: str, alternate: str, alternates: list | None, verify_percentile: str = "p95",
 ) -> None:
     """Accept a soundalike only on phonetic evidence, never on the model's word.
 
@@ -96,9 +105,9 @@ def verify_alternate(
     try:
         score = sound_similarity(term, alternate)
     except MissingPronunciation as exc:
-        raise ModelResponseError(f"alternate_form {alternate!r} has no pronunciation to verify") from exc
+        raise AlternateNotVerified(f"alternate_form {alternate!r} has no pronunciation to verify") from exc
     if score.sim < percentile_value(score.length, verify_percentile):
-        raise ModelResponseError(
+        raise AlternateNotVerified(
             f"alternate_form {alternate!r} does not sound like {term!r} "
             f"(similarity {score.sim:.3f} is below the {verify_percentile} random-pair level)"
         )
@@ -108,8 +117,14 @@ def validate_l4_response(
     value: Any, text: str, term: str, is_split: bool,
     split_options: list[tuple[str, str]] | None = None,
     alternates: list | None = None,
-    verify_percentile: str = "p99",
+    verify_percentile: str = "p95",
 ) -> dict[str, Any]:
+    # Observed live (gpt-6-luna): the model sometimes appends a content-free
+    # `"": ""` after "reasoning". Only that exact empty key with an empty or
+    # null value is ignored; any other extra key still fails. The attempt log
+    # keeps the original response unchanged.
+    if isinstance(value, dict) and "" in value and value[""] in ("", None):
+        value = {k: v for k, v in value.items() if k != ""}
     p = require_fields(value, set(L4_RESPONSE_FIELDS))
     target = require_text(p["target_term"], "target_term")
     if target.strip().casefold() != term.strip().casefold():

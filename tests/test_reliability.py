@@ -45,10 +45,25 @@ def test_l4_cannot_select_a_candidate_outside_the_offered_budget(monkeypatch):
     assert rec.l4_attempts[0].candidate_terms == ["crate"]
 
 
-def test_empty_extra_key_remains_a_failure_without_correction(monkeypatch):
+def test_content_free_empty_key_is_ignored_without_another_request(monkeypatch):
+    # Changed 2026-10-23 after the first live soundalike run: gpt-6-luna
+    # appended a content-free `"": ""` to 5 of 79 otherwise valid answers.
+    # Ignoring that exact entry makes no model request and changes no content;
+    # the attempt log keeps the original response.
+    rec = record()
+    trailing = payload()
+    trailing[""] = ""
+    calls = responses(monkeypatch, [trailing, payload()])
+    result = l4.anchor_l4(rec)
+    assert len(calls) == 1
+    assert rec.l4_attempts[0].accepted and result.anchoring_status.value == "PASS"
+    assert rec.l4_attempts[0].parsed_response[""] == ""
+
+
+def test_any_other_extra_key_remains_a_failure_without_correction(monkeypatch):
     rec = record()
     invalid = payload()
-    invalid[""] = ""
+    invalid[""] = "more reasoning"
     calls = responses(monkeypatch, [invalid, payload()])
     with pytest.raises(ModelResponseError, match="unexpected"):
         l4.anchor_l4(rec)

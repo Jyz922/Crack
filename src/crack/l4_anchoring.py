@@ -20,7 +20,7 @@ from pydantic import BaseModel, ConfigDict, ValidationError
 from .config import DEFAULT_SETTINGS, Settings
 from .enums import AnchorRelation, AnchoringStatus, DetectionStatus, Genre
 from .schema import AnalysisRecord, CandidateAssessment, CandidateEntry, L4Attempt, L4CandidateFinding, L4Result, L4Search
-from .validation import ModelResponseError, validate_l4_response, require_completion
+from .validation import AlternateNotVerified, ModelResponseError, validate_l4_response, require_completion
 
 _PROMPT_PATH = Path(__file__).parent / "prompts" / "l4_anchoring.md"
 _LOG = logging.getLogger(__name__)
@@ -304,11 +304,23 @@ def _anchor_shortlist(
                           and c.term.strip().casefold() == target.strip().casefold()), None)
         if candidate is None:
             raise ModelResponseError("L4 target_term must name a supplied shortlisted candidate")
-        parsed = validate_l4_response(call.parsed, record.text, candidate.term,
-            candidate.score_components.get("compound_split") == 1.0, candidate.split_options,
-            alternates=candidate.soundalike_alternates,
-            verify_percentile=settings.PHONETIC_VERIFY_PERCENTILE)
-        result = L4Result(**parsed)
+        try:
+            parsed = validate_l4_response(call.parsed, record.text, candidate.term,
+                candidate.score_components.get("compound_split") == 1.0, candidate.split_options,
+                alternates=candidate.soundalike_alternates,
+                verify_percentile=settings.PHONETIC_VERIFY_PERCENTILE)
+            result = L4Result(**parsed)
+        except AlternateNotVerified as exc:
+            # Everything else in the response validated; only the claimed
+            # soundalike failed the phonetic check. That is a negative finding
+            # about the claim, not a broken response: record a FAIL.
+            result = L4Result(
+                sense_a="", sense_a_anchor_quote="", sense_b="", sense_b_anchor_quote="",
+                anchor_relation=None, anchoring_status=AnchoringStatus.FAIL, resolving_sense=None,
+                target_term=candidate.term, split_parts=[], alternate_form=None,
+                reasoning=f"Soundalike reading rejected by the phonetic check: {exc}. "
+                          f"Model reasoning: {call.parsed.get('reasoning', '')}",
+            )
     except Exception as exc:
         log.error = f"{type(exc).__name__}: {exc}"
         raise
