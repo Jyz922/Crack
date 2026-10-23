@@ -121,13 +121,20 @@ def test_soundalike_prompts_carry_the_mechanism(mocked_models):
     assert 'evokes the absent, similar-sounding "pursuing"' in prompts["L6"]
 
 
-def test_forced_alternate_ends_as_execution_failure(mocked_models, monkeypatch):
+def test_forced_alternate_ends_as_a_negative_finding(mocked_models, monkeypatch):
     calls, _ = mocked_models
     monkeypatch.setitem(L4_BODIES, T2, {**L4_BODIES[T2], "alternate_form": "chasing"})
     record = run_pipeline(T2)
-    assert record.final.main_classification == MainClassification.EXECUTION_FAILED
-    assert "does not sound like" in next(t.reason for t in record.trace if t.layer == "L4")
-    assert calls == ["L4"]  # rejected without a corrective request; L5/L6 never run
+    assert record.final.main_classification == MainClassification.ANCHORING_FAIL
+    assert detection_status_for(record.final.main_classification) == DetectionStatus.NON_PUN
+    assert "does not sound like" in record.l4_result.reasoning
+    assert calls == ["L4"]  # no corrective request; L5/L6 never run
+
+
+def test_trailing_empty_key_from_the_model_is_tolerated(mocked_models, monkeypatch):
+    monkeypatch.setitem(L4_BODIES, T2, {**L4_BODIES[T2], "": ""})
+    record = run_pipeline(T2)
+    assert record.final.main_classification == MainClassification.VALID_SOUNDALIKE_JOKE
 
 
 def test_web_result_shows_soundalike_joke(mocked_models):

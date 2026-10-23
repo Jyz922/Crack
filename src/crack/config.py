@@ -56,8 +56,10 @@ class Settings(BaseModel):
     SOUNDALIKE_MAX_CANDIDATES: int = Field(default=4, ge=0)
     SOUNDALIKE_MAX_ALTERNATES: int = Field(default=3, ge=1)
     # An alternate L4 proposes itself (not supplied by the finder) is accepted
-    # only when its raw similarity reaches this random-pair percentile.
-    PHONETIC_VERIFY_PERCENTILE: Literal["p95", "p99"] = "p99"
+    # only when its raw similarity reaches this random-pair percentile. p95
+    # after the first live run: p99 rejected real imperfect puns (tents/tense,
+    # yeast/least) while p95 still blocked the invented needs/knead link.
+    PHONETIC_VERIFY_PERCENTILE: Literal["p95", "p99"] = "p95"
     # Soundalike candidates get their own L3 budget, so the homograph top-K is unchanged.
     L3_SOUNDALIKE_TOP_K: int = Field(default=4, ge=0)
 

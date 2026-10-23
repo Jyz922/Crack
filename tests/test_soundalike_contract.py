@@ -62,10 +62,11 @@ def test_sound_pair_needs_both_words_in_text():
     validate_l4_response(pair, T1, "drum", False, alternates=[drama])
     with pytest.raises(ModelResponseError, match="sound_pair requires"):
         validate_l4_response({**pair, "alternate_form": "dram"}, T1, "drum", False, alternates=[drama])
-    # drum/drama (0.890) clears the finder's p95 but not the p99 bar for
-    # alternates the model proposes on its own.
+    # drum/drama (0.890) clears the p95 verification bar (default) on its own,
+    # but not the stricter p99 bar used before the first live run.
+    validate_l4_response(pair, T1, "drum", False, alternates=[])
     with pytest.raises(ModelResponseError, match="does not sound like"):
-        validate_l4_response(pair, T1, "drum", False, alternates=[])
+        validate_l4_response(pair, T1, "drum", False, alternates=[], verify_percentile="p99")
 
 
 def test_alternate_only_on_soundalike_pass():
@@ -187,14 +188,17 @@ def test_l4_sees_soundalike_candidate_and_its_alternate(monkeypatch):
     assert result.alternate_form == "pursuing" and result.anchor_relation.value == "sound_substitution"
 
 
-def test_forced_sound_link_fails_after_one_request(monkeypatch):
+def test_forced_sound_link_is_a_fail_after_one_request(monkeypatch):
     from crack import l4_anchoring as l4
+    from crack.enums import AnchoringStatus
 
     record = _through_l3_record(T2)
     calls = _mock_l4(monkeypatch, sound(alternate="chasing"))
-    with pytest.raises(ModelResponseError, match="does not sound like"):
-        l4.anchor_l4(record)
-    assert len(calls) == 1 and not record.l4_attempts[0].accepted
+    result = l4.anchor_l4(record)
+    assert len(calls) == 1
+    assert result.anchoring_status == AnchoringStatus.FAIL and result.alternate_form is None
+    assert "does not sound like" in result.reasoning
+    assert record.l4_attempts[0].parsed_response["alternate_form"] == "chasing"  # audit trail kept
 
 
 def test_prompt_declares_eleven_keys_and_both_relations():
@@ -273,3 +277,31 @@ def test_alternate_word_is_citable_for_age_but_not_mandatory(monkeypatch):
     inputs = age_evidence.age_inputs(record)
     assert "pursuing" in {row["word"] for row in inputs["aoa_lookup"]}
     assert "pursuing" not in inputs["mandatory_vocabulary"]
+
+
+
+# --- Live-run findings (2026-10-23) -----------------------------------------
+
+def test_content_free_empty_key_is_ignored_but_others_are_not():
+    body = {**sound(), "": ""}
+    assert "" not in validate_l4_response(body, T2, "purr-suing", False, alternates=[PURSUING])
+    validate_l4_response({**sound(), "": None}, T2, "purr-suing", False, alternates=[PURSUING])
+    with pytest.raises(ModelResponseError, match="unexpected"):
+        validate_l4_response({**sound(), "": "more reasoning"}, T2, "purr-suing", False, alternates=[PURSUING])
+    with pytest.raises(ModelResponseError, match="unexpected"):
+        validate_l4_response({**sound(), "notes": ""}, T2, "purr-suing", False, alternates=[PURSUING])
+
+
+@pytest.mark.parametrize("text,term,alt,accepted", [
+    ("The campers were nervous; it was a tents situation.", "tents", "tense", True),     # 0.900
+    ("The bread came out flat, but at yeast it was cheap.", "yeast", "least", True),     # 0.929
+    ("The fish choir couldn't carry a tuna.", "tuna", "tune", False),                   # 0.875
+    ("She needs to knead the dough longer before it rises.", "knead", "needs", False),  # 0.875, invented link
+])
+def test_p95_verification_on_live_run_cases(text, term, alt, accepted):
+    from crack.validation import AlternateNotVerified, verify_alternate
+    if accepted:
+        verify_alternate(term, alt, [])
+    else:
+        with pytest.raises(AlternateNotVerified):
+            verify_alternate(term, alt, [])

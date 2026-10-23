@@ -131,12 +131,18 @@ wordplay. A soundalike becomes wordplay only when (1) L4 chooses a
 `sound_substitution` (the written form evokes an absent similar-sounding word)
 or `sound_pair` (both words occur and are juxtaposed) reading, (2) the
 alternate is either supplied by the local finder or re-verifies phonetically at
-the 99th percentile of random same-length CMUdict pairs
-(`PHONETIC_VERIFY_PERCENTILE`), never on the model's word, (3) the two readings
+the 95th percentile of random same-length CMUdict pairs
+(`PHONETIC_VERIFY_PERCENTILE`; p99 until the first live run), never on the
+model's word, (3) the two readings
 are anchored to different source spans, and (4) L5 resolution and L6
 distinctness pass. The result is `VALID_SOUNDALIKE_JOKE` with scope
 `SOUNDALIKE` (detection status PUN). `OUT_OF_SCOPE_HOMOPHONE` remains for
 soundalike mechanisms the phonetic module cannot represent.
+
+An alternate that fails the phonetic check is a negative finding, not an
+execution failure: L4 records `FAIL` with the similarity in its reasoning, so
+the item ends as `ANCHORING_FAIL` (NON_PUN). L4 also ignores one observed
+model artefact, a content-free `"": ""` entry; any other extra key still fails.
 
 ### Stages
 
