@@ -23,7 +23,7 @@ architecture: [ARCHITECTURE.md § Soundalike wordplay extension](../../ARCHITECT
 | Sound-similarity method with formulas, and why it is adequate (component b) | [01](handoff/01_phonetic_core.md) | **Done** (PR #5). Formulas in `src/crack/phonetics/similarity.py` and `calibration.py` docstrings and in ARCHITECTURE.md |
 | Similarity results for {cat,cad} {cat,cash} {drum,drama} {knight,night} {bat,pat} {pat,pit} | [01](handoff/01_phonetic_core.md) | **Done.** sim: knight/night 1.000, cat/cad 0.994, bat/pat 0.994, pat/pit 0.966, cat/cash 0.954, drum/drama 0.890; pinned by `tests/test_phonetics.py`; reproduced on Windows |
 | Finding utterances that sound similar (component a) | [02](handoff/02_soundalike_finder.md); [05](handoff/05_lexicon_neighbours.md) optional | **Done** for in-text pairs and hyphen merges (PR #6). Lexicon neighbours (05) not started |
-| Results on the three test texts (drum/drama, purr-suing, cat-nap) | [03](handoff/03_contract_l3_l4_l0post.md) + [04](handoff/04_eval_data.md) | **Mocked end-to-end only** (PR #7): purr-suing and drum/drama → `VALID_SOUNDALIKE_JOKE`, cat-nap → `VALID_COMPOUND_SPLIT_JOKE`, with scripted L4/L5/L6 answers. **Live results NOT run** |
+| Results on the three test texts (drum/drama, purr-suing, cat-nap) | [03](handoff/03_contract_l3_l4_l0post.md) + [04](handoff/04_eval_data.md) | **Live** (gpt-6-luna, 2026-10-23, after fixes): all three correct with the right mechanism (purr-suing and drum/drama → `VALID_SOUNDALIKE_JOKE`, cat-nap → `VALID_COMPOUND_SPLIT_JOKE`). The first live run got 1/3 (two misquoted answers); runs vary |
 | ≥ 20 soundalike jokes | [04](handoff/04_eval_data.md) | **Built**: 25 seed positives in `corpus/soundalike_*.jsonl` (+8 known, +3 test texts). **Blind double labelling NOT run** |
 | ≥ 20 negatives | [04](handoff/04_eval_data.md) | **Built**: 29 seed minimal-pair negatives typed A–E (+11 known, +3 test). **Blind double labelling NOT run** |
 
@@ -37,10 +37,10 @@ with the Windows offline-guard fix (PR #4). CRACK can now output
 [architecture section](../../ARCHITECTURE.md#soundalike-wordplay-extension).
 Workstreams 04–06 have no code yet.
 
-**Not yet verified live.** The L4 prompt changed for every text (new soundalike
-section and an 11-key response). The 60-item project corpus has not been rerun
-since, so the README's October 4 numbers (55/60 exact) predate the extension,
-and no real-model result exists for the three test texts. Offline, the
+**Live results (2026-10-23, gpt-6-luna).** Soundalike corpus after the live-run
+fixes: binary 73/79 (92.4%), all three test texts correct. Homograph regression:
+binary 54/60 in two runs (October 4: 56/60); J22 is the one repeat loss. The
+team chose to report this as is. See README and `docs/evaluations/`. Offline, the
 homograph top-8 shortlist is unchanged for all 74 corpus and fixture texts, and
 the L5/L6 prompts are byte-identical for non-soundalike readings.
 
@@ -183,7 +183,7 @@ Original notes:
 | 01 | [handoff/01_phonetic_core.md](handoff/01_phonetic_core.md) | P0 lexicon, P1 similarity, calibration | — | **merged** (PR #5) |
 | 02 | [handoff/02_soundalike_finder.md](handoff/02_soundalike_finder.md) | P2 in-text pairs, hyphen merge/split, L1 `hyphen_groups`, L2 hyphen splits | 01 | **merged** (PR #6) |
 | 03 | [handoff/03_contract_l3_l4_l0post.md](handoff/03_contract_l3_l4_l0post.md) | Schemas, L3 entries, L4 prompt + validation, enums, L0-post, version bumps | 01, 02 | **merged** (PR #7); live corpus rerun pending |
-| 04 | [handoff/04_eval_data.md](handoff/04_eval_data.md) | Minimal-pair data, heterographic SemEval, eval script, baselines | 01 (data file can start now) | built; labelling and live run pending |
+| 04 | [handoff/04_eval_data.md](handoff/04_eval_data.md) | Minimal-pair data, heterographic SemEval, eval script, baselines | 01 (data file can start now) | merged (PR #9); live runs done; labelling pending |
 | 05 | [handoff/05_lexicon_neighbours.md](handoff/05_lexicon_neighbours.md) | k ≤ 2 phone deletion index, frequency floor | 01, 02 | not started |
 | 06 | [handoff/06_optional_extensions.md](handoff/06_optional_extensions.md) | LM re-ranking, DP resegmentation, curated list, dual-support diagnostic | 03, 04 results | not started |
 

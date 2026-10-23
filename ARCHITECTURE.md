@@ -118,9 +118,9 @@ reliability and usability revisions, preserved thresholds and offline verificati
 
 ## Soundalike wordplay extension
 
-Implemented in workstreams 01–03 (Project 2). It has offline and mocked
-end-to-end tests; the 60-item project corpus has **not** been rerun live since
-the L4 prompt changed, so the October 4 numbers above predate it. Design and
+Implemented in workstreams 01–03 (Project 2), with live results from
+October 23 (README): soundalike corpus binary 73/79 after the live-run fixes,
+homograph regression 54/60 in two runs against 56/60 on October 4. Design and
 evidence: [docs/soundalike/design.md](docs/soundalike/design.md); work plan and
 measured checks: [docs/soundalike/HANDOFF.md](docs/soundalike/HANDOFF.md).
 

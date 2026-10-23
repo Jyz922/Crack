@@ -1,7 +1,7 @@
 # 04 — Evaluation data, heterographic SemEval, eval script, baselines
 Last updated: 2026-10-21 by soundalike eval-data session (offline; no provider calls)
 
-Status: **built, labelling and live run pending** (branch `feat/soundalike-eval-data`). Back to [HANDOFF](../HANDOFF.md).
+Status: **merged** (PR #9); live runs done 2026-10-23; **blind double labelling still pending**. Back to [HANDOFF](../HANDOFF.md).
 
 ## Results so far (2026-10-21)
 
@@ -16,7 +16,9 @@ Status: **built, labelling and live run pending** (branch `feat/soundalike-eval-
 | P2 finder recall | `scripts/evaluate_soundalike.py finder` | Target supplied for **2/35** corpus positives (only test texts) and **2/1,098** SemEval puns (0.2%). The finder fires on 10/43 negatives |
 | Verification of L4-proposed alternates (p99) | phonetics on each positive's pun/target | 3 seed positives fail p99 even if L4 names the right target: tents/tense 0.900, yeast/least 0.929, tuna/tune 0.875 (and drum/drama passes only because the finder supplies it) |
 | Detection rescoring | `scripts/evaluate_soundalike.py detection runs/<run>/records.jsonl` | Implemented; see the live run below |
-| **First live run** (gpt-6-luna, authored labels, before the 2026-10-23 fixes) | `crack.runner --input corpus/soundalike_blind.jsonl --backend openai` → `runs/20261023T172942Z` | All 79: P 0.862, R 0.694, F1 0.769, decided 68/79. 11 `EXECUTION_FAILED`: 5 from a content-free `"": ""` the model appended (S08, S25, S31, S34, T2), 5 from the p99 check (S15, S26, S27 real imperfect puns; N19, N30 invented links correctly blocked but scored as errors), 1 from a non-verbatim split quote (T3 quoted "her cat-nap"). Negatives: A 19/19, B 7/9, C 6/9, D 3/4, E 2/2 rejected; false alarms N02 (way→whey), N06, N08, N18 (morning→mourning). Fixes on `fix/soundalike-live-findings`: ignore `"": ""`, verify at p95, failed check → NON_PUN. **Rerun needed** to measure them |
+| **First live run** (gpt-6-luna, authored labels, before the 2026-10-23 fixes) | `crack.runner --input corpus/soundalike_blind.jsonl --backend openai` → `runs/20261023T172942Z` | All 79: P 0.862, R 0.694, F1 0.769, decided 68/79. 11 `EXECUTION_FAILED`: 5 from a content-free `"": ""` the model appended (S08, S25, S31, S34, T2), 5 from the p99 check (S15, S26, S27 real imperfect puns; N19, N30 invented links correctly blocked but scored as errors), 1 from a non-verbatim split quote (T3 quoted "her cat-nap"). Negatives: A 19/19, B 7/9, C 6/9, D 3/4, E 2/2 rejected; false alarms N02 (way→whey), N06, N08, N18 (morning→mourning). Fixes on `fix/soundalike-live-findings`: ignore `"": ""`, verify at p95, failed check → NON_PUN |
+| **Live run after fixes** (`runs/20261023T180420Z`, published as `docs/evaluations/soundalike_after_fixes_20261023`) | same command | Binary 73/79 (92.4%), P 0.970, R 0.889, F1 0.928, decided 78/79; test texts 3/3 with correct mechanisms; negatives A 19/19, B 9/9, C 7/9, D 4/4, E 2/2; paired 31/36. Misses: S23 alleged, S27 tuna (0.875 < p95), S28 wok (model chose "fired"), S29 clothed; false alarm N06; N08 rejected for an invented `"extra"` key. N19/N30 blocked by the sound check (correct NON_PUN) |
+| **Homograph regression** (`docs/evaluations/regression_{1,2}_20261023`) | 60-item corpus, two runs | Exact 52 and 54/60, binary 54 and 54/60 (October 4: 55 and 56/60). J22 lost in both runs with no soundalike input (likely the L4 prompt section); J06/J13/D09/D15 varied. Team decision: report as is (option A); gating the section was rejected because no local signal separates soundalike texts (finder fires on 9/36 positives; an exact-homophone gate opens on 34/60 homograph texts) |
 
 **What this means.** Almost every positive depends on L4 naming the evoked
 word itself (the finder only sees words already in the text), and imperfect

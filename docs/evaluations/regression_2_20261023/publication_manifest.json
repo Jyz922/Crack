@@ -1,0 +1,25 @@
+{
+  "original_run_directory": "runs/20261023T182346Z",
+  "original_records_sha256": "848ae55a777e97e6ecf8155779888a6df468d2e515c0c8e5e4f76f2fad9cfdf6",
+  "original_run_meta_sha256": "cad6a05aa16855724605bfc7e927a4bc4d84f12f2af64f4d9c10472b0857682d",
+  "original_evaluation_sha256": "2735c695e455346681a74ce1806c2baf093f67f50b319fe594bf966625d1d12f",
+  "published_records_sha256": "944c9e34877c5462d69f825ff62a006ab6099cc0daa8e552f0d63f77a3c82705",
+  "published_run_meta_sha256": "cad6a05aa16855724605bfc7e927a4bc4d84f12f2af64f4d9c10472b0857682d",
+  "published_evaluation_sha256": "2735c695e455346681a74ce1806c2baf093f67f50b319fe594bf966625d1d12f",
+  "omitted_record_fields": [
+    "l2_result",
+    "l4_attempts",
+    "age_attempts"
+  ],
+  "item_count": 60,
+  "gold_path": "corpus/joke_corpus_gold.jsonl",
+  "gold_sha256": "103769879da029a0f8defe5f2c62674a22cc0142015689ce4ed2eb8efd4607cc",
+  "git_sha": "e8565438945cc2f551918dbb41381ec120cb8bba",
+  "offline_rescore_matches_every_original_metric": true,
+  "note": "60-item homograph regression after the soundalike extension (code e856543), run 2 of 2.",
+  "limitations": [
+    "Compact records are an explicitly declared projection, not raw SDK receipts.",
+    "Local structural revalidation and metric arithmetic do not prove model semantic correctness.",
+    "Single runs of a nondeterministic model; compare runs rather than reading one in isolation."
+  ]
+}

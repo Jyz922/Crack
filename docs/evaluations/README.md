@@ -1,4 +1,19 @@
-# Published October 4 regression evidence
+# Published evaluation evidence
+
+## October 23: soundalike extension
+
+| Run | Corpus | Exact labels | Binary detection | Code |
+|---|---|---:|---:|---|
+| [Soundalike, before fixes](soundalike_before_fixes_20261023/evaluation.json) | `corpus/soundalike_*` (79) | 61/79 | 62/79 | 7521c9e |
+| [Soundalike, after fixes](soundalike_after_fixes_20261023/evaluation.json) | `corpus/soundalike_*` (79) | 71/79 | 73/79 | e856543 |
+| [Homograph regression 1](regression_1_20261023/evaluation.json) | `corpus/joke_corpus_*` (60) | 52/60 | 54/60 | e856543 |
+| [Homograph regression 2](regression_2_20261023/evaluation.json) | `corpus/joke_corpus_*` (60) | 54/60 | 54/60 | e856543 |
+
+Published with `scripts/publish_run.py`, using the same projection and manifest
+fields as below; every manifest records that an offline rescore reproduces the
+original metrics. Soundalike labels are authored and not yet double-labelled.
+
+## October 4 regression
 
 These three complete 60-item runs use the same project texts and gold labels.
 The recovery and repeat runs also use the same detection/age implementation,
