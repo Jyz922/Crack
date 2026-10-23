@@ -1,0 +1,25 @@
+{
+  "original_run_directory": "runs/20261023T172942Z",
+  "original_records_sha256": "7a65deeea5ab672111d1ccf109ccca9b81b5d4f7313c2851051e5e4c6d23093f",
+  "original_run_meta_sha256": "8f6dff10930d1e06c5b8d4dfeff24e2b4c09bf52fff9f7955db7ce5b97dffd15",
+  "original_evaluation_sha256": "b29344432a981df9ff1b3918920dbe2512f336b3443afaf634d2690ade46e5b7",
+  "published_records_sha256": "2d771ba0737b3610aa267e2d4b29ef7c05df9b83e87f79d2ea5042ebf905c307",
+  "published_run_meta_sha256": "8f6dff10930d1e06c5b8d4dfeff24e2b4c09bf52fff9f7955db7ce5b97dffd15",
+  "published_evaluation_sha256": "b29344432a981df9ff1b3918920dbe2512f336b3443afaf634d2690ade46e5b7",
+  "omitted_record_fields": [
+    "l2_result",
+    "l4_attempts",
+    "age_attempts"
+  ],
+  "item_count": 79,
+  "gold_path": "corpus/soundalike_gold.jsonl",
+  "gold_sha256": "a0ea1848fd0ed68b69ef357ebc3a9ba62195cef40c4fc5d4e8969024255491e8",
+  "git_sha": "7521c9ef8d52d244e00e1607d0199fd3b5127160",
+  "offline_rescore_matches_every_original_metric": true,
+  "note": "First live soundalike run (code 7521c9e): before the empty-key, p95 and failed-check fixes; authored labels, not yet double-labelled.",
+  "limitations": [
+    "Compact records are an explicitly declared projection, not raw SDK receipts.",
+    "Local structural revalidation and metric arithmetic do not prove model semantic correctness.",
+    "Single runs of a nondeterministic model; compare runs rather than reading one in isolation."
+  ]
+}

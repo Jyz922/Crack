@@ -1,0 +1,25 @@
+{
+  "original_run_directory": "runs/20261023T180420Z",
+  "original_records_sha256": "763059fb4990d9cc219008a7cacef0100f72b06969a968134aeb72e834c6e8d2",
+  "original_run_meta_sha256": "aae741539d3f6f71490170685f09c1920c76ba1275acacafde5a47c328f61da6",
+  "original_evaluation_sha256": "406784de2049e4ef86192470b8d5937957371f7dd7246fc745944237ce1eeb49",
+  "published_records_sha256": "56fccebd8238051643ddb4456c4a5a6712b8dd791acd785be7ed2cf0ac318a4d",
+  "published_run_meta_sha256": "aae741539d3f6f71490170685f09c1920c76ba1275acacafde5a47c328f61da6",
+  "published_evaluation_sha256": "406784de2049e4ef86192470b8d5937957371f7dd7246fc745944237ce1eeb49",
+  "omitted_record_fields": [
+    "l2_result",
+    "l4_attempts",
+    "age_attempts"
+  ],
+  "item_count": 79,
+  "gold_path": "corpus/soundalike_gold.jsonl",
+  "gold_sha256": "a0ea1848fd0ed68b69ef357ebc3a9ba62195cef40c4fc5d4e8969024255491e8",
+  "git_sha": "e8565438945cc2f551918dbb41381ec120cb8bba",
+  "offline_rescore_matches_every_original_metric": true,
+  "note": "Soundalike run after the live-run fixes (code e856543); authored labels, not yet double-labelled.",
+  "limitations": [
+    "Compact records are an explicitly declared projection, not raw SDK receipts.",
+    "Local structural revalidation and metric arithmetic do not prove model semantic correctness.",
+    "Single runs of a nondeterministic model; compare runs rather than reading one in isolation."
+  ]
+}

@@ -6,7 +6,7 @@
 
 **CRACK** (Computational Resolution & Anchoring of Comedy & Knowledge) analyzes English wordplay by combining WordNet, SemCor, age-of-acquisition data, and configurable LLM judgments. It identifies candidate ambiguous words, records text spans supporting each reading, assesses joke resolution, and reports comprehension and appropriateness by requested age.
 
-The pipeline targets homographic wordplay (one spelling with multiple meanings), compound resegmentation and, since Project 2, soundalike wordplay (a word that evokes or echoes a similar-sounding word; see [ARCHITECTURE.md](ARCHITECTURE.md#soundalike-wordplay-extension)). The corpus results below predate the soundalike extension. Contextual analysis can use any of the supported LLM providers.
+The pipeline targets homographic wordplay (one spelling with multiple meanings), compound resegmentation and, since Project 2, soundalike wordplay (a word that evokes or echoes a similar-sounding word; see [ARCHITECTURE.md](ARCHITECTURE.md#soundalike-wordplay-extension)). Results for both the soundalike extension and the homograph regression are reported below. Contextual analysis can use any of the supported LLM providers.
 
 ### Try CRACK live
 
@@ -18,10 +18,51 @@ Curious how it works? [Try the live demo](https://crack-8s9j.onrender.com): ente
 
 ## Evaluation data and reported results
 
-This version has two fresh project-corpus regression runs, reported below.
+This version adds live soundalike results and two homograph regression runs
+after the soundalike extension (October 23), alongside the October 4 runs.
 Earlier benchmark results belong to earlier designs and are archived separately.
 Use [the fresh corpus command](#test-the-current-project-corpus) to repeat the
 current evaluation.
+
+### Soundalike extension and homograph regression — October 23, 2026
+
+All runs: OpenAI `gpt-6-luna`, strict response checks. Published, rescorable
+records are in [docs/evaluations](docs/evaluations/README.md).
+
+**Soundalike corpus** (79 items: 36 soundalike/split positives, 43 minimal-pair
+negatives; labels authored, **not yet independently double-labelled**):
+
+| Run | Binary detection | Precision / recall | Unanswered | Instructor test texts |
+|---|---:|---:|---:|---:|
+| Before live-run fixes | 62/79 (78.5%) | 0.862 / 0.694 | 11 | 1/3 |
+| After live-run fixes | **73/79 (92.4%)** | **0.970 / 0.889** | 1 | **3/3** |
+
+The fixes: ignore a content-free `"": ""` the model appended (5 items), verify
+model-proposed soundalikes at the p95 instead of p99 random-pair level, and
+score a failed sound check as "not a pun" instead of an error. Negatives that
+use the pun word literally were all rejected (19/19); the hardest were
+context-swap negatives (7/9). Remaining misses include tuna/tune, whose
+similarity (0.875) cannot be separated from the invented needs/knead link
+(also 0.875) by sound alone.
+
+**Homograph regression** (the same 60 texts, gold labels and ages as October 4):
+
+| Run | Exact labels | Binary detection | Coverage | Gold-pun age labels |
+|---|---:|---:|---:|---:|
+| October 4 (recovery / repeat) | 55/60 / 55/60 | 56/60 / 56/60 | 60/60 | 46/75 / 48/75 |
+| October 23, run 1 | 52/60 | 54/60 | 59/60 | 48/75 |
+| October 23, run 2 | 54/60 | 54/60 | 58/60 | 47/75 |
+
+The soundalike extension costs about two homograph items. J22 ("I asked if I
+can skip") was missed in both October 23 runs although its inputs carried no
+soundalike candidates, which points to the new L4 soundalike prompt section
+making the model more cautious; other changes (J06, J13, D09, D15) varied
+between runs. The model also occasionally added an invented extra field
+(`"extra"`, `"unused"`), which strict validation rejects; this did not occur
+on October 4. Gating the soundalike prompt section was evaluated and rejected:
+no local signal separates possible soundalike texts from ordinary ones (the
+finder fires on 9/36 soundalike positives; an exact-homophone gate opens on
+34/60 homograph texts).
 
 ### Current pipeline regression — October 4, 2026
 
@@ -80,9 +121,9 @@ without provider calls. Fresh-inference commands are below.
 The current design prioritizes a reliable, bounded pipeline: every required
 stage must complete with usable evidence, uncertainty stays explicit, and
 failure stops dependent work. Detection and age outputs are separate. The
-historical benchmark results above predate this design. The October 4
-regression run evaluates the current source; fresh corpus runs are needed
-to assess subsequent changes and performance variation.
+historical benchmark results above predate this design. The October 23 runs
+evaluate the current source, including the soundalike extension; the October 4
+runs predate it.
 
 ```text
 Text + explicitly requested ages
