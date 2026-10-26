@@ -3,7 +3,7 @@ services:
     name: crack-web
     runtime: python
     plan: free
-    buildCommand: "pip install -e '.[web]' && python -c 'from crack.l2_senses import wordnet; wordnet()'"
+    buildCommand: "pip install -e '.[web]' && python scripts/fetch_lexical_resources.py && python -c 'from crack.l2_senses import wordnet; wordnet()'"
     startCommand: "uvicorn crack.serve:app --host 0.0.0.0 --port $PORT"
     envVars:
       - key: PYTHON_VERSION

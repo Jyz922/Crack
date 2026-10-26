@@ -1,0 +1,149 @@
+{
+  "scope": "Local finder only, all existing candidate caps and thresholds unchanged; no model calls.",
+  "baseline_sha256": "ab73e69c7e3299bfe1f585dbf7a03d30641d7d3174220e7874cc082bc2d24d35",
+  "corpus_sha256": "a138f40ddbc74decbf3f05c0d048f7576e57f9cd2cb7a8a71c4b0184f11c4013",
+  "config": {
+    "ACCEPTED_MECHANISMS": [
+      "heterographic_homophone",
+      "resegmentation",
+      "homographic_ambiguity",
+      "idiomatic_expression_with_homograph",
+      "compound_split"
+    ],
+    "EXCLUDED_MECHANISMS": [
+      "absurdist_situation",
+      "cultural_reference",
+      "social_context_only",
+      "rhyming_joke",
+      "sarcasm"
+    ],
+    "MAX_INPUT_CHARS": 500,
+    "MIN_INPUT_CHARS": 3,
+    "MAX_NON_ASCII_RATIO": 0.15,
+    "L3_TOP_K": 8,
+    "PHONETIC_RETRIEVE_PERCENTILE": "p95",
+    "SOUNDALIKE_MAX_CANDIDATES": 4,
+    "SOUNDALIKE_MAX_ALTERNATES": 3,
+    "PHONETIC_VERIFY_PERCENTILE": "p95",
+    "L3_SOUNDALIKE_TOP_K": 4,
+    "L4_MAX_CANDIDATES": 8,
+    "CONTINUE_AFTER_CANDIDATE_REJECTION": false,
+    "L4_BACKEND": "gemini",
+    "L4_MODEL": null,
+    "L4_MODEL_GEMINI": "gemini-3.6-flash",
+    "L4_MODEL_GEMINI_CHAIN": [
+      "gemini-3.8-flash"
+    ],
+    "L4_MODEL_ANTHROPIC": "claude-sonnet-5",
+    "L4_MODEL_OPENAI": "gpt-6-luna",
+    "L4_MODEL_DEEPSEEK": "deepseek-chat",
+    "L4_MAX_OUTPUT_TOKENS": 4096,
+    "L4_CALL_PAUSE_SECONDS": 6.0,
+    "L5_BACKEND": "gemini",
+    "L5_MODEL": null,
+    "L5_MODEL_GEMINI": "gemini-3.6-flash",
+    "L5_MODEL_GEMINI_CHAIN": [
+      "gemini-3.8-flash"
+    ],
+    "L5_MODEL_ANTHROPIC": "claude-sonnet-5",
+    "L5_MODEL_OPENAI": "gpt-6-luna",
+    "L5_MODEL_DEEPSEEK": "deepseek-chat",
+    "L5_MAX_OUTPUT_TOKENS": 8192,
+    "L5_CALL_PAUSE_SECONDS": 6.0,
+    "L6_BACKEND": "gemini",
+    "L6_MODEL": null,
+    "L6_MODEL_GEMINI": "gemini-3.6-flash",
+    "L6_MODEL_GEMINI_CHAIN": [
+      "gemini-3.8-flash"
+    ],
+    "L6_MODEL_ANTHROPIC": "claude-sonnet-5",
+    "L6_MODEL_OPENAI": "gpt-6-luna",
+    "L6_MODEL_DEEPSEEK": "deepseek-chat",
+    "L6_MAX_OUTPUT_TOKENS": 4096,
+    "L6_CALL_PAUSE_SECONDS": 6.0,
+    "L7_BACKEND": "gemini",
+    "L7_MODEL": null,
+    "L7_MODEL_GEMINI": "gemini-3.6-flash",
+    "L7_MODEL_GEMINI_CHAIN": [
+      "gemini-3.8-flash"
+    ],
+    "L7_MODEL_ANTHROPIC": "claude-sonnet-5",
+    "L7_MODEL_OPENAI": "gpt-6-luna",
+    "L7_MODEL_DEEPSEEK": "deepseek-chat",
+    "L7_MAX_OUTPUT_TOKENS": 8192,
+    "L7_CALL_PAUSE_SECONDS": 6.0,
+    "L7_METALINGUISTIC_FLOOR_HOMOGRAPH": 6.0,
+    "L7_METALINGUISTIC_FLOOR_DEFINITIONAL": 7.0,
+    "L7_METALINGUISTIC_FLOOR_DIALOGUE": 7.5,
+    "L7_METALINGUISTIC_FLOOR_RESEGMENTATION": 8.0,
+    "L7_SECONDARY_SENSE_AOA_OFFSET": 2.0,
+    "L7_AOA_TOLERANCE": 0.5,
+    "L8_BACKEND": "gemini",
+    "L8_MODEL": null,
+    "L8_MODEL_GEMINI": "gemini-3.6-flash",
+    "L8_MODEL_GEMINI_CHAIN": [
+      "gemini-3.8-flash"
+    ],
+    "L8_MODEL_ANTHROPIC": "claude-sonnet-5",
+    "L8_MODEL_OPENAI": "gpt-6-luna",
+    "L8_MODEL_DEEPSEEK": "deepseek-chat",
+    "L8_MAX_OUTPUT_TOKENS": 8192,
+    "L8_CALL_PAUSE_SECONDS": 6.0,
+    "L5_QA_WEIGHTS": {
+      "polarity_or_direction": 0.45,
+      "answer_relevance": 0.25,
+      "causal": 0.15,
+      "agent": 0.1,
+      "tense_aspect": 0.05
+    },
+    "L5_QA_MIN_POLARITY": 0.05,
+    "L5_RESOLUTION_THRESHOLDS": {
+      "QA_RIDDLE": 0.46,
+      "DEFINITIONAL_ONELINER": 0.6,
+      "DIALOGUE_MISUNDERSTANDING": 0.6,
+      "DECLARATIVE": 0.25
+    }
+  },
+  "before": {
+    "eligible_positives": 35,
+    "target_supplied": 2,
+    "target_supplied_ids": [
+      "T1",
+      "T2"
+    ],
+    "pun_word_flagged": 4,
+    "negatives": 43,
+    "negative_finder_fires": 9
+  },
+  "after": {
+    "eligible_positives": 35,
+    "target_supplied": 22,
+    "target_supplied_ids": [
+      "S01",
+      "S02",
+      "S03",
+      "S04",
+      "S05",
+      "S06",
+      "S07",
+      "S08",
+      "S09",
+      "S10",
+      "S12",
+      "S13",
+      "S14",
+      "S16",
+      "S17",
+      "S18",
+      "S19",
+      "S20",
+      "S21",
+      "S28",
+      "T1",
+      "T2"
+    ],
+    "pun_word_flagged": 27,
+    "negatives": 43,
+    "negative_finder_fires": 38
+  }
+}

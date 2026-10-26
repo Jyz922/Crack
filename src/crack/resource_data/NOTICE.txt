@@ -1,0 +1,30 @@
+Lexical data attribution
+========================
+
+CMU Pronouncing Dictionary
+Source: https://github.com/cmusphinx/cmudict
+Copyright Carnegie Mellon University. BSD-2-Clause.
+The exact snapshot and SHA-256 appear in manifest.json.
+The upstream license is preserved in CMUDICT-LICENSE.txt.
+
+Open English Wordnet 2025
+Source: https://en-word.net/downloads
+Copyright the Open English Wordnet team. CC BY 4.0.
+License: https://creativecommons.org/licenses/by/4.0/
+Downloaded dictionary files are not altered. The official WNDB archive's
+copyright/version header says 2023; the official download page identifies this
+archive as the 2025 release. Its checksum is pinned in manifest.json.
+The reader reports the release identity from that manifest.
+
+Princeton WordNet 3.0
+Source: https://wordnet.princeton.edu/
+The bundled lexnames.txt reproduces the standard lexical-category labels.
+The historical cntlist.rev data is read from NLTK's separate WordNet 3.0
+corpus, verified by checksum, and joined to OEWN only by exact lemma sense key.
+No current usage frequencies are claimed. Missing count evidence remains zero
+as in the original WordNet API; CRACK does not interpret that as observed balance.
+Princeton license: https://wordnet.princeton.edu/license-and-commercial-use
+
+PanPhon 0.22.2
+Source: https://github.com/dmort27/panphon
+MIT license. Used for articulatory features, with name-aligned feature weights.

@@ -1,0 +1,45 @@
+{
+  "original_run_directory": "runs/final_regression/20261026T023549Z",
+  "original_records_sha256": "03a43ee68501fae33b757a1dfda6876f82fbdab33ced2de5977ba17573195c4b",
+  "original_run_meta_sha256": "20a8ece95aa1832bb146fc00d7c671280e97f1972b21519ec1c5b286bab3194e",
+  "original_evaluation_sha256": "9a10421fed4720bdce4fe7836f914fda2d1175fe9e0fa170bc18d80eaf8202cd",
+  "published_records_sha256": "0c3cddb7ca82915e6a0241306a0be31a39c3b37b4e543146d8db7de38a519e95",
+  "published_run_meta_sha256": "20a8ece95aa1832bb146fc00d7c671280e97f1972b21519ec1c5b286bab3194e",
+  "published_evaluation_sha256": "9a10421fed4720bdce4fe7836f914fda2d1175fe9e0fa170bc18d80eaf8202cd",
+  "omitted_record_fields": [
+    "l2_result",
+    "l4_attempts",
+    "age_attempts"
+  ],
+  "item_count": 60,
+  "gold_path": "corpus/joke_corpus_gold.jsonl",
+  "gold_sha256": "103769879da029a0f8defe5f2c62674a22cc0142015689ce4ed2eb8efd4607cc",
+  "git_sha": "7ed6381e959592282475deb12054b3a4e6c0c3c8",
+  "offline_rescore_matches_every_original_metric": false,
+  "offline_rescore_differences": {
+    "unverified_contract_items": {
+      "original": 0,
+      "current_rescore": 60
+    }
+  },
+  "offline_rescore_differs_only_in_historical_contract_provenance": true,
+  "note": "Frozen contract-7 60-item regression; retain its one execution failure. Follow-up repairs are reported separately.",
+  "limitations": [
+    "Compact records are an explicitly declared projection, not raw SDK receipts.",
+    "Local structural revalidation and metric arithmetic do not prove model semantic correctness.",
+    "Single runs of a nondeterministic model; compare runs rather than reading one in isolation."
+  ],
+  "l4_requests_sha256": "3c7892714cba871207ac9e204143daab2a57cb8eca1bc2304753a753e8203aef",
+  "l4_request_projection_fields": [
+    "prompt_text",
+    "prompt_sha256",
+    "model_used",
+    "raw_responses",
+    "parsed_response",
+    "validated_response",
+    "anchor_adjustments",
+    "accepted",
+    "error"
+  ],
+  "l4_request_count": 60
+}

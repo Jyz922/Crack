@@ -1,0 +1,2 @@
+# Keep the upstream lexical metadata byte-for-byte, including trailing spaces.
+src/crack/resource_data/lexnames.txt whitespace=-blank-at-eol

@@ -19,6 +19,7 @@ from collections import defaultdict
 from crack.phonetics import lexicon
 from crack.phonetics.calibration import CALIBRATION_PATH
 from crack.phonetics.similarity import DEFAULT_INDEL, weighted_levenshtein
+from crack.lexical_resources import resource_manifest
 
 
 def _percentile(sorted_values: list[float], q: float) -> float:
@@ -67,7 +68,9 @@ def main() -> None:
     table = {
         "method": "random pairs of distinct alphabetic CMUdict words with equal IPA segment length; "
                   "first pronunciation; weighted Levenshtein, name-aligned panphon weights",
-        "lexicon": "nltk.corpus.cmudict (0.7a)",
+        "lexicon": "cmusphinx/cmudict",
+        "lexicon_version": resource_manifest()["resources"]["cmudict"]["version"],
+        "lexicon_sha256": resource_manifest()["resources"]["cmudict"]["sha256"],
         "indel": DEFAULT_INDEL,
         "seed": args.seed,
         "pairs_per_length": args.pairs,

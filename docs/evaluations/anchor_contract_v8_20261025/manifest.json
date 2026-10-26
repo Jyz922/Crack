@@ -1,0 +1,13 @@
+{
+  "contract": "8",
+  "prompts_config_finder_match_frozen_version": true,
+  "files": {
+    "newly_valid_blind.jsonl": "a68b9ddc7c5a0ee69c47f4a9fa3a7eebfb1bb3418cbffa734589589821297ec4",
+    "newly_valid_gold.jsonl": "badfb22a94f174eb4d35e7864456b6ba98df78f077c89a5271d9f56a0cb98181",
+    "prompt_overlap.json": "7c82210eae18dcd5a08c4f0c4eebbd44152966e18e696c7f86d4c6b1e69f4b17",
+    "replay.json": "e966c33aaa009ec96b379eabbd72be0116b38a50aa37dbbfa4cefae688d9723b",
+    "source/l4_anchoring.py": "9913d8a8b8a6e1e1b5216213fb8d1e2d26bb69a702d666bbb30a2845ac0f814e",
+    "source/schema.py": "25f5fd32de47cfb0f39822913b0040f27bee3899235502bf7b5dc26318550d38",
+    "source/validation.py": "f2263b01d50ce6d1d310a1d3628802e0572fb5465501a868c03016f48448a941"
+  }
+}

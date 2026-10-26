@@ -26,7 +26,7 @@ _PROMPT_PATH = Path(__file__).parent / "prompts" / "l4_anchoring.md"
 _LOG = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
-# Pydantic response model — used as Gemini response_schema.
+# Pydantic response model — shared by Gemini and OpenAI strict output.
 # ---------------------------------------------------------------------------
 
 class _L4LLMResponse(BaseModel):
@@ -224,6 +224,7 @@ def _call_openai_l4(
         temperature=0.0,
         parse_attempts=1,
         response_observer=response_log.append if response_log is not None else None,
+        response_schema=_L4LLMResponse.model_json_schema() if backend == "openai" else None,
     )
     return _L4Call(parsed, model, fallback_used, retries)
 
@@ -292,7 +293,8 @@ def _anchor_shortlist(
     details = "Dictionary proposals are possibilities, not contextual evidence.\n" + json.dumps(proposals, ensure_ascii=False)
     prompt = _render_l4_prompt(record.text, genre, json.dumps(terms, ensure_ascii=False), details)
     log = L4Attempt(candidate_term=terms[0] if len(terms) == 1 else "", candidate_terms=terms,
-                    attempt=1, prompt_sha256=hashlib.sha256(prompt.encode()).hexdigest())
+                    attempt=1, prompt_sha256=hashlib.sha256(prompt.encode()).hexdigest(),
+                    prompt_text=prompt)
     record.l4_attempts.append(log)
     try:
         call = _complete_l4(prompt, settings, client, log.raw_responses)
@@ -308,7 +310,8 @@ def _anchor_shortlist(
             parsed = validate_l4_response(call.parsed, record.text, candidate.term,
                 candidate.score_components.get("compound_split") == 1.0, candidate.split_options,
                 alternates=candidate.soundalike_alternates,
-                verify_percentile=settings.PHONETIC_VERIFY_PERCENTILE)
+                verify_percentile=settings.PHONETIC_VERIFY_PERCENTILE,
+                anchor_audit=log.anchor_adjustments)
             result = L4Result(**parsed)
         except AlternateNotVerified as exc:
             # Everything else in the response validated; only the claimed
@@ -325,6 +328,7 @@ def _anchor_shortlist(
         log.error = f"{type(exc).__name__}: {exc}"
         raise
     log.candidate_term = result.target_term
+    log.validated_response = result.model_dump(mode="json")
     log.accepted = True
     return result
 

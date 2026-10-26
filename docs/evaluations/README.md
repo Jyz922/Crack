@@ -1,5 +1,41 @@
 # Published evaluation evidence
 
+## October 25: final runs and separate anchor repair
+
+| Run | Exact labels | Binary detection | Coverage | Execution failures |
+|---|---:|---:|---:|---:|
+| [Final soundalike](final_soundalike_20261025/evaluation.json) | 69/79 | 71/79 | 78/79 | 1 |
+| [Final regression](final_regression_20261025/evaluation.json) | 54/60 | 54/60 | 59/60 | 1 |
+| [Separate two-item anchor repair](anchor_contract_v8_live_20261025/evaluation.json) | 1/2 | 2/2 | 2/2 | 0 |
+
+The full runs retain their contract-7 predictions and failures. The contract-8
+follow-up resolves both execution failures; one mechanism label still differs
+from the authored reference. Do not combine these three runs into a new full-run
+accuracy claim. See [the final report](../final_results_20261025.md).
+
+Each of these directories also contains `l4_requests.jsonl`, preserving every
+rendered L4 prompt, its hash, raw response text and local validation audit.
+Its SHA-256 and projection fields are declared in the publication manifest.
+Current rescoring reproduces detection and age metrics. For the older contract-7
+runs only, `unverified_contract_items` now counts historical records, so that
+provenance difference is recorded explicitly; original evaluations are unchanged.
+
+## October 25: resource refresh user reruns
+
+| Run | Exact labels | Binary detection | Coverage | Execution failures |
+|---|---:|---:|---:|---:|
+| [Soundalike](resource_refresh_soundalike_20261025/evaluation.json) | 67/79 | 71/79 | 79/79 | 0 |
+| [Original corpus regression](resource_refresh_regression_20261025/evaluation.json) | 51/60 | 53/60 | 59/60 | 1 |
+
+These runs use OEWN 2025 and the pinned official CMUdict snapshot. The working
+tree was uncommitted, so the Git HEAD is the earlier base; `run_meta.json`
+source hashes and resource checksums identify the actual implementation.
+Directory timestamps are October 26 UTC, corresponding to October 25 local time.
+Both compact copies rescore to every original metric. See the
+[live comparison and error analysis](../resource_refresh_live_20261025.md).
+The `resource_refresh_20261025` subdirectory contains offline local-comparison
+analysis, rather than a published provider run.
+
 ## October 23: soundalike extension
 
 | Run | Corpus | Exact labels | Binary detection | Code |
@@ -48,7 +84,7 @@ from pathlib import Path
 from crack.corpus import evaluate_run
 
 for run in sorted(Path("docs/evaluations").iterdir()):
-    if not run.is_dir():
+    if not run.is_dir() or not (run / "publication_manifest.json").is_file():
         continue
     manifest = json.loads((run / "publication_manifest.json").read_text())
     for filename, key in [
@@ -61,12 +97,18 @@ for run in sorted(Path("docs/evaluations").iterdir()):
     assert hashlib.sha256(gold.read_bytes()).hexdigest() == manifest["gold_sha256"]
     expected = json.loads((run / "evaluation.json").read_text())
     actual = evaluate_run(run / "records.jsonl", gold)
-    assert all(actual[key] == value for key, value in expected.items())
+    differences = {key for key, value in expected.items() if actual[key] != value}
+    if differences:
+        from crack.validation import RESPONSE_CONTRACT_VERSION
+        metadata = json.loads((run / "run_meta.json").read_text())
+        assert differences == {"unverified_contract_items"}
+        assert metadata["validation_version"] != RESPONSE_CONTRACT_VERSION
     print(run.name, actual["correct_classification"], actual["binary_detection"]["correct"], actual["age_gold_puns"])
 PY
 ```
 
-These records establish saved-result arithmetic and local contract validity.
+These records establish saved-result arithmetic under their recorded contracts;
+historical records are not claimed to have passed the current contract.
 They are not signed provider receipts or proof of model semantic correctness.
 The first recovery directory additionally publishes a compact SDK invocation
 index with model, stage, duration and response metadata; SDK-internal HTTP

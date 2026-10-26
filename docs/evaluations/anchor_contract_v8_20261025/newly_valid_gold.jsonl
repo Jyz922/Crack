@@ -1,0 +1,2 @@
+{"id": "J13", "gold_label": "VALID_COMPOUND_SPLIT_JOKE", "genre": "DEFINITIONAL_ONELINER", "ambiguous_term": "mushroom", "sense_a": "an umbrella-shaped edible fungus", "sense_b": "mush (much) + room (spatial capacity)", "expected_age_verdict": {"8": "PARTIALLY_COMPREHENSIBLE", "10": "FULLY_COMPREHENSIBLE", "12": "FULLY_COMPREHENSIBLE"}}
+{"id": "T3", "gold_label": "VALID_COMPOUND_SPLIT_JOKE", "genre": "QA_RIDDLE", "ambiguous_term": "cat-nap", "sense_a": "a short light sleep", "sense_b": "the cat's own nap", "expected_age_verdict": {}}

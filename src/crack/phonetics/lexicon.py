@@ -1,11 +1,9 @@
 """P0 pronunciation lexicon: words and spans to ARPAbet phones and feature vectors.
 
-Source: the CMU Pronouncing Dictionary as distributed with NLTK
-(``nltk.corpus.cmudict``, data id ``"cmudict"``, revision 0.7a). The PyPI
-``cmudict`` package is deliberately not used: it is GPL-3.0-or-later and CRACK
-is MIT. The corpus is downloaded to ``data/nltk_data`` on first use, the same
-way ``l2_senses.wordnet`` handles WordNet. Offline tests block the network, so
-that directory must be populated before the test suite runs.
+Source: a checksum-pinned snapshot of CMU's official cmusphinx/cmudict
+repository, identified in resource_data/manifest.json. It replaces NLTK's
+older 0.7a snapshot without depending on the PyPI cmudict wrapper. Fetch the
+data explicitly with scripts/fetch_lexical_resources.py before offline use.
 
 Pronunciations are American English only. Lexical stress is stripped, except
 that unstressed AH0 and ER0 are kept distinct because they map to the reduced
@@ -17,14 +15,11 @@ import itertools
 import re
 import threading
 from functools import lru_cache
-from pathlib import Path
 from typing import Literal
 
-import nltk
-
 from crack.phonetics.features import has_segment, segment_vector
+from crack.lexical_resources import resource_directory
 
-NLTK_DIR = Path(__file__).resolve().parents[3] / "data" / "nltk_data"
 MAX_PRONUNCIATION_COMBOS = 16
 
 # One ARPAbet phone -> the IPA segment(s) PanPhon has a row for.
@@ -55,21 +50,19 @@ _EDGE_PUNCT = re.compile(r"^[^\w']+|[^\w']+$")
 @lru_cache(maxsize=1)
 def _cmu() -> dict[str, list[list[str]]]:
     with _CMU_LOCK:
-        if str(NLTK_DIR) not in nltk.data.path:
-            nltk.data.path.insert(0, str(NLTK_DIR))
-        try:
-            nltk.data.find("corpora/cmudict")
-        except LookupError:
-            try:
-                nltk.download("cmudict", download_dir=str(NLTK_DIR), quiet=True, raise_on_error=True)
-            except Exception as exc:  # offline test runs block the network
-                raise LookupError(
-                    f"CMUdict corpus missing from {NLTK_DIR}. Fetch it once with: "
-                    "py -3.11 -c \"import nltk; nltk.download('cmudict', download_dir='data/nltk_data')\""
-                ) from exc
-        from nltk.corpus import cmudict
+        return _parse_cmu((resource_directory("cmudict") / "cmudict.dict").read_text(encoding="utf-8"))
 
-        return cmudict.dict()
+
+def _parse_cmu(text: str) -> dict[str, list[list[str]]]:
+    """Official lower-case format, numbered variants and inline comments."""
+    entries: dict[str, list[list[str]]] = {}
+    for line in text.splitlines():
+        parts = line.partition("#")[0].split()
+        if len(parts) < 2 or parts[0].startswith(";;;"):
+            continue
+        word = re.sub(r"\(\d+\)$", "", parts[0]).lower()
+        entries.setdefault(word, []).append(parts[1:])
+    return entries
 
 
 def _strip_stress(phone: str) -> str:

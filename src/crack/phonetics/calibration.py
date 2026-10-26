@@ -27,7 +27,12 @@ def calibration_table() -> dict:
         raise FileNotFoundError(
             f"{CALIBRATION_PATH} is missing; run scripts/fit_phonetic_calibration.py"
         )
-    return json.loads(CALIBRATION_PATH.read_text(encoding="utf-8"))
+    from crack.lexical_resources import resource_manifest
+    table = json.loads(CALIBRATION_PATH.read_text(encoding="utf-8"))
+    lexicon = resource_manifest()["resources"]["cmudict"]
+    if table.get("lexicon_version") != lexicon["version"] or table.get("lexicon_sha256") != lexicon["sha256"]:
+        raise ValueError("Phonetic calibration uses a different lexicon; run scripts/fit_phonetic_calibration.py")
+    return table
 
 
 def stored_lengths() -> list[int]:

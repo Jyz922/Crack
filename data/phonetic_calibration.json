@@ -1,72 +1,74 @@
 {
   "method": "random pairs of distinct alphabetic CMUdict words with equal IPA segment length; first pronunciation; weighted Levenshtein, name-aligned panphon weights",
-  "lexicon": "nltk.corpus.cmudict (0.7a)",
+  "lexicon": "cmusphinx/cmudict",
+  "lexicon_version": "74790861f652b15e4ac49015a90074ad62a27690",
+  "lexicon_sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22",
   "indel": 0.5,
   "seed": 0,
   "pairs_per_length": 1500,
   "lengths": {
     "2": {
-      "mean": 0.6798,
-      "p95": 0.931,
-      "p99": 0.9612,
+      "mean": 0.6812,
+      "p95": 0.9397,
+      "p99": 0.9828,
       "pairs": 1500,
-      "pool_words": 486
+      "pool_words": 493
     },
     "3": {
-      "mean": 0.7455,
-      "p95": 0.9052,
-      "p99": 0.9483,
+      "mean": 0.7452,
+      "p95": 0.908,
+      "p99": 0.9454,
       "pairs": 1500,
-      "pool_words": 4349
+      "pool_words": 4384
     },
     "4": {
-      "mean": 0.7151,
-      "p95": 0.8815,
-      "p99": 0.9353,
+      "mean": 0.7169,
+      "p95": 0.8772,
+      "p99": 0.9267,
       "pairs": 1500,
-      "pool_words": 11305
+      "pool_words": 11449
     },
     "5": {
-      "mean": 0.7276,
-      "p95": 0.869,
-      "p99": 0.9172,
+      "mean": 0.7207,
+      "p95": 0.8586,
+      "p99": 0.9034,
       "pairs": 1500,
-      "pool_words": 20191
+      "pool_words": 20444
     },
     "6": {
-      "mean": 0.7351,
-      "p95": 0.8549,
-      "p99": 0.9052,
+      "mean": 0.7346,
+      "p95": 0.8592,
+      "p99": 0.9037,
       "pairs": 1500,
-      "pool_words": 22923
+      "pool_words": 23273
     },
     "7": {
-      "mean": 0.7289,
+      "mean": 0.7296,
       "p95": 0.8276,
-      "p99": 0.8842,
+      "p99": 0.8781,
       "pairs": 1500,
-      "pool_words": 18959
+      "pool_words": 19298
     },
     "8": {
-      "mean": 0.7306,
-      "p95": 0.8222,
-      "p99": 0.8664,
+      "mean": 0.7307,
+      "p95": 0.8157,
+      "p99": 0.8675,
       "pairs": 1500,
-      "pool_words": 14186
+      "pool_words": 14484
     },
     "9": {
-      "mean": 0.7344,
-      "p95": 0.8218,
-      "p99": 0.8736,
+      "mean": 0.732,
+      "p95": 0.8142,
+      "p99": 0.863,
       "pairs": 1500,
-      "pool_words": 9867
+      "pool_words": 10086
     },
     "10": {
-      "mean": 0.7388,
-      "p95": 0.8207,
-      "p99": 0.8612,
+      "mean": 0.7396,
+      "p95": 0.8198,
+      "p99": 0.8578,
       "pairs": 1500,
-      "pool_words": 5869
+      "pool_words": 6020
     }
   }
 }

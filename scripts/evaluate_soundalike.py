@@ -197,15 +197,25 @@ def cmd_detection(args) -> None:
         return detection_status_for(records.get(i, "EXECUTION_FAILED"))
 
     for slc in ("seed", "known", "test_text", None):
-        ids = sorted(i for i in keep if i in records and (slc is None or meta.get(i, {}).get("slice") == slc))
+        ids = sorted(i for i in keep if slc is None or meta.get(i, {}).get("slice") == slc)
         if not ids:
             continue
         decided = [i for i in ids if status(i) in {DetectionStatus.PUN, DetectionStatus.NON_PUN}]
         print(f"### Slice: {slc or 'all'} ({len(ids)} items; decided {rate(len(decided), len(ids))})\n")
         g = [gold[i]["gold_label"] != "ONE_SENSE_ONLY" for i in ids]
-        p = [status(i) == DetectionStatus.PUN for i in ids]
-        print(f"- Detection (undecided counted as not-pun): {prf(p, g)}")
-        exact = sum(records[i] == gold[i]["gold_label"] for i in ids if gold[i]["gold_label"] != "ONE_SENSE_ONLY")
+        p = [status(i) == DetectionStatus.PUN for i in decided]
+        decided_gold = [gold[i]["gold_label"] != "ONE_SENSE_ONLY" for i in decided]
+        print(f"- Detection (decided items only): {prf(p, decided_gold)}")
+
+        def correct(i: str) -> bool:
+            expected = DetectionStatus.NON_PUN if gold[i]["gold_label"] == "ONE_SENSE_ONLY" else DetectionStatus.PUN
+            return status(i) == expected
+
+        print(f"- Binary accuracy (all items; unresolved are incorrect): {rate(sum(correct(i) for i in ids), len(ids))}")
+        unresolved = [i for i in ids if i not in decided]
+        unresolved_pos = sum(gold[i]["gold_label"] != "ONE_SENSE_ONLY" for i in unresolved)
+        print(f"- Unresolved: {len(unresolved)} (positive {unresolved_pos}, negative {len(unresolved) - unresolved_pos})")
+        exact = sum(records.get(i) == gold[i]["gold_label"] for i in ids if gold[i]["gold_label"] != "ONE_SENSE_ONLY")
         print(f"- Exact label on positives (mechanism right): {rate(exact, sum(g))}")
         by_type = defaultdict(lambda: [0, 0])
         for i in ids:
@@ -219,8 +229,7 @@ def cmd_detection(args) -> None:
         for i in ids:
             pairs[meta.get(i, {}).get("pair_id") or i].append(i)
         complete = [m for k, m in pairs.items() if k in m and len(m) > 1]
-        ok = sum(all((status(i) == DetectionStatus.PUN) == (gold[i]["gold_label"] != "ONE_SENSE_ONLY") for i in m)
-                 for m in complete)
+        ok = sum(all(correct(i) for i in m) for m in complete)
         print(f"- Paired accuracy (a positive and all its negatives right): {rate(ok, len(complete))}\n")
 
 

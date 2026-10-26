@@ -1,0 +1,7741 @@
+{
+  "date": "2026-10-25",
+  "base_commit": "7ed6381e959592282475deb12054b3a4e6c0c3c8",
+  "mode": "offline local L1-L3 comparison, no new provider predictions",
+  "resources": {
+    "manifest_sha256": "91c5e43fa65ba0368d478870db7ec1cbe7021f42043f584d7d4e0c2503507b57",
+    "resources": {
+      "cmudict": {
+        "name": "CMU Pronouncing Dictionary",
+        "version": "74790861f652b15e4ac49015a90074ad62a27690",
+        "sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22",
+        "url": "https://raw.githubusercontent.com/cmusphinx/cmudict/74790861f652b15e4ac49015a90074ad62a27690/cmudict.dict"
+      },
+      "oewn": {
+        "name": "Open English Wordnet",
+        "version": "2025",
+        "sha256": "38b16326159f51853626b7d24a44c453fa88ab33f06fce5ec8fc5996d1c2be93",
+        "url": "https://en-word.net/static/english-wordnet-2025.zip"
+      }
+    },
+    "phonetic_calibration_sha256": "99390f3b5d2671537a20ae5296f57d5973acbb8020df28ba8bedb7d5f42a43eb",
+    "aoa_sha256": "45db20f3083b2f38904751d498fa5a60e19e89f59ed4b44c8a0b791de31b87d8",
+    "semcor_reference": "Princeton WordNet 3.0 cntlist.rev, exact lemma sense keys"
+  },
+  "required_pairs": [
+    {
+      "pair": [
+        "cat",
+        "cad"
+      ],
+      "raw_similarity": 0.9943,
+      "old_calibrated": 0.9774,
+      "new_calibrated": 0.9774
+    },
+    {
+      "pair": [
+        "cat",
+        "cash"
+      ],
+      "raw_similarity": 0.954,
+      "old_calibrated": 0.8193,
+      "new_calibrated": 0.8196
+    },
+    {
+      "pair": [
+        "drum",
+        "drama"
+      ],
+      "raw_similarity": 0.8897,
+      "old_calibrated": 0.5949,
+      "new_calibrated": 0.6049
+    },
+    {
+      "pair": [
+        "knight",
+        "night"
+      ],
+      "raw_similarity": 1.0,
+      "old_calibrated": 1.0,
+      "new_calibrated": 1.0
+    },
+    {
+      "pair": [
+        "bat",
+        "pat"
+      ],
+      "raw_similarity": 0.9943,
+      "old_calibrated": 0.9774,
+      "new_calibrated": 0.9774
+    },
+    {
+      "pair": [
+        "pat",
+        "pit"
+      ],
+      "raw_similarity": 0.9655,
+      "old_calibrated": 0.8645,
+      "new_calibrated": 0.8647
+    }
+  ],
+  "corpora": {
+    "corpus/joke_corpus_blind.jsonl": {
+      "items": 60,
+      "shortlist_changes": 15,
+      "sense_count_changes": 51,
+      "soundalike_output_changes": 26
+    },
+    "corpus/soundalike_blind.jsonl": {
+      "items": 79,
+      "shortlist_changes": 17,
+      "sense_count_changes": 61,
+      "soundalike_output_changes": 20
+    }
+  },
+  "differences": [
+    {
+      "id": "J04",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J04",
+        "senses": 176,
+        "shortlist": [
+          "case",
+          "doctor",
+          "shingles",
+          "siding",
+          "got",
+          "awful",
+          "wrong",
+          "look",
+          "bad"
+        ],
+        "soundalikes": [
+          {
+            "surface": "bad",
+            "char_span": [
+              62,
+              65
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "got",
+                "phones": [
+                  "G",
+                  "AA",
+                  "T"
+                ],
+                "sim": 0.931,
+                "sim_cal": 0.729,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J04",
+        "senses": 177,
+        "shortlist": [
+          "case",
+          "doctor",
+          "shingles",
+          "siding",
+          "got",
+          "awful",
+          "wrong",
+          "look",
+          "bad"
+        ],
+        "soundalikes": [
+          {
+            "surface": "bad",
+            "char_span": [
+              62,
+              65
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "got",
+                "phones": [
+                  "G",
+                  "AA",
+                  "T"
+                ],
+                "sim": 0.931,
+                "sim_cal": 0.7293,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "J05",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J05",
+        "senses": 74,
+        "shortlist": [
+          "work",
+          "horns",
+          "bells",
+          "wear",
+          "cows"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J05",
+        "senses": 71,
+        "shortlist": [
+          "work",
+          "horns",
+          "bells",
+          "wear",
+          "cows"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "J07",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J07",
+        "senses": 149,
+        "shortlist": [
+          "doctor",
+          "together",
+          "thinking",
+          "pair",
+          "curtains",
+          "keep",
+          "pull",
+          "pull yourself together",
+          "yourself"
+        ],
+        "soundalikes": [
+          {
+            "surface": "together",
+            "char_span": [
+              79,
+              87
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "doctor",
+                "phones": [
+                  "D",
+                  "AO",
+                  "K",
+                  "T",
+                  "ER0"
+                ],
+                "sim": 0.8879,
+                "sim_cal": 0.5769,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "yourself",
+            "char_span": [
+              70,
+              78
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "curtains",
+                "phones": [
+                  "K",
+                  "ER",
+                  "T",
+                  "AH0",
+                  "N",
+                  "Z"
+                ],
+                "sim": 0.875,
+                "sim_cal": 0.5281,
+                "source": "in_text"
+              },
+              {
+                "form": "patient",
+                "phones": [
+                  "P",
+                  "EY",
+                  "SH",
+                  "AH0",
+                  "N",
+                  "T"
+                ],
+                "sim": 0.8313,
+                "sim_cal": 0.3776,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "curtains",
+            "char_span": [
+              47,
+              55
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "patient",
+                "phones": [
+                  "P",
+                  "EY",
+                  "SH",
+                  "AH0",
+                  "N",
+                  "T"
+                ],
+                "sim": 0.8621,
+                "sim_cal": 0.4912,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J07",
+        "senses": 146,
+        "shortlist": [
+          "doctor",
+          "together",
+          "thinking",
+          "pair",
+          "curtains",
+          "keep",
+          "pull",
+          "pull yourself together",
+          "yourself"
+        ],
+        "soundalikes": [
+          {
+            "surface": "together",
+            "char_span": [
+              79,
+              87
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "doctor",
+                "phones": [
+                  "D",
+                  "AO",
+                  "K",
+                  "T",
+                  "ER0"
+                ],
+                "sim": 0.8879,
+                "sim_cal": 0.5777,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "yourself",
+            "char_span": [
+              70,
+              78
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "curtains",
+                "phones": [
+                  "K",
+                  "ER",
+                  "T",
+                  "AH0",
+                  "N",
+                  "Z"
+                ],
+                "sim": 0.875,
+                "sim_cal": 0.529,
+                "source": "in_text"
+              },
+              {
+                "form": "patient",
+                "phones": [
+                  "P",
+                  "EY",
+                  "SH",
+                  "AH0",
+                  "N",
+                  "T"
+                ],
+                "sim": 0.8313,
+                "sim_cal": 0.376,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "curtains",
+            "char_span": [
+              47,
+              55
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "patient",
+                "phones": [
+                  "P",
+                  "EY",
+                  "SH",
+                  "AH0",
+                  "N",
+                  "T"
+                ],
+                "sim": 0.8621,
+                "sim_cal": 0.4899,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "J08",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J08",
+        "senses": 48,
+        "shortlist": [
+          "plenty",
+          "like",
+          "bark",
+          "dogs",
+          "friendly",
+          "trees"
+        ],
+        "soundalikes": [
+          {
+            "surface": "plenty",
+            "char_span": [
+              57,
+              63
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "friendly",
+                "phones": [
+                  "F",
+                  "R",
+                  "EH",
+                  "N",
+                  "L",
+                  "IY"
+                ],
+                "sim": 0.9023,
+                "sim_cal": 0.6312,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J08",
+        "senses": 47,
+        "shortlist": [
+          "plenty",
+          "like",
+          "bark",
+          "dogs",
+          "friendly",
+          "trees"
+        ],
+        "soundalikes": [
+          {
+            "surface": "plenty",
+            "char_span": [
+              57,
+              63
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "friendly",
+                "phones": [
+                  "F",
+                  "R",
+                  "EH",
+                  "N",
+                  "L",
+                  "IY"
+                ],
+                "sim": 0.9023,
+                "sim_cal": 0.6319,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "J09",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J09",
+        "senses": 185,
+        "shortlist": [
+          "love",
+          "carries",
+          "baseball",
+          "wooden",
+          "bat",
+          "player",
+          "every",
+          "vampires"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J09",
+        "senses": 179,
+        "shortlist": [
+          "love",
+          "carries",
+          "baseball",
+          "wooden",
+          "bat",
+          "player",
+          "every",
+          "vampires"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "J10",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J10",
+        "senses": 71,
+        "shortlist": [
+          "always",
+          "fish",
+          "smart",
+          "schools",
+          "live",
+          "live in"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J10",
+        "senses": 69,
+        "shortlist": [
+          "always",
+          "fish",
+          "smart",
+          "schools",
+          "live",
+          "live in"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "J11",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J11",
+        "senses": 204,
+        "shortlist": [
+          "date",
+          "seed",
+          "blind",
+          "hard",
+          "dried",
+          "inside",
+          "customer",
+          "last",
+          "night"
+        ],
+        "soundalikes": [
+          {
+            "surface": "night",
+            "char_span": [
+              39,
+              44
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "date",
+                "phones": [
+                  "D",
+                  "EY",
+                  "T"
+                ],
+                "sim": 0.9397,
+                "sim_cal": 0.7882,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "dried",
+            "char_span": [
+              71,
+              76
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "date",
+                "phones": [
+                  "D",
+                  "EY",
+                  "T"
+                ],
+                "sim": 0.8828,
+                "sim_cal": 0.5696,
+                "source": "in_text"
+              },
+              {
+                "form": "blind",
+                "phones": [
+                  "B",
+                  "L",
+                  "AY",
+                  "N",
+                  "D"
+                ],
+                "sim": 0.8635,
+                "sim_cal": 0.4847,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J11",
+        "senses": 207,
+        "shortlist": [
+          "date",
+          "seed",
+          "blind",
+          "hard",
+          "dried",
+          "inside",
+          "customer",
+          "last",
+          "night"
+        ],
+        "soundalikes": [
+          {
+            "surface": "night",
+            "char_span": [
+              39,
+              44
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "date",
+                "phones": [
+                  "D",
+                  "EY",
+                  "T"
+                ],
+                "sim": 0.9397,
+                "sim_cal": 0.7868,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "dried",
+            "char_span": [
+              71,
+              76
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "date",
+                "phones": [
+                  "D",
+                  "EY",
+                  "T"
+                ],
+                "sim": 0.8828,
+                "sim_cal": 0.5802,
+                "source": "in_text"
+              },
+              {
+                "form": "night",
+                "phones": [
+                  "N",
+                  "AY",
+                  "T"
+                ],
+                "sim": 0.8621,
+                "sim_cal": 0.5062,
+                "source": "in_text"
+              },
+              {
+                "form": "blind",
+                "phones": [
+                  "B",
+                  "L",
+                  "AY",
+                  "N",
+                  "D"
+                ],
+                "sim": 0.8635,
+                "sim_cal": 0.4857,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "J12",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J12",
+        "senses": 147,
+        "shortlist": [
+          "bar",
+          "exam",
+          "pass",
+          "neighborhood",
+          "spent",
+          "bar exam",
+          "young",
+          "evening"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J12",
+        "senses": 152,
+        "shortlist": [
+          "bar",
+          "exam",
+          "pass",
+          "neighborhood",
+          "spent",
+          "bar exam",
+          "young",
+          "evening"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "J13",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses",
+        "shortlist"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J13",
+        "senses": 191,
+        "shortlist": [
+          "mushroom",
+          "needs",
+          "tiny",
+          "crowded",
+          "runs",
+          "living room",
+          "room",
+          "house"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J13",
+        "senses": 189,
+        "shortlist": [
+          "mushroom",
+          "needs",
+          "crowded",
+          "runs",
+          "living room",
+          "room",
+          "house",
+          "living"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "J14",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J14",
+        "senses": 154,
+        "shortlist": [
+          "current",
+          "always",
+          "wanted",
+          "newspapers",
+          "touch",
+          "reading",
+          "keep",
+          "events"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J14",
+        "senses": 152,
+        "shortlist": [
+          "current",
+          "always",
+          "wanted",
+          "newspapers",
+          "touch",
+          "reading",
+          "keep",
+          "events"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "J15",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses",
+        "shortlist"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J15",
+        "senses": 101,
+        "shortlist": [
+          "nothing",
+          "merely",
+          "standing",
+          "waved",
+          "sailor",
+          "blue",
+          "ocean",
+          "shore"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J15",
+        "senses": 98,
+        "shortlist": [
+          "nothing",
+          "standing",
+          "waved",
+          "sailor",
+          "blue",
+          "ocean",
+          "shore",
+          "friendly"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "J16",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J16",
+        "senses": 197,
+        "shortlist": [
+          "camp",
+          "match",
+          "light",
+          "boxing",
+          "bring",
+          "brought",
+          "campfire",
+          "championship"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J16",
+        "senses": 202,
+        "shortlist": [
+          "camp",
+          "match",
+          "light",
+          "boxing",
+          "bring",
+          "brought",
+          "campfire",
+          "championship"
+        ],
+        "soundalikes": [
+          {
+            "surface": "campfire",
+            "char_span": [
+              54,
+              62
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "counselor",
+                "phones": [
+                  "K",
+                  "AW",
+                  "N",
+                  "S",
+                  "AH0",
+                  "L",
+                  "ER0"
+                ],
+                "sim": 0.8222,
+                "sim_cal": 0.3398,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "J17",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J17",
+        "senses": 108,
+        "shortlist": [
+          "alphabet",
+          "wisdom",
+          "mailbox",
+          "overflowing",
+          "postal",
+          "letter",
+          "contained",
+          "every"
+        ],
+        "soundalikes": [
+          {
+            "surface": "wisdom",
+            "char_span": [
+              44,
+              50
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "postal",
+                "phones": [
+                  "P",
+                  "OW",
+                  "S",
+                  "T",
+                  "AH0",
+                  "L"
+                ],
+                "sim": 0.8485,
+                "sim_cal": 0.4412,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J17",
+        "senses": 106,
+        "shortlist": [
+          "alphabet",
+          "wisdom",
+          "mailbox",
+          "overflowing",
+          "postal",
+          "letter",
+          "contained",
+          "every"
+        ],
+        "soundalikes": [
+          {
+            "surface": "wisdom",
+            "char_span": [
+              44,
+              50
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "postal",
+                "phones": [
+                  "P",
+                  "OW",
+                  "S",
+                  "T",
+                  "AH0",
+                  "L"
+                ],
+                "sim": 0.8485,
+                "sim_cal": 0.4398,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "mailbox",
+            "char_span": [
+              19,
+              26
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "postal",
+                "phones": [
+                  "P",
+                  "OW",
+                  "S",
+                  "T",
+                  "AH0",
+                  "L"
+                ],
+                "sim": 0.8222,
+                "sim_cal": 0.3398,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "J18",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses",
+        "shortlist"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J18",
+        "senses": 107,
+        "shortlist": [
+          "kidnap",
+          "hour",
+          "afternoon",
+          "falls",
+          "finally",
+          "falls asleep",
+          "asleep",
+          "peaceful"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J18",
+        "senses": 100,
+        "shortlist": [
+          "kidnap",
+          "afternoon",
+          "falls",
+          "finally",
+          "falls asleep",
+          "asleep",
+          "peaceful",
+          "hour"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "J20",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J20",
+        "senses": 113,
+        "shortlist": [
+          "retail",
+          "spring",
+          "soaring",
+          "experienced",
+          "profits",
+          "finally",
+          "company",
+          "mattress"
+        ],
+        "soundalikes": [
+          {
+            "surface": "spring",
+            "char_span": [
+              64,
+              70
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "soaring",
+                "phones": [
+                  "S",
+                  "AO",
+                  "R",
+                  "IH",
+                  "NG"
+                ],
+                "sim": 0.8724,
+                "sim_cal": 0.5316,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "finally",
+            "char_span": [
+              75,
+              82
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "company",
+                "phones": [
+                  "K",
+                  "AH",
+                  "M",
+                  "P",
+                  "AH0",
+                  "N",
+                  "IY"
+                ],
+                "sim": 0.8362,
+                "sim_cal": 0.3958,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J20",
+        "senses": 113,
+        "shortlist": [
+          "retail",
+          "spring",
+          "soaring",
+          "experienced",
+          "profits",
+          "finally",
+          "company",
+          "mattress"
+        ],
+        "soundalikes": [
+          {
+            "surface": "spring",
+            "char_span": [
+              64,
+              70
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "soaring",
+                "phones": [
+                  "S",
+                  "AO",
+                  "R",
+                  "IH",
+                  "NG"
+                ],
+                "sim": 0.8724,
+                "sim_cal": 0.5432,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "finally",
+            "char_span": [
+              75,
+              82
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "company",
+                "phones": [
+                  "K",
+                  "AH",
+                  "M",
+                  "P",
+                  "AH0",
+                  "N",
+                  "IY"
+                ],
+                "sim": 0.8362,
+                "sim_cal": 0.3943,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "J21",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J21",
+        "senses": 93,
+        "shortlist": [
+          "making",
+          "wood",
+          "bark",
+          "imagine",
+          "dog"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J21",
+        "senses": 86,
+        "shortlist": [
+          "making",
+          "wood",
+          "bark",
+          "imagine",
+          "dog"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "J22",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses",
+        "shortlist"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J22",
+        "senses": 69,
+        "shortlist": [
+          "said",
+          "annual",
+          "skip",
+          "sports",
+          "teacher",
+          "day",
+          "asked"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J22",
+        "senses": 66,
+        "shortlist": [
+          "said",
+          "annual",
+          "skip",
+          "sports",
+          "teacher",
+          "asked",
+          "day"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "J23",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J23",
+        "senses": 42,
+        "shortlist": [
+          "loss",
+          "net",
+          "calculating",
+          "fishermen"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J23",
+        "senses": 41,
+        "shortlist": [
+          "loss",
+          "net",
+          "calculating",
+          "fishermen"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "J24",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J24",
+        "senses": 31,
+        "shortlist": [
+          "library",
+          "building",
+          "stories",
+          "many"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J24",
+        "senses": 26,
+        "shortlist": [
+          "library",
+          "building",
+          "stories",
+          "many"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "J25",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J25",
+        "senses": 53,
+        "shortlist": [
+          "refuse",
+          "full",
+          "dump"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "J25",
+        "senses": 52,
+        "shortlist": [
+          "refuse",
+          "full",
+          "dump"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "D01",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D01",
+        "senses": 78,
+        "shortlist": [
+          "skeletons",
+          "structures",
+          "bone",
+          "fight",
+          "lacking",
+          "dead",
+          "muscles"
+        ],
+        "soundalikes": [
+          {
+            "surface": "bone",
+            "char_span": [
+              49,
+              53
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "fight",
+                "phones": [
+                  "F",
+                  "AY",
+                  "T"
+                ],
+                "sim": 0.8922,
+                "sim_cal": 0.6218,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D01",
+        "senses": 74,
+        "shortlist": [
+          "skeletons",
+          "structures",
+          "bone",
+          "fight",
+          "lacking",
+          "dead",
+          "muscles"
+        ],
+        "soundalikes": [
+          {
+            "surface": "bone",
+            "char_span": [
+              49,
+              53
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "fight",
+                "phones": [
+                  "F",
+                  "AY",
+                  "T"
+                ],
+                "sim": 0.8922,
+                "sim_cal": 0.6194,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "D02",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses",
+        "shortlist",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D02",
+        "senses": 92,
+        "shortlist": [
+          "autobiography",
+          "author",
+          "life",
+          "documenting",
+          "history",
+          "publishes",
+          "book",
+          "personal"
+        ],
+        "soundalikes": [
+          {
+            "surface": "personal",
+            "char_span": [
+              77,
+              85
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "publishes",
+                "phones": [
+                  "P",
+                  "AH",
+                  "B",
+                  "L",
+                  "IH",
+                  "SH",
+                  "IH",
+                  "Z"
+                ],
+                "sim": 0.8351,
+                "sim_cal": 0.388,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D02",
+        "senses": 86,
+        "shortlist": [
+          "autobiography",
+          "life",
+          "documenting",
+          "history",
+          "publishes",
+          "book",
+          "personal",
+          "non-fiction"
+        ],
+        "soundalikes": [
+          {
+            "surface": "personal",
+            "char_span": [
+              77,
+              85
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "publishes",
+                "phones": [
+                  "P",
+                  "AH",
+                  "B",
+                  "L",
+                  "IH",
+                  "SH",
+                  "AH0",
+                  "Z"
+                ],
+                "sim": 0.8351,
+                "sim_cal": 0.3878,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "D03",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D03",
+        "senses": 36,
+        "shortlist": [
+          "trunk",
+          "elephants",
+          "full",
+          "already",
+          "car"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D03",
+        "senses": 35,
+        "shortlist": [
+          "trunk",
+          "elephants",
+          "full",
+          "already",
+          "car"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "D04",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D04",
+        "senses": 118,
+        "shortlist": [
+          "antiviral",
+          "doctor",
+          "shingles",
+          "got",
+          "prescription",
+          "wrong",
+          "look",
+          "unwell"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D04",
+        "senses": 120,
+        "shortlist": [
+          "antiviral",
+          "doctor",
+          "shingles",
+          "got",
+          "prescription",
+          "wrong",
+          "look",
+          "unwell"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "D05",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses",
+        "shortlist"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D05",
+        "senses": 58,
+        "shortlist": [
+          "bells",
+          "locate",
+          "help",
+          "jingle",
+          "pasture",
+          "wear",
+          "cows",
+          "dairy"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D05",
+        "senses": 63,
+        "shortlist": [
+          "bells",
+          "locate",
+          "help",
+          "jingle",
+          "pasture",
+          "wear",
+          "cows",
+          "farmers"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "D06",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses",
+        "shortlist"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D06",
+        "senses": 116,
+        "shortlist": [
+          "explain",
+          "ideas",
+          "define",
+          "words",
+          "understand",
+          "clearly",
+          "listeners"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D06",
+        "senses": 99,
+        "shortlist": [
+          "explain",
+          "define",
+          "words",
+          "understand",
+          "clearly",
+          "ideas",
+          "listeners"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "D07",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D07",
+        "senses": 197,
+        "shortlist": [
+          "doctor",
+          "feel",
+          "together",
+          "breaths",
+          "take",
+          "deep",
+          "pull",
+          "pull yourself together",
+          "yourself"
+        ],
+        "soundalikes": [
+          {
+            "surface": "Pull",
+            "char_span": [
+              57,
+              61
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "feel",
+                "phones": [
+                  "F",
+                  "IY",
+                  "L"
+                ],
+                "sim": 0.9368,
+                "sim_cal": 0.7516,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "together",
+            "char_span": [
+              71,
+              79
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "doctor",
+                "phones": [
+                  "D",
+                  "AO",
+                  "K",
+                  "T",
+                  "ER0"
+                ],
+                "sim": 0.8879,
+                "sim_cal": 0.5769,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "yourself",
+            "char_span": [
+              62,
+              70
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "patient",
+                "phones": [
+                  "P",
+                  "EY",
+                  "SH",
+                  "AH0",
+                  "N",
+                  "T"
+                ],
+                "sim": 0.8313,
+                "sim_cal": 0.3776,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D07",
+        "senses": 197,
+        "shortlist": [
+          "doctor",
+          "feel",
+          "together",
+          "breaths",
+          "take",
+          "deep",
+          "pull",
+          "pull yourself together",
+          "yourself"
+        ],
+        "soundalikes": [
+          {
+            "surface": "Pull",
+            "char_span": [
+              57,
+              61
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "feel",
+                "phones": [
+                  "F",
+                  "IY",
+                  "L"
+                ],
+                "sim": 0.9368,
+                "sim_cal": 0.7519,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "together",
+            "char_span": [
+              71,
+              79
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "doctor",
+                "phones": [
+                  "D",
+                  "AO",
+                  "K",
+                  "T",
+                  "ER0"
+                ],
+                "sim": 0.8879,
+                "sim_cal": 0.5777,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "yourself",
+            "char_span": [
+              62,
+              70
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "patient",
+                "phones": [
+                  "P",
+                  "EY",
+                  "SH",
+                  "AH0",
+                  "N",
+                  "T"
+                ],
+                "sim": 0.8313,
+                "sim_cal": 0.376,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "D08",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D08",
+        "senses": 113,
+        "shortlist": [
+          "bark",
+          "seals",
+          "shields",
+          "layers",
+          "rough",
+          "grow",
+          "thick",
+          "tree"
+        ],
+        "soundalikes": [
+          {
+            "surface": "shields",
+            "char_span": [
+              76,
+              83
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "seals",
+                "phones": [
+                  "S",
+                  "IY",
+                  "L",
+                  "Z"
+                ],
+                "sim": 0.8897,
+                "sim_cal": 0.5949,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D08",
+        "senses": 110,
+        "shortlist": [
+          "bark",
+          "seals",
+          "shields",
+          "layers",
+          "rough",
+          "grow",
+          "thick",
+          "tree"
+        ],
+        "soundalikes": [
+          {
+            "surface": "shields",
+            "char_span": [
+              76,
+              83
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "seals",
+                "phones": [
+                  "S",
+                  "IY",
+                  "L",
+                  "Z"
+                ],
+                "sim": 0.8897,
+                "sim_cal": 0.6049,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "D09",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D09",
+        "senses": 119,
+        "shortlist": [
+          "baseball",
+          "kinetic",
+          "grip",
+          "power",
+          "transfers",
+          "wooden",
+          "bat",
+          "hitters"
+        ],
+        "soundalikes": [
+          {
+            "surface": "transfers",
+            "char_span": [
+              59,
+              68
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "baseball",
+                "phones": [
+                  "B",
+                  "EY",
+                  "S",
+                  "B",
+                  "AO",
+                  "L"
+                ],
+                "sim": 0.8341,
+                "sim_cal": 0.384,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D09",
+        "senses": 116,
+        "shortlist": [
+          "baseball",
+          "kinetic",
+          "grip",
+          "power",
+          "transfers",
+          "wooden",
+          "bat",
+          "hitters"
+        ],
+        "soundalikes": [
+          {
+            "surface": "wooden",
+            "char_span": [
+              48,
+              54
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "hitters",
+                "phones": [
+                  "HH",
+                  "IH",
+                  "T",
+                  "ER0",
+                  "Z"
+                ],
+                "sim": 0.8621,
+                "sim_cal": 0.5062,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "transfers",
+            "char_span": [
+              59,
+              68
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "baseball",
+                "phones": [
+                  "B",
+                  "EY",
+                  "S",
+                  "B",
+                  "AO",
+                  "L"
+                ],
+                "sim": 0.8341,
+                "sim_cal": 0.3838,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "D10",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D10",
+        "senses": 99,
+        "shortlist": [
+          "marine",
+          "predators",
+          "salmon",
+          "protection",
+          "collective",
+          "offers",
+          "school",
+          "schools"
+        ],
+        "soundalikes": [
+          {
+            "surface": "predators",
+            "char_span": [
+              98,
+              107
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "protection",
+                "phones": [
+                  "P",
+                  "R",
+                  "AH0",
+                  "T",
+                  "EH",
+                  "K",
+                  "SH",
+                  "AH0",
+                  "N"
+                ],
+                "sim": 0.8812,
+                "sim_cal": 0.5528,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "protection",
+            "char_span": [
+              79,
+              89
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "collective",
+                "phones": [
+                  "K",
+                  "AH0",
+                  "L",
+                  "EH",
+                  "K",
+                  "T",
+                  "IH",
+                  "V"
+                ],
+                "sim": 0.8718,
+                "sim_cal": 0.524,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D10",
+        "senses": 97,
+        "shortlist": [
+          "marine",
+          "predators",
+          "salmon",
+          "protection",
+          "collective",
+          "offers",
+          "school",
+          "schools"
+        ],
+        "soundalikes": [
+          {
+            "surface": "predators",
+            "char_span": [
+              98,
+              107
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "protection",
+                "phones": [
+                  "P",
+                  "R",
+                  "AH0",
+                  "T",
+                  "EH",
+                  "K",
+                  "SH",
+                  "AH0",
+                  "N"
+                ],
+                "sim": 0.8812,
+                "sim_cal": 0.5568,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "protection",
+            "char_span": [
+              79,
+              89
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "collective",
+                "phones": [
+                  "K",
+                  "AH0",
+                  "L",
+                  "EH",
+                  "K",
+                  "T",
+                  "IH",
+                  "V"
+                ],
+                "sim": 0.84,
+                "sim_cal": 0.4031,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "D11",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D11",
+        "senses": 82,
+        "shortlist": [
+          "today",
+          "calendar",
+          "date",
+          "current",
+          "customer",
+          "twentieth",
+          "friend",
+          "october"
+        ],
+        "soundalikes": [
+          {
+            "surface": "Friend",
+            "char_span": [
+              51,
+              57
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "current",
+                "phones": [
+                  "K",
+                  "ER",
+                  "AH0",
+                  "N",
+                  "T"
+                ],
+                "sim": 0.8914,
+                "sim_cal": 0.6012,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "calendar",
+            "char_span": [
+              30,
+              38
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "current",
+                "phones": [
+                  "K",
+                  "AA",
+                  "R",
+                  "AH0",
+                  "N",
+                  "T"
+                ],
+                "sim": 0.8842,
+                "sim_cal": 0.573,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D11",
+        "senses": 82,
+        "shortlist": [
+          "today",
+          "calendar",
+          "date",
+          "current",
+          "customer",
+          "twentieth",
+          "friend",
+          "october"
+        ],
+        "soundalikes": [
+          {
+            "surface": "Friend",
+            "char_span": [
+              51,
+              57
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "current",
+                "phones": [
+                  "K",
+                  "ER",
+                  "AH0",
+                  "N",
+                  "T"
+                ],
+                "sim": 0.8914,
+                "sim_cal": 0.6111,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "calendar",
+            "char_span": [
+              30,
+              38
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "current",
+                "phones": [
+                  "K",
+                  "AA",
+                  "R",
+                  "AH0",
+                  "N",
+                  "T"
+                ],
+                "sim": 0.8842,
+                "sim_cal": 0.5719,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "D12",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D12",
+        "senses": 148,
+        "shortlist": [
+          "needed",
+          "study",
+          "represent",
+          "judge",
+          "precedent",
+          "defense",
+          "court",
+          "client"
+        ],
+        "soundalikes": [
+          {
+            "surface": "represent",
+            "char_span": [
+              74,
+              83
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "precedent",
+                "phones": [
+                  "P",
+                  "R",
+                  "EH",
+                  "S",
+                  "IH",
+                  "D",
+                  "AH0",
+                  "N",
+                  "T"
+                ],
+                "sim": 0.8573,
+                "sim_cal": 0.4626,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "client",
+            "char_span": [
+              88,
+              94
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "precedent",
+                "phones": [
+                  "P",
+                  "R",
+                  "EH",
+                  "S",
+                  "IH",
+                  "D",
+                  "AH0",
+                  "N",
+                  "T"
+                ],
+                "sim": 0.8352,
+                "sim_cal": 0.3797,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D12",
+        "senses": 144,
+        "shortlist": [
+          "needed",
+          "study",
+          "represent",
+          "judge",
+          "precedent",
+          "defense",
+          "court",
+          "client"
+        ],
+        "soundalikes": [
+          {
+            "surface": "represent",
+            "char_span": [
+              74,
+              83
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "precedent",
+                "phones": [
+                  "P",
+                  "R",
+                  "EH",
+                  "S",
+                  "IH",
+                  "D",
+                  "AH0",
+                  "N",
+                  "T"
+                ],
+                "sim": 0.8573,
+                "sim_cal": 0.4675,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "client",
+            "char_span": [
+              88,
+              94
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "precedent",
+                "phones": [
+                  "P",
+                  "R",
+                  "EH",
+                  "S",
+                  "IH",
+                  "D",
+                  "AH0",
+                  "N",
+                  "T"
+                ],
+                "sim": 0.8352,
+                "sim_cal": 0.3853,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "D13",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D13",
+        "senses": 108,
+        "shortlist": [
+          "mushroom",
+          "rounded",
+          "timber",
+          "soil",
+          "cap",
+          "earthy",
+          "organism",
+          "sprouts"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D13",
+        "senses": 109,
+        "shortlist": [
+          "mushroom",
+          "rounded",
+          "timber",
+          "soil",
+          "cap",
+          "earthy",
+          "organism",
+          "sprouts"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "D14",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D14",
+        "senses": 195,
+        "shortlist": [
+          "breaker",
+          "safe",
+          "limits",
+          "replace",
+          "current",
+          "alternating",
+          "exceeded",
+          "electrical",
+          "technician"
+        ],
+        "soundalikes": [
+          {
+            "surface": "exceeded",
+            "char_span": [
+              87,
+              95
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "technician",
+                "phones": [
+                  "T",
+                  "EH",
+                  "K",
+                  "N",
+                  "IH",
+                  "SH",
+                  "AH0",
+                  "N"
+                ],
+                "sim": 0.8534,
+                "sim_cal": 0.456,
+                "source": "in_text"
+              },
+              {
+                "form": "replace",
+                "phones": [
+                  "ER0",
+                  "P",
+                  "L",
+                  "EY",
+                  "S"
+                ],
+                "sim": 0.8473,
+                "sim_cal": 0.4367,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "technician",
+            "char_span": [
+              23,
+              33
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "electrical",
+                "phones": [
+                  "IH",
+                  "L",
+                  "EH",
+                  "K",
+                  "T",
+                  "R",
+                  "IH",
+                  "K",
+                  "AH0",
+                  "L"
+                ],
+                "sim": 0.8216,
+                "sim_cal": 0.3168,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D14",
+        "senses": 193,
+        "shortlist": [
+          "breaker",
+          "safe",
+          "limits",
+          "replace",
+          "current",
+          "alternating",
+          "exceeded",
+          "electrical",
+          "technician"
+        ],
+        "soundalikes": [
+          {
+            "surface": "exceeded",
+            "char_span": [
+              87,
+              95
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "technician",
+                "phones": [
+                  "T",
+                  "EH",
+                  "K",
+                  "N",
+                  "IH",
+                  "SH",
+                  "AH0",
+                  "N"
+                ],
+                "sim": 0.8534,
+                "sim_cal": 0.4558,
+                "source": "in_text"
+              },
+              {
+                "form": "replace",
+                "phones": [
+                  "ER0",
+                  "P",
+                  "L",
+                  "EY",
+                  "S"
+                ],
+                "sim": 0.8473,
+                "sim_cal": 0.4352,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "technician",
+            "char_span": [
+              23,
+              33
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "electrical",
+                "phones": [
+                  "IH",
+                  "L",
+                  "EH",
+                  "K",
+                  "T",
+                  "R",
+                  "IH",
+                  "K",
+                  "AH0",
+                  "L"
+                ],
+                "sim": 0.8216,
+                "sim_cal": 0.3147,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "D15",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D15",
+        "senses": 146,
+        "shortlist": [
+          "pier",
+          "concrete",
+          "wave",
+          "coastline",
+          "pounded",
+          "towering",
+          "water",
+          "happened"
+        ],
+        "soundalikes": [
+          {
+            "surface": "water",
+            "char_span": [
+              69,
+              74
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "weather",
+                "phones": [
+                  "W",
+                  "EH",
+                  "DH",
+                  "ER0"
+                ],
+                "sim": 0.9569,
+                "sim_cal": 0.8487,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "towering",
+            "char_span": [
+              60,
+              68
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "during",
+                "phones": [
+                  "D",
+                  "Y",
+                  "UH",
+                  "R",
+                  "IH",
+                  "NG"
+                ],
+                "sim": 0.9511,
+                "sim_cal": 0.8156,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D15",
+        "senses": 138,
+        "shortlist": [
+          "pier",
+          "concrete",
+          "wave",
+          "coastline",
+          "pounded",
+          "towering",
+          "water",
+          "happened"
+        ],
+        "soundalikes": [
+          {
+            "surface": "water",
+            "char_span": [
+              69,
+              74
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "weather",
+                "phones": [
+                  "W",
+                  "EH",
+                  "DH",
+                  "ER0"
+                ],
+                "sim": 0.9569,
+                "sim_cal": 0.8477,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "towering",
+            "char_span": [
+              60,
+              68
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "during",
+                "phones": [
+                  "D",
+                  "Y",
+                  "UH",
+                  "R",
+                  "IH",
+                  "NG"
+                ],
+                "sim": 0.9511,
+                "sim_cal": 0.8159,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "D16",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D16",
+        "senses": 224,
+        "shortlist": [
+          "backpack",
+          "camp",
+          "matches",
+          "fire",
+          "carry",
+          "bring",
+          "safety",
+          "counselor"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D16",
+        "senses": 225,
+        "shortlist": [
+          "backpack",
+          "camp",
+          "matches",
+          "fire",
+          "carry",
+          "bring",
+          "safety",
+          "counselor"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "D17",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D17",
+        "senses": 197,
+        "shortlist": [
+          "carrier",
+          "sack",
+          "collected",
+          "paper",
+          "metal",
+          "packed",
+          "postal",
+          "mail",
+          "letters"
+        ],
+        "soundalikes": [
+          {
+            "surface": "letters",
+            "char_span": [
+              93,
+              100
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "metal",
+                "phones": [
+                  "M",
+                  "EH",
+                  "T",
+                  "AH0",
+                  "L"
+                ],
+                "sim": 0.9017,
+                "sim_cal": 0.6392,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "mail",
+            "char_span": [
+              18,
+              22
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "metal",
+                "phones": [
+                  "M",
+                  "EH",
+                  "T",
+                  "AH0",
+                  "L"
+                ],
+                "sim": 0.8793,
+                "sim_cal": 0.5569,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "collected",
+            "char_span": [
+              70,
+              79
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "postal",
+                "phones": [
+                  "P",
+                  "OW",
+                  "S",
+                  "T",
+                  "AH0",
+                  "L"
+                ],
+                "sim": 0.8394,
+                "sim_cal": 0.404,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D17",
+        "senses": 195,
+        "shortlist": [
+          "carrier",
+          "sack",
+          "collected",
+          "paper",
+          "metal",
+          "packed",
+          "postal",
+          "mail",
+          "letters"
+        ],
+        "soundalikes": [
+          {
+            "surface": "letters",
+            "char_span": [
+              93,
+              100
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "metal",
+                "phones": [
+                  "M",
+                  "EH",
+                  "T",
+                  "AH0",
+                  "L"
+                ],
+                "sim": 0.9017,
+                "sim_cal": 0.6481,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "mail",
+            "char_span": [
+              18,
+              22
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "metal",
+                "phones": [
+                  "M",
+                  "EH",
+                  "T",
+                  "AH0",
+                  "L"
+                ],
+                "sim": 0.8793,
+                "sim_cal": 0.5679,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "paper",
+            "char_span": [
+              87,
+              92
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "eighty",
+                "phones": [
+                  "EY",
+                  "T",
+                  "IY"
+                ],
+                "sim": 0.8603,
+                "sim_cal": 0.5,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "collected",
+            "char_span": [
+              70,
+              79
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "postal",
+                "phones": [
+                  "P",
+                  "OW",
+                  "S",
+                  "T",
+                  "AH0",
+                  "L"
+                ],
+                "sim": 0.8394,
+                "sim_cal": 0.4038,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "D18",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D18",
+        "senses": 41,
+        "shortlist": [
+          "kidnap",
+          "ransom",
+          "unlawful",
+          "seized",
+          "felony",
+          "victim"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D18",
+        "senses": 40,
+        "shortlist": [
+          "kidnap",
+          "ransom",
+          "unlawful",
+          "seized",
+          "felony",
+          "victim"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "D19",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses",
+        "shortlist",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D19",
+        "senses": 126,
+        "shortlist": [
+          "examine",
+          "measure",
+          "light",
+          "pupil",
+          "entering",
+          "cornea",
+          "surgeon",
+          "patient"
+        ],
+        "soundalikes": [
+          {
+            "surface": "patient",
+            "char_span": [
+              87,
+              94
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "pupil",
+                "phones": [
+                  "P",
+                  "Y",
+                  "UW",
+                  "P",
+                  "AH0",
+                  "L"
+                ],
+                "sim": 0.8313,
+                "sim_cal": 0.3776,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D19",
+        "senses": 116,
+        "shortlist": [
+          "examine",
+          "measure",
+          "light",
+          "pupil",
+          "entering",
+          "surgeon",
+          "patient",
+          "eye"
+        ],
+        "soundalikes": [
+          {
+            "surface": "patient",
+            "char_span": [
+              87,
+              94
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "pupil",
+                "phones": [
+                  "P",
+                  "Y",
+                  "UW",
+                  "P",
+                  "AH0",
+                  "L"
+                ],
+                "sim": 0.8313,
+                "sim_cal": 0.376,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "D20",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D20",
+        "senses": 89,
+        "shortlist": [
+          "retail",
+          "soaring",
+          "experienced",
+          "discounts",
+          "profits",
+          "seasonal",
+          "company",
+          "mattress"
+        ],
+        "soundalikes": [
+          {
+            "surface": "seasonal",
+            "char_span": [
+              64,
+              72
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "retail",
+                "phones": [
+                  "R",
+                  "IY",
+                  "T",
+                  "EY",
+                  "L"
+                ],
+                "sim": 0.8399,
+                "sim_cal": 0.4094,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D20",
+        "senses": 88,
+        "shortlist": [
+          "retail",
+          "soaring",
+          "experienced",
+          "discounts",
+          "profits",
+          "seasonal",
+          "company",
+          "mattress"
+        ],
+        "soundalikes": [
+          {
+            "surface": "seasonal",
+            "char_span": [
+              64,
+              72
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "retail",
+                "phones": [
+                  "R",
+                  "IY",
+                  "T",
+                  "EY",
+                  "L"
+                ],
+                "sim": 0.8399,
+                "sim_cal": 0.4079,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "D21",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D21",
+        "senses": 86,
+        "shortlist": [
+          "cement",
+          "making",
+          "bricks",
+          "imagine",
+          "dog"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D21",
+        "senses": 84,
+        "shortlist": [
+          "cement",
+          "making",
+          "bricks",
+          "imagine",
+          "dog"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "D22",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses",
+        "shortlist",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D22",
+        "senses": 139,
+        "shortlist": [
+          "said",
+          "time",
+          "annual",
+          "started",
+          "sports",
+          "teacher",
+          "day",
+          "asked"
+        ],
+        "soundalikes": [
+          {
+            "surface": "started",
+            "char_span": [
+              68,
+              75
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "sports",
+                "phones": [
+                  "S",
+                  "P",
+                  "AO",
+                  "R",
+                  "T",
+                  "S"
+                ],
+                "sim": 0.8855,
+                "sim_cal": 0.5775,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D22",
+        "senses": 132,
+        "shortlist": [
+          "said",
+          "time",
+          "annual",
+          "started",
+          "sports",
+          "teacher",
+          "asked",
+          "day"
+        ],
+        "soundalikes": [
+          {
+            "surface": "started",
+            "char_span": [
+              68,
+              75
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "sports",
+                "phones": [
+                  "S",
+                  "P",
+                  "AO",
+                  "R",
+                  "T",
+                  "S"
+                ],
+                "sim": 0.8855,
+                "sim_cal": 0.5764,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "D23",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses",
+        "shortlist"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D23",
+        "senses": 63,
+        "shortlist": [
+          "caught",
+          "fish",
+          "calculating",
+          "many",
+          "fishermen"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D23",
+        "senses": 56,
+        "shortlist": [
+          "caught",
+          "fish",
+          "calculating",
+          "fishermen",
+          "many"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "D24",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses",
+        "shortlist",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D24",
+        "senses": 74,
+        "shortlist": [
+          "library",
+          "building",
+          "think",
+          "stories",
+          "floors",
+          "many",
+          "five"
+        ],
+        "soundalikes": [
+          {
+            "surface": "floors",
+            "char_span": [
+              60,
+              66
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "stories",
+                "phones": [
+                  "S",
+                  "T",
+                  "AO",
+                  "R",
+                  "IY",
+                  "Z"
+                ],
+                "sim": 0.8606,
+                "sim_cal": 0.4739,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D24",
+        "senses": 69,
+        "shortlist": [
+          "library",
+          "building",
+          "think",
+          "stories",
+          "floors",
+          "five",
+          "many"
+        ],
+        "soundalikes": [
+          {
+            "surface": "floors",
+            "char_span": [
+              60,
+              66
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "stories",
+                "phones": [
+                  "S",
+                  "T",
+                  "AO",
+                  "R",
+                  "IY",
+                  "Z"
+                ],
+                "sim": 0.8606,
+                "sim_cal": 0.4749,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "D25",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D25",
+        "senses": 79,
+        "shortlist": [
+          "close",
+          "early",
+          "full",
+          "dump",
+          "day"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "D25",
+        "senses": 78,
+        "shortlist": [
+          "close",
+          "early",
+          "full",
+          "dump",
+          "day"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N01",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses",
+        "shortlist"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "N01",
+        "senses": 80,
+        "shortlist": [
+          "leaves",
+          "trunk",
+          "pick up",
+          "used",
+          "pick",
+          "elephant"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "N01",
+        "senses": 70,
+        "shortlist": [
+          "trunk",
+          "pick up",
+          "leaves",
+          "pick",
+          "elephant",
+          "used"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N02",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "N02",
+        "senses": 148,
+        "shortlist": [
+          "moss",
+          "bank",
+          "stones",
+          "covered",
+          "steep",
+          "green",
+          "wet",
+          "river"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "N02",
+        "senses": 140,
+        "shortlist": [
+          "moss",
+          "bank",
+          "stones",
+          "covered",
+          "steep",
+          "green",
+          "wet",
+          "river"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N03",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "N03",
+        "senses": 202,
+        "shortlist": [
+          "base",
+          "sprinted",
+          "baseball",
+          "wooden",
+          "first",
+          "bat",
+          "swung",
+          "baseball player"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "N03",
+        "senses": 197,
+        "shortlist": [
+          "base",
+          "sprinted",
+          "baseball",
+          "wooden",
+          "first",
+          "bat",
+          "swung",
+          "baseball player"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N04",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "N04",
+        "senses": 125,
+        "shortlist": [
+          "postage",
+          "slipped",
+          "folded",
+          "envelope",
+          "handwritten",
+          "letter"
+        ],
+        "soundalikes": [
+          {
+            "surface": "postage",
+            "char_span": [
+              58,
+              65
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "folded",
+                "phones": [
+                  "F",
+                  "OW",
+                  "L",
+                  "D",
+                  "AH0",
+                  "D"
+                ],
+                "sim": 0.8987,
+                "sim_cal": 0.624,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "N04",
+        "senses": 121,
+        "shortlist": [
+          "postage",
+          "slipped",
+          "folded",
+          "envelope",
+          "handwritten",
+          "letter"
+        ],
+        "soundalikes": [
+          {
+            "surface": "postage",
+            "char_span": [
+              58,
+              65
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "folded",
+                "phones": [
+                  "F",
+                  "OW",
+                  "L",
+                  "D",
+                  "AH0",
+                  "D"
+                ],
+                "sim": 0.8987,
+                "sim_cal": 0.6239,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "N05",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses",
+        "shortlist",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "N05",
+        "senses": 117,
+        "shortlist": [
+          "fence",
+          "gate",
+          "barked",
+          "guard",
+          "approached",
+          "dog",
+          "guard dog",
+          "loudly"
+        ],
+        "soundalikes": [
+          {
+            "surface": "gate",
+            "char_span": [
+              70,
+              74
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "guard",
+                "phones": [
+                  "G",
+                  "AA",
+                  "R",
+                  "D"
+                ],
+                "sim": 0.9116,
+                "sim_cal": 0.6898,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "N05",
+        "senses": 135,
+        "shortlist": [
+          "fence",
+          "gate",
+          "guard",
+          "barked",
+          "approached",
+          "dog",
+          "guard dog",
+          "loudly"
+        ],
+        "soundalikes": [
+          {
+            "surface": "gate",
+            "char_span": [
+              70,
+              74
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "guard",
+                "phones": [
+                  "G",
+                  "AA",
+                  "R",
+                  "D"
+                ],
+                "sim": 0.9116,
+                "sim_cal": 0.6879,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "barked",
+            "char_span": [
+              14,
+              20
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "guard",
+                "phones": [
+                  "G",
+                  "AA",
+                  "R",
+                  "D"
+                ],
+                "sim": 0.869,
+                "sim_cal": 0.5308,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "N06",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "N06",
+        "senses": 93,
+        "shortlist": [
+          "dates",
+          "package",
+          "store",
+          "dried",
+          "sweet",
+          "bought",
+          "dessert",
+          "grocery"
+        ],
+        "soundalikes": [
+          {
+            "surface": "dates",
+            "char_span": [
+              35,
+              40
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "package",
+                "phones": [
+                  "P",
+                  "AE",
+                  "K",
+                  "IH",
+                  "JH"
+                ],
+                "sim": 0.8807,
+                "sim_cal": 0.5498,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "N06",
+        "senses": 92,
+        "shortlist": [
+          "dates",
+          "package",
+          "store",
+          "dried",
+          "sweet",
+          "bought",
+          "dessert",
+          "grocery"
+        ],
+        "soundalikes": [
+          {
+            "surface": "dates",
+            "char_span": [
+              35,
+              40
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "package",
+                "phones": [
+                  "P",
+                  "AE",
+                  "K",
+                  "IH",
+                  "JH"
+                ],
+                "sim": 0.8807,
+                "sim_cal": 0.5507,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "N07",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses",
+        "shortlist"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "N07",
+        "senses": 60,
+        "shortlist": [
+          "stacked",
+          "books",
+          "history",
+          "shelves",
+          "librarian",
+          "neatly",
+          "oak"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "N07",
+        "senses": 48,
+        "shortlist": [
+          "stacked",
+          "history",
+          "books",
+          "shelves",
+          "librarian",
+          "neatly",
+          "oak"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N08",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "N08",
+        "senses": 82,
+        "shortlist": [
+          "digital",
+          "laboratory",
+          "experiment",
+          "calibrated",
+          "starting",
+          "microscope",
+          "before",
+          "technician"
+        ],
+        "soundalikes": [
+          {
+            "surface": "digital",
+            "char_span": [
+              41,
+              48
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "technician",
+                "phones": [
+                  "T",
+                  "EH",
+                  "K",
+                  "N",
+                  "IH",
+                  "SH",
+                  "AH0",
+                  "N"
+                ],
+                "sim": 0.8998,
+                "sim_cal": 0.628,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "N08",
+        "senses": 82,
+        "shortlist": [
+          "digital",
+          "laboratory",
+          "experiment",
+          "calibrated",
+          "starting",
+          "microscope",
+          "before",
+          "technician"
+        ],
+        "soundalikes": [
+          {
+            "surface": "digital",
+            "char_span": [
+              41,
+              48
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "technician",
+                "phones": [
+                  "T",
+                  "EH",
+                  "K",
+                  "N",
+                  "IH",
+                  "SH",
+                  "AH0",
+                  "N"
+                ],
+                "sim": 0.8998,
+                "sim_cal": 0.6279,
+                "source": "in_text"
+              },
+              {
+                "form": "laboratory",
+                "phones": [
+                  "L",
+                  "AE",
+                  "B",
+                  "R",
+                  "AH0",
+                  "T",
+                  "AO",
+                  "R",
+                  "IY"
+                ],
+                "sim": 0.8209,
+                "sim_cal": 0.3316,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "N09",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "N09",
+        "senses": 135,
+        "shortlist": [
+          "passed",
+          "shower",
+          "afternoon",
+          "rain",
+          "early",
+          "rain shower",
+          "passed over",
+          "sudden"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "N09",
+        "senses": 132,
+        "shortlist": [
+          "passed",
+          "shower",
+          "afternoon",
+          "rain",
+          "early",
+          "rain shower",
+          "passed over",
+          "sudden"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N10",
+      "corpus": "corpus/joke_corpus_blind.jsonl",
+      "changed": [
+        "senses",
+        "shortlist"
+      ],
+      "before": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "N10",
+        "senses": 70,
+        "shortlist": [
+          "train",
+          "platform",
+          "commuter",
+          "waited",
+          "morning",
+          "commuter train",
+          "passengers",
+          "quietly"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/joke_corpus_blind.jsonl",
+        "id": "N10",
+        "senses": 74,
+        "shortlist": [
+          "waited",
+          "train",
+          "platform",
+          "commuter",
+          "morning",
+          "commuter train",
+          "passengers",
+          "quietly"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "S01",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S01",
+        "senses": 76,
+        "shortlist": [
+          "retire",
+          "whey",
+          "found",
+          "early",
+          "finally"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S01",
+        "senses": 73,
+        "shortlist": [
+          "retire",
+          "whey",
+          "found",
+          "early",
+          "finally"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "S02",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses",
+        "shortlist"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S02",
+        "senses": 73,
+        "shortlist": [
+          "money",
+          "strike",
+          "went",
+          "went on",
+          "bakers",
+          "knead"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S02",
+        "senses": 71,
+        "shortlist": [
+          "strike",
+          "went",
+          "went on",
+          "bakers",
+          "knead",
+          "money"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "S03",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S03",
+        "senses": 69,
+        "shortlist": [
+          "sole",
+          "heart",
+          "cobbler",
+          "put",
+          "boot",
+          "every"
+        ],
+        "soundalikes": [
+          {
+            "surface": "boot",
+            "char_span": [
+              46,
+              50
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "put",
+                "phones": [
+                  "P",
+                  "UH",
+                  "T"
+                ],
+                "sim": 0.9713,
+                "sim_cal": 0.8871,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S03",
+        "senses": 69,
+        "shortlist": [
+          "sole",
+          "heart",
+          "cobbler",
+          "put",
+          "boot",
+          "every"
+        ],
+        "soundalikes": [
+          {
+            "surface": "boot",
+            "char_span": [
+              46,
+              50
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "put",
+                "phones": [
+                  "P",
+                  "UH",
+                  "T"
+                ],
+                "sim": 0.9713,
+                "sim_cal": 0.8872,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "S04",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S04",
+        "senses": 108,
+        "shortlist": [
+          "mussel",
+          "pulled",
+          "seafood",
+          "crate",
+          "lifting",
+          "chef"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S04",
+        "senses": 98,
+        "shortlist": [
+          "mussel",
+          "pulled",
+          "seafood",
+          "crate",
+          "lifting",
+          "chef"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "S05",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses",
+        "shortlist"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S05",
+        "senses": 208,
+        "shortlist": [
+          "cereal",
+          "breakfast",
+          "turned",
+          "killer",
+          "turned out",
+          "thief"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S05",
+        "senses": 218,
+        "shortlist": [
+          "cereal",
+          "breakfast",
+          "turned out",
+          "turned",
+          "killer",
+          "thief"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "S06",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S06",
+        "senses": 79,
+        "shortlist": [
+          "real",
+          "said",
+          "job",
+          "pane",
+          "window"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S06",
+        "senses": 73,
+        "shortlist": [
+          "real",
+          "said",
+          "job",
+          "pane",
+          "window"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "S07",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses",
+        "shortlist"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S07",
+        "senses": 89,
+        "shortlist": [
+          "deal",
+          "reel",
+          "rod",
+          "said",
+          "new",
+          "fisherman"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S07",
+        "senses": 82,
+        "shortlist": [
+          "reel",
+          "rod",
+          "said",
+          "deal",
+          "new",
+          "fisherman"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "S08",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S08",
+        "senses": 107,
+        "shortlist": [
+          "hare",
+          "pulled",
+          "got",
+          "mad",
+          "magician"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S08",
+        "senses": 106,
+        "shortlist": [
+          "hare",
+          "pulled",
+          "got",
+          "mad",
+          "magician"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "S10",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses",
+        "shortlist"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S10",
+        "senses": 90,
+        "shortlist": [
+          "garden",
+          "self",
+          "rising",
+          "flours",
+          "full",
+          "is full",
+          "baker"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S10",
+        "senses": 84,
+        "shortlist": [
+          "garden",
+          "self",
+          "rising",
+          "flours",
+          "full",
+          "baker"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "S11",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S11",
+        "senses": 49,
+        "shortlist": [
+          "lettuce",
+          "said",
+          "dinner",
+          "salad",
+          "before",
+          "chef",
+          "pray"
+        ],
+        "soundalikes": [
+          {
+            "surface": "said",
+            "char_span": [
+              29,
+              33
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "chef",
+                "phones": [
+                  "SH",
+                  "EH",
+                  "F"
+                ],
+                "sim": 0.9224,
+                "sim_cal": 0.6951,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "Lettuce",
+            "char_span": [
+              36,
+              43
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "salad",
+                "phones": [
+                  "S",
+                  "AE",
+                  "L",
+                  "AH0",
+                  "D"
+                ],
+                "sim": 0.8724,
+                "sim_cal": 0.5316,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S11",
+        "senses": 47,
+        "shortlist": [
+          "lettuce",
+          "said",
+          "dinner",
+          "salad",
+          "before",
+          "chef",
+          "pray"
+        ],
+        "soundalikes": [
+          {
+            "surface": "said",
+            "char_span": [
+              29,
+              33
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "chef",
+                "phones": [
+                  "SH",
+                  "EH",
+                  "F"
+                ],
+                "sim": 0.9224,
+                "sim_cal": 0.6955,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "Lettuce",
+            "char_span": [
+              36,
+              43
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "salad",
+                "phones": [
+                  "S",
+                  "AE",
+                  "L",
+                  "AH0",
+                  "D"
+                ],
+                "sim": 0.8724,
+                "sim_cal": 0.5432,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "S12",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S12",
+        "senses": 98,
+        "shortlist": [
+          "dyeing",
+          "said",
+          "worker",
+          "colors",
+          "textile",
+          "try",
+          "new"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S12",
+        "senses": 96,
+        "shortlist": [
+          "dyeing",
+          "said",
+          "worker",
+          "colors",
+          "textile",
+          "try",
+          "new"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "S13",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S13",
+        "senses": 72,
+        "shortlist": [
+          "forecast",
+          "admitted",
+          "mist",
+          "weatherman"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S13",
+        "senses": 71,
+        "shortlist": [
+          "forecast",
+          "admitted",
+          "mist",
+          "weatherman"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "S14",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S14",
+        "senses": 63,
+        "shortlist": [
+          "best",
+          "undertaker",
+          "mourning",
+          "never"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S14",
+        "senses": 61,
+        "shortlist": [
+          "best",
+          "undertaker",
+          "mourning",
+          "never"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "S16",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S16",
+        "senses": 85,
+        "shortlist": [
+          "always",
+          "pirate",
+          "crew",
+          "told",
+          "seas",
+          "captain",
+          "day"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S16",
+        "senses": 83,
+        "shortlist": [
+          "always",
+          "pirate",
+          "crew",
+          "told",
+          "seas",
+          "captain",
+          "day"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "S17",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S17",
+        "senses": 144,
+        "shortlist": [
+          "orca",
+          "breakup",
+          "whale",
+          "long",
+          "one",
+          "song"
+        ],
+        "soundalikes": [
+          {
+            "surface": "long",
+            "char_span": [
+              32,
+              36
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "song",
+                "phones": [
+                  "S",
+                  "AO",
+                  "NG"
+                ],
+                "sim": 0.931,
+                "sim_cal": 0.729,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S17",
+        "senses": 142,
+        "shortlist": [
+          "orca",
+          "breakup",
+          "whale",
+          "long",
+          "one",
+          "song"
+        ],
+        "soundalikes": [
+          {
+            "surface": "long",
+            "char_span": [
+              32,
+              36
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "song",
+                "phones": [
+                  "S",
+                  "AO",
+                  "NG"
+                ],
+                "sim": 0.931,
+                "sim_cal": 0.7293,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "S18",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S18",
+        "senses": 80,
+        "shortlist": [
+          "pier",
+          "pressure",
+          "gave",
+          "young",
+          "gave in",
+          "dockworkers"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S18",
+        "senses": 72,
+        "shortlist": [
+          "pier",
+          "pressure",
+          "gave",
+          "young",
+          "gave in",
+          "dockworkers"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "S19",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses",
+        "shortlist",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S19",
+        "senses": 123,
+        "shortlist": [
+          "slept",
+          "shift",
+          "guard",
+          "worked",
+          "knight",
+          "royal",
+          "day"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S19",
+        "senses": 127,
+        "shortlist": [
+          "guard",
+          "slept",
+          "shift",
+          "worked",
+          "knight",
+          "royal",
+          "day"
+        ],
+        "soundalikes": [
+          {
+            "surface": "shift",
+            "char_span": [
+              59,
+              64
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "slept",
+                "phones": [
+                  "S",
+                  "L",
+                  "EH",
+                  "P",
+                  "T"
+                ],
+                "sim": 0.8655,
+                "sim_cal": 0.5185,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "S21",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S21",
+        "senses": 77,
+        "shortlist": [
+          "get",
+          "board",
+          "carpenters",
+          "die",
+          "old",
+          "never"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S21",
+        "senses": 76,
+        "shortlist": [
+          "get",
+          "board",
+          "carpenters",
+          "die",
+          "old",
+          "never"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "S25",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S25",
+        "senses": 109,
+        "shortlist": [
+          "sacred",
+          "church",
+          "proceeds",
+          "gas",
+          "propane",
+          "annual",
+          "barbecue",
+          "went"
+        ],
+        "soundalikes": [
+          {
+            "surface": "gas",
+            "char_span": [
+              23,
+              26
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "bought",
+                "phones": [
+                  "B",
+                  "AA",
+                  "T"
+                ],
+                "sim": 0.908,
+                "sim_cal": 0.6387,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "propane",
+            "char_span": [
+              91,
+              98
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "proceeds",
+                "phones": [
+                  "P",
+                  "R",
+                  "OW",
+                  "S",
+                  "IY",
+                  "D",
+                  "Z"
+                ],
+                "sim": 0.8685,
+                "sim_cal": 0.512,
+                "source": "in_text"
+              },
+              {
+                "form": "sacred",
+                "phones": [
+                  "S",
+                  "EY",
+                  "K",
+                  "R",
+                  "IH",
+                  "D"
+                ],
+                "sim": 0.8254,
+                "sim_cal": 0.352,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S25",
+        "senses": 108,
+        "shortlist": [
+          "sacred",
+          "church",
+          "proceeds",
+          "gas",
+          "propane",
+          "annual",
+          "barbecue",
+          "went"
+        ],
+        "soundalikes": [
+          {
+            "surface": "gas",
+            "char_span": [
+              23,
+              26
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "bought",
+                "phones": [
+                  "B",
+                  "AA",
+                  "T"
+                ],
+                "sim": 0.908,
+                "sim_cal": 0.6391,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "propane",
+            "char_span": [
+              91,
+              98
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "proceeds",
+                "phones": [
+                  "P",
+                  "R",
+                  "OW",
+                  "S",
+                  "IY",
+                  "D",
+                  "Z"
+                ],
+                "sim": 0.8685,
+                "sim_cal": 0.5118,
+                "source": "in_text"
+              },
+              {
+                "form": "sacred",
+                "phones": [
+                  "S",
+                  "EY",
+                  "K",
+                  "R",
+                  "IH",
+                  "D"
+                ],
+                "sim": 0.8254,
+                "sim_cal": 0.3518,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "S26",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses",
+        "shortlist",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S26",
+        "senses": 74,
+        "shortlist": [
+          "came",
+          "flat",
+          "yeast",
+          "bread",
+          "came out",
+          "cheap"
+        ],
+        "soundalikes": [
+          {
+            "surface": "flat",
+            "char_span": [
+              19,
+              23
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "bread",
+                "phones": [
+                  "B",
+                  "R",
+                  "EH",
+                  "D"
+                ],
+                "sim": 0.8922,
+                "sim_cal": 0.6218,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S26",
+        "senses": 71,
+        "shortlist": [
+          "flat",
+          "yeast",
+          "came",
+          "bread",
+          "came out",
+          "cheap"
+        ],
+        "soundalikes": [
+          {
+            "surface": "flat",
+            "char_span": [
+              19,
+              23
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "bread",
+                "phones": [
+                  "B",
+                  "R",
+                  "EH",
+                  "D"
+                ],
+                "sim": 0.8922,
+                "sim_cal": 0.6194,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "S27",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S27",
+        "senses": 55,
+        "shortlist": [
+          "tuna",
+          "carry",
+          "choir",
+          "fish"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S27",
+        "senses": 54,
+        "shortlist": [
+          "tuna",
+          "carry",
+          "choir",
+          "fish"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "S28",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S28",
+        "senses": 128,
+        "shortlist": [
+          "fired",
+          "fry",
+          "take",
+          "cook",
+          "stir",
+          "long",
+          "told",
+          "fry cook"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S28",
+        "senses": 124,
+        "shortlist": [
+          "fired",
+          "fry",
+          "take",
+          "cook",
+          "stir",
+          "long",
+          "told",
+          "fry cook"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "S32",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "shortlist"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S32",
+        "senses": 52,
+        "shortlist": [
+          "said",
+          "harvest",
+          "tasted",
+          "grape",
+          "vineyard",
+          "year",
+          "owner"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S32",
+        "senses": 52,
+        "shortlist": [
+          "said",
+          "harvest",
+          "tasted",
+          "grape",
+          "vineyard",
+          "owner",
+          "year"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "S33",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S33",
+        "senses": 55,
+        "shortlist": [
+          "shellfish",
+          "customer",
+          "told",
+          "fishmonger",
+          "greedy"
+        ],
+        "soundalikes": [
+          {
+            "surface": "customer",
+            "char_span": [
+              31,
+              39
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "fishmonger",
+                "phones": [
+                  "F",
+                  "IH",
+                  "SH",
+                  "M",
+                  "AA",
+                  "NG",
+                  "G",
+                  "ER0"
+                ],
+                "sim": 0.8287,
+                "sim_cal": 0.364,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S33",
+        "senses": 54,
+        "shortlist": [
+          "shellfish",
+          "customer",
+          "told",
+          "fishmonger",
+          "greedy"
+        ],
+        "soundalikes": [
+          {
+            "surface": "customer",
+            "char_span": [
+              31,
+              39
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "fishmonger",
+                "phones": [
+                  "F",
+                  "IH",
+                  "SH",
+                  "M",
+                  "AA",
+                  "NG",
+                  "G",
+                  "ER0"
+                ],
+                "sim": 0.8287,
+                "sim_cal": 0.3638,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "S34",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S34",
+        "senses": 97,
+        "shortlist": [
+          "life",
+          "much",
+          "retired",
+          "tailor",
+          "sew",
+          "calmer",
+          "now",
+          "says"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "S34",
+        "senses": 94,
+        "shortlist": [
+          "life",
+          "much",
+          "retired",
+          "tailor",
+          "sew",
+          "calmer",
+          "now",
+          "says"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N01",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N01",
+        "senses": 71,
+        "shortlist": [
+          "whey",
+          "drained",
+          "curds",
+          "pressing",
+          "before"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N01",
+        "senses": 70,
+        "shortlist": [
+          "whey",
+          "drained",
+          "curds",
+          "pressing",
+          "before"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N02",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N02",
+        "senses": 87,
+        "shortlist": [
+          "retire",
+          "found",
+          "way",
+          "early",
+          "finally"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N02",
+        "senses": 84,
+        "shortlist": [
+          "retire",
+          "found",
+          "way",
+          "early",
+          "finally"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N03",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N03",
+        "senses": 43,
+        "shortlist": [
+          "shaping",
+          "dough",
+          "ten",
+          "minutes",
+          "before",
+          "bakers",
+          "knead"
+        ],
+        "soundalikes": [
+          {
+            "surface": "shaping",
+            "char_span": [
+              50,
+              57
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "bakers",
+                "phones": [
+                  "B",
+                  "EY",
+                  "K",
+                  "ER0",
+                  "Z"
+                ],
+                "sim": 0.8592,
+                "sim_cal": 0.4685,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N03",
+        "senses": 40,
+        "shortlist": [
+          "shaping",
+          "dough",
+          "ten",
+          "minutes",
+          "before",
+          "bakers",
+          "knead"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N04",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses",
+        "shortlist"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N04",
+        "senses": 82,
+        "shortlist": [
+          "money",
+          "need",
+          "strike",
+          "went",
+          "went on",
+          "bakers"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N04",
+        "senses": 79,
+        "shortlist": [
+          "need",
+          "strike",
+          "went",
+          "went on",
+          "bakers",
+          "money"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N05",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N05",
+        "senses": 48,
+        "shortlist": [
+          "sole",
+          "cobbler",
+          "glued",
+          "boot",
+          "new",
+          "every"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N05",
+        "senses": 47,
+        "shortlist": [
+          "sole",
+          "cobbler",
+          "glued",
+          "boot",
+          "new",
+          "every"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N06",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N06",
+        "senses": 110,
+        "shortlist": [
+          "mussel",
+          "pulled",
+          "shellfish",
+          "seafood",
+          "crate",
+          "chef"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N06",
+        "senses": 99,
+        "shortlist": [
+          "mussel",
+          "pulled",
+          "shellfish",
+          "seafood",
+          "crate",
+          "chef"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N07",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses",
+        "shortlist"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N07",
+        "senses": 188,
+        "shortlist": [
+          "cereal",
+          "breakfast",
+          "turned",
+          "turned out",
+          "lover",
+          "thief"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N07",
+        "senses": 198,
+        "shortlist": [
+          "cereal",
+          "breakfast",
+          "turned out",
+          "turned",
+          "lover",
+          "thief"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N08",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N08",
+        "senses": 106,
+        "shortlist": [
+          "real",
+          "said",
+          "cracked",
+          "problem",
+          "pane",
+          "window"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N08",
+        "senses": 102,
+        "shortlist": [
+          "real",
+          "said",
+          "cracked",
+          "problem",
+          "pane",
+          "window"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N09",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses",
+        "shortlist"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N09",
+        "senses": 108,
+        "shortlist": [
+          "came",
+          "reel",
+          "rod",
+          "said",
+          "spare",
+          "came with",
+          "new",
+          "fisherman"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N09",
+        "senses": 100,
+        "shortlist": [
+          "reel",
+          "rod",
+          "said",
+          "spare",
+          "came",
+          "came with",
+          "new",
+          "fisherman"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N10",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses",
+        "shortlist"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N10",
+        "senses": 90,
+        "shortlist": [
+          "across",
+          "hare",
+          "rapidly",
+          "field",
+          "ran"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N10",
+        "senses": 82,
+        "shortlist": [
+          "hare",
+          "rapidly",
+          "field",
+          "ran",
+          "across"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N11",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N11",
+        "senses": 59,
+        "shortlist": [
+          "carrot",
+          "nibbled",
+          "shop",
+          "jeweler",
+          "behind",
+          "rabbit"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N11",
+        "senses": 58,
+        "shortlist": [
+          "carrot",
+          "nibbled",
+          "shop",
+          "jeweler",
+          "behind",
+          "rabbit"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N12",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses",
+        "shortlist"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N12",
+        "senses": 98,
+        "shortlist": [
+          "self",
+          "rising",
+          "flour",
+          "full",
+          "is full",
+          "pantry",
+          "baker"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N12",
+        "senses": 89,
+        "shortlist": [
+          "self",
+          "rising",
+          "flour",
+          "full",
+          "pantry",
+          "baker"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N13",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N13",
+        "senses": 65,
+        "shortlist": [
+          "said",
+          "dinner",
+          "salad",
+          "let",
+          "before",
+          "chef",
+          "pray"
+        ],
+        "soundalikes": [
+          {
+            "surface": "Let",
+            "char_span": [
+              36,
+              39
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "said",
+                "phones": [
+                  "S",
+                  "EH",
+                  "D"
+                ],
+                "sim": 0.9253,
+                "sim_cal": 0.7064,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "said",
+            "char_span": [
+              29,
+              33
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "chef",
+                "phones": [
+                  "SH",
+                  "EH",
+                  "F"
+                ],
+                "sim": 0.9224,
+                "sim_cal": 0.6951,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N13",
+        "senses": 62,
+        "shortlist": [
+          "said",
+          "dinner",
+          "salad",
+          "let",
+          "before",
+          "chef",
+          "pray"
+        ],
+        "soundalikes": [
+          {
+            "surface": "Let",
+            "char_span": [
+              36,
+              39
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "said",
+                "phones": [
+                  "S",
+                  "EH",
+                  "D"
+                ],
+                "sim": 0.9253,
+                "sim_cal": 0.7068,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "said",
+            "char_span": [
+              29,
+              33
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "chef",
+                "phones": [
+                  "SH",
+                  "EH",
+                  "F"
+                ],
+                "sim": 0.9224,
+                "sim_cal": 0.6955,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "N14",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N14",
+        "senses": 74,
+        "shortlist": [
+          "lettuce",
+          "washed",
+          "dinner",
+          "salad",
+          "before",
+          "chef"
+        ],
+        "soundalikes": [
+          {
+            "surface": "lettuce",
+            "char_span": [
+              40,
+              47
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "salad",
+                "phones": [
+                  "S",
+                  "AE",
+                  "L",
+                  "AH0",
+                  "D"
+                ],
+                "sim": 0.8724,
+                "sim_cal": 0.5316,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N14",
+        "senses": 68,
+        "shortlist": [
+          "lettuce",
+          "washed",
+          "dinner",
+          "salad",
+          "before",
+          "chef"
+        ],
+        "soundalikes": [
+          {
+            "surface": "lettuce",
+            "char_span": [
+              40,
+              47
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "salad",
+                "phones": [
+                  "S",
+                  "AE",
+                  "L",
+                  "AH0",
+                  "D"
+                ],
+                "sim": 0.8724,
+                "sim_cal": 0.5432,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "N15",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N15",
+        "senses": 76,
+        "shortlist": [
+          "dyeing",
+          "indigo",
+          "spent",
+          "wool",
+          "blue",
+          "worker",
+          "textile",
+          "morning"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N15",
+        "senses": 77,
+        "shortlist": [
+          "dyeing",
+          "indigo",
+          "spent",
+          "wool",
+          "blue",
+          "worker",
+          "textile",
+          "morning"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N16",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N16",
+        "senses": 130,
+        "shortlist": [
+          "said",
+          "cover",
+          "light",
+          "mist",
+          "dawn",
+          "weatherman",
+          "valley"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N16",
+        "senses": 129,
+        "shortlist": [
+          "said",
+          "cover",
+          "light",
+          "mist",
+          "dawn",
+          "weatherman",
+          "valley"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N17",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N17",
+        "senses": 86,
+        "shortlist": [
+          "period",
+          "undertaker",
+          "mourning",
+          "black",
+          "wore",
+          "throughout"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N17",
+        "senses": 84,
+        "shortlist": [
+          "period",
+          "undertaker",
+          "mourning",
+          "black",
+          "wore",
+          "throughout"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N18",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N18",
+        "senses": 62,
+        "shortlist": [
+          "best",
+          "undertaker",
+          "morning",
+          "never"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N18",
+        "senses": 60,
+        "shortlist": [
+          "best",
+          "undertaker",
+          "morning",
+          "never"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N21",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N21",
+        "senses": 98,
+        "shortlist": [
+          "ended",
+          "orca",
+          "hunting",
+          "chase",
+          "after",
+          "whale",
+          "long",
+          "one"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N21",
+        "senses": 95,
+        "shortlist": [
+          "ended",
+          "orca",
+          "hunting",
+          "chase",
+          "after",
+          "whale",
+          "long",
+          "one"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N22",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N22",
+        "senses": 48,
+        "shortlist": [
+          "pier",
+          "tied",
+          "ferry",
+          "young",
+          "dockworkers"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N22",
+        "senses": 41,
+        "shortlist": [
+          "pier",
+          "tied",
+          "ferry",
+          "young",
+          "dockworkers"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N23",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses",
+        "shortlist",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N23",
+        "senses": 144,
+        "shortlist": [
+          "made",
+          "after",
+          "guard",
+          "knight",
+          "royal",
+          "battle"
+        ],
+        "soundalikes": [
+          {
+            "surface": "knight",
+            "char_span": [
+              27,
+              33
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "made",
+                "phones": [
+                  "M",
+                  "EY",
+                  "D"
+                ],
+                "sim": 0.9591,
+                "sim_cal": 0.8563,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N23",
+        "senses": 142,
+        "shortlist": [
+          "guard",
+          "made",
+          "after",
+          "knight",
+          "royal",
+          "battle"
+        ],
+        "soundalikes": [
+          {
+            "surface": "knight",
+            "char_span": [
+              27,
+              33
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "made",
+                "phones": [
+                  "M",
+                  "EY",
+                  "D"
+                ],
+                "sim": 0.9591,
+                "sim_cal": 0.8554,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "N25",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N25",
+        "senses": 46,
+        "shortlist": [
+          "train",
+          "apprentices",
+          "carpenters",
+          "die",
+          "old",
+          "never"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N25",
+        "senses": 45,
+        "shortlist": [
+          "train",
+          "apprentices",
+          "carpenters",
+          "die",
+          "old",
+          "never"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N26",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses",
+        "shortlist"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N26",
+        "senses": 106,
+        "shortlist": [
+          "four",
+          "board",
+          "cut",
+          "shelves",
+          "carpenter"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N26",
+        "senses": 104,
+        "shortlist": [
+          "board",
+          "cut",
+          "shelves",
+          "four",
+          "carpenter"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N28",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N28",
+        "senses": 58,
+        "shortlist": [
+          "said",
+          "tom",
+          "halfway",
+          "mountain"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N28",
+        "senses": 57,
+        "shortlist": [
+          "said",
+          "tom",
+          "halfway",
+          "mountain"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N29",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N29",
+        "senses": 58,
+        "shortlist": [
+          "ledge",
+          "said",
+          "tom",
+          "standing"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N29",
+        "senses": 56,
+        "shortlist": [
+          "ledge",
+          "said",
+          "tom",
+          "standing"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N30",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N30",
+        "senses": 95,
+        "shortlist": [
+          "needs",
+          "rises",
+          "dough",
+          "longer",
+          "before",
+          "knead"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N30",
+        "senses": 94,
+        "shortlist": [
+          "needs",
+          "rises",
+          "dough",
+          "longer",
+          "before",
+          "knead"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N31",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N31",
+        "senses": 63,
+        "shortlist": [
+          "church",
+          "gas",
+          "propane",
+          "annual",
+          "cost",
+          "barbecue",
+          "expected",
+          "bought"
+        ],
+        "soundalikes": [
+          {
+            "surface": "gas",
+            "char_span": [
+              23,
+              26
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "bought",
+                "phones": [
+                  "B",
+                  "AA",
+                  "T"
+                ],
+                "sim": 0.908,
+                "sim_cal": 0.6387,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N31",
+        "senses": 63,
+        "shortlist": [
+          "church",
+          "gas",
+          "propane",
+          "annual",
+          "cost",
+          "barbecue",
+          "expected",
+          "bought"
+        ],
+        "soundalikes": [
+          {
+            "surface": "gas",
+            "char_span": [
+              23,
+              26
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "bought",
+                "phones": [
+                  "B",
+                  "AA",
+                  "T"
+                ],
+                "sim": 0.908,
+                "sim_cal": 0.6391,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "N32",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses",
+        "shortlist",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N32",
+        "senses": 77,
+        "shortlist": [
+          "came",
+          "flat",
+          "least",
+          "bread",
+          "came out",
+          "at least",
+          "cheap"
+        ],
+        "soundalikes": [
+          {
+            "surface": "flat",
+            "char_span": [
+              19,
+              23
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "bread",
+                "phones": [
+                  "B",
+                  "R",
+                  "EH",
+                  "D"
+                ],
+                "sim": 0.8922,
+                "sim_cal": 0.6218,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N32",
+        "senses": 74,
+        "shortlist": [
+          "flat",
+          "came",
+          "least",
+          "bread",
+          "came out",
+          "at least",
+          "cheap"
+        ],
+        "soundalikes": [
+          {
+            "surface": "flat",
+            "char_span": [
+              19,
+              23
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "bread",
+                "phones": [
+                  "B",
+                  "R",
+                  "EH",
+                  "D"
+                ],
+                "sim": 0.8922,
+                "sim_cal": 0.6194,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "N33",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N33",
+        "senses": 56,
+        "shortlist": [
+          "carry",
+          "choir",
+          "fish",
+          "tune"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N33",
+        "senses": 55,
+        "shortlist": [
+          "carry",
+          "choir",
+          "fish",
+          "tune"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N34",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N34",
+        "senses": 73,
+        "shortlist": [
+          "fried",
+          "cook",
+          "stir",
+          "vegetables",
+          "hot",
+          "wok"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N34",
+        "senses": 70,
+        "shortlist": [
+          "fried",
+          "cook",
+          "stir",
+          "vegetables",
+          "hot",
+          "wok"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N36",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses",
+        "shortlist"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N36",
+        "senses": 99,
+        "shortlist": [
+          "granite",
+          "quarry",
+          "counters",
+          "kitchen",
+          "cut",
+          "owner"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N36",
+        "senses": 95,
+        "shortlist": [
+          "granite",
+          "quarry",
+          "counters",
+          "cut",
+          "owner",
+          "kitchen"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N38",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "shortlist"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N38",
+        "senses": 57,
+        "shortlist": [
+          "said",
+          "harvest",
+          "grape",
+          "vineyard",
+          "large",
+          "year",
+          "owner"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N38",
+        "senses": 57,
+        "shortlist": [
+          "said",
+          "harvest",
+          "grape",
+          "vineyard",
+          "owner",
+          "large",
+          "year"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "N39",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N39",
+        "senses": 69,
+        "shortlist": [
+          "shellfish",
+          "today",
+          "customer",
+          "told",
+          "fresh",
+          "fishmonger"
+        ],
+        "soundalikes": [
+          {
+            "surface": "customer",
+            "char_span": [
+              24,
+              32
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "fishmonger",
+                "phones": [
+                  "F",
+                  "IH",
+                  "SH",
+                  "M",
+                  "AA",
+                  "NG",
+                  "G",
+                  "ER0"
+                ],
+                "sim": 0.8287,
+                "sim_cal": 0.364,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N39",
+        "senses": 68,
+        "shortlist": [
+          "shellfish",
+          "today",
+          "customer",
+          "told",
+          "fresh",
+          "fishmonger"
+        ],
+        "soundalikes": [
+          {
+            "surface": "customer",
+            "char_span": [
+              24,
+              32
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "fishmonger",
+                "phones": [
+                  "F",
+                  "IH",
+                  "SH",
+                  "M",
+                  "AA",
+                  "NG",
+                  "G",
+                  "ER0"
+                ],
+                "sim": 0.8287,
+                "sim_cal": 0.3638,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "N40",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N40",
+        "senses": 73,
+        "shortlist": [
+          "retired",
+          "curtains",
+          "tailor",
+          "sew",
+          "still",
+          "likes",
+          "friends"
+        ],
+        "soundalikes": []
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "N40",
+        "senses": 71,
+        "shortlist": [
+          "retired",
+          "curtains",
+          "tailor",
+          "sew",
+          "still",
+          "likes",
+          "friends"
+        ],
+        "soundalikes": []
+      }
+    },
+    {
+      "id": "T1",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "T1",
+        "senses": 115,
+        "shortlist": [
+          "band",
+          "drama",
+          "broke",
+          "broke up",
+          "drum"
+        ],
+        "soundalikes": [
+          {
+            "surface": "drum",
+            "char_span": [
+              54,
+              58
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "drama",
+                "phones": [
+                  "D",
+                  "R",
+                  "AA",
+                  "M",
+                  "AH0"
+                ],
+                "sim": 0.8897,
+                "sim_cal": 0.5949,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "T1",
+        "senses": 114,
+        "shortlist": [
+          "band",
+          "drama",
+          "broke",
+          "broke up",
+          "drum"
+        ],
+        "soundalikes": [
+          {
+            "surface": "drum",
+            "char_span": [
+              54,
+              58
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "drama",
+                "phones": [
+                  "D",
+                  "R",
+                  "AA",
+                  "M",
+                  "AH0"
+                ],
+                "sim": 0.8897,
+                "sim_cal": 0.6049,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "T2",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "T2",
+        "senses": 93,
+        "shortlist": [
+          "cad",
+          "dating",
+          "purr",
+          "stop",
+          "gain",
+          "realized",
+          "cat",
+          "suing",
+          "purr-suing"
+        ],
+        "soundalikes": [
+          {
+            "surface": "purr-suing",
+            "char_span": [
+              70,
+              80
+            ],
+            "mechanism": "sound_substitution",
+            "alternates": [
+              {
+                "form": "pursuing",
+                "phones": [
+                  "P",
+                  "ER0",
+                  "S",
+                  "UW",
+                  "IH",
+                  "NG"
+                ],
+                "sim": 1.0,
+                "sim_cal": 1.0,
+                "source": "hyphen_merge"
+              }
+            ]
+          },
+          {
+            "surface": "cad",
+            "char_span": [
+              32,
+              35
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "cat",
+                "phones": [
+                  "K",
+                  "AE",
+                  "T"
+                ],
+                "sim": 0.9943,
+                "sim_cal": 0.9774,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "T2",
+        "senses": 92,
+        "shortlist": [
+          "cad",
+          "dating",
+          "purr",
+          "stop",
+          "gain",
+          "realized",
+          "cat",
+          "suing",
+          "purr-suing"
+        ],
+        "soundalikes": [
+          {
+            "surface": "purr-suing",
+            "char_span": [
+              70,
+              80
+            ],
+            "mechanism": "sound_substitution",
+            "alternates": [
+              {
+                "form": "pursuing",
+                "phones": [
+                  "P",
+                  "ER0",
+                  "S",
+                  "UW",
+                  "IH",
+                  "NG"
+                ],
+                "sim": 1.0,
+                "sim_cal": 1.0,
+                "source": "hyphen_merge"
+              }
+            ]
+          },
+          {
+            "surface": "cad",
+            "char_span": [
+              32,
+              35
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "cat",
+                "phones": [
+                  "K",
+                  "AE",
+                  "T"
+                ],
+                "sim": 0.9943,
+                "sim_cal": 0.9774,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "T3",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "T3",
+        "senses": 183,
+        "shortlist": [
+          "cat",
+          "cat-nap",
+          "nap",
+          "bank",
+          "wanted",
+          "cash",
+          "working",
+          "start"
+        ],
+        "soundalikes": [
+          {
+            "surface": "cash",
+            "char_span": [
+              85,
+              89
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "cat",
+                "phones": [
+                  "K",
+                  "AE",
+                  "T"
+                ],
+                "sim": 0.954,
+                "sim_cal": 0.8193,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "T3",
+        "senses": 185,
+        "shortlist": [
+          "cat",
+          "cat-nap",
+          "nap",
+          "bank",
+          "wanted",
+          "cash",
+          "working",
+          "start"
+        ],
+        "soundalikes": [
+          {
+            "surface": "cash",
+            "char_span": [
+              85,
+              89
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "cat",
+                "phones": [
+                  "K",
+                  "AE",
+                  "T"
+                ],
+                "sim": 0.954,
+                "sim_cal": 0.8196,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "TN1",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "TN1",
+        "senses": 41,
+        "shortlist": [
+          "band",
+          "drama",
+          "after",
+          "quit",
+          "drummer",
+          "manager",
+          "months"
+        ],
+        "soundalikes": [
+          {
+            "surface": "drama",
+            "char_span": [
+              42,
+              47
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "drummer",
+                "phones": [
+                  "D",
+                  "R",
+                  "AH",
+                  "M",
+                  "ER0"
+                ],
+                "sim": 0.9724,
+                "sim_cal": 0.8987,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "TN1",
+        "senses": 40,
+        "shortlist": [
+          "band",
+          "drama",
+          "after",
+          "quit",
+          "drummer",
+          "manager",
+          "months"
+        ],
+        "soundalikes": [
+          {
+            "surface": "drama",
+            "char_span": [
+              42,
+              47
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "drummer",
+                "phones": [
+                  "D",
+                  "R",
+                  "AH",
+                  "M",
+                  "ER0"
+                ],
+                "sim": 0.9724,
+                "sim_cal": 0.9012,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "TN2",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "TN2",
+        "senses": 66,
+        "shortlist": [
+          "cad",
+          "bothering",
+          "hissed",
+          "kept",
+          "cat"
+        ],
+        "soundalikes": [
+          {
+            "surface": "cad",
+            "char_span": [
+              22,
+              25
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "cat",
+                "phones": [
+                  "K",
+                  "AE",
+                  "T"
+                ],
+                "sim": 0.9943,
+                "sim_cal": 0.9774,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "kept",
+            "char_span": [
+              30,
+              34
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "hissed",
+                "phones": [
+                  "HH",
+                  "IH",
+                  "S",
+                  "T"
+                ],
+                "sim": 0.8901,
+                "sim_cal": 0.6142,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "TN2",
+        "senses": 68,
+        "shortlist": [
+          "cad",
+          "bothering",
+          "hissed",
+          "kept",
+          "cat"
+        ],
+        "soundalikes": [
+          {
+            "surface": "cad",
+            "char_span": [
+              22,
+              25
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "cat",
+                "phones": [
+                  "K",
+                  "AE",
+                  "T"
+                ],
+                "sim": 0.9943,
+                "sim_cal": 0.9774,
+                "source": "in_text"
+              }
+            ]
+          },
+          {
+            "surface": "kept",
+            "char_span": [
+              30,
+              34
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "hissed",
+                "phones": [
+                  "HH",
+                  "IH",
+                  "S",
+                  "T"
+                ],
+                "sim": 0.8901,
+                "sim_cal": 0.6117,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "TN3",
+      "corpus": "corpus/soundalike_blind.jsonl",
+      "changed": [
+        "senses",
+        "soundalikes"
+      ],
+      "before": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "TN3",
+        "senses": 144,
+        "shortlist": [
+          "next",
+          "bank",
+          "fell",
+          "cash",
+          "asleep",
+          "drawer",
+          "cat"
+        ],
+        "soundalikes": [
+          {
+            "surface": "cash",
+            "char_span": [
+              32,
+              36
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "cat",
+                "phones": [
+                  "K",
+                  "AE",
+                  "T"
+                ],
+                "sim": 0.954,
+                "sim_cal": 0.8193,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "corpus": "corpus/soundalike_blind.jsonl",
+        "id": "TN3",
+        "senses": 145,
+        "shortlist": [
+          "next",
+          "bank",
+          "fell",
+          "cash",
+          "asleep",
+          "drawer",
+          "cat"
+        ],
+        "soundalikes": [
+          {
+            "surface": "cash",
+            "char_span": [
+              32,
+              36
+            ],
+            "mechanism": "sound_pair",
+            "alternates": [
+              {
+                "form": "cat",
+                "phones": [
+                  "K",
+                  "AE",
+                  "T"
+                ],
+                "sim": 0.954,
+                "sim_cal": 0.8196,
+                "source": "in_text"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

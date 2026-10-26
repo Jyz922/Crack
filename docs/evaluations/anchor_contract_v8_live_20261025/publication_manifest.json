@@ -1,0 +1,40 @@
+{
+  "original_run_directory": "runs/anchor_contract_v8/20261026T025827Z",
+  "original_records_sha256": "caa2206d111577e4c046851a65c1ce06007fdc1d45bfd153b5c31735e3fee443",
+  "original_run_meta_sha256": "1091f717146f24e8c58bed209364858ffd334b86786aa536894b66bb4f3e502f",
+  "original_evaluation_sha256": "90445dfec0e5550bb17aeb823391486944cf4db72089e74d1695c82995a7ab6f",
+  "published_records_sha256": "b7f8a43206b5c7869e5f1a01acb49cc879594e4ce6ba2e4628eb076f56a56eff",
+  "published_run_meta_sha256": "1091f717146f24e8c58bed209364858ffd334b86786aa536894b66bb4f3e502f",
+  "published_evaluation_sha256": "90445dfec0e5550bb17aeb823391486944cf4db72089e74d1695c82995a7ab6f",
+  "omitted_record_fields": [
+    "l2_result",
+    "l4_attempts",
+    "age_attempts"
+  ],
+  "item_count": 2,
+  "gold_path": "docs/evaluations/anchor_contract_v8_20261025/newly_valid_gold.jsonl",
+  "gold_sha256": "badfb22a94f174eb4d35e7864456b6ba98df78f077c89a5271d9f56a0cb98181",
+  "git_sha": "7ed6381e959592282475deb12054b3a4e6c0c3c8",
+  "offline_rescore_matches_every_original_metric": true,
+  "offline_rescore_differences": {},
+  "offline_rescore_differs_only_in_historical_contract_provenance": false,
+  "note": "Separate two-item contract-8 repair experiment; not a replacement for either complete frozen run.",
+  "limitations": [
+    "Compact records are an explicitly declared projection, not raw SDK receipts.",
+    "Local structural revalidation and metric arithmetic do not prove model semantic correctness.",
+    "Single runs of a nondeterministic model; compare runs rather than reading one in isolation."
+  ],
+  "l4_requests_sha256": "1dabd23eefb1c53819f4a47905ce2a8061d5586ecd3162f603d25fe02cdf4b5e",
+  "l4_request_projection_fields": [
+    "prompt_text",
+    "prompt_sha256",
+    "model_used",
+    "raw_responses",
+    "parsed_response",
+    "validated_response",
+    "anchor_adjustments",
+    "accepted",
+    "error"
+  ],
+  "l4_request_count": 2
+}

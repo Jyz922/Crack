@@ -1,0 +1,25 @@
+{
+  "original_run_directory": "runs/resource_refresh_soundalike/20261026T014933Z",
+  "original_records_sha256": "ec260d979239c38a214aa3790f93976d4bfd7881da307339e86bff9fee7132dd",
+  "original_run_meta_sha256": "c8a21807c3a20733bdecadad7d592477b307df9dc49b062967a43caf9bba03a6",
+  "original_evaluation_sha256": "299ef636f17151f556f1aacb6404fe994e8ee4cb2936bbc564e33a3585ed8f71",
+  "published_records_sha256": "8efb9b15aeaeb6d944a7e0ae45bf6997f1b245864f3bb19ad7fc1ca7d945c782",
+  "published_run_meta_sha256": "c8a21807c3a20733bdecadad7d592477b307df9dc49b062967a43caf9bba03a6",
+  "published_evaluation_sha256": "299ef636f17151f556f1aacb6404fe994e8ee4cb2936bbc564e33a3585ed8f71",
+  "omitted_record_fields": [
+    "l2_result",
+    "l4_attempts",
+    "age_attempts"
+  ],
+  "item_count": 79,
+  "gold_path": "corpus/soundalike_gold.jsonl",
+  "gold_sha256": "a0ea1848fd0ed68b69ef357ebc3a9ba62195cef40c4fc5d4e8969024255491e8",
+  "git_sha": "7ed6381e959592282475deb12054b3a4e6c0c3c8",
+  "offline_rescore_matches_every_original_metric": true,
+  "note": "User rerun after the October 25 lexical resource refresh. OEWN 2025 and pinned official CMUdict; working-tree source hashes in run_meta.json identify the uncommitted implementation.",
+  "limitations": [
+    "Compact records are an explicitly declared projection, not raw SDK receipts.",
+    "Local structural revalidation and metric arithmetic do not prove model semantic correctness.",
+    "Single runs of a nondeterministic model; compare runs rather than reading one in isolation."
+  ]
+}

@@ -6,10 +6,10 @@ import math
 import re
 from typing import Any
 
-from .enums import AnchorRelation, AnchoringStatus, DistinctnessStatus, AmbiguityAblation
+from .enums import AnchorRelation, AnchoringStatus, DistinctnessStatus, AmbiguityAblation, Genre
 
 
-RESPONSE_CONTRACT_VERSION = "7"
+RESPONSE_CONTRACT_VERSION = "8"
 
 L4_RESPONSE_FIELDS = frozenset({
     "sense_a", "sense_b", "sense_a_anchor_quote", "sense_b_anchor_quote",
@@ -88,6 +88,61 @@ def _occurs(word: str, text: str) -> bool:
     return re.search(rf"(?<![A-Za-z]){re.escape(word)}(?![A-Za-z])", text, re.I) is not None
 
 
+def _split_anchor(quote: str, text: str, term: str) -> tuple[str, list[int] | None]:
+    """Locate an unambiguous split token inside an already verbatim quote.
+
+    This does not align, spell-correct or invent a quotation. A larger quote
+    is narrowed only when both it and the complete target occurrence have
+    unique source locations. Hyphens/apostrophes count as token continuations.
+    """
+    if quote.casefold() == term.casefold():
+        return quote, None  # Preserve previously accepted exact anchors.
+    matches = list(re.finditer(rf"(?<![\w'’\-]){re.escape(term)}(?![\w'’\-])", text, re.I))
+    start = text.find(quote)
+    if len(matches) != 1 or start < 0 or start != text.rfind(quote):
+        raise ModelResponseError("Split anchor must uniquely locate the complete candidate in the source")
+    match = matches[0]
+    if not (start <= match.start() and match.end() <= start + len(quote)):
+        raise ModelResponseError("Split anchor must contain the complete candidate")
+    return text[match.start():match.end()], [match.start(), match.end()]
+
+
+def _definition_head_anchor(text: str, term: str, qa: str, qb: str,
+                            relation: AnchorRelation) -> dict[str, Any] | None:
+    """A lexical heading supplies the written form, its body a separate cue.
+
+    The exception is structural, applies to homographs as well as soundalikes,
+    and establishes anchor admissibility only, never a second meaning/humor.
+    """
+    from .l1_surface import route_genre
+
+    if relation not in {AnchorRelation.SEPARATE_CONTEXTS, AnchorRelation.SOUND_SUBSTITUTION,
+                        AnchorRelation.SOUND_PAIR} or route_genre(text) != Genre.DEFINITIONAL_ONELINER:
+        return None
+    head = re.match(rf"\A\s*({re.escape(term)})[ \t]*:\s*(?=\S)", text, re.I)
+    if head is None:
+        return None
+    fields = ("sense_a_anchor_quote", "sense_b_anchor_quote")
+    quotes = (qa, qb)
+    target_only = [i for i, q in enumerate(quotes) if q.strip().casefold() == term.casefold()]
+    if len(target_only) != 1:
+        return None
+    index = target_only[0]
+    if quotes[index] != head.group(1):
+        return None
+    other = quotes[1 - index]
+    # Keep head/body evidence spatially separate. Ambiguous repetitions of the
+    # other quote cannot establish a unique body location from string anchors.
+    other_start = text.find(other)
+    if not other.strip() or other_start < head.end() or other_start != text.rfind(other):
+        return None
+    return {"rule": "definition_head_anchor", "field": fields[index],
+            "raw_quote": quotes[index], "accepted_quote": quotes[index],
+            "source_span": [head.start(1), head.end(1)],
+            "body_source_span": [other_start, other_start + len(other)],
+            "reason": "Definition heading identifies the written form; a separate body quote supplies context."}
+
+
 def verify_alternate(
     term: str, alternate: str, alternates: list | None, verify_percentile: str = "p95",
 ) -> None:
@@ -118,6 +173,7 @@ def validate_l4_response(
     split_options: list[tuple[str, str]] | None = None,
     alternates: list | None = None,
     verify_percentile: str = "p95",
+    *, anchor_audit: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     # Observed live (gpt-6-luna): the model sometimes appends a content-free
     # `"": ""` after "reasoning". Only that exact empty key with an empty or
@@ -145,6 +201,7 @@ def validate_l4_response(
     b = require_text(p["sense_b"], "sense_b", allow_empty=True)
     qa = source_quote(p["sense_a_anchor_quote"], text, "sense_a_anchor_quote")
     qb = source_quote(p["sense_b_anchor_quote"], text, "sense_b_anchor_quote")
+    anchor_events: list[dict[str, Any]] = []
     alternate = p["alternate_form"]
     if alternate is not None:
         require_text(alternate, "alternate_form")
@@ -158,15 +215,28 @@ def validate_l4_response(
         if p["resolving_sense"] not in ("sense_a", "sense_b") or relation is None:
             raise ModelResponseError("L4 PASS requires an explicit resolving sense and relation")
         if relation == AnchorRelation.RESEGMENTATION:
-            if not is_split or qa.casefold() != term.casefold() or qb.casefold() != term.casefold():
+            if not is_split:
                 raise ModelResponseError("Split anchors must name a detected compound-split candidate")
             # A hyphenated surface ("cat-nap") keeps its verbatim quote; its
             # parts join to the term without hyphens.
             if (tuple(parts) not in (split_options or [])
                     or "".join(parts).casefold() != term.replace("-", "").casefold()):
                 raise ModelResponseError("split_parts must equal a supplied segmentation of the candidate")
+            for field, quote in (("sense_a_anchor_quote", qa), ("sense_b_anchor_quote", qb)):
+                normalized, span = _split_anchor(quote, text, term)
+                if span is not None:
+                    anchor_events.append({"rule": "split_token_narrowing", "field": field,
+                        "raw_quote": quote, "accepted_quote": normalized, "source_span": span,
+                        "reason": "Verbatim enclosing quote uniquely locates the supplied split token."})
+                if field == "sense_a_anchor_quote":
+                    qa = normalized
+                else:
+                    qb = normalized
         elif qa.casefold() == qb.casefold() or any(q.strip().casefold() == term.casefold() for q in (qa, qb)):
-            raise ModelResponseError("Non-split anchors must be different context spans, not just the candidate word")
+            heading = _definition_head_anchor(text, term, qa, qb, relation)
+            if heading is None:
+                raise ModelResponseError("Non-split anchors must be different context spans, not just the candidate word")
+            anchor_events.append(heading)
         if relation != AnchorRelation.RESEGMENTATION and parts:
             raise ModelResponseError("Non-split findings require empty split_parts")
         if relation in SOUND_RELATIONS:
@@ -182,9 +252,11 @@ def validate_l4_response(
             raise ModelResponseError("Non-PASS status contradicts a claimed resolving sense or relation")
         if status == AnchoringStatus.ONE_SENSE_ONLY and not ((a.strip() and qa) or (b.strip() and qb)):
             raise ModelResponseError("ONE_SENSE_ONLY requires an identified meaning with source evidence")
-    # Canonicalize only a verified candidate identifier. Leave the caller's
-    # raw/parsed response and every source quote unchanged for auditing.
-    return {**p, "target_term": term}
+    # Do not mutate the raw/parsed model response. Only accepted, deterministic
+    # anchor processing is recorded; no event is committed on validation error.
+    if anchor_audit is not None:
+        anchor_audit.extend(anchor_events)
+    return {**p, "target_term": term, "sense_a_anchor_quote": qa, "sense_b_anchor_quote": qb}
 
 
 def validate_l5_response(value: Any, score_keys: set[str]) -> dict[str, Any]:

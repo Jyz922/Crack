@@ -151,7 +151,7 @@ registry order is unchanged.
 
 | Stage | Soundalike responsibility | Implementation |
 |---|---|---|
-| P0 | Words and 1–3-token spans to phones via `nltk.corpus.cmudict` (stress stripped except AH0 → ə, ER0 → ə˞); hyphenated coinages looked up whole, then by parts; one explicit ARPAbet → IPA table checked against PanPhon at import. No g2p fallback: a miss is reported. | `phonetics/lexicon.py`, `phonetics/features.py` |
+| P0 | Words and 1–3-token spans to phones via the pinned official `cmusphinx/cmudict` snapshot (stress stripped except AH0 → ə, ER0 → ə˞); hyphenated coinages looked up whole, then by parts; one explicit ARPAbet → IPA table checked against PanPhon at import. No g2p fallback: a miss is reported. | `phonetics/lexicon.py`, `phonetics/features.py` |
 | P1 | Graded sound similarity and length calibration (formulas below). | `phonetics/similarity.py`, `phonetics/calibration.py` |
 | P2 | Recall-only finder: content-word pairs in the text kept at the p95 random-pair similarity for their length (`PHONETIC_RETRIEVE_PERCENTILE`), word families skipped; hyphen merges that exactly match a real word. | `l3_soundalikes.py` |
 | L1 | Also records hyphenated spans in `hyphen_groups`; `tokens` unchanged. | `l1_surface.py` |
@@ -162,9 +162,9 @@ registry order is unchanged.
 | L7/L8 | The alternate's words are added to the AoA lookup table (citable, not mandatory). | `age_evidence.age_inputs` |
 | L0-post | Soundalike PASS → `SOUNDALIKE` / `VALID_SOUNDALIKE_JOKE`; label sites in `runner.py`, `serve.py` and `static/index.html` updated. | `runner._l0_post_layer`, `l0_scope.py`, `decisions.py`, `enums.py` |
 
-Licence note: the lexicon uses NLTK's `cmudict` corpus (BSD-style CMU data)
-rather than the PyPI `cmudict` package, which is GPL-3.0-or-later while CRACK
-is MIT. PanPhon (MIT) is pinned at 0.22.2; its CSVs are read as UTF-8 by
+Licence note: the pronunciation lexicon uses the official CMU snapshot (BSD-2-Clause),
+not a PyPI dictionary wrapper. OEWN 2025 uses CC BY 4.0. Exact versions,
+SHA-256 hashes and attribution live in `src/crack/resource_data/`. PanPhon (MIT) is pinned at 0.22.2; its CSVs are read as UTF-8 by
 `phonetics/features.py` because `panphon.FeatureTable` fails on Windows
 without `PYTHONUTF8`.
 
@@ -195,3 +195,20 @@ is made.
 source fingerprint hashes `src/crack/**/*.py` recursively, so changes under
 `phonetics/` also invalidate resumed records. `heterographic_homophone` is now
 an accepted mechanism in `config.py`.
+
+
+### October 25 lexical data update
+
+L2 now retrieves senses and morphological analyses from Open English Wordnet
+2025. NLTK's WordNet 3.0 reader remains an explicitly historical SemCor count
+source. Counts join by exact sense key rather than synset name or offset, since
+names such as `cat.n.01` change meaning between inventories. The official OEWN
+2025 WNDB package retains a 2023 header; the reader identifies the verified
+release from the manifest without editing upstream files.
+
+`python scripts/fetch_lexical_resources.py` explicitly downloads pinned files.
+At first access in a process, missing or modified files fail with a setup hint;
+there is no implicit fallback to the old dictionaries. Phonetic calibration is
+bound to its CMU snapshot and must be regenerated when that snapshot changes.
+Run metadata and resume compatibility include resource identities, calibration
+and AoA checksums. See [migration evidence](docs/resource_refresh_20261025.md).

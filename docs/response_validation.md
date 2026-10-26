@@ -1,12 +1,20 @@
 # Response validation and terminal states
 
-Current detection contract: `7`; candidate-selection policy: `5`.
+Current detection contract: `8`; candidate-selection policy: `5`.
 Every model answer is checked locally before it becomes a layer result.
 The pipeline does not repair an invalid response with another model request.
 One content-free artefact is ignored locally: an L4 entry whose key and value
 are both empty (`"": ""`, observed from gpt-6-luna). Any other extra or missing
 key still rejects the response. A soundalike alternate that fails phonetic
 verification makes L4 a `FAIL` (a negative finding), not an error.
+
+Contract 8 adds two structural anchor admissibility rules, described in
+[the design and replay report](anchor_contract_v8_20261025.md): a verbatim
+enclosing split quote can be narrowed to an unambiguous complete target token;
+a lexical definition heading can supply one anchor when a separate, uniquely
+located body quote supplies the other. Neither rule supplies a meaning or a
+positive humor decision. Original model responses remain unchanged alongside
+the validated response and explicit anchor audit events.
 
 ## Layer states and stopping
 

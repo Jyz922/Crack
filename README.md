@@ -16,6 +16,37 @@ Curious how it works? [Try the live demo](https://crack-8s9j.onrender.com): ente
   <img src="assets/demo.gif" alt="CRACK interactive analysis interface" width="100%">
 </p>
 
+## Lexical resource refresh — October 25, 2026
+
+The active semantic dictionary is **Open English Wordnet 2025**, and pronunciation
+lookup uses the official **cmusphinx/cmudict** snapshot `74790861f652b15e4ac49015a90074ad62a27690`
+(October 24, 2025). Both downloads are SHA-256 pinned in
+`src/crack/resource_data/manifest.json`; PanPhon remains at 0.22.2, the latest
+published release checked on October 25, 2026.
+
+Fetch the resources after installation:
+
+```bash
+python scripts/fetch_lexical_resources.py
+```
+
+Princeton WordNet 3.0 is retained only for historical SemCor-derived frequency
+counts, joined to current senses by exact lemma sense key. It is not the active
+sense inventory. AoA ratings retain their published provenance rather than
+being replaced with unvalidated newer estimates.
+
+**The October 23 live scores below predate this refresh.** The six required raw
+sound scores are unchanged, but calibration and candidate shortlists change.
+Local checks cover 139 texts. Subsequent user live reruns scored **71/79**
+on soundalikes and **53/60** on the original regression corpus. See the
+[live comparison and error analysis](docs/resource_refresh_live_20261025.md).
+The subsequent frozen full runs achieved **71/79** binary correct on soundalikes
+and **54/60** on regression, with one execution failure each. A separate
+contract-8 follow-up resolved both failures (2/2 binary correct, 1/2 mechanism
+labels matching); it does not replace either full-run result. Full rendered L4
+prompts and audit records accompany the [final results](docs/final_results_20261025.md).
+See [resource versions, migration checks and limitations](docs/resource_refresh_20261025.md).
+
 ## Evaluation data and reported results
 
 This version adds live soundalike results and two homograph regression runs
@@ -122,8 +153,8 @@ The current design prioritizes a reliable, bounded pipeline: every required
 stage must complete with usable evidence, uncertainty stays explicit, and
 failure stops dependent work. Detection and age outputs are separate. The
 historical benchmark results above predate this design. The October 23 runs
-evaluate the current source, including the soundalike extension; the October 4
-runs predate it.
+evaluate the soundalike extension before the October 25 resource refresh; the
+October 4 runs predate the extension.
 
 ```text
 Text + explicitly requested ages
@@ -314,7 +345,7 @@ Implementation details: [ARCHITECTURE.md](ARCHITECTURE.md),
 [response validation](docs/response_validation.md) and
 [failure recovery policy](docs/provider_failure_policy.md) and
 [age evidence](docs/age_evidence.md). Current record versions are detection
-contract `6`, candidate selection `4`, age contract `3` and age aggregation `4`.
+contract `8`, candidate selection `5`, age contract `3` and age aggregation `4`.
 
 ## Installation
 
@@ -326,6 +357,7 @@ cd Crack
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e .
+python scripts/fetch_lexical_resources.py
 ```
 
 CRACK needs an API key for the selected LLM provider. Copy `.env.example` to `.env`, then set the provider key and, if needed, `DOUBLETAKE_BACKEND` (`openai`, `gemini`, `anthropic`, or `deepseek`). You can also pass a provider with `--backend`.
@@ -443,7 +475,7 @@ Prompt changes can be compared with the
 Run the current offline contract and pipeline regressions with:
 
 ```bash
-pip install -e ".[test]"
+pip install -e ".[test,web]"
 pytest -q -m "not live"
 ```
 

@@ -1,0 +1,66 @@
+{
+  "total_items": 60,
+  "recorded_items": 60,
+  "missing_items": 0,
+  "unverified_contract_items": 0,
+  "correct_classification": 54,
+  "classification_accuracy": 0.9,
+  "decided_items": 59,
+  "decision_coverage": 0.9833,
+  "classification_accuracy_on_decided": 0.9153,
+  "outcome_counts": {
+    "PUN": 25,
+    "NON_PUN": 34,
+    "INSUFFICIENT_EVIDENCE": 0,
+    "EXECUTION_FAILED": 1,
+    "OUT_OF_SCOPE": 0
+  },
+  "confusion_matrix": {
+    "VALID_HOMOGRAPH_JOKE": {
+      "VALID_HOMOGRAPH_JOKE": 20,
+      "ONE_SENSE_ONLY": 1
+    },
+    "VALID_COMPOUND_SPLIT_JOKE": {
+      "VALID_COMPOUND_SPLIT_JOKE": 2,
+      "ONE_SENSE_ONLY": 1,
+      "EXECUTION_FAILED": 1
+    },
+    "ONE_SENSE_ONLY": {
+      "ONE_SENSE_ONLY": 32,
+      "VALID_HOMOGRAPH_JOKE": 3
+    }
+  },
+  "total_age_evals": 180,
+  "correct_age_evals": 50,
+  "age_accuracy": 0.2778,
+  "assessed_age_evals": 70,
+  "age_assessment_coverage": 0.3889,
+  "age_accuracy_on_assessed": 0.7143,
+  "age_gold_puns": {
+    "total_labels": 75,
+    "assessed_labels": 62,
+    "correct_labels": 44,
+    "accuracy_all_labels": 0.5867,
+    "assessment_coverage": 0.8267,
+    "accuracy_on_assessed": 0.7097
+  },
+  "binary_detection": {
+    "eligible_items": 60,
+    "decided_items": 59,
+    "decision_coverage": 0.9833,
+    "correct": 54,
+    "accuracy_all_items": 0.9,
+    "accuracy_on_decided": 0.9153,
+    "precision_on_decided": 0.88,
+    "recall_on_decided": 0.9167,
+    "f1_on_decided": 0.898,
+    "tp": 22,
+    "fp": 3,
+    "tn": 32,
+    "fn": 2,
+    "abstentions_by_gold_class": {
+      "positive": 1,
+      "negative": 0
+    }
+  }
+}

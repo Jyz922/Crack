@@ -1,0 +1,1201 @@
+[
+  {
+    "id": "S01",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "way",
+    "pun_word": "whey",
+    "candidates": []
+  },
+  {
+    "id": "S02",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "need",
+    "pun_word": "knead",
+    "candidates": []
+  },
+  {
+    "id": "S03",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "soul",
+    "pun_word": "sole",
+    "candidates": [
+      {
+        "surface": "boot",
+        "char_span": [
+          46,
+          50
+        ],
+        "mechanism": "sound_pair",
+        "alternates": [
+          {
+            "form": "put",
+            "phones": [
+              "P",
+              "UH",
+              "T"
+            ],
+            "sim": 0.9713,
+            "sim_cal": 0.8872,
+            "source": "in_text"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "S04",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "muscle",
+    "pun_word": "mussel",
+    "candidates": []
+  },
+  {
+    "id": "S05",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "serial",
+    "pun_word": "cereal",
+    "candidates": []
+  },
+  {
+    "id": "S06",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "pain",
+    "pun_word": "pane",
+    "candidates": []
+  },
+  {
+    "id": "S07",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "real",
+    "pun_word": "reel",
+    "candidates": []
+  },
+  {
+    "id": "S08",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "hair",
+    "pun_word": "hare",
+    "candidates": []
+  },
+  {
+    "id": "S09",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "karat",
+    "pun_word": "carrot",
+    "candidates": []
+  },
+  {
+    "id": "S10",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "flowers",
+    "pun_word": "flours",
+    "candidates": []
+  },
+  {
+    "id": "S11",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "let us",
+    "pun_word": "lettuce",
+    "candidates": [
+      {
+        "surface": "said",
+        "char_span": [
+          29,
+          33
+        ],
+        "mechanism": "sound_pair",
+        "alternates": [
+          {
+            "form": "chef",
+            "phones": [
+              "SH",
+              "EH",
+              "F"
+            ],
+            "sim": 0.9224,
+            "sim_cal": 0.6955,
+            "source": "in_text"
+          }
+        ]
+      },
+      {
+        "surface": "Lettuce",
+        "char_span": [
+          36,
+          43
+        ],
+        "mechanism": "sound_pair",
+        "alternates": [
+          {
+            "form": "salad",
+            "phones": [
+              "S",
+              "AE",
+              "L",
+              "AH0",
+              "D"
+            ],
+            "sim": 0.8724,
+            "sim_cal": 0.5432,
+            "source": "in_text"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "S12",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "dying",
+    "pun_word": "dyeing",
+    "candidates": []
+  },
+  {
+    "id": "S13",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "missed",
+    "pun_word": "mist",
+    "candidates": []
+  },
+  {
+    "id": "S14",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "morning",
+    "pun_word": "mourning",
+    "candidates": []
+  },
+  {
+    "id": "S15",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "tense",
+    "pun_word": "tents",
+    "candidates": []
+  },
+  {
+    "id": "S16",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "seize",
+    "pun_word": "seas",
+    "candidates": []
+  },
+  {
+    "id": "S17",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "wail",
+    "pun_word": "whale",
+    "candidates": [
+      {
+        "surface": "long",
+        "char_span": [
+          32,
+          36
+        ],
+        "mechanism": "sound_pair",
+        "alternates": [
+          {
+            "form": "song",
+            "phones": [
+              "S",
+              "AO",
+              "NG"
+            ],
+            "sim": 0.931,
+            "sim_cal": 0.7293,
+            "source": "in_text"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "S18",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "peer",
+    "pun_word": "pier",
+    "candidates": []
+  },
+  {
+    "id": "S19",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "night",
+    "pun_word": "knight",
+    "candidates": [
+      {
+        "surface": "shift",
+        "char_span": [
+          59,
+          64
+        ],
+        "mechanism": "sound_pair",
+        "alternates": [
+          {
+            "form": "slept",
+            "phones": [
+              "S",
+              "L",
+              "EH",
+              "P",
+              "T"
+            ],
+            "sim": 0.8655,
+            "sim_cal": 0.5185,
+            "source": "in_text"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "S20",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "towed",
+    "pun_word": "toad",
+    "candidates": []
+  },
+  {
+    "id": "S21",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "bored",
+    "pun_word": "board",
+    "candidates": []
+  },
+  {
+    "id": "S22",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "you",
+    "pun_word": "ewe",
+    "candidates": []
+  },
+  {
+    "id": "S23",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "a ledge",
+    "pun_word": "alleged",
+    "candidates": []
+  },
+  {
+    "id": "S25",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "profane",
+    "pun_word": "propane",
+    "candidates": [
+      {
+        "surface": "gas",
+        "char_span": [
+          23,
+          26
+        ],
+        "mechanism": "sound_pair",
+        "alternates": [
+          {
+            "form": "bought",
+            "phones": [
+              "B",
+              "AA",
+              "T"
+            ],
+            "sim": 0.908,
+            "sim_cal": 0.6391,
+            "source": "in_text"
+          }
+        ]
+      },
+      {
+        "surface": "propane",
+        "char_span": [
+          91,
+          98
+        ],
+        "mechanism": "sound_pair",
+        "alternates": [
+          {
+            "form": "proceeds",
+            "phones": [
+              "P",
+              "R",
+              "OW",
+              "S",
+              "IY",
+              "D",
+              "Z"
+            ],
+            "sim": 0.8685,
+            "sim_cal": 0.5118,
+            "source": "in_text"
+          },
+          {
+            "form": "sacred",
+            "phones": [
+              "S",
+              "EY",
+              "K",
+              "R",
+              "IH",
+              "D"
+            ],
+            "sim": 0.8254,
+            "sim_cal": 0.3518,
+            "source": "in_text"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "S26",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "least",
+    "pun_word": "yeast",
+    "candidates": [
+      {
+        "surface": "flat",
+        "char_span": [
+          19,
+          23
+        ],
+        "mechanism": "sound_pair",
+        "alternates": [
+          {
+            "form": "bread",
+            "phones": [
+              "B",
+              "R",
+              "EH",
+              "D"
+            ],
+            "sim": 0.8922,
+            "sim_cal": 0.6194,
+            "source": "in_text"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "S27",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "tune",
+    "pun_word": "tuna",
+    "candidates": []
+  },
+  {
+    "id": "S28",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "walk",
+    "pun_word": "wok",
+    "candidates": []
+  },
+  {
+    "id": "S29",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "closed",
+    "pun_word": "clothed",
+    "candidates": []
+  },
+  {
+    "id": "S30",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "granted",
+    "pun_word": "granite",
+    "candidates": []
+  },
+  {
+    "id": "S31",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "be",
+    "pun_word": "bee",
+    "candidates": []
+  },
+  {
+    "id": "S32",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "great",
+    "pun_word": "grape",
+    "candidates": []
+  },
+  {
+    "id": "S33",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "selfish",
+    "pun_word": "shellfish",
+    "candidates": [
+      {
+        "surface": "customer",
+        "char_span": [
+          31,
+          39
+        ],
+        "mechanism": "sound_pair",
+        "alternates": [
+          {
+            "form": "fishmonger",
+            "phones": [
+              "F",
+              "IH",
+              "SH",
+              "M",
+              "AA",
+              "NG",
+              "G",
+              "ER0"
+            ],
+            "sim": 0.8287,
+            "sim_cal": 0.3638,
+            "source": "in_text"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "S34",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "so",
+    "pun_word": "sew",
+    "candidates": []
+  },
+  {
+    "id": "N01",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "whey",
+    "candidates": []
+  },
+  {
+    "id": "N02",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "way",
+    "candidates": []
+  },
+  {
+    "id": "N03",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "knead",
+    "candidates": []
+  },
+  {
+    "id": "N04",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "need",
+    "candidates": []
+  },
+  {
+    "id": "N05",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "sole",
+    "candidates": []
+  },
+  {
+    "id": "N06",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "mussel",
+    "candidates": []
+  },
+  {
+    "id": "N07",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "cereal",
+    "candidates": []
+  },
+  {
+    "id": "N08",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "pane",
+    "candidates": []
+  },
+  {
+    "id": "N09",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "reel",
+    "candidates": []
+  },
+  {
+    "id": "N10",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "hare",
+    "candidates": []
+  },
+  {
+    "id": "N11",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "carrot",
+    "candidates": []
+  },
+  {
+    "id": "N12",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "flour",
+    "candidates": []
+  },
+  {
+    "id": "N13",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "let us",
+    "candidates": [
+      {
+        "surface": "Let",
+        "char_span": [
+          36,
+          39
+        ],
+        "mechanism": "sound_pair",
+        "alternates": [
+          {
+            "form": "said",
+            "phones": [
+              "S",
+              "EH",
+              "D"
+            ],
+            "sim": 0.9253,
+            "sim_cal": 0.7068,
+            "source": "in_text"
+          }
+        ]
+      },
+      {
+        "surface": "said",
+        "char_span": [
+          29,
+          33
+        ],
+        "mechanism": "sound_pair",
+        "alternates": [
+          {
+            "form": "chef",
+            "phones": [
+              "SH",
+              "EH",
+              "F"
+            ],
+            "sim": 0.9224,
+            "sim_cal": 0.6955,
+            "source": "in_text"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "N14",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "lettuce",
+    "candidates": [
+      {
+        "surface": "lettuce",
+        "char_span": [
+          40,
+          47
+        ],
+        "mechanism": "sound_pair",
+        "alternates": [
+          {
+            "form": "salad",
+            "phones": [
+              "S",
+              "AE",
+              "L",
+              "AH0",
+              "D"
+            ],
+            "sim": 0.8724,
+            "sim_cal": 0.5432,
+            "source": "in_text"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "N15",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "dyeing",
+    "candidates": []
+  },
+  {
+    "id": "N16",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "mist",
+    "candidates": []
+  },
+  {
+    "id": "N17",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "mourning",
+    "candidates": []
+  },
+  {
+    "id": "N18",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "morning",
+    "candidates": []
+  },
+  {
+    "id": "N19",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "tents",
+    "candidates": []
+  },
+  {
+    "id": "N20",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "seas",
+    "candidates": []
+  },
+  {
+    "id": "N21",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "whale",
+    "candidates": []
+  },
+  {
+    "id": "N22",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "pier",
+    "candidates": []
+  },
+  {
+    "id": "N23",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "knight",
+    "candidates": [
+      {
+        "surface": "knight",
+        "char_span": [
+          27,
+          33
+        ],
+        "mechanism": "sound_pair",
+        "alternates": [
+          {
+            "form": "made",
+            "phones": [
+              "M",
+              "EY",
+              "D"
+            ],
+            "sim": 0.9591,
+            "sim_cal": 0.8554,
+            "source": "in_text"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "N24",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "frog",
+    "candidates": []
+  },
+  {
+    "id": "N25",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "carpenters",
+    "candidates": []
+  },
+  {
+    "id": "N26",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "board",
+    "candidates": []
+  },
+  {
+    "id": "N27",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "ewe",
+    "candidates": []
+  },
+  {
+    "id": "N28",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "Tom",
+    "candidates": []
+  },
+  {
+    "id": "N29",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "ledge",
+    "candidates": []
+  },
+  {
+    "id": "N30",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "knead",
+    "candidates": []
+  },
+  {
+    "id": "N31",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "propane",
+    "candidates": [
+      {
+        "surface": "gas",
+        "char_span": [
+          23,
+          26
+        ],
+        "mechanism": "sound_pair",
+        "alternates": [
+          {
+            "form": "bought",
+            "phones": [
+              "B",
+              "AA",
+              "T"
+            ],
+            "sim": 0.908,
+            "sim_cal": 0.6391,
+            "source": "in_text"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "N32",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "least",
+    "candidates": [
+      {
+        "surface": "flat",
+        "char_span": [
+          19,
+          23
+        ],
+        "mechanism": "sound_pair",
+        "alternates": [
+          {
+            "form": "bread",
+            "phones": [
+              "B",
+              "R",
+              "EH",
+              "D"
+            ],
+            "sim": 0.8922,
+            "sim_cal": 0.6194,
+            "source": "in_text"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "N33",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "tune",
+    "candidates": []
+  },
+  {
+    "id": "N34",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "wok",
+    "candidates": []
+  },
+  {
+    "id": "N35",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "closed",
+    "candidates": []
+  },
+  {
+    "id": "N36",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "granite",
+    "candidates": []
+  },
+  {
+    "id": "N37",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "be",
+    "candidates": []
+  },
+  {
+    "id": "N38",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "grape",
+    "candidates": []
+  },
+  {
+    "id": "N39",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "shellfish",
+    "candidates": [
+      {
+        "surface": "customer",
+        "char_span": [
+          24,
+          32
+        ],
+        "mechanism": "sound_pair",
+        "alternates": [
+          {
+            "form": "fishmonger",
+            "phones": [
+              "F",
+              "IH",
+              "SH",
+              "M",
+              "AA",
+              "NG",
+              "G",
+              "ER0"
+            ],
+            "sim": 0.8287,
+            "sim_cal": 0.3638,
+            "source": "in_text"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "N40",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "sew",
+    "candidates": []
+  },
+  {
+    "id": "T1",
+    "negative": false,
+    "mechanism": "sound_pair",
+    "target": "drama",
+    "pun_word": "drum",
+    "candidates": [
+      {
+        "surface": "drum",
+        "char_span": [
+          54,
+          58
+        ],
+        "mechanism": "sound_pair",
+        "alternates": [
+          {
+            "form": "drama",
+            "phones": [
+              "D",
+              "R",
+              "AA",
+              "M",
+              "AH0"
+            ],
+            "sim": 0.8897,
+            "sim_cal": 0.6049,
+            "source": "in_text"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "T2",
+    "negative": false,
+    "mechanism": "sound_substitution",
+    "target": "pursuing",
+    "pun_word": "purr-suing",
+    "candidates": [
+      {
+        "surface": "purr-suing",
+        "char_span": [
+          70,
+          80
+        ],
+        "mechanism": "sound_substitution",
+        "alternates": [
+          {
+            "form": "pursuing",
+            "phones": [
+              "P",
+              "ER0",
+              "S",
+              "UW",
+              "IH",
+              "NG"
+            ],
+            "sim": 1.0,
+            "sim_cal": 1.0,
+            "source": "hyphen_merge"
+          }
+        ]
+      },
+      {
+        "surface": "cad",
+        "char_span": [
+          32,
+          35
+        ],
+        "mechanism": "sound_pair",
+        "alternates": [
+          {
+            "form": "cat",
+            "phones": [
+              "K",
+              "AE",
+              "T"
+            ],
+            "sim": 0.9943,
+            "sim_cal": 0.9774,
+            "source": "in_text"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "T3",
+    "negative": false,
+    "mechanism": "resegmentation",
+    "target": "cat + nap",
+    "pun_word": "cat-nap",
+    "candidates": [
+      {
+        "surface": "cash",
+        "char_span": [
+          85,
+          89
+        ],
+        "mechanism": "sound_pair",
+        "alternates": [
+          {
+            "form": "cat",
+            "phones": [
+              "K",
+              "AE",
+              "T"
+            ],
+            "sim": 0.954,
+            "sim_cal": 0.8196,
+            "source": "in_text"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "TN1",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "drama",
+    "candidates": [
+      {
+        "surface": "drama",
+        "char_span": [
+          42,
+          47
+        ],
+        "mechanism": "sound_pair",
+        "alternates": [
+          {
+            "form": "drummer",
+            "phones": [
+              "D",
+              "R",
+              "AH",
+              "M",
+              "ER0"
+            ],
+            "sim": 0.9724,
+            "sim_cal": 0.9012,
+            "source": "in_text"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "TN2",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "cad",
+    "candidates": [
+      {
+        "surface": "cad",
+        "char_span": [
+          22,
+          25
+        ],
+        "mechanism": "sound_pair",
+        "alternates": [
+          {
+            "form": "cat",
+            "phones": [
+              "K",
+              "AE",
+              "T"
+            ],
+            "sim": 0.9943,
+            "sim_cal": 0.9774,
+            "source": "in_text"
+          }
+        ]
+      },
+      {
+        "surface": "kept",
+        "char_span": [
+          30,
+          34
+        ],
+        "mechanism": "sound_pair",
+        "alternates": [
+          {
+            "form": "hissed",
+            "phones": [
+              "HH",
+              "IH",
+              "S",
+              "T"
+            ],
+            "sim": 0.8901,
+            "sim_cal": 0.6117,
+            "source": "in_text"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "TN3",
+    "negative": true,
+    "mechanism": null,
+    "target": null,
+    "pun_word": "cash",
+    "candidates": [
+      {
+        "surface": "cash",
+        "char_span": [
+          32,
+          36
+        ],
+        "mechanism": "sound_pair",
+        "alternates": [
+          {
+            "form": "cat",
+            "phones": [
+              "K",
+              "AE",
+              "T"
+            ],
+            "sim": 0.954,
+            "sim_cal": 0.8196,
+            "source": "in_text"
+          }
+        ]
+      }
+    ]
+  }
+]

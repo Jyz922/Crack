@@ -1,0 +1,25 @@
+{
+  "original_run_directory": "runs/resource_refresh_regression/20261026T015247Z",
+  "original_records_sha256": "b74d918d3b4a8a36f5500192e5cc31ae8abdfba70590c4017443b14608a6f82b",
+  "original_run_meta_sha256": "552fb99ed80979b568a6d816ca4c092a72a33a86fd03efba95212601a348103a",
+  "original_evaluation_sha256": "b344d0f53d439a33a490676a93aed6210240d956d64a0ad9cd75f5616b459c59",
+  "published_records_sha256": "3f3d6e66e9dbecd2680df63832569dfe6f8565d940398b7dc104e10e23cc619f",
+  "published_run_meta_sha256": "552fb99ed80979b568a6d816ca4c092a72a33a86fd03efba95212601a348103a",
+  "published_evaluation_sha256": "b344d0f53d439a33a490676a93aed6210240d956d64a0ad9cd75f5616b459c59",
+  "omitted_record_fields": [
+    "l2_result",
+    "l4_attempts",
+    "age_attempts"
+  ],
+  "item_count": 60,
+  "gold_path": "corpus/joke_corpus_gold.jsonl",
+  "gold_sha256": "103769879da029a0f8defe5f2c62674a22cc0142015689ce4ed2eb8efd4607cc",
+  "git_sha": "7ed6381e959592282475deb12054b3a4e6c0c3c8",
+  "offline_rescore_matches_every_original_metric": true,
+  "note": "User rerun after the October 25 lexical resource refresh. One L4 extra-field validation error; working-tree source hashes in run_meta.json identify the uncommitted implementation.",
+  "limitations": [
+    "Compact records are an explicitly declared projection, not raw SDK receipts.",
+    "Local structural revalidation and metric arithmetic do not prove model semantic correctness.",
+    "Single runs of a nondeterministic model; compare runs rather than reading one in isolation."
+  ]
+}

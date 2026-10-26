@@ -1,7 +1,8 @@
-"""L2: deterministic sense retrieval — WordNet senses + SemCor counts + Kuperman AoA.
+"""L2: Open English Wordnet 2025 senses + historical SemCor counts + Kuperman AoA.
 
 Data lives under <repo>/data/ (gitignored):
-  - nltk_data/  WordNet 3.0, downloaded on first use.
+  - lexical_resources/  verified Open English Wordnet 2025, fetched explicitly.
+  - nltk_data/  WordNet 3.0 retained only for historical SemCor sense-key counts.
   - aoa_kuperman.csv  produced by scripts/fetch_aoa.py (not auto-downloaded:
     the fetch pins a checksum and should be run deliberately).
 
@@ -27,15 +28,19 @@ reports which stage matched, so a miss is visible downstream (L7), never silent:
 from __future__ import annotations
 
 import csv
+import hashlib
 import re
+import warnings
 from collections import Counter
 from functools import lru_cache, wraps
 from pathlib import Path
 from threading import RLock
 
 import nltk
+from nltk.corpus.reader import WordNetCorpusReader
 
 from .schema import SenseEntry
+from .lexical_resources import resource_directory, resource_manifest
 
 DATA_DIR = Path(__file__).resolve().parents[2] / "data"
 NLTK_DIR = DATA_DIR / "nltk_data"
@@ -76,8 +81,8 @@ def _wordnet_locked(fn):
 
 @_wordnet_locked
 @lru_cache(maxsize=1)
-def wordnet():
-    """WordNet corpus reader; downloads to data/nltk_data on first use."""
+def _legacy_wordnet():
+    """Princeton reference for unchanged historical SemCor sense keys."""
     if str(NLTK_DIR) not in nltk.data.path:
         nltk.data.path.insert(0, str(NLTK_DIR))
     try:
@@ -89,15 +94,49 @@ def wordnet():
             nltk.download("wordnet", download_dir=str(NLTK_DIR), quiet=True, raise_on_error=True)
     from nltk.corpus import wordnet as wn
     wn.ensure_loaded()
+    expected = resource_manifest()["semcor_reference"]["cntlist_sha256"]
+    with wn.open("cntlist.rev") as handle:
+        actual = hashlib.sha256(handle.read().encode("utf-8")).hexdigest()
+    if actual != expected:
+        raise ValueError("WordNet 3.0 SemCor counts differ from the pinned reference")
     return wn
+
+
+class _OpenEnglishWordnet(WordNetCorpusReader):
+    def get_version(self):
+        # The official 2025 WNDB archive retains a stale 2023 header. Identify
+        # this verified release by its manifest, without editing upstream data.
+        return resource_manifest()["resources"]["oewn"]["version"]
+
+    def lemma_count(self, lemma):
+        # Use the exact sense key, never a synset name/offset whose meaning may
+        # have moved in OEWN. Unattested new keys have count zero, not a guess.
+        return _legacy_wordnet().lemma_count(lemma)
+
+
+@_wordnet_locked
+@lru_cache(maxsize=1)
+def wordnet():
+    """The pinned OEWN inventory, with explicitly historical count evidence."""
+    _legacy_wordnet()  # NLTK builds its cross-version sense-key map at init.
+    root = resource_directory("oewn")
+    if str(root.parent) not in nltk.data.path:
+        nltk.data.path.insert(0, str(root.parent))
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="The multilingual functions are not available")
+        return _OpenEnglishWordnet(str(root), None)
 
 
 @_wordnet_locked
 @lru_cache(maxsize=1)
 def _lemmatizer():
     from nltk.stem import WordNetLemmatizer
-    wordnet()  # ensure data path is set before first use
-    return WordNetLemmatizer()
+
+    class CurrentLemmatizer(WordNetLemmatizer):
+        def _morphy(self, form, pos, check_exceptions=True):
+            return wordnet()._morphy(form, pos, check_exceptions)
+
+    return CurrentLemmatizer()
 
 
 @_wordnet_locked

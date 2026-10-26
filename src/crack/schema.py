@@ -166,11 +166,14 @@ class L4Attempt(BaseModel):
     candidate_terms: list[str] = Field(default_factory=list)
     attempt: int
     prompt_sha256: str
+    prompt_text: str | None = None
     model_used: str = ""
     provider_retries: int = 0
     fallback_used: bool = False
     raw_responses: list[str] = Field(default_factory=list)
     parsed_response: Optional[dict[str, Any]] = None
+    validated_response: Optional[dict[str, Any]] = None
+    anchor_adjustments: list[dict[str, Any]] = Field(default_factory=list)
     accepted: bool = False
     error: str = ""
 

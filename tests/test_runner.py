@@ -89,7 +89,10 @@ class TestRunnerPipeline:
         assert "git_sha" in meta
         assert "config" in meta
 
-    def test_run_with_eval_cli(self, tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    def test_run_with_eval_cli(self, tmp_path: Path, capsys: pytest.CaptureFixture[str], monkeypatch) -> None:
+        # This integration test allows per-item provider errors, but the CLI now
+        # requires a locally configured credential before starting the batch.
+        monkeypatch.setenv("GEMINI_API_KEY", "offline-test-key")
         out_root = tmp_path / "runs"
         _main([
             "--blind", str(_SAMPLE_BLIND),
@@ -104,6 +107,29 @@ class TestRunnerPipeline:
         eval_data = json.loads(eval_files[0].read_text(encoding="utf-8"))
         assert eval_data["total_items"] == 3
         assert "confusion_matrix" in eval_data
+
+    @pytest.mark.parametrize("mode", ["batch", "text"])
+    def test_cli_missing_key_fails_before_processing(self, tmp_path, capsys, monkeypatch, mode):
+        import os
+        for name in tuple(os.environ):
+            if name.endswith("API_KEY"):
+                monkeypatch.delenv(name)
+        from unittest.mock import Mock
+        import crack.runner as runner
+        batch = Mock(side_effect=AssertionError("must not start"))
+        layer = Mock(side_effect=AssertionError("must not execute"))
+        monkeypatch.setattr(runner, "run", batch)
+        monkeypatch.setattr(runner, "execute_layer", layer)
+        out = tmp_path / "runs"
+        args = ["--backend", "openai", "--output", str(out)]
+        args += ["--input", str(_SAMPLE_BLIND)] if mode == "batch" else ["--text", "A joke"]
+        with pytest.raises(SystemExit) as exc:
+            _main(args)
+        assert exc.value.code == 2
+        assert "OPENAI_API_KEY not set" in capsys.readouterr().err
+        batch.assert_not_called()
+        layer.assert_not_called()
+        assert not out.exists()
 
     def test_runner_catches_layer_exceptions_and_continues(self, tmp_path: Path) -> None:
         """Issue e: runner catches any layer exception and records LayerTrace(status='ERROR')."""

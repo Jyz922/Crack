@@ -12,6 +12,7 @@ from crack.config import DEFAULT_SETTINGS, Settings
 from crack.providers import (
     PROVIDERS,
     call_openai_compatible,
+    check_credentials,
     create_client,
     normalize_backend_name,
     resolve_api_key,
@@ -69,6 +70,16 @@ class TestBackendResolution:
 
 
 class TestApiKeyResolution:
+    @pytest.mark.parametrize("value", [None, "", "   "])
+    def test_preflight_rejects_missing_or_blank_key(self, value):
+        with patch.dict(os.environ, {} if value is None else {"OPENAI_API_KEY": value}, clear=True):
+            with pytest.raises(ValueError, match="OPENAI_API_KEY not set"):
+                check_credentials("openai")
+
+    def test_preflight_accepts_generic_fallback_without_network(self):
+        with patch.dict(os.environ, {"LLM_API_KEY": "offline-test-key"}, clear=True):
+            check_credentials("openai")
+
     def test_resolve_api_key_name(self) -> None:
         assert resolve_api_key_name("openai") == "OPENAI_API_KEY"
         assert resolve_api_key_name("deepseek") == "DEEPSEEK_API_KEY"
@@ -142,6 +153,46 @@ class TestModelResolution:
 
 
 class TestCallOpenAICompatible:
+    def test_l4_openai_sends_strict_contract_and_compatible_keeps_json_mode(self):
+        from crack.l4_anchoring import _call_openai_l4
+        from crack.validation import L4_RESPONSE_FIELDS
+        client = MagicMock()
+        choice = MagicMock()
+        choice.finish_reason = "stop"
+        choice.message.refusal = None
+        choice.message.content = '{}'
+        client.chat.completions.create.return_value = MagicMock(choices=[choice])
+        _call_openai_l4("prompt", "openai", DEFAULT_SETTINGS, client)
+        fmt = client.chat.completions.create.call_args.kwargs["response_format"]
+        assert fmt["type"] == "json_schema" and fmt["json_schema"]["strict"] is True
+        schema = fmt["json_schema"]["schema"]
+        assert set(schema["required"]) == set(schema["properties"]) == L4_RESPONSE_FIELDS
+        assert schema["additionalProperties"] is False
+        _call_openai_l4("prompt", "deepseek", DEFAULT_SETTINGS, client)
+        assert client.chat.completions.create.call_args.kwargs["response_format"] == {"type": "json_object"}
+
+    def test_strict_schema_rejection_does_not_downgrade(self):
+        client = MagicMock()
+        client.chat.completions.create.side_effect = RuntimeError("unsupported response_format json_schema")
+        with pytest.raises(RuntimeError, match="unsupported response_format"):
+            call_openai_compatible(client, "test", "prompt", response_schema={"type": "object"})
+        assert client.chat.completions.create.call_count == 1
+
+    def test_parameter_compatibility_retry_preserves_strict_schema(self):
+        client = MagicMock()
+        choice = MagicMock()
+        choice.finish_reason = "stop"
+        choice.message.refusal = None
+        choice.message.content = '{}'
+        client.chat.completions.create.side_effect = [
+            RuntimeError("unsupported temperature"), MagicMock(choices=[choice]),
+        ]
+        call_openai_compatible(client, "test", "prompt", response_schema={"type": "object"})
+        calls = client.chat.completions.create.call_args_list
+        assert len(calls) == 2
+        assert calls[0].kwargs["response_format"] == calls[1].kwargs["response_format"]
+        assert "temperature" not in calls[1].kwargs
+
     def test_successful_call_extracts_json(self) -> None:
         client = MagicMock()
         choice = MagicMock()

@@ -88,7 +88,7 @@ if __package__ in (None, ""):
         run_l7,
         run_l8,
     )
-    from crack.providers import resolve_backend
+    from crack.providers import check_credentials, resolve_backend
     from crack.schema import AgeVerdict, AnalysisRecord, FinalVerdict, LayerTrace
 else:
     from .config import DEFAULT_SETTINGS, Settings
@@ -123,7 +123,7 @@ else:
         run_l7,
         run_l8,
     )
-    from .providers import resolve_backend
+    from .providers import check_credentials, resolve_backend
     from .schema import AgeVerdict, AnalysisRecord, FinalVerdict, LayerTrace
 
 
@@ -345,10 +345,12 @@ def _git_sha() -> str:
 
 def _run_fingerprint(blind_path: str | Path, settings: Settings) -> dict:
     """Freeze inputs, source/prompt bytes and nonsecret settings before inference."""
+    from .lexical_resources import resource_provenance
     package_root = Path(__file__).resolve().parent
     source_files = sorted([
         # rglob: subpackages such as phonetics/ must also invalidate --resume.
         *package_root.rglob("*.py"), *package_root.joinpath("prompts").glob("*.md"),
+        *package_root.joinpath("resource_data").glob("*"),
     ])
     excluded = {name for name in Settings.model_fields if name.endswith(("_API_KEY", "_BASE_URL"))}
     return {
@@ -358,6 +360,7 @@ def _run_fingerprint(blind_path: str | Path, settings: Settings) -> dict:
             for path in source_files
         },
         "config": settings.model_dump(mode="json", exclude=excluded),
+        "lexical_resources": resource_provenance(),
     }
 
 
@@ -376,10 +379,10 @@ def _check_resume_fingerprint(resume_path: Path, fingerprint: dict) -> None:
             "Omit --resume to start a fresh run."
         ) from exc
     if not isinstance(metadata, dict) or any(
-        metadata.get(key) != fingerprint[key] for key in ("source_sha256", "config")
+        metadata.get(key) != fingerprint.get(key) for key in ("source_sha256", "config", "lexical_resources")
     ):
         raise ValueError(
-            "Resume source, prompts or model/settings differ from this run. "
+            "Resume source, prompts, lexical resources or model/settings differ from this run. "
             "Omit --resume to start a fresh run without mixing results."
         )
 
@@ -711,6 +714,13 @@ def _main(argv: list[str] | None = None) -> None:
         **({"L4_MAX_CANDIDATES": args.candidate_budget} if args.candidate_budget is not None else {}),
     })
 
+    if not args.text and not args.blind:
+        parser.error("Either --blind/--input <path>, --text <string>, or --serve must be provided.")
+    try:
+        check_credentials(backend, settings)
+    except ValueError as exc:
+        parser.error(str(exc))
+
     if args.text:
         record = AnalysisRecord(
             item_id="CLI_01",
@@ -732,9 +742,6 @@ def _main(argv: list[str] | None = None) -> None:
                 ))
         print(format_analysis_report(record, args.age))
         return
-
-    if not args.blind and not args.serve:
-        parser.error("Either --blind/--input <path>, --text <string>, or --serve must be provided.")
 
     out_root = Path(args.output)
     is_jsonl_target = out_root.suffix == ".jsonl"

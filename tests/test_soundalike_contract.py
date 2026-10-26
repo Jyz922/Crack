@@ -35,6 +35,11 @@ def test_eleven_keys_required():
         validate_l4_response(old, T2, "purr-suing", False, alternates=[PURSUING])
 
 
+def test_extra_unused_field_is_still_rejected_locally():
+    with pytest.raises(ModelResponseError, match=r"unexpected=\['unused'\]"):
+        validate_l4_response(sound(unused=""), T2, "purr-suing", False, alternates=[PURSUING])
+
+
 def test_supplied_alternate_is_accepted_without_rescoring():
     out = validate_l4_response(sound(), T2, "purr-suing", False, alternates=[PURSUING])
     assert out["alternate_form"] == "pursuing"
@@ -102,7 +107,7 @@ def test_hyphenated_resegmentation_is_accepted():
 def test_labels_and_versions():
     assert detection_status_for(MainClassification.VALID_SOUNDALIKE_JOKE) == DetectionStatus.PUN
     assert detection_status_for(MainClassification.OUT_OF_SCOPE_HOMOPHONE) == DetectionStatus.OUT_OF_SCOPE
-    assert (RESPONSE_CONTRACT_VERSION, CANDIDATE_SEARCH_VERSION) == ("7", "5")
+    assert (RESPONSE_CONTRACT_VERSION, CANDIDATE_SEARCH_VERSION) == ("8", "5")
 
 
 # --- Sub-step B: L3 soundalike entries with a separate budget -------------

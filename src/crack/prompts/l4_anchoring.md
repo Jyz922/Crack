@@ -51,6 +51,18 @@ written meaning does not explain.
 - sound_pair: the candidate and the alternate both occur in the text, and
   their near-identical sound is what creates the wordplay.
 
+For a sound_pair, explain the observable interaction between the two
+expressions. Their co-occurrence, similar pronunciation, and different meanings
+are insufficient by themselves. Identify the wording that creates a
+reinterpretation or contrast through the sound relationship. If the expressions
+only describe their ordinary referents without such an interaction, return
+ONE_SENSE_ONLY.
+
+Select the expression that carries the wordplay. If the explanation depends
+on a sound substitution in another word, select that word and report its
+alternate_form. The selected expression must belong to the supplied shortlist;
+do not attribute another expression's wordplay to an unrelated candidate.
+
 Prefer a supplied alternate. Name a different one only if it is an ordinary
 English word or phrase that sounds nearly identical to the candidate; it is
 checked phonetically and rejected if it does not. Spell alternate_form as

@@ -2,7 +2,7 @@
 
 Recall stage only. It reports candidates with graded phonetic scores and never
 decides that something is wordplay; L4 anchors both readings and L5/L6 judge
-resolution. Two mechanisms are covered here (handoff 02):
+resolution. Retrieval paths covered here:
 
 - sound_pair: two content words in the same text that sound alike
   (drum/drama, cat/cad, cat/cash). The surface is the later word and the
@@ -12,6 +12,9 @@ resolution. Two mechanisms are covered here (handoff 02):
 - sound_substitution via hyphen merge: a hyphenated coinage whose combined
   pronunciation is exactly an existing word ("purr-suing" -> "pursuing").
   Exact phone match only (k = 0); near matches are workstream 05.
+- sound_substitution via lexicon: each content word queries the reverse
+  pronunciation index for exact homophones absent from the text. OEWN must
+  supply a sense for the alternate. No near-neighbor search is performed.
 
 The joined spelling of a hyphen group ("cat-nap" -> "catnap") is not a
 soundalike: it is handled as resegmentation by L2/L3.
@@ -25,7 +28,7 @@ from collections import defaultdict
 from functools import lru_cache
 
 from .config import Settings
-from .l2_senses import STOPWORDS, wordnet
+from .l2_senses import STOPWORDS, _wordnet_locked, wordnet
 from .phonetics import MissingPronunciation, pronunciations, sound_similarity
 from .phonetics.calibration import percentile_value
 from .phonetics.lexicon import _cmu
@@ -63,8 +66,9 @@ def _reverse_index() -> dict[tuple[str, ...], tuple[str, ...]]:
     return {k: tuple(sorted(set(v))) for k, v in index.items()}
 
 
+@lru_cache(maxsize=8192)
 def _in_wordnet(word: str) -> bool:
-    """Frequency-floor proxy: keep alternates WordNet can give senses for."""
+    """Lexical validity filter: keep alternates OEWN can give senses for."""
     wn = wordnet()
     return bool(wn.synsets(word))
 
@@ -141,11 +145,55 @@ def _hyphen_merges(l1: L1Result, text: str) -> list[SoundalikeCandidate]:
     return out
 
 
+def _word_homophones(text: str, max_alternates: int) -> list[SoundalikeCandidate]:
+    """Exact dictionary homophones only; no gold targets or curated pair list."""
+    present = {_norm(m.group()) for m in _WORD.finditer(text)}
+    out = []
+    for word, span in _content_spans(text):
+        prons = set(pronunciations(word))
+        forms = set()
+        for pron in prons:
+            for form in _reverse_index().get(_key(pron), ()):
+                # Exact homophones can share a long spelling prefix while
+                # being different lexemes. Only exclude shared inflectional
+                # bases here; the near-pair prefix heuristic is too broad.
+                if form in present or form in STOPWORDS or _bases(word) & _bases(form):
+                    continue
+                # The shared reverse index removes all stress digits. The
+                # scorer preserves AH0/ER0 reduction, so require phone identity
+                # under that same normalization before accepting a homophone.
+                if prons.isdisjoint(pronunciations(form)) or not _in_wordnet(form):
+                    continue
+                forms.add(form)
+        alts = [a for form in sorted(forms)[:max_alternates]
+                if (a := _alternate(word, form, "lexicon"))]
+        if alts:
+            out.append(SoundalikeCandidate(
+                surface=text[slice(*span)], char_span=span,
+                mechanism="sound_substitution", alternates=alts,
+            ))
+    return out
+
+
+@_wordnet_locked
 def find_soundalikes(l1: L1Result, text: str, settings: Settings) -> list[SoundalikeCandidate]:
     """Soundalike candidates in *text* (the L0-normalised text L4 quotes from)."""
     if settings.SOUNDALIKE_MAX_CANDIDATES == 0:
         return []
-    cands = _hyphen_merges(l1, text) + _in_text_pairs(text, settings.PHONETIC_RETRIEVE_PERCENTILE)
+    retrieved = (_hyphen_merges(l1, text)
+                 + _in_text_pairs(text, settings.PHONETIC_RETRIEVE_PERCENTILE)
+                 + _word_homophones(text, settings.SOUNDALIKE_MAX_ALTERNATES))
+    # A surface can have both an in-text pair and an absent homophone. Share
+    # one candidate slot; each alternate retains its own relation via source.
+    merged: dict[tuple[int, int], SoundalikeCandidate] = {}
+    for cand in retrieved:
+        if cand.char_span not in merged:
+            merged[cand.char_span] = cand
+        else:
+            existing = merged[cand.char_span]
+            known = {a.form for a in existing.alternates}
+            existing.alternates.extend(a for a in cand.alternates if a.form not in known)
+    cands = list(merged.values())
     for cand in cands:
         cand.alternates.sort(key=lambda a: (-a.sim_cal, a.form))
         del cand.alternates[settings.SOUNDALIKE_MAX_ALTERNATES:]

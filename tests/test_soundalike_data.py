@@ -6,6 +6,7 @@ labelling (docs/soundalike/labelling/), which is not run by this test.
 from __future__ import annotations
 
 import json
+import pytest
 from collections import Counter
 from pathlib import Path
 
@@ -92,3 +93,26 @@ def test_detection_rescoring_counts_items(tmp_path, capsys):
     EVAL["cmd_detection"](types.SimpleNamespace(records=str(records), gold=str(CORPUS / "soundalike_gold.jsonl"), all=True))
     out = capsys.readouterr().out
     assert "### Slice: seed" in out and "F1 1.000" in out
+
+
+@pytest.mark.parametrize("unresolved", ["EXECUTION_FAILED", "INSUFFICIENT_EVIDENCE", "OUT_OF_SCOPE_HOMOPHONE", None])
+def test_unresolved_negative_cannot_count_as_correct_or_complete_pair(tmp_path, capsys, unresolved):
+    import types
+    # S01 and its matched N01 form one pair; a failed or missing negative
+    # must stay in the denominator and cannot complete that pair correctly.
+    gold = tmp_path / "gold.jsonl"
+    gold.write_text(
+        json.dumps({"id": "S01", "gold_label": "VALID_SOUNDALIKE_JOKE"}) + "\n" +
+        json.dumps({"id": "N01", "gold_label": "ONE_SENSE_ONLY"}) + "\n", encoding="utf-8")
+    rows = [{"item_id": "S01", "final": {"main_classification": "VALID_SOUNDALIKE_JOKE"}}]
+    if unresolved is not None:
+        rows.append({"item_id": "N01", "final": {"main_classification": unresolved}})
+    records = tmp_path / "records.jsonl"
+    records.write_text("".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
+    EVAL["cmd_detection"](types.SimpleNamespace(records=str(records), gold=str(gold), all=True))
+    out = capsys.readouterr().out
+    assert "### Slice: all (2 items; decided 1/2 (50.0%))" in out
+    assert "Binary accuracy (all items; unresolved are incorrect): 1/2 (50.0%)" in out
+    assert "TP 1 FP 0 FN 0 TN 0" in out
+    assert "Unresolved: 1 (positive 0, negative 1)" in out
+    assert "Paired accuracy (a positive and all its negatives right): 0/1 (0.0%)" in out

@@ -4,7 +4,9 @@ Follows the October 4 convention (docs/evaluations/README.md): records.jsonl
 omits l2_result, l4_attempts and age_attempts; evaluation.json and
 run_meta.json are copied unchanged (run_meta already stores repository-relative
 paths and no secrets); publication_manifest.json records original and
-published hashes and confirms an offline rescore reproduces every metric.
+published hashes and compares every original metric with an offline rescore.
+A newer contract's provenance counter difference is declared separately;
+detection and age metric differences still fail publication.
 
     py -3.11 scripts/publish_run.py runs/<timestamp> <name> <gold.jsonl> "<note>"
 """
@@ -17,6 +19,7 @@ import sys
 from pathlib import Path
 
 from crack.corpus import evaluate_run
+from crack.validation import RESPONSE_CONTRACT_VERSION
 
 ROOT = Path(__file__).resolve().parents[1]
 OMIT = ("l2_result", "l4_attempts", "age_attempts")
@@ -44,6 +47,12 @@ def main(run_dir: str, name: str, gold: str, note: str) -> None:
     expected = json.loads((dst / "evaluation.json").read_text(encoding="utf-8"))
     actual = evaluate_run(dst / "records.jsonl", gold_path)
     matches = all(actual.get(k) == v for k, v in expected.items())
+    differences = {k: {"original": v, "current_rescore": actual.get(k)}
+                   for k, v in expected.items() if actual.get(k) != v}
+    # A historical run retains its recorded contract version. A newer scorer
+    # marks it unverified rather than relabeling those original receipts.
+    provenance_only = (set(differences) == {"unverified_contract_items"}
+                       and meta.get("validation_version") != RESPONSE_CONTRACT_VERSION)
     manifest = {
         "original_run_directory": run_dir.replace("\\", "/"),
         "original_records_sha256": sha(src / "records.jsonl"),
@@ -58,6 +67,8 @@ def main(run_dir: str, name: str, gold: str, note: str) -> None:
         "gold_sha256": sha(gold_path),
         "git_sha": meta.get("git_sha"),
         "offline_rescore_matches_every_original_metric": matches,
+        "offline_rescore_differences": differences,
+        "offline_rescore_differs_only_in_historical_contract_provenance": provenance_only,
         "note": note,
         "limitations": [
             "Compact records are an explicitly declared projection, not raw SDK receipts.",
@@ -67,7 +78,9 @@ def main(run_dir: str, name: str, gold: str, note: str) -> None:
     }
     (dst / "publication_manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     print(name, "rescore matches:", matches)
-    if not matches:
+    if provenance_only:
+        print("Detection and age metrics match; historical contract provenance differs:", differences)
+    if not matches and not provenance_only:
         raise SystemExit("offline rescore does not reproduce evaluation.json")
 
 

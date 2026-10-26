@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "checked_on": "2026-10-25",
+  "resources": {
+    "cmudict": {
+      "name": "CMU Pronouncing Dictionary",
+      "version": "74790861f652b15e4ac49015a90074ad62a27690",
+      "released_at": "2025-10-24T17:40:26Z",
+      "url": "https://raw.githubusercontent.com/cmusphinx/cmudict/74790861f652b15e4ac49015a90074ad62a27690/cmudict.dict",
+      "sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22",
+      "format": "text",
+      "directory": "cmudict",
+      "files": {
+        "cmudict.dict": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22"
+      },
+      "license": "BSD-2-Clause",
+      "source": "https://github.com/cmusphinx/cmudict"
+    },
+    "oewn": {
+      "name": "Open English Wordnet",
+      "version": "2025",
+      "released_at": "2025-12-31",
+      "url": "https://en-word.net/static/english-wordnet-2025.zip",
+      "sha256": "38b16326159f51853626b7d24a44c453fa88ab33f06fce5ec8fc5996d1c2be93",
+      "format": "zip",
+      "archive_prefix": "oewn2025/",
+      "directory": "oewn2025",
+      "files": {
+        "data.adj": "98651304f90602352120dffdd27dfeb8a3fa4dadfc712391934ad5f466601059",
+        "index.adj": "85e1e08cc4fc8ac5a8f9d32564799e5e67f04812165dcc8de354797ab53c6492",
+        "data.verb": "2ef76318838583e5cb0d04d019fd7200c629d7aed8cc5cfea41122d3d67c866c",
+        "index.noun": "b833126645b2f43ddeddf2e3038264b6be09980d37d6740d02e5df625a6cce34",
+        "adv.exc": "e7291461b629abfe63301bbe1998cee09fd575ed7107abd7ea9763adb05bf0a8",
+        "data.noun": "97c1c4e4f323e2b29bba5ac52b64aca5b91df9f7661dbc65cf64f28ea36e98d3",
+        "index.adv": "bdd918323bcd816e59564abc2a707c37fad6ccb66b1daf28567a16bef8f4dbd8",
+        "data.adv": "c40c0bf2eb0c0ba682663a1ad8f62c4eb7cd581189a8f19368b93c6dda8e04d7",
+        "index.sense": "dd12973335613642af035c1174c42a10cf5daa3a301e0497aaf7619045842fee",
+        "adj.exc": "17bd79dbae17636fb4cd9b692b4945c19e5acd2e23b8e372268b5fb89e975531",
+        "noun.exc": "c976744abeb6e99792f8c74fb8f1a2d4da13c7c4227c914d80fe39f596a476bc",
+        "verb.exc": "bd999f2b30b9126aab9aaa9cb895b92bca72cb6797da41b7b308994716e7ab03",
+        "index.verb": "2186bf15fae5100d6220e55bd2af3079849e2f1e82d473642d1c5d0becda54ea"
+      },
+      "license": "CC-BY-4.0",
+      "source": "https://en-word.net/downloads",
+      "upstream_header_version": "2023"
+    }
+  },
+  "semcor_reference": {
+    "name": "Princeton WordNet 3.0 SemCor-derived sense-key counts",
+    "version": "3.0",
+    "cntlist_sha256": "a198580b8f705fa02797bba8b13e5cbe4a9f9f40cb1697e774c7fc6a5865b035",
+    "source": "https://wordnet.princeton.edu/",
+    "matching": "exact lemma sense key; no mapping by synset names or offsets"
+  }
+}

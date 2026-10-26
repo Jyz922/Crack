@@ -1,0 +1,49 @@
+{
+  "note": "Frozen after offline retrieval check; no new live inference. Full actual L4 requests are stored as records.jsonl l4_attempts[].prompt_text.",
+  "l5_l6_templates_match_previous_live_run": true,
+  "l4_changes_confined_to_soundalike_section": true,
+  "files": {
+    "before/l3_soundalikes.py": "f58a59d2108c82477ab1dc469de29a754ee9fe01841fb63b6e738409c9e17881",
+    "before/prompts/l4_anchoring.md": "5f9df3bdc9ec9a681e56b72863b6ee3a6349e321210a8f694b6760eee4b0d004",
+    "after/age_evidence.py": "55c1db6ce7993d92f4306b1c606ea96c3950c6eeb127cfb01e0e702928d17bd7",
+    "after/config.py": "c52a846868aa2947e375ab06b901bdd9ae69e45e32db54e5b8417f5f73e55bcc",
+    "after/l3_soundalikes.py": "38e89e8f86f97ee0954f2384dad62c660df0ba588ae69b5634dd4f1031fa5bf4",
+    "after/l4_anchoring.py": "41ac8195ada08506a1a054e800edd7c305c7477ec6c9a31e9d16c5bcfee30a24",
+    "after/prompts/l4_anchoring.md": "eb307a1c5db0a0141c34710afff05b039270417d3e49a93388dcd1aa282c41b9",
+    "after/prompts/l5_declarative.md": "6cd2fc3b71c74c7d808a7298c3d2ecf6cfc368da264ab9d909b4c2c52ad1b8e3",
+    "after/prompts/l5_definitional.md": "fe5dae0a87f772d1fce424fc4f00c000f7ea2ec6c041453b1d138a56d4afae7d",
+    "after/prompts/l5_dialogue.md": "4434e408addd2b8f6cb477db8e03df36080f9f0dbe6f31bbd7cb37666605f285",
+    "after/prompts/l5_qa.md": "8881dd224ac76bf072bc4065c04ba11c69cdec9d29ee9a850a0703a3a200876c",
+    "after/prompts/l6_distinctness.md": "f0438e556d933ba747114ff152c973796701a53b35194cbe7b139e801a10a254",
+    "after/prompts/l7_comprehension.md": "6f53a896dd00a95a2c6db530b4e459f20fb9142f94fb0dc8ded745804b03a859",
+    "after/prompts/l8_appropriateness.md": "3b4db415e43310a1edb5e77f61d5c856420c1d59fae4917c433829d653100dd1",
+    "after/schema.py": "5c3f56c31910efae9533452f6514780696f33e79d86ecca703c782521014a051",
+    "after/validation.py": "ac6cb27fa404a670cdb8cbb44c8343dd3029c99a1ac3399531e0e6bc97b58ffe"
+  },
+  "frozen_at_utc": "2026-10-26T02:32:50.815288+00:00",
+  "lexical_resources": {
+    "manifest_sha256": "91c5e43fa65ba0368d478870db7ec1cbe7021f42043f584d7d4e0c2503507b57",
+    "resources": {
+      "cmudict": {
+        "name": "CMU Pronouncing Dictionary",
+        "version": "74790861f652b15e4ac49015a90074ad62a27690",
+        "sha256": "81917843c7f44ce2b094ac63873c2c7a4cf802040792c455ba3ca406891c3d22",
+        "url": "https://raw.githubusercontent.com/cmusphinx/cmudict/74790861f652b15e4ac49015a90074ad62a27690/cmudict.dict"
+      },
+      "oewn": {
+        "name": "Open English Wordnet",
+        "version": "2025",
+        "sha256": "38b16326159f51853626b7d24a44c453fa88ab33f06fce5ec8fc5996d1c2be93",
+        "url": "https://en-word.net/static/english-wordnet-2025.zip"
+      }
+    },
+    "phonetic_calibration_sha256": "99390f3b5d2671537a20ae5296f57d5973acbb8020df28ba8bedb7d5f42a43eb",
+    "aoa_sha256": "45db20f3083b2f38904751d498fa5a60e19e89f59ed4b44c8a0b791de31b87d8",
+    "semcor_reference": "Princeton WordNet 3.0 cntlist.rev, exact lemma sense keys"
+  },
+  "artifacts_sha256": {
+    "finder_before.json": "ab73e69c7e3299bfe1f585dbf7a03d30641d7d3174220e7874cc082bc2d24d35",
+    "finder_after.json": "849989dfbf2ce4edd89f871e6a715e3abdfe95c92aaf1cf45ed7cadc7513e880",
+    "finder_comparison.json": "7e9636057653c16f2facdadfe527f0d877dd6459b59cf3d6a87373d80607ce49"
+  }
+}

@@ -35,6 +35,9 @@ eval = [
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+crack = ["prompts/*.md", "resource_data/*.json", "resource_data/*.txt"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]

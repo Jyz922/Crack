@@ -1,6 +1,6 @@
 """Phonetic core (handoff 01): graded sound similarity, offline and local.
 
-Needs data/nltk_data/corpora/cmudict (see crack.phonetics.lexicon). Values are
+Needs pinned official lexical data (see scripts/fetch_lexical_resources.py). Values are
 pinned to what docs/soundalike/reference_wlev_fixed.py prints; see the checks
 table in docs/soundalike/handoff/01_phonetic_core.md.
 """
@@ -109,7 +109,7 @@ def test_indel_one_only_changes_unequal_lengths():
     ("drum", "D R AH1 M"), ("drama", "D R AA1 M AH0"), ("knight", "N AY1 T"),
     ("night", "N AY1 T"), ("bat", "B AE1 T"), ("pat", "P AE1 T"), ("pit", "P IH1 T"),
 ])
-def test_nltk_cmudict_first_entries(word, entry):
+def test_official_cmudict_first_entries(word, entry):
     assert lexicon._cmu()[word][0] == entry.split()
 
 
@@ -149,7 +149,10 @@ def test_calibration_endpoints():
 
 def test_calibration_table_is_committed_and_ordered():
     table = calibration.calibration_table()
-    assert table["lexicon"].startswith("nltk.corpus.cmudict")
+    from crack.lexical_resources import resource_manifest
+    assert table["lexicon"] == "cmusphinx/cmudict"
+    assert table["lexicon_version"] == resource_manifest()["resources"]["cmudict"]["version"]
+    assert table["lexicon_sha256"] == resource_manifest()["resources"]["cmudict"]["sha256"]
     for row in table["lengths"].values():
         assert 0 < row["mean"] < row["p95"] < row["p99"] < 1
 

@@ -1,0 +1,45 @@
+{
+  "original_run_directory": "runs/final_soundalike/20261026T023324Z",
+  "original_records_sha256": "7d9842aab9073ee64f04ac42da574087cadfb465091c3f8baf4c361e67771e00",
+  "original_run_meta_sha256": "210ba63ff0c730d56cb6a4757382027a87ae037d5ea02700e6a4efab964e3fd4",
+  "original_evaluation_sha256": "21765ecabda4c4667d469e4d885d7ac5fe17ad56e66ecc33c323b6b1fe1b7333",
+  "published_records_sha256": "96e14de4a193a64a224bb58ecb8b7d39a03cd6fb47cc77cd207212486ea5cc98",
+  "published_run_meta_sha256": "210ba63ff0c730d56cb6a4757382027a87ae037d5ea02700e6a4efab964e3fd4",
+  "published_evaluation_sha256": "21765ecabda4c4667d469e4d885d7ac5fe17ad56e66ecc33c323b6b1fe1b7333",
+  "omitted_record_fields": [
+    "l2_result",
+    "l4_attempts",
+    "age_attempts"
+  ],
+  "item_count": 79,
+  "gold_path": "corpus/soundalike_gold.jsonl",
+  "gold_sha256": "a0ea1848fd0ed68b69ef357ebc3a9ba62195cef40c4fc5d4e8969024255491e8",
+  "git_sha": "7ed6381e959592282475deb12054b3a4e6c0c3c8",
+  "offline_rescore_matches_every_original_metric": false,
+  "offline_rescore_differences": {
+    "unverified_contract_items": {
+      "original": 0,
+      "current_rescore": 79
+    }
+  },
+  "offline_rescore_differs_only_in_historical_contract_provenance": true,
+  "note": "Frozen contract-7 79-item run; retain its one execution failure. Follow-up repairs are reported separately.",
+  "limitations": [
+    "Compact records are an explicitly declared projection, not raw SDK receipts.",
+    "Local structural revalidation and metric arithmetic do not prove model semantic correctness.",
+    "Single runs of a nondeterministic model; compare runs rather than reading one in isolation."
+  ],
+  "l4_requests_sha256": "e2fb4d4a1b7f417e5bc25d5ac8d8b2bd276d1aef911339ca01a336c1daccc454",
+  "l4_request_projection_fields": [
+    "prompt_text",
+    "prompt_sha256",
+    "model_used",
+    "raw_responses",
+    "parsed_response",
+    "validated_response",
+    "anchor_adjustments",
+    "accepted",
+    "error"
+  ],
+  "l4_request_count": 79
+}

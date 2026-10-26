@@ -1,0 +1,200 @@
+"""Pipeline configuration and single source of truth for thresholds.
+
+L3 candidate ranking is intentionally independent of the requested target
+age; age judgments reuse L6 and are validated locally in L7/L8. L5 thresholds are
+stored per genre because each branch uses a different set of subscores. The
+thresholds and their calibration limitations are documented in
+docs/L5_CALIBRATION.md.
+"""
+
+from __future__ import annotations
+
+from typing import Literal
+
+from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+from .enums import Genre
+from .providers import BackendType, load_dotenv
+
+load_dotenv()
+
+
+class Settings(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    # --- L0 scope policy -------------------------------------------------
+    ACCEPTED_MECHANISMS: frozenset[str] = frozenset({
+        "homographic_ambiguity",
+        "idiomatic_expression_with_homograph",
+        "compound_split",
+        "resegmentation",
+        "heterographic_homophone",  # soundalike wordplay (Project 2)
+    })
+    EXCLUDED_MECHANISMS: frozenset[str] = frozenset({
+        "rhyming_joke",
+        "absurdist_situation",
+        "cultural_reference",
+        "sarcasm",
+        "social_context_only",
+    })
+
+    # --- Input validation (L0-pre) ---------------------------------------
+    MAX_INPUT_CHARS: int = 500
+    MIN_INPUT_CHARS: int = 3
+    # Fraction of characters that may be non-ASCII before the text is
+    # rejected as non-English or encoding garbage.
+    MAX_NON_ASCII_RATIO: float = 0.15
+
+    # --- L3 candidate ranking --------------------------------------------
+    # NOTE: target-age familiarity is intentionally excluded from the
+    # candidate score — see module docstring, deviation 1.
+    L3_TOP_K: int = Field(default=8, ge=1)
+    # Soundalike finder (workstream 02). Recall stage only: L4 decides.
+    # An in-text pair is retrieved when its raw similarity reaches this
+    # percentile of random same-length CMUdict pairs (data/phonetic_calibration.json).
+    PHONETIC_RETRIEVE_PERCENTILE: Literal["p95", "p99"] = "p95"
+    SOUNDALIKE_MAX_CANDIDATES: int = Field(default=4, ge=0)
+    SOUNDALIKE_MAX_ALTERNATES: int = Field(default=3, ge=1)
+    # An alternate L4 proposes itself (not supplied by the finder) is accepted
+    # only when its raw similarity reaches this random-pair percentile. p95
+    # after the first live run: p99 rejected real imperfect puns (tents/tense,
+    # yeast/least) while p95 still blocked the invented needs/knead link.
+    PHONETIC_VERIFY_PERCENTILE: Literal["p95", "p99"] = "p95"
+    # Soundalike candidates get their own L3 budget, so the homograph top-K is unchanged.
+    L3_SOUNDALIKE_TOP_K: int = Field(default=4, ge=0)
+
+    # --- L4 backend ------------------------------------------------------
+    # Compare the original L3 shortlist in one L4 request. Unknown/error
+    # terminates L4; L5/L6 never restart candidate search.
+    L4_MAX_CANDIDATES: int = Field(default=8, ge=1)
+    # Historical manifests remain readable; the runner no longer uses this.
+    CONTINUE_AFTER_CANDIDATE_REJECTION: bool = False
+    L4_BACKEND: BackendType = "gemini"
+    L4_MODEL: str | None = None
+    L4_MODEL_GEMINI: str = "gemini-3.6-flash"
+    L4_MODEL_GEMINI_CHAIN: list[str] = ["gemini-3.8-flash"]
+    L4_MODEL_ANTHROPIC: str = "claude-sonnet-5"
+    L4_MODEL_OPENAI: str = "gpt-6-luna"
+    L4_MODEL_DEEPSEEK: str = "deepseek-chat"
+    L4_MAX_OUTPUT_TOKENS: int = 4096
+    L4_CALL_PAUSE_SECONDS: float = 6.0
+
+    # --- L5 backend ------------------------------------------------------
+    L5_BACKEND: BackendType = "gemini"
+    L5_MODEL: str | None = None
+    # Pin exact IDs — never use -latest aliases; availability varies by account age.
+    L5_MODEL_GEMINI: str = "gemini-3.6-flash"
+    # Ordered fallback chain tried after the primary exhausts its 5xx retries.
+    L5_MODEL_GEMINI_CHAIN: list[str] = ["gemini-3.8-flash"]
+    L5_MODEL_ANTHROPIC: str = "claude-sonnet-5"
+    L5_MODEL_OPENAI: str = "gpt-6-luna"
+    L5_MODEL_DEEPSEEK: str = "deepseek-chat"
+    # Max output tokens per Gemini call. Gemini 3.x counts THINKING tokens
+    # against this cap — measured thinking was 487 then 969 on the same temp-0
+    # prompt (2x variance), and the dialogue/definitional branches have longer,
+    # untested prompts. 8192 leaves ample margin; we pay for tokens generated,
+    # not the cap. Do NOT lower to "save" tokens: too small a cap truncates the
+    # JSON mid-emit (finish_reason=MAX_TOKENS) and used to masquerade as a
+    L5_MAX_OUTPUT_TOKENS: int = 8192
+    L5_CALL_PAUSE_SECONDS: float = 6.0
+
+    # --- L6 backend ------------------------------------------------------
+    L6_BACKEND: BackendType = "gemini"
+    L6_MODEL: str | None = None
+    L6_MODEL_GEMINI: str = "gemini-3.6-flash"
+    L6_MODEL_GEMINI_CHAIN: list[str] = ["gemini-3.8-flash"]
+    L6_MODEL_ANTHROPIC: str = "claude-sonnet-5"
+    L6_MODEL_OPENAI: str = "gpt-6-luna"
+    L6_MODEL_DEEPSEEK: str = "deepseek-chat"
+    L6_MAX_OUTPUT_TOKENS: int = 4096
+    L6_CALL_PAUSE_SECONDS: float = 6.0
+
+    # --- Legacy L7 settings: retained for saved manifests; unused at runtime ---
+    L7_BACKEND: BackendType = "gemini"
+    L7_MODEL: str | None = None
+    L7_MODEL_GEMINI: str = "gemini-3.6-flash"
+    L7_MODEL_GEMINI_CHAIN: list[str] = ["gemini-3.8-flash"]
+    L7_MODEL_ANTHROPIC: str = "claude-sonnet-5"
+    L7_MODEL_OPENAI: str = "gpt-6-luna"
+    L7_MODEL_DEEPSEEK: str = "deepseek-chat"
+    L7_MAX_OUTPUT_TOKENS: int = 8192
+    L7_CALL_PAUSE_SECONDS: float = 6.0
+
+    # Legacy configuration keys retained for old run manifests; L7 no longer uses these heuristics.
+    L7_METALINGUISTIC_FLOOR_HOMOGRAPH: float = 6.0
+    L7_METALINGUISTIC_FLOOR_DEFINITIONAL: float = 7.0
+    L7_METALINGUISTIC_FLOOR_DIALOGUE: float = 7.5
+    L7_METALINGUISTIC_FLOOR_RESEGMENTATION: float = 8.0
+    L7_SECONDARY_SENSE_AOA_OFFSET: float = 2.0
+    L7_AOA_TOLERANCE: float = 0.5
+
+    # --- Legacy L8 settings: retained for saved manifests; unused at runtime ---
+    L8_BACKEND: BackendType = "gemini"
+    L8_MODEL: str | None = None
+    L8_MODEL_GEMINI: str = "gemini-3.6-flash"
+    L8_MODEL_GEMINI_CHAIN: list[str] = ["gemini-3.8-flash"]
+    L8_MODEL_ANTHROPIC: str = "claude-sonnet-5"
+    L8_MODEL_OPENAI: str = "gpt-6-luna"
+    L8_MODEL_DEEPSEEK: str = "deepseek-chat"
+    L8_MAX_OUTPUT_TOKENS: int = 8192
+    L8_CALL_PAUSE_SECONDS: float = 6.0
+
+    # --- Provider API keys & custom base URLs ----------------------------
+    OPENAI_API_KEY: str | None = None
+    DEEPSEEK_API_KEY: str | None = None
+    GEMINI_API_KEY: str | None = None
+    ANTHROPIC_API_KEY: str | None = None
+    GROQ_API_KEY: str | None = None
+    MISTRAL_API_KEY: str | None = None
+    DASHSCOPE_API_KEY: str | None = None
+    MOONSHOT_API_KEY: str | None = None
+    ZHIPUAI_API_KEY: str | None = None
+    SILICONFLOW_API_KEY: str | None = None
+
+    OPENAI_BASE_URL: str | None = None
+    DEEPSEEK_BASE_URL: str = "https://api.deepseek.com"
+
+    # --- L5 QA resolution ------------------------------------------------
+    # Weights must sum to 1.0 (asserted below).
+    L5_QA_WEIGHTS: dict[str, float] = {
+        "polarity_or_direction": 0.45,
+        "answer_relevance": 0.25,
+        "causal": 0.15,
+        "agent": 0.10,
+        "tense_aspect": 0.05,
+    }
+    # Polarity floor: guard against complete absence of contrast (e.g. 0.0)
+    L5_QA_MIN_POLARITY: float = 0.05
+
+    # Per-genre pass/fail cut-off for the weighted resolution score.
+    # Not named in README — see module docstring, deviation 2.
+    # Verdicts are per run, so cut-offs are set from per-run ranges, not means.
+    L5_RESOLUTION_THRESHOLDS: dict[Genre, float] = {
+        # 5-run calibration: X1 (negative) max 0.417, E1 (positive) min 0.507.
+        # 0.46 separates them on every run. NO threshold fixes S2 (negative,
+        # 0.59-0.86 > S1 positive's 0.58-0.68): that is sense-labelling
+        # (polarity inversion), not threshold.
+        Genre.QA_RIDDLE: 0.46,
+        # A1 0.935 stable; P2 0.865-0.930 (both positives). No validated negative yet.
+        Genre.DEFINITIONAL_ONELINER: 0.60,
+        # D1 0.858-0.927, P3 0.897-0.917. Positives only; no negative yet.
+        Genre.DIALOGUE_MISUNDERSTANDING: 0.60,
+        # Calibrated on benchmark corpus declarative homograph/heteronym wordplays.
+        Genre.DECLARATIVE: 0.25,
+    }
+    # Pause between API calls in the calibration script.
+    # Free-tier Gemini is ~10–15 req/min → 6 s keeps us well inside the limit.
+    L5_CALL_PAUSE_SECONDS: float = 6.0
+
+    @model_validator(mode="after")
+    def _weights_sum_to_one(self) -> "Settings":
+        total = sum(self.L5_QA_WEIGHTS.values())
+        assert abs(total - 1.0) < 1e-9, (
+            f"L5_QA_WEIGHTS must sum to 1.0, got {total:.6f}"
+        )
+        missing = set(Genre) - self.L5_RESOLUTION_THRESHOLDS.keys()
+        assert not missing, f"L5_RESOLUTION_THRESHOLDS missing genres: {missing}"
+        return self
+
+
+DEFAULT_SETTINGS = Settings()

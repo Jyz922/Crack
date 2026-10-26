@@ -3,6 +3,15 @@ Last updated: 2026-10-21 by soundalike docs-sync session (workstreams 01–03 me
 
 ---
 
+## October 25 resource update
+
+The current implementation supersedes the original NLTK-CMUdict choice below:
+P0 uses official cmusphinx/cmudict commit `74790861f652b15e4ac49015a90074ad62a27690`,
+L2 uses Open English Wordnet 2025, and historical SemCor counts still come from
+Princeton WordNet 3.0 via exact sense keys. Calibration has been regenerated.
+The October 23 live results describe the previous resources. New local checks
+and exact provenance are in [the refresh report](../resource_refresh_20261025.md).
+
 ## Goal
 
 Project 2 extends CRACK from homographic wordplay (one spelling, two meanings)
@@ -35,7 +44,7 @@ Workstreams **01, 02 and 03 are merged** into `main` (PRs #5, #6, #7), together
 with the Windows offline-guard fix (PR #4). CRACK can now output
 `VALID_SOUNDALIKE_JOKE`; see the
 [architecture section](../../ARCHITECTURE.md#soundalike-wordplay-extension).
-Workstreams 04–06 have no code yet.
+Workstream 04 is also merged (PR #9). Optional workstreams 05–06 remain unimplemented.
 
 **Live results (2026-10-23, gpt-6-luna).** Soundalike corpus after the live-run
 fixes: binary 73/79 (92.4%), all three test texts correct. Homograph regression:

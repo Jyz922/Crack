@@ -329,6 +329,19 @@ def resolve_base_url(backend: str, settings: Any = None) -> str | None:
     return spec.default_base_url if spec else None
 
 
+def check_credentials(backend: str, settings: Any = None) -> None:
+    """Check local credential availability without sending a paid API request."""
+    norm = resolve_backend(backend, settings)
+    if norm not in PROVIDERS:
+        raise ValueError(f"Unknown backend: {norm!r}")
+    key, key_name = resolve_api_key(norm, settings)
+    if not key or not key.strip():
+        raise ValueError(
+            f"{key_name} not set for backend '{norm}'. "
+            "Export it in this terminal or add it to the project .env before running."
+        )
+
+
 def resolve_model(backend: str, layer: str, settings: Any) -> str:
     """Resolve default model for a given layer ('L4' or 'L5') and backend."""
     norm = resolve_backend(backend, settings)
@@ -418,6 +431,7 @@ def call_openai_compatible(
     validate_fn: Callable[[dict[str, Any], int], None] | None = None,
     parse_attempts: int = 2,
     response_observer: Callable[[str], None] | None = None,
+    response_schema: dict[str, Any] | None = None,
 ) -> tuple[dict[str, Any] | None, int, bool]:
     """Call an OpenAI-compatible model with retry on rate-limits, 5xx, or parse failures.
 
@@ -440,6 +454,11 @@ def call_openai_compatible(
             "max_completion_tokens": max_output_tokens,
             "response_format": {"type": "json_object"},
         }
+        if response_schema is not None:
+            call_kwargs["response_format"] = {
+                "type": "json_schema",
+                "json_schema": {"name": "crack_response", "strict": True, "schema": response_schema},
+            }
         # Only add temperature if it's not a model that enforces default temperature=1 (like o1, o3, luna)
         is_fixed_temp_model = any(k in model.lower() for k in ("o1", "o3", "luna", "reasoning"))
         if not is_fixed_temp_model and temperature is not None:
@@ -471,7 +490,7 @@ def call_openai_compatible(
                         call_kwargs["max_completion_tokens"] = max_output_tokens
                         modified = True
                     # 3. Handle response_format
-                    if ("response_format" in err_msg or "json_object" in err_msg or "unsupported" in err_msg) and "response_format" in call_kwargs:
+                    if response_schema is None and ("response_format" in err_msg or "json_object" in err_msg or "unsupported" in err_msg) and "response_format" in call_kwargs:
                         del call_kwargs["response_format"]
                         modified = True
 
